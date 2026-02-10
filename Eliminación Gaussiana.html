@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solucionador Gaussiano - Dr. Rodriguez Espinoza</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-color: #0066cc;
+            --success-color: #2e7d32;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 15px 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Cabecera */
+        .header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            line-height: 1.2;
+        }
+
+        .header h2 {
+            margin: 8px 0 0;
+            font-size: 0.95rem;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+        /* Sección del Autor */
+        .author-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 25px 20px;
+            border-bottom: 1px solid #eee;
+            background-color: #fff;
+        }
+
+        /* Contenedor de la Identidad del Autor */
+        .author-identity-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            /* Simula el aspecto de la imagen original */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .author-identity-card:active {
+            transform: scale(0.98);
+            background-color: #f9f9f9;
+        }
+
+        /* El QR generado o la imagen cargada */
+        .qr-display {
+            width: 160px;
+            height: 160px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Texto recreado para máxima nitidez */
+        .author-text-group {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            line-height: 1.3;
+        }
+
+        .author-name-main {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .author-title-sub {
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .hint-text {
+            margin-top: 10px;
+            font-size: 0.7rem;
+            color: #aaa;
+            font-family: sans-serif;
+        }
+
+        /* Controles */
+        .controls {
+            padding: 20px;
+            text-align: center;
+            background-color: #fafafa;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        input[type="number"] {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            width: 80px;
+            text-align: center;
+            font-size: 1.1rem;
+            background: #fff;
+        }
+
+        button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        /* Matriz de Entrada */
+        .matrix-container {
+            padding: 15px 5px;
+            overflow-x: auto;
+            display: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .matrix-wrapper {
+            display: inline-block;
+            min-width: 100%;
+        }
+
+        .matrix-input-table {
+            margin: 0 auto;
+            border-collapse: separate;
+            border-spacing: 6px;
+        }
+
+        .matrix-input-table input {
+            width: 55px;
+            padding: 8px 4px;
+            text-align: center;
+            border: 1px solid #bbb;
+            font-size: 1rem;
+        }
+
+        .matrix-input-table th {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+        }
+
+        /* Resultados */
+        .results-section {
+            padding: 20px;
+            display: none;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        .result-card {
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .result-title {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 300px;
+            margin: 0 auto;
+        }
+
+        .styled-table th, .styled-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .styled-table th {
+            background-color: #e6f2ff;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .highlight-solution {
+            background-color: #e8f5e9;
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .verification-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .verification-success {
+            background-color: #e8f5e9;
+            border-left: 5px solid #4CAF50;
+            color: #2e7d32;
+        }
+
+        .verification-warning {
+            background-color: #ffebee;
+            border-left: 5px solid #f44336;
+            color: #c62828;
+        }
+
+        #fileInput { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Cabecera -->
+    <div class="header">
+        <h1>SOLUCIONADOR DE SISTEMAS DE ECUACIONES LINEALES</h1>
+        <h2>Método de Eliminación Gaussiana</h2>
+    </div>
+
+    <!-- Sección del Autor -->
+    <div class="author-section">
+        
+        <!-- Tarjeta de Identidad (Simula la imagen o muestra la cargada) -->
+        <div class="author-identity-card" onclick="document.getElementById('fileInput').click()" title="Toque para cambiar imagen">
+            
+            <!-- 
+               1. QR Generado Automáticamente:
+               Ahora enlaza directamente al perfil CTI Vitae del Dr. Rodriguez.
+               URL codificada: https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364
+            -->
+            <img id="displayImage" 
+                 class="qr-display"
+                 src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fctivitae.concytec.gob.pe%2FappDirectorioCTI%2FVerDatosInvestigador.do%3Fid_investigador%3D0015364" 
+                 alt="QR Code CTI Vitae"
+                 onerror="this.style.display='none'">
+
+            <!-- Texto formateado exactamente como en la imagen original -->
+            <div id="displayText" class="author-text-group">
+                <div class="author-name-main">Dr. Ronald F. Rodriguez Espinoza</div>
+                <div class="author-title-sub">CTI Vitae - CONCYTEC</div>
+            </div>
+
+            <!-- Pequeña ayuda visual -->
+            <div class="hint-text">(Toque aquí si desea cargar su archivo JPG original)</div>
+        </div>
+
+        <!-- Input oculto para carga manual -->
+        <input type="file" id="fileInput" accept="image/*" onchange="loadImage(event)">
+    </div>
+
+    <!-- Configuración -->
+    <div class="controls">
+        <div class="input-group">
+            <label for="dimension">Número de variables (2-10):</label>
+            <input type="number" id="dimension" min="2" max="10" value="3" inputmode="numeric">
+        </div>
+        <button onclick="generateMatrixInput()">Crear Sistema</button>
+    </div>
+
+    <!-- Entrada de Matriz -->
+    <div id="matrixContainer" class="matrix-container">
+        <div class="matrix-wrapper">
+            <h3 style="text-align: center; color: #555; margin-top:0;">Ingrese los coeficientes</h3>
+            <p style="text-align: center; font-size: 0.85rem; color: #777; margin-bottom: 15px;">
+                a·x + ... = b<br>
+                <small>(Puede usar decimales)</small>
+            </p>
+            
+            <form id="matrixForm" onsubmit="event.preventDefault(); solveSystem();">
+                <div id="matrixInputs"></div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button type="submit">Resolver Sistema</button>
+                    <button type="button" class="secondary" onclick="clearInputs()">Limpiar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div id="resultsSection" class="results-section">
+        <!-- Matriz Triangular -->
+        <div class="result-card">
+            <div class="result-title">1. Matriz Triangular Superior</div>
+            <div id="triangularMatrixOutput"></div>
+        </div>
+
+        <!-- Solución Final -->
+        <div class="result-card">
+            <div class="result-title">2. Solución del Sistema</div>
+            <div id="solutionOutput"></div>
+        </div>
+
+        <!-- Verificación -->
+        <div id="verificationBox" class="verification-box"></div>
+    </div>
+</div>
+
+<script>
+    // Función para cargar imagen manualmente desde el celular
+    // Esta función reemplaza el QR generado con la imagen real si el usuario la selecciona
+    function loadImage(event) {
+        if(event.target.files && event.target.files[0]){
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = document.getElementById('displayImage');
+                img.src = e.target.result;
+                img.style.width = '100%'; // Ajustar al ancho completo si es imagen completa
+                img.style.maxWidth = '300px';
+                img.style.height = 'auto';
+                
+                // Ocultar el texto HTML porque la imagen cargada (seguramente) ya lo trae
+                document.getElementById('displayText').style.display = 'none';
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Intentar cargar "Sin título.jpg" solo si el navegador lo permite
+    // Si falla, no pasa nada, porque ya tenemos el QR generado visible por defecto
+    window.onload = function() {
+        const imgTest = new Image();
+        imgTest.src = "Sin título.jpg";
+        imgTest.onload = function() {
+            // Si carga con éxito (estamos en PC o carpeta correcta), reemplazar el QR
+            const displayImg = document.getElementById('displayImage');
+            displayImg.src = this.src;
+            displayImg.style.width = '100%';
+            displayImg.style.maxWidth = '300px';
+            displayImg.style.height = 'auto';
+            document.getElementById('displayText').style.display = 'none';
+        };
+    };
+
+    // Generar los campos de entrada
+    function generateMatrixInput() {
+        const n = parseInt(document.getElementById('dimension').value);
+        if (isNaN(n) || n < 2 || n > 10) {
+            alert("Por favor ingrese un número válido entre 2 y 10.");
+            return;
+        }
+
+        const container = document.getElementById('matrixInputs');
+        container.innerHTML = '';
+        
+        const table = document.createElement('table');
+        table.className = 'matrix-input-table';
+
+        // Cabecera
+        const headerRow = document.createElement('tr');
+        for(let i=0; i<n; i++) {
+            const th = document.createElement('th');
+            th.innerHTML = `x<sub>${i+1}</sub>`;
+            headerRow.appendChild(th);
+        }
+        const thEq = document.createElement('th');
+        thEq.innerText = '=';
+        headerRow.appendChild(thEq);
+        const thB = document.createElement('th');
+        thB.innerText = 'b';
+        headerRow.appendChild(thB);
+        table.appendChild(headerRow);
+
+        // Filas de entrada
+        for (let i = 0; i < n; i++) {
+            const row = document.createElement('tr');
+            
+            // Coeficientes A
+            for (let j = 0; j < n; j++) {
+                const cell = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.step = 'any'; // Permitir decimales
+                input.required = true;
+                input.placeholder = `a${i+1}${j+1}`;
+                input.id = `a_${i}_${j}`;
+                cell.appendChild(input);
+                row.appendChild(cell);
+            }
+
+            // Signo Igual
+            const eqCell = document.createElement('td');
+            eqCell.innerText = '=';
+            eqCell.style.fontWeight = 'bold';
+            row.appendChild(eqCell);
+
+            // Constante b
+            const bCell = document.createElement('td');
+            const bInput = document.createElement('input');
+            bInput.type = 'number';
+            bInput.step = 'any';
+            bInput.required = true;
+            bInput.placeholder = `b${i+1}`;
+            bInput.id = `b_${i}`;
+            bCell.appendChild(bInput);
+            row.appendChild(bCell);
+
+            table.appendChild(row);
+        }
+
+        container.appendChild(table);
+        document.getElementById('matrixContainer').style.display = 'block';
+        document.getElementById('resultsSection').style.display = 'none';
+        
+        // Scroll suave hacia la matriz
+        setTimeout(() => {
+            document.getElementById('matrixContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+
+    function clearInputs() {
+        const inputs = document.querySelectorAll('.matrix-input-table input');
+        inputs.forEach(input => input.value = '');
+        document.getElementById('resultsSection').style.display = 'none';
+    }
+
+    // Lógica principal: Eliminación Gaussiana
+    function solveSystem() {
+        const n = parseInt(document.getElementById('dimension').value);
+        let A = [];
+        let b = [];
+
+        // Leer datos
+        try {
+            for (let i = 0; i < n; i++) {
+                let row = [];
+                for (let j = 0; j < n; j++) {
+                    const input = document.getElementById(`a_${i}_${j}`);
+                    const val = parseFloat(input.value);
+                    if (isNaN(val)) {
+                        input.focus();
+                        throw new Error("Valor inválido");
+                    }
+                    row.push(val);
+                }
+                A.push(row);
+                const inputB = document.getElementById(`b_${i}`);
+                const valB = parseFloat(inputB.value);
+                if (isNaN(valB)) {
+                    inputB.focus();
+                    throw new Error("Valor inválido");
+                }
+                b.push(valB);
+            }
+        } catch (e) {
+            alert("Por favor complete todos los campos con números válidos.");
+            return;
+        }
+
+        // Crear matriz aumentada para el cálculo [A|b]
+        let M = A.map((row, i) => [...row, b[i]]);
+        
+        // --- ELIMINACIÓN GAUSSIANA ---
+        try {
+            for (let i = 0; i < n; i++) {
+                // Pivoteo parcial
+                let maxRow = i;
+                for (let k = i + 1; k < n; k++) {
+                    if (Math.abs(M[k][i]) > Math.abs(M[maxRow][i])) {
+                        maxRow = k;
+                    }
+                }
+
+                // Intercambiar filas
+                [M[i], M[maxRow]] = [M[maxRow], M[i]];
+
+                // Verificar singularidad
+                if (Math.abs(M[i][i]) < 1e-10) {
+                    alert("El sistema tiene infinitas soluciones o no tiene solución (Pivote cercano a 0).");
+                    return;
+                }
+                
+                // Eliminar elementos debajo
+                for (let k = i + 1; k < n; k++) {
+                    let factor = M[k][i] / M[i][i];
+                    for (let j = i; j <= n; j++) {
+                        M[k][j] -= factor * M[i][j];
+                    }
+                }
+            }
+
+            // Mostrar Matriz Triangular (M)
+            displayMatrix(M, n, 'triangularMatrixOutput');
+
+            // --- SUSTITUCIÓN HACIA ATRÁS ---
+            let x = new Array(n).fill(0);
+            for (let i = n - 1; i >= 0; i--) {
+                let sum = 0;
+                for (let j = i + 1; j < n; j++) {
+                    sum += M[i][j] * x[j];
+                }
+                x[i] = (M[i][n] - sum) / M[i][i];
+            }
+
+            // Mostrar Solución
+            displaySolution(x, 'solutionOutput');
+
+            // --- VERIFICACIÓN ---
+            verifySolution(A, b, x);
+
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Scroll suave hacia los resultados
+            setTimeout(() => {
+                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+        } catch (error) {
+            console.error(error);
+            alert("Ocurrió un error en el cálculo. Verifique que la matriz no sea singular.");
+        }
+    }
+
+    // Renderizar matriz en HTML
+    function displayMatrix(M, n, elementId) {
+        let html = '<table class="styled-table">';
+        for (let i = 0; i < n; i++) {
+            html += '<tr>';
+            for (let j = 0; j <= n; j++) {
+                // Estilo para la barra vertical del sistema aumentado
+                let borderStyle = (j === n) ? 'border-left: 3px double #aaa;' : '';
+                let bgStyle = (i === j && j < n) ? 'background-color: #fff9c4;' : ''; // Resaltar diagonal
+                
+                // Formatear número
+                let val = M[i][j];
+                // Usar notación simple si es entero o pequeño decimal
+                let displayVal = Math.abs(val) < 1e-10 ? "0" : Number(val.toFixed(4)).toString();
+                
+                html += `<td style="${borderStyle} ${bgStyle}">${displayVal}</td>`;
+            }
+            html += '</tr>';
+        }
+        html += '</table>';
+        document.getElementById(elementId).innerHTML = html;
+    }
+
+    // Renderizar solución final
+    function displaySolution(x, elementId) {
+        let html = '<table class="styled-table">';
+        html += '<tr><th>Variable</th><th>Valor</th></tr>';
+        x.forEach((val, index) => {
+            let displayVal = Number(val.toFixed(6)).toString(); // Eliminar ceros innecesarios
+            html += `<tr>
+                <td style="font-weight:bold;">x<sub>${index+1}</sub></td>
+                <td class="highlight-solution">${displayVal}</td>
+            </tr>`;
+        });
+        html += '</table>';
+        document.getElementById(elementId).innerHTML = html;
+    }
+
+    // Verificar residuales (Ax - b)
+    function verifySolution(A, b, x) {
+        let maxError = 0;
+        let n = A.length;
+        
+        for(let i=0; i<n; i++) {
+            let sum = 0;
+            for(let j=0; j<n; j++) {
+                sum += A[i][j] * x[j];
+            }
+            let error = Math.abs(sum - b[i]);
+            if(error > maxError) maxError = error;
+        }
+
+        const box = document.getElementById('verificationBox');
+        if (maxError < 1e-5) {
+            box.className = 'verification-box verification-success';
+            box.innerHTML = `<strong>✓ Verificación Exitosa:</strong> Las ecuaciones se satisfacen correctamente.<br><small>Error máximo: ${maxError.toExponential(2)}</small>`;
+        } else {
+            box.className = 'verification-box verification-warning';
+            box.innerHTML = `<strong>⚠ Precaución:</strong> Hay errores de redondeo o precisión.<br><small>Error máximo: ${maxError.toExponential(2)}</small>`;
+        }
+    }
+</script>
+
+</body>
+</html>
