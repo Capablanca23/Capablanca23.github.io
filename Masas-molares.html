@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Masa Molar PRO - Dr. Rodriguez Espinoza</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración para usar la fuente Inter -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,700;1,400&display=swap'); /* Para el nombre del autor */
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        
+        /* Animación suave para la entrada de elementos */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="min-h-screen bg-gray-50 flex flex-col items-center p-4">
+    
+    <!-- SECCIÓN DEL AUTOR (QR y Datos) -->
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden mb-6 transform transition-all hover:shadow-2xl animate-fade-in" style="animation-delay: 0.1s;">
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 flex flex-col items-center text-center relative">
+            
+            <!-- Contenedor del QR (Clickeable) -->
+            <div class="relative group cursor-pointer mb-4" onclick="document.getElementById('fileInput').click()" title="Toque para cambiar imagen">
+                <div class="bg-white p-2 rounded-xl shadow-lg transform transition-transform group-hover:scale-105">
+                    <!-- Enlace directo al perfil CTI Vitae -->
+                    <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" onclick="event.stopPropagation()">
+                        <img id="authorImage" 
+                             src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fctivitae.concytec.gob.pe%2FappDirectorioCTI%2FVerDatosInvestigador.do%3Fid_investigador%3D0015364" 
+                             alt="QR Code CTI Vitae" 
+                             class="w-32 h-32 object-contain rounded-lg">
+                    </a>
+                </div>
+                <!-- Tooltip al pasar el mouse -->
+                <div class="absolute inset-x-0 -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-light">
+                    Click imagen para cambiar / Escanear para visitar
+                </div>
+            </div>
+
+            <!-- Input oculto para cargar imagen personalizada -->
+            <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="loadImage(event)">
+
+            <!-- Datos del Autor -->
+            <h2 class="text-white font-bold text-xl font-serif tracking-wide">Dr. Ronald F. Rodriguez Espinoza</h2>
+            <p class="text-blue-200 text-sm font-medium mt-1">CTI Vitae - CONCYTEC</p>
+        </div>
+    </div>
+
+    <!-- CALCULADORA DE MASA MOLAR -->
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 animate-fade-in" style="animation-delay: 0.2s;">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Calculadora de Masa Molar</h1>
+        <p class="text-gray-500 text-sm mb-6 text-center">Ingrese una fórmula química (ej. H2O, C6H12O6, Ca(NO3)2)</p>
+
+        <!-- Input de Fórmula -->
+        <div class="mb-6 relative">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="formula">
+                Fórmula Química
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-lg" 
+                   id="formula" 
+                   type="text" 
+                   placeholder="Ej: H2SO4"
+                   autocomplete="off">
+        </div>
+
+        <!-- Botón Calcular -->
+        <div id="buttonContainer"></div>
+
+        <!-- Resultados y Errores -->
+        <div id="resultContainer" class="mt-6"></div>
+    </div>
+
+    <!-- Lista de Elementos Soportados (Pie de página) -->
+    <div class="mt-8 text-gray-400 text-xs text-center max-w-lg">
+        <p class="mb-2 font-semibold">Elementos soportados (1-83):</p>
+        <p class="leading-relaxed">H, He, Li, Be, B, C, N, O, F, Ne, Na, Mg, Al, Si, P, S, Cl, Ar, K, Ca, Sc, Ti, V, Cr, Mn, Fe, Co, Ni, Cu, Zn, Ga, Ge, As, Se, Br, Kr, Rb, Sr, Y, Zr, Nb, Mo, Tc, Ru, Rh, Pd, Ag, Cd, In, Sn, Sb, Te, I, Xe, Cs, Ba, La, Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb, Lu, Hf, Ta, W, Re, Os, Ir, Pt, Au, Hg, Tl, Pb, Bi.</p>
+    </div>
+
+</div>
+
+<script>
+    // =================================================================
+    // 1. LÓGICA DE LA IMAGEN / QR
+    // =================================================================
+    function loadImage(event) {
+        if(event.target.files && event.target.files[0]){
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('authorImage');
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // =================================================================
+    // 2. DATOS QUÍMICOS
+    // =================================================================
+    const ATOMIC_MASSES = {
+        "H": 1.008, "He": 4.0026, "Li": 6.94, "Be": 9.0122, "B": 10.81, "C": 12.011, "N": 14.007, "O": 15.999, "F": 18.998, "Ne": 20.180,
+        "Na": 22.990, "Mg": 24.305, "Al": 26.982, "Si": 28.085, "P": 30.974, "S": 32.06, "Cl": 35.45, "Ar": 39.948, "K": 39.098, "Ca": 40.078,
+        "Sc": 44.956, "Ti": 47.867, "V": 50.942, "Cr": 51.996, "Mn": 54.938, "Fe": 55.845, "Co": 58.933, "Ni": 58.693, "Cu": 63.546, "Zn": 65.38,
+        "Ga": 69.723, "Ge": 72.63, "As": 74.922, "Se": 78.96, "Br": 79.904, "Kr": 83.798, "Rb": 85.468, "Sr": 87.62, "Y": 88.906, "Zr": 91.224,
+        "Nb": 92.906, "Mo": 95.95, "Tc": 98.0, "Ru": 101.07, "Rh": 102.91, "Pd": 106.42, "Ag": 107.87, "Cd": 112.41, "In": 114.82, "Sn": 118.71,
+        "Sb": 121.76, "Te": 127.60, "I": 126.90, "Xe": 131.29, "Cs": 132.91, "Ba": 137.33, "La": 138.91, "Ce": 140.12, "Pr": 140.91, "Nd": 144.24,
+        "Pm": 145.0, "Sm": 150.36, "Eu": 151.96, "Gd": 157.25, "Tb": 158.93, "Dy": 162.50, "Ho": 164.93, "Er": 167.26, "Tm": 168.93, "Yb": 173.05,
+        "Lu": 174.97, "Hf": 178.49, "Ta": 180.95, "W": 183.84, "Re": 186.21, "Os": 190.23, "Ir": 192.22, "Pt": 195.08, "Au": 196.97, "Hg": 200.59,
+        "Tl": 204.38, "Pb": 207.2, "Bi": 208.98
+    };
+
+    // =================================================================
+    // 3. LÓGICA DE CÁLCULO
+    // =================================================================
+    function calculateMolarMass(formula) {
+        if (!formula || formula.trim() === "") return null;
+
+        let stack = [0]; // Pila para manejar paréntesis, inicia con el nivel base 0
+        let i = 0;
+        let len = formula.length;
+
+        while (i < len) {
+            let char = formula[i];
+
+            if (char === '(') {
+                stack.push(0); // Nuevo nivel para el paréntesis
+                i++;
+            } else if (char === ')') {
+                let currentMass = stack.pop(); // Sacar la masa calculada dentro del paréntesis
+                i++;
+                
+                // Buscar subíndice después del paréntesis
+                let numStr = "";
+                while (i < len && /[0-9]/.test(formula[i])) {
+                    numStr += formula[i];
+                    i++;
+                }
+                let multiplier = numStr === "" ? 1 : parseInt(numStr);
+                
+                // Sumar al nivel anterior
+                if (stack.length > 0) {
+                    stack[stack.length - 1] += currentMass * multiplier;
+                } else {
+                    throw new Error("Paréntesis desbalanceados");
+                }
+            } else if (/[A-Z]/.test(char)) {
+                // Es un elemento
+                let element = char;
+                i++;
+                // Ver si tiene segunda letra minúscula
+                if (i < len && /[a-z]/.test(formula[i])) {
+                    element += formula[i];
+                    i++;
+                }
+
+                if (!ATOMIC_MASSES[element]) {
+                    throw new Error(`Elemento desconocido: ${element}`);
+                }
+
+                // Buscar subíndice
+                let numStr = "";
+                while (i < len && /[0-9]/.test(formula[i])) {
+                    numStr += formula[i];
+                    i++;
+                }
+                let multiplier = numStr === "" ? 1 : parseInt(numStr);
+
+                // Sumar masa al nivel actual
+                stack[stack.length - 1] += ATOMIC_MASSES[element] * multiplier;
+            } else {
+                // Carácter inválido
+                throw new Error(`Carácter inválido: ${char}`);
+            }
+        }
+
+        if (stack.length !== 1) {
+            throw new Error("Paréntesis desbalanceados");
+        }
+
+        return stack[0].toFixed(2); // Retornar con 2 decimales
+    }
+
+    // =================================================================
+    // 4. INTERFAZ DE USUARIO (UI)
+    // =================================================================
+    const formulaInput = document.getElementById('formula');
+    const buttonContainer = document.getElementById('buttonContainer');
+    const resultContainer = document.getElementById('resultContainer');
+
+    let currentError = null;
+    let currentResult = null;
+    let isCalculating = false;
+
+    // Renderizar Botón
+    function renderButton() {
+        buttonContainer.innerHTML = `
+            <button onclick="handleCalculate()" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-4 rounded-lg shadow-md transform transition-transform active:scale-95 flex justify-center items-center">
+                ${isCalculating 
+                    ? '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Calculando...' 
+                    : 'Calcular Masa Molar'}
+            </button>
+        `;
+    }
+
+    // Renderizar Resultado/Error
+    function renderResult() {
+        let content = '';
+        if (currentError) {
+            content = `
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-md animate-fade-in" role="alert">
+                    <p class="font-bold">Error</p>
+                    <p>${currentError}</p>
+                </div>
+            `;
+        } else if (currentResult) {
+            content = `
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-900 p-6 rounded-xl shadow-lg text-center animate-fade-in transform transition-all hover:scale-[1.02]">
+                    <p class="text-lg font-medium opacity-75 mb-1">Masa Molar Calculada</p>
+                    <p class="text-5xl font-extrabold text-green-700">${currentResult}</p>
+                    <p class="text-xl font-medium text-green-800 mt-1">g/mol</p>
+                </div>
+            `;
+        } else {
+             content = `
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 p-4 rounded shadow-sm text-center">
+                    <p>Esperando fórmula...</p>
+                </div>
+            `;
+        }
+        resultContainer.innerHTML = content;
+    }
+
+    // Manejador del cálculo
+    window.handleCalculate = function() {
+        const formula = formulaInput.value;
+        isCalculating = true;
+        currentError = null;
+        currentResult = null;
+        renderButton();
+        renderResult();
+
+        // Simular un pequeño tiempo de proceso para mejor UX
+        setTimeout(() => {
+            try {
+                const mass = calculateMolarMass(formula);
+                if (mass === null) {
+                    currentError = "Por favor ingrese una fórmula.";
+                } else {
+                    currentResult = mass;
+                }
+            } catch (error) {
+                currentError = error.message;
+            }
+            isCalculating = false;
+            renderButton();
+            renderResult();
+        }, 300);
+    };
+
+    // Permitir Enter para calcular
+    formulaInput.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            handleCalculate();
+        }
+    });
+
+    // Inicializar
+    renderButton();
+    renderResult();
+
+</script>
+</body>
+</html>
