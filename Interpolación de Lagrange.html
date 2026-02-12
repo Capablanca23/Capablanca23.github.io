@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interpolación Lagrange - Dr. Rodriguez Espinoza</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Fuentes -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,700;1,400&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    </style>
+</head>
+<body>
+
+<div id="app" class="min-h-screen bg-gray-50 flex flex-col items-center p-4">
+    
+    <!-- SECCIÓN DEL AUTOR (QR y Datos) -->
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden mb-6 transform transition-all hover:shadow-2xl animate-fade-in" style="animation-delay: 0.1s;">
+        <div class="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 flex flex-col items-center text-center relative">
+            
+            <!-- Contenedor del QR (Clickeable) -->
+            <div class="relative group cursor-pointer mb-4" title="Ir al perfil CTI Vitae">
+                <div class="bg-white p-2 rounded-xl shadow-lg transform transition-transform group-hover:scale-105">
+                    <!-- Enlace directo al perfil CTI Vitae -->
+                    <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank">
+                        <!-- QR generado dinámicamente con la URL del perfil -->
+                        <img id="authorQr" 
+                             src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fctivitae.concytec.gob.pe%2FappDirectorioCTI%2FVerDatosInvestigador.do%3Fid_investigador%3D0015364" 
+                             alt="QR Code CTI Vitae" 
+                             class="w-32 h-32 object-contain rounded-lg">
+                    </a>
+                </div>
+                <div class="absolute inset-x-0 -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-light">
+                    Toca para visitar perfil
+                </div>
+            </div>
+
+            <!-- Datos del Autor -->
+            <h2 class="text-white font-bold text-xl font-serif tracking-wide">Dr. Ronald F. Rodriguez Espinoza</h2>
+            <p class="text-blue-200 text-sm font-medium mt-1">CTI Vitae - CONCYTEC</p>
+        </div>
+    </div>
+
+    <!-- CALCULADORA DE INTERPOLACIÓN -->
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 animate-fade-in" style="animation-delay: 0.2s;">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Interpolación de Lagrange</h1>
+        <p class="text-gray-500 text-sm mb-6 text-center">Ingrese los puntos (x, y) conocidos y el valor a interpolar.</p>
+
+        <!-- Ingreso de Puntos -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-gray-700 text-xs font-bold mb-1">Valor X</label>
+                <input type="number" id="inputX" step="any" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: 1">
+            </div>
+            <div>
+                <label class="block text-gray-700 text-xs font-bold mb-1">Valor Y</label>
+                <input type="number" id="inputY" step="any" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: 2">
+            </div>
+        </div>
+        
+        <button onclick="addPoint()" class="w-full mb-6 bg-gray-100 hover:bg-gray-200 text-blue-700 font-semibold py-2 px-4 rounded border border-blue-200 transition-colors flex justify-center items-center">
+            <span class="text-xl mr-2">+</span> Agregar Punto
+        </button>
+
+        <!-- Tabla de Puntos -->
+        <div class="mb-6 overflow-hidden rounded-lg border border-gray-200" id="pointsTableContainer" style="display:none;">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="py-2 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">X</th>
+                        <th class="py-2 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Y</th>
+                        <th class="py-2 px-4 text-right"></th>
+                    </tr>
+                </thead>
+                <tbody id="pointsList" class="divide-y divide-gray-200">
+                    <!-- Los puntos se agregan aquí -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sección de Cálculo -->
+        <div class="border-t border-gray-200 pt-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Valor a interpolar (x)</label>
+            <div class="flex gap-2">
+                <input type="number" id="targetX" step="any" class="shadow border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 text-lg" placeholder="¿Qué valor de Y buscas?">
+                <button onclick="calculate()" class="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-2 px-6 rounded shadow-md transform transition-transform active:scale-95">
+                    Calcular
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultado -->
+        <div id="resultContainer" class="mt-6"></div>
+        
+        <!-- Gráfica -->
+        <div class="mt-8">
+            <canvas id="chartCanvas"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ==========================================
+    // ESTADO DE LA APLICACIÓN
+    // ==========================================
+    let points = [];
+    let myChart = null;
+
+    // ==========================================
+    // LÓGICA DE LAGRANGE
+    // ==========================================
+    function calculateLagrange(x, dataPoints) {
+        let result = 0;
+        const n = dataPoints.length;
+
+        for (let i = 0; i < n; i++) {
+            let term = dataPoints[i].y;
+            for (let j = 0; j < n; j++) {
+                if (i !== j) {
+                    term *= (x - dataPoints[j].x) / (dataPoints[i].x - dataPoints[j].x);
+                }
+            }
+            result += term;
+        }
+        return result;
+    }
+
+    // ==========================================
+    // MANEJO DE PUNTOS
+    // ==========================================
+    function addPoint() {
+        const xInput = document.getElementById('inputX');
+        const yInput = document.getElementById('inputY');
+        
+        const x = parseFloat(xInput.value);
+        const y = parseFloat(yInput.value);
+
+        if (isNaN(x) || isNaN(y)) {
+            alert("Por favor ingrese valores numéricos válidos.");
+            return;
+        }
+
+        // Verificar duplicados en X (causa división por cero)
+        if (points.some(p => Math.abs(p.x - x) < 0.000001)) {
+            alert("El valor de X ya existe. Los valores de X deben ser únicos.");
+            return;
+        }
+
+        points.push({ x, y });
+        // Ordenar puntos por X para la tabla y gráfica
+        points.sort((a, b) => a.x - b.x);
+
+        xInput.value = '';
+        yInput.value = '';
+        xInput.focus();
+
+        renderPoints();
+        updateChart();
+    }
+
+    function removePoint(index) {
+        points.splice(index, 1);
+        renderPoints();
+        updateChart();
+        document.getElementById('resultContainer').innerHTML = '';
+    }
+
+    function renderPoints() {
+        const list = document.getElementById('pointsList');
+        const container = document.getElementById('pointsTableContainer');
+        
+        list.innerHTML = '';
+        
+        if (points.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+        
+        container.style.display = 'block';
+
+        points.forEach((p, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="py-2 px-4 text-gray-800">${p.x}</td>
+                <td class="py-2 px-4 text-gray-800">${p.y}</td>
+                <td class="py-2 px-4 text-right">
+                    <button onclick="removePoint(${index})" class="text-red-500 hover:text-red-700 font-bold text-sm">Eliminar</button>
+                </td>
+            `;
+            list.appendChild(row);
+        });
+    }
+
+    // ==========================================
+    // CÁLCULO E INTERFAZ
+    // ==========================================
+    function calculate() {
+        const targetInput = document.getElementById('targetX');
+        const valX = parseFloat(targetInput.value);
+        const resultDiv = document.getElementById('resultContainer');
+
+        if (points.length < 2) {
+            resultDiv.innerHTML = `
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded shadow-sm">
+                    <p>Se necesitan al menos 2 puntos para interpolar.</p>
+                </div>`;
+            return;
+        }
+
+        if (isNaN(valX)) {
+            resultDiv.innerHTML = `
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm">
+                    <p>Ingrese un valor X válido.</p>
+                </div>`;
+            return;
+        }
+
+        try {
+            const resultY = calculateLagrange(valX, points);
+            
+            resultDiv.innerHTML = `
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-900 p-6 rounded-xl shadow-lg text-center animate-fade-in">
+                    <p class="text-sm font-medium opacity-75 mb-1">Resultado para x = ${valX}</p>
+                    <p class="text-4xl font-extrabold text-green-700">${resultY.toFixed(4)}</p>
+                    <p class="text-xs text-green-800 mt-2">y = P(${valX})</p>
+                </div>
+            `;
+            
+            // Actualizar gráfica mostrando el punto interpolado
+            updateChart(valX, resultY);
+
+        } catch (e) {
+            console.error(e);
+            resultDiv.innerHTML = `<p class="text-red-500">Error en el cálculo.</p>`;
+        }
+    }
+
+    // ==========================================
+    // GRÁFICOS (Chart.js)
+    // ==========================================
+    function updateChart(interpolatedX = null, interpolatedY = null) {
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+
+        if (points.length < 2) {
+            if (myChart) myChart.destroy();
+            return;
+        }
+
+        // Generar puntos para la curva suave
+        const curvePoints = [];
+        const minX = Math.min(...points.map(p => p.x));
+        const maxX = Math.max(...points.map(p => p.x));
+        // Extender un poco el rango para visualización
+        const range = maxX - minX;
+        const start = minX - (range * 0.1);
+        const end = maxX + (range * 0.1);
+        const steps = 100;
+
+        for (let i = 0; i <= steps; i++) {
+            const cx = start + (i * (end - start)) / steps;
+            const cy = calculateLagrange(cx, points);
+            curvePoints.push({ x: cx, y: cy });
+        }
+
+        const datasets = [
+            {
+                label: 'Puntos Datos',
+                data: points,
+                backgroundColor: 'rgba(59, 130, 246, 1)', // Blue-500
+                borderColor: 'rgba(59, 130, 246, 1)',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                showLine: false,
+                order: 1
+            },
+            {
+                label: 'Polinomio de Lagrange',
+                data: curvePoints,
+                backgroundColor: 'rgba(165, 180, 252, 0.2)', // Indigo-200
+                borderColor: 'rgba(79, 70, 229, 0.8)', // Indigo-600
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+                type: 'line',
+                tension: 0.4, // Suavizar un poco
+                order: 2
+            }
+        ];
+
+        // Si hay un punto interpolado, agregarlo
+        if (interpolatedX !== null) {
+            datasets.push({
+                label: 'Interpolación',
+                data: [{x: interpolatedX, y: interpolatedY}],
+                backgroundColor: 'rgba(220, 38, 38, 1)', // Red-600
+                borderColor: 'rgba(220, 38, 38, 1)',
+                pointRadius: 8,
+                pointStyle: 'star',
+                showLine: false,
+                order: 0
+            });
+        }
+
+        if (myChart) {
+            myChart.data.datasets = datasets;
+            myChart.update();
+        } else {
+            myChart = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `(${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: 'X' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Y' }
+                        }
+                    }
+                }
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
