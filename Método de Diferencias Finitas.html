@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diferenciación Numérica MDF - Dr. Rodriguez Espinoza</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Math.js para evaluaciones matemáticas y derivadas simbólicas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    
+    <!-- Fuentes -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,700;1,400&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        /* Estilos personalizados para las pestañas */
+        .tab-active {
+            border-bottom: 3px solid #3b82f6;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-inactive:hover {
+            color: #374151;
+            border-bottom: 3px solid #d1d5db;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="min-h-screen bg-gray-50 flex flex-col items-center p-4">
+    
+    <!-- SECCIÓN DEL AUTOR (QR y Datos) -->
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden mb-6 transform transition-all hover:shadow-2xl animate-fade-in" style="animation-delay: 0.1s;">
+        <div class="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 flex flex-col md:flex-row items-center justify-between relative">
+            
+            <div class="flex flex-col items-center md:items-start text-center md:text-left mb-4 md:mb-0 z-10">
+                <h2 class="text-white font-bold text-2xl font-serif tracking-wide">Dr. Ronald F. Rodriguez Espinoza</h2>
+                <p class="text-blue-200 text-sm font-medium mt-1">CTI Vitae - CONCYTEC</p>
+                <h1 class="text-white text-lg mt-4 font-light opacity-90">Diferenciación Numérica (MDF)</h1>
+            </div>
+
+            <!-- Contenedor del QR (Clickeable) -->
+            <div class="relative group cursor-pointer" title="Ir al perfil CTI Vitae">
+                <div class="bg-white p-2 rounded-xl shadow-lg transform transition-transform group-hover:scale-105">
+                    <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank">
+                        <img id="authorQr" 
+                             src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fctivitae.concytec.gob.pe%2FappDirectorioCTI%2FVerDatosInvestigador.do%3Fid_investigador%3D0015364" 
+                             alt="QR Code CTI Vitae" 
+                             class="w-24 h-24 object-contain rounded-lg">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden animate-fade-in" style="animation-delay: 0.2s;">
+        
+        <!-- Pestañas de Navegación -->
+        <div class="flex border-b border-gray-200">
+            <button onclick="switchTab('function')" id="tab-function" class="flex-1 py-4 text-center transition-all tab-active">
+                📐 Caso 1: Función f(x)
+            </button>
+            <button onclick="switchTab('data')" id="tab-data" class="flex-1 py-4 text-center transition-all tab-inactive">
+                📊 Caso 2: Datos Tabulados
+            </button>
+            <button onclick="toggleHelp()" class="px-6 py-4 text-gray-500 hover:text-blue-600 bg-gray-50 border-l border-gray-200">
+                ❓ Ayuda
+            </button>
+        </div>
+
+        <!-- CONTENIDO: CASO 1 (FUNCIÓN) -->
+        <div id="content-function" class="p-6 md:p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="md:col-span-3">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Función f(x)</label>
+                    <div class="relative">
+                        <input type="text" id="funcInput" class="shadow border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-lg" 
+                               placeholder="Ej: ln(x), sin(x), exp(-x^2)" value="ln(x)">
+                        <div class="absolute right-3 top-3 text-gray-400 text-xs">MathJS Syntax</div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Punto x₀</label>
+                    <input type="number" id="x0Input" step="any" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value="2.0">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Paso h</label>
+                    <input type="number" id="hInput" step="any" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" value="0.1">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="calculateFunction()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition-colors">
+                        Calcular Derivadas
+                    </button>
+                </div>
+            </div>
+
+            <div id="result-function" class="hidden">
+                <!-- Resultados Analíticos -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                    <h3 class="font-bold text-blue-800 mb-2">Resultados Analíticos (Exactos)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Primera Derivada f'(x₀)</p>
+                            <p class="text-xl font-mono text-blue-900" id="analytical-d1">...</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Segunda Derivada f''(x₀)</p>
+                            <p class="text-xl font-mono text-blue-900" id="analytical-d2">...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Resultados Numéricos -->
+                <div class="overflow-x-auto mb-8">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Método</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase">Fórmula</th>
+                                <th class="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">Aproximación</th>
+                                <th class="py-3 px-4 text-right text-xs font-semibold text-gray-600 uppercase">Error Abs.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-results-body" class="divide-y divide-gray-200">
+                            <!-- Filas generadas por JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Gráfico -->
+                <div class="h-64 md:h-80 w-full bg-white border border-gray-200 rounded-lg p-2">
+                    <canvas id="chartFunction"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENIDO: CASO 2 (DATOS TABULADOS) -->
+        <div id="content-data" class="p-6 md:p-8 hidden">
+            <div class="mb-6 flex flex-col md:flex-row gap-4 items-start">
+                <div class="flex-1 w-full">
+                    <h3 class="font-bold text-gray-700 mb-2">Ingresar Datos (x, y)</h3>
+                    <div class="grid grid-cols-3 gap-2 mb-2">
+                        <input type="number" id="dataX" placeholder="x" class="shadow border rounded py-2 px-3">
+                        <input type="number" id="dataY" placeholder="y" class="shadow border rounded py-2 px-3">
+                        <button onclick="addDataPoint()" class="bg-green-500 hover:bg-green-600 text-white rounded font-bold px-3 transition-colors">+</button>
+                    </div>
+                    
+                    <!-- Tabla de Entrada -->
+                    <div class="border rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">x</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">y</th>
+                                    <th class="px-4 py-2"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="input-data-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Datos ingresados -->
+                            </tbody>
+                        </table>
+                        <div id="empty-msg" class="p-4 text-center text-gray-400 text-sm">No hay datos ingresados</div>
+                    </div>
+                    <div class="mt-2 text-right">
+                        <button onclick="calculateData()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition-colors">
+                            Calcular Tabla de Derivadas
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resultados Datos -->
+                <div id="result-data-container" class="flex-1 w-full hidden">
+                    <h3 class="font-bold text-gray-700 mb-2">Resultados Calculados</h3>
+                    <div class="overflow-x-auto border rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left font-medium text-gray-500">x</th>
+                                    <th class="px-3 py-2 text-right font-medium text-gray-500">f'(x) Centrada</th>
+                                    <th class="px-3 py-2 text-right font-medium text-gray-500">f''(x)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="output-data-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Resultados -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gráfico Datos -->
+            <div id="chart-data-container" class="hidden h-64 md:h-80 w-full bg-white border border-gray-200 rounded-lg p-2 mt-6">
+                <canvas id="chartData"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE AYUDA -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">📚 Ayuda de Funciones</h3>
+                <button onclick="toggleHelp()" class="text-gray-400 hover:text-red-500 text-2xl">&times;</button>
+            </div>
+            <div class="prose prose-sm text-gray-600 overflow-y-auto max-h-[60vh]">
+                <p>Formas correctas de escribir funciones matemáticas:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                    <li><strong>Logaritmo Natural:</strong> <code>log(x)</code> o <code>ln(x)</code></li>
+                    <li><strong>Exponencial:</strong> <code>exp(x)</code> o <code>e^x</code></li>
+                    <li><strong>Potencia:</strong> <code>x^2</code> o <code>x^3</code></li>
+                    <li><strong>Trigonometría:</strong> <code>sin(x)</code>, <code>cos(x)</code>, <code>tan(x)</code> (En inglés)</li>
+                    <li><strong>Raíz:</strong> <code>sqrt(x)</code></li>
+                    <li><strong>Pi:</strong> <code>pi</code></li>
+                </ul>
+                <p class="mt-4 font-semibold">Ejemplos:</p>
+                <code class="block bg-gray-100 p-2 rounded">log(x^2 + 1)</code>
+                <code class="block bg-gray-100 p-2 rounded mt-1">x^3 - 2*x + 1</code>
+                <code class="block bg-gray-100 p-2 rounded mt-1">exp(-x) * sin(x)</code>
+            </div>
+            <div class="mt-6 text-right">
+                <button onclick="toggleHelp()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ==========================================
+    // ESTADO GLOBAL
+    // ==========================================
+    let chartInstanceFunc = null;
+    let chartInstanceData = null;
+    let dataPoints = [];
+
+    // ==========================================
+    // UTILIDADES
+    // ==========================================
+    function switchTab(tab) {
+        // Estilos botones
+        document.getElementById('tab-function').className = tab === 'function' ? 'flex-1 py-4 text-center transition-all tab-active' : 'flex-1 py-4 text-center transition-all tab-inactive';
+        document.getElementById('tab-data').className = tab === 'data' ? 'flex-1 py-4 text-center transition-all tab-active' : 'flex-1 py-4 text-center transition-all tab-inactive';
+        
+        // Visibilidad contenido
+        document.getElementById('content-function').className = tab === 'function' ? 'p-6 md:p-8 block' : 'hidden';
+        document.getElementById('content-data').className = tab === 'data' ? 'p-6 md:p-8 block' : 'hidden';
+    }
+
+    function toggleHelp() {
+        const modal = document.getElementById('helpModal');
+        modal.classList.toggle('hidden');
+    }
+
+    function formatNumber(num, decimals = 6) {
+        if (num === null || num === undefined || isNaN(num)) return "N/A";
+        return Math.abs(num) < 0.0001 && num !== 0 ? num.toExponential(4) : num.toFixed(decimals);
+    }
+
+    // ==========================================
+    // CASO 1: FUNCIONES
+    // ==========================================
+    function calculateFunction() {
+        const funcStrRaw = document.getElementById('funcInput').value;
+        const x0 = parseFloat(document.getElementById('x0Input').value);
+        const h = parseFloat(document.getElementById('hInput').value);
+
+        if(!funcStrRaw || isNaN(x0) || isNaN(h) || h === 0) {
+            alert("Por favor ingrese una función válida y parámetros numéricos correctos (h != 0).");
+            return;
+        }
+
+        try {
+            // Preparar string para MathJS (reemplazar ln por log si es necesario)
+            // MathJS usa log(x) para base e por defecto.
+            let funcStr = funcStrRaw.toLowerCase().replace(/ln\(/g, 'log(').replace(/sen\(/g, 'sin(');
+            
+            // 1. Evaluar puntos necesarios
+            const scope = {};
+            const f = (x) => {
+                try {
+                    return math.evaluate(funcStr, {x: x, e: math.e, pi: math.pi});
+                } catch(e) { return NaN; }
+            };
+
+            const fx0 = f(x0);
+            const fx0_ph = f(x0 + h);
+            const fx0_mh = f(x0 - h);
+            const fx0_p2h = f(x0 + 2*h);
+            const fx0_m2h = f(x0 - 2*h);
+
+            if(isNaN(fx0)) throw new Error("Error evaluando la función en x0");
+
+            // 2. Calcular Derivadas Numéricas
+            const forward = (fx0_ph - fx0) / h;
+            const backward = (fx0 - fx0_mh) / h;
+            const centered = (fx0_ph - fx0_mh) / (2 * h);
+            const centered4 = (-fx0_p2h + 8*fx0_ph - 8*fx0_mh + fx0_m2h) / (12 * h);
+            const secondDeriv = (fx0_ph - 2*fx0 + fx0_mh) / (h * h);
+
+            // 3. Calcular Derivada Analítica (Simbólica) con MathJS
+            let analyticalD1 = null;
+            let analyticalD2 = null;
+            try {
+                const node = math.parse(funcStr);
+                const d1 = math.derivative(node, 'x');
+                const d2 = math.derivative(d1, 'x');
+                analyticalD1 = d1.evaluate({x: x0, e: math.e});
+                analyticalD2 = d2.evaluate({x: x0, e: math.e});
+            } catch(e) {
+                console.log("No se pudo calcular derivada simbólica:", e);
+            }
+
+            // 4. Renderizar Resultados
+            document.getElementById('result-function').classList.remove('hidden');
+            
+            // Analíticos
+            document.getElementById('analytical-d1').textContent = formatNumber(analyticalD1, 8);
+            document.getElementById('analytical-d2').textContent = formatNumber(analyticalD2, 8);
+
+            // Tabla Numérica
+            const tbody = document.getElementById('table-results-body');
+            tbody.innerHTML = '';
+            
+            const addRow = (method, formula, val, exact) => {
+                const error = exact !== null ? Math.abs(val - exact) : null;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-2 px-4 border-b font-medium text-gray-800">${method}</td>
+                    <td class="py-2 px-4 border-b text-gray-500 font-mono text-xs">${formula}</td>
+                    <td class="py-2 px-4 border-b text-right font-mono text-blue-700">${formatNumber(val, 8)}</td>
+                    <td class="py-2 px-4 border-b text-right font-mono text-red-600">${formatNumber(error, 2)}</td>
+                `;
+                tbody.appendChild(tr);
+            };
+
+            addRow("Adelante O(h)", "[f(x+h)-f(x)]/h", forward, analyticalD1);
+            addRow("Atrás O(h)", "[f(x)-f(x-h)]/h", backward, analyticalD1);
+            addRow("Centrada O(h²)", "[f(x+h)-f(x-h)]/2h", centered, analyticalD1);
+            addRow("Centrada O(h⁴)", "[-f(x+2h)+8f(x+h)-...]/12h", centered4, analyticalD1);
+            addRow("Segunda Derivada", "[f(x+h)-2f(x)+f(x-h)]/h²", secondDeriv, analyticalD2);
+
+            // 5. Gráfico
+            updateFunctionChart(f, x0, h, analyticalD1);
+
+        } catch (error) {
+            alert("Error en el cálculo: " + error.message);
+        }
+    }
+
+    function updateFunctionChart(f, x0, h, slope) {
+        const ctx = document.getElementById('chartFunction').getContext('2d');
+        if(chartInstanceFunc) chartInstanceFunc.destroy();
+
+        // Generar puntos alrededor de x0
+        const labels = [];
+        const dataY = [];
+        const dataTangent = [];
+        const range = h * 4;
+        const steps = 50;
+        
+        // Ecuación recta tangente: y - y0 = m(x - x0) => y = m(x - x0) + y0
+        const y0 = f(x0);
+
+        for(let i = 0; i <= steps; i++) {
+            const x = (x0 - range) + (i * (2*range) / steps);
+            labels.push(x.toFixed(2));
+            dataY.push(f(x));
+            
+            if (slope !== null) {
+                dataTangent.push(slope * (x - x0) + y0);
+            }
+        }
+
+        chartInstanceFunc = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'f(x)',
+                        data: dataY,
+                        borderColor: 'rgb(37, 99, 235)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Tangente (Derivada)',
+                        data: dataTangent,
+                        borderColor: 'rgba(220, 38, 38, 0.6)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Punto x₀',
+                        data: [{x: x0, y: y0}], // Truco para punto simple, requiere plugin scatter o manejo manual, simplificado aquí:
+                        pointBackgroundColor: 'red',
+                        pointRadius: 6,
+                        type: 'scatter',
+                        showLine: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    title: { display: true, text: 'Visualización de la Función y Tangente' }
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // CASO 2: DATOS TABULADOS
+    // ==========================================
+    function addDataPoint() {
+        const xVal = document.getElementById('dataX').value;
+        const yVal = document.getElementById('dataY').value;
+
+        if(xVal === '' || yVal === '') return;
+
+        dataPoints.push({x: parseFloat(xVal), y: parseFloat(yVal)});
+        dataPoints.sort((a, b) => a.x - b.x); // Mantener ordenado por X
+
+        document.getElementById('dataX').value = '';
+        document.getElementById('dataY').value = '';
+        document.getElementById('dataX').focus();
+
+        renderDataTable();
+    }
+
+    function removeDataPoint(index) {
+        dataPoints.splice(index, 1);
+        renderDataTable();
+    }
+
+    function renderDataTable() {
+        const tbody = document.getElementById('input-data-body');
+        const emptyMsg = document.getElementById('empty-msg');
+        
+        tbody.innerHTML = '';
+        if(dataPoints.length === 0) {
+            emptyMsg.classList.remove('hidden');
+        } else {
+            emptyMsg.classList.add('hidden');
+            dataPoints.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-4 py-2 text-sm text-gray-900">${p.x}</td>
+                    <td class="px-4 py-2 text-sm text-gray-900">${p.y}</td>
+                    <td class="px-4 py-2 text-right">
+                        <button onclick="removeDataPoint(${idx})" class="text-red-500 hover:text-red-700 text-xs font-bold">X</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    function calculateData() {
+        if(dataPoints.length < 3) {
+            alert("Se necesitan al menos 3 puntos para calcular derivadas centradas y segundas derivadas.");
+            return;
+        }
+
+        const n = dataPoints.length;
+        const results = [];
+
+        // Calcular derivadas para puntos interiores
+        for(let i = 1; i < n - 1; i++) {
+            const xi = dataPoints[i].x;
+            const xi_prev = dataPoints[i-1].x;
+            const xi_next = dataPoints[i+1].x;
+            
+            const yi = dataPoints[i].y;
+            const yi_prev = dataPoints[i-1].y;
+            const yi_next = dataPoints[i+1].y;
+
+            // Diferencia centrada (asumiendo h no constante, fórmula general de 3 puntos Lagrange derivada)
+            // f'(x) ≈ (y_{i+1} - y_{i-1}) / (x_{i+1} - x_{i-1})
+            const centered = (yi_next - yi_prev) / (xi_next - xi_prev);
+
+            // Segunda derivada (aproximación simple si h es constante, generalizada aquí para h aprox)
+            // Usando diferencias divididas finitas
+            const h1 = xi - xi_prev;
+            const h2 = xi_next - xi;
+            
+            // Fórmula general segunda derivada 3 puntos
+            const term1 = yi_prev / (h1 * (h1 + h2));
+            const term2 = yi / (h1 * h2);
+            const term3 = yi_next / (h2 * (h1 + h2));
+            const second = 2 * (term1 - term2 + term3); // Nota: signo corregido respecto al código python original para coincidir algebraicamente
+
+            results.push({
+                x: xi,
+                d1: centered,
+                d2: second
+            });
+        }
+
+        // Renderizar Resultados
+        document.getElementById('result-data-container').classList.remove('hidden');
+        const tbody = document.getElementById('output-data-body');
+        tbody.innerHTML = '';
+        
+        results.forEach(res => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="px-3 py-2 text-gray-900">${res.x}</td>
+                <td class="px-3 py-2 text-right font-mono text-blue-700">${formatNumber(res.d1, 6)}</td>
+                <td class="px-3 py-2 text-right font-mono text-purple-700">${formatNumber(res.d2, 6)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Gráfico
+        document.getElementById('chart-data-container').classList.remove('hidden');
+        updateDataChart(results);
+    }
+
+    function updateDataChart(results) {
+        const ctx = document.getElementById('chartData').getContext('2d');
+        if(chartInstanceData) chartInstanceData.destroy();
+
+        const xVals = dataPoints.map(p => p.x);
+        const yVals = dataPoints.map(p => p.y);
+        
+        const xDeriv = results.map(r => r.x);
+        const yDeriv = results.map(r => r.d1);
+
+        chartInstanceData = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: xVals, // Etiquetas base (aproximadas para el eje X)
+                datasets: [
+                    {
+                        label: 'Datos y = f(x)',
+                        data: dataPoints, // Chart.js acepta objetos {x,y}
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        showLine: true,
+                        tension: 0.2
+                    },
+                    {
+                        label: "Derivada f'(x)",
+                        data: results.map(r => ({x: r.x, y: r.d1})),
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderDash: [5, 5],
+                        showLine: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { type: 'linear', position: 'bottom', title: {display: true, text: 'x'} }
+                }
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
