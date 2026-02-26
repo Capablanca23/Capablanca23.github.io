@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integración Numérica: Trapecio y Simpson</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primario: '#1E40AF', // Azul Intenso
+                        secundario: '#1D4ED8', // Azul Real
+                        terciario: '#3B82F6',
+                        exito: '#10B981',
+                        advertencia: '#F59E0B',
+                        error: '#EF4444',
+                        fondo: '#F8FAFC',
+                        texto: '#0F172A'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Math.js para evaluar funciones -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    
+    <!-- Plotly.js para gráficos -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+
+    <!-- KaTeX para renderizar fórmulas matemáticas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #F8FAFC; }
+        .tab-active { border-bottom: 4px solid #1E40AF; color: #1E40AF; font-weight: bold; background-color: #EFF6FF; }
+        .tab-inactive { color: #64748B; }
+        .katex-display { margin: 0.5em 0; overflow-x: auto; overflow-y: hidden; }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Estilo para el encabezado azul solicitado */
+        .header-blue {
+            background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%);
+        }
+    </style>
+</head>
+<body class="text-texto p-4 md:p-8">
+
+    <!-- Header Azul y Datos del Autor -->
+    <div class="max-w-6xl mx-auto header-blue rounded-2xl shadow-xl p-6 mb-8 flex flex-col md:flex-row items-center gap-8 text-white">
+        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" class="flex-shrink-0 group">
+            <div class="p-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl group-hover:bg-white/20 transition duration-300 shadow-sm">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                     alt="QR Investigador" 
+                     class="w-28 h-28 transform group-hover:scale-105 transition-transform duration-300 rounded-lg">
+            </div>
+            <p class="text-[10px] text-center text-blue-200 mt-2 font-bold uppercase tracking-wider">Perfil Científico</p>
+        </a>
+        <div class="flex-1 text-center md:text-left">
+            <h1 class="text-3xl font-black mb-2 leading-tight tracking-tight">INTEGRACIÓN NUMÉRICA</h1>
+            <p class="text-xl font-medium text-blue-100 mb-1">Dr. Ronald F. Rodriguez Espinoza</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-4 mt-2">
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded border border-white/30">Matemática Computacional</span>
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded border border-white/30">Métodos Numéricos</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+        
+        <!-- Navegación por Pestañas -->
+        <div class="flex flex-wrap border-b border-gray-200 bg-slate-50">
+            <button onclick="cambiarPestaña('trapecio-simple')" id="btn-trapecio-simple" class="flex-1 py-4 px-2 text-sm md:text-base text-center focus:outline-none transition-all tab-active">
+                Trapecio Simple
+            </button>
+            <button onclick="cambiarPestaña('trapecio-compuesto')" id="btn-trapecio-compuesto" class="flex-1 py-4 px-2 text-sm md:text-base text-center focus:outline-none transition-all tab-inactive hover:bg-gray-100">
+                Trapecio Compuesto
+            </button>
+            <button onclick="cambiarPestaña('simpson-simple')" id="btn-simpson-simple" class="flex-1 py-4 px-2 text-sm md:text-base text-center focus:outline-none transition-all tab-inactive hover:bg-gray-100">
+                Simpson 1/3
+            </button>
+            <button onclick="cambiarPestaña('simpson-compuesto')" id="btn-simpson-compuesto" class="flex-1 py-4 px-2 text-sm md:text-base text-center focus:outline-none transition-all tab-inactive hover:bg-gray-100">
+                Simpson Compuesto
+            </button>
+            <button onclick="cambiarPestaña('datos-tabulares')" id="btn-datos-tabulares" class="flex-1 py-4 px-2 text-sm md:text-base text-center focus:outline-none transition-all tab-inactive hover:bg-gray-100 font-bold text-blue-700">
+                📊 Datos Tabulares
+            </button>
+        </div>
+
+        <div class="p-6 md:p-10">
+            <!-- Alertas -->
+            <div id="alerta-error" class="hidden bg-red-50 border-l-4 border-error text-error p-4 rounded-md mb-6 animate-pulse">
+                <div class="flex items-center">
+                    <span class="font-bold mr-2">Error:</span>
+                    <span id="texto-error"></span>
+                </div>
+            </div>
+            
+            <div id="alerta-advertencia" class="hidden bg-amber-50 border-l-4 border-advertencia text-amber-800 p-4 rounded-md mb-6">
+                <span class="font-bold mr-2">Aviso:</span>
+                <span id="texto-advertencia"></span>
+            </div>
+
+            <!-- Controles de Entrada (Modo Función) -->
+            <div id="controles-funcion" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 items-end">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-2 tracking-widest">Función f(x):</label>
+                    <input type="text" id="input-funcion" value="x * sin(x) + 2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-primario outline-none font-mono text-lg transition-all" placeholder="Ej: sin(x) + x^2">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-2 tracking-widest">Límite [a]:</label>
+                    <input type="number" id="input-a" value="0" step="any" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 outline-none text-lg">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-2 tracking-widest">Límite [b]:</label>
+                    <input type="number" id="input-b" value="6" step="any" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 outline-none text-lg">
+                </div>
+                <div id="container-n" class="hidden">
+                    <label class="block text-xs font-black text-slate-500 uppercase mb-2 tracking-widest">Intervalos (n):</label>
+                    <input type="number" id="input-n" value="6" min="1" step="1" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 outline-none text-lg">
+                </div>
+            </div>
+
+            <!-- Controles de Entrada (Modo Tabular) -->
+            <div id="controles-tabular" class="hidden mb-8 space-y-4">
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <label class="block text-xs font-black text-blue-700 uppercase mb-2 tracking-widest">Datos (x, y) - Formato: x1, y1 | x2, y2 | ...</label>
+                    <textarea id="input-datos" rows="3" class="w-full px-4 py-3 bg-white border border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-100 outline-none font-mono text-sm" placeholder="0, 0 | 1, 2 | 2, 3 | 4, 1.5 | 6, 4"></textarea>
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <button id="btn-calcular" class="w-full py-4 bg-primario text-white font-black text-lg rounded-xl shadow-lg hover:bg-blue-800 hover:shadow-2xl transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    <span>EJECUTAR CÁLCULO</span>
+                </button>
+            </div>
+
+            <!-- Resultados -->
+            <div id="resultados-container" class="hidden space-y-10 animate-fade-in-up">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Procedimiento -->
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 class="text-sm font-black uppercase tracking-widest mb-6 flex items-center text-primario">
+                            <span class="p-2 bg-blue-100 rounded-lg mr-3">📝</span> Desarrollo Matemático
+                        </h3>
+                        <div id="procedimiento-math" class="prose max-w-none text-slate-700"></div>
+                    </div>
+
+                    <!-- Resultado Destacado -->
+                    <div class="space-y-6">
+                        <div class="bg-white p-8 rounded-2xl border-2 border-primario shadow-xl relative overflow-hidden">
+                            <h3 id="metodo-nombre" class="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-2">MÉTODO</h3>
+                            <div id="resultado-valor" class="text-5xl font-black text-primario tracking-tight mb-4">0.00</div>
+                            <p id="interpretacion-texto" class="text-slate-500 text-sm italic leading-relaxed"></p>
+                        </div>
+
+                        <!-- Gráfico Plotly -->
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-md">
+                             <div id="grafico" class="w-full h-[380px]"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pestañaActual = 'trapecio-simple';
+        
+        const inputFuncion = document.getElementById('input-funcion');
+        const inputA = document.getElementById('input-a');
+        const inputB = document.getElementById('input-b');
+        const inputN = document.getElementById('input-n');
+        const inputDatos = document.getElementById('input-datos');
+        const containerN = document.getElementById('container-n');
+        const ctrlFuncion = document.getElementById('controles-funcion');
+        const ctrlTabular = document.getElementById('controles-tabular');
+        const btnCalcular = document.getElementById('btn-calcular');
+        
+        function mostrarError(mensaje) {
+            const alerta = document.getElementById('alerta-error');
+            document.getElementById('texto-error').innerText = mensaje;
+            alerta.classList.remove('hidden');
+            document.getElementById('resultados-container').classList.add('hidden');
+        }
+
+        function ocultarError() {
+            document.getElementById('alerta-error').classList.add('hidden');
+            document.getElementById('alerta-advertencia').classList.add('hidden');
+        }
+
+        function mostrarAdvertencia(mensaje) {
+            const alerta = document.getElementById('alerta-advertencia');
+            document.getElementById('texto-advertencia').innerText = mensaje;
+            alerta.classList.remove('hidden');
+        }
+
+        function renderKatex(stringTeX) {
+            try {
+                return katex.renderToString(stringTeX, { displayMode: true, throwOnError: false });
+            } catch (e) { return stringTeX; }
+        }
+
+        function evaluar(funcStr, valX) {
+            try {
+                let f = funcStr.replace(/\*\*/g, '^');
+                const nodo = math.parse(f);
+                const codigo = nodo.compile();
+                const resultado = codigo.evaluate({ x: valX, e: Math.E, pi: Math.PI });
+                if (!isFinite(resultado) || isNaN(resultado)) throw new Error(`Indefinido`);
+                return resultado;
+            } catch (error) { throw new Error(`Error f(${valX})`); }
+        }
+
+        window.cambiarPestaña = function(metodo) {
+            pestañaActual = metodo;
+            const botones = ['trapecio-simple', 'trapecio-compuesto', 'simpson-simple', 'simpson-compuesto', 'datos-tabulares'];
+            botones.forEach(b => {
+                const btn = document.getElementById('btn-' + b);
+                if (b === metodo) {
+                    btn.classList.add('tab-active');
+                    btn.classList.remove('tab-inactive', 'hover:bg-gray-100');
+                } else {
+                    btn.classList.remove('tab-active');
+                    btn.classList.add('tab-inactive', 'hover:bg-gray-100');
+                }
+            });
+
+            if (metodo === 'datos-tabulares') {
+                ctrlFuncion.classList.add('hidden');
+                ctrlTabular.classList.remove('hidden');
+            } else {
+                ctrlFuncion.classList.remove('hidden');
+                ctrlTabular.classList.add('hidden');
+                containerN.style.display = metodo.includes('compuesto') ? 'block' : 'none';
+            }
+
+            document.getElementById('resultados-container').classList.add('hidden');
+            ocultarError();
+        };
+
+        btnCalcular.addEventListener('click', () => {
+            ocultarError();
+            
+            let pasosTeX = "";
+            let resultadoFinal = 0;
+            let interpretacion = "";
+            let tracesPlotly = [];
+            
+            // Colores del gráfico
+            const COLOR_LINEA = '#1E3A8A';
+            const COLOR_AREA = 'rgba(245, 158, 11, 0.3)'; // Ámbar semitransparente
+            const COLOR_PUNTOS = '#F59E0B'; // Ámbar intenso
+
+            try {
+                if (pestañaActual === 'datos-tabulares') {
+                    const raw = inputDatos.value;
+                    const pares = raw.split('|').map(p => p.split(',').map(n => parseFloat(n.trim())));
+                    
+                    if (pares.length < 2) throw new Error("Ingrese al menos 2 puntos (x, y)");
+                    
+                    let x_vals = pares.map(p => p[0]);
+                    let y_vals = pares.map(p => p[1]);
+
+                    for(let i=0; i < x_vals.length - 1; i++) {
+                        let h_i = x_vals[i+1] - x_vals[i];
+                        if (h_i <= 0) throw new Error("Los valores de x deben ser estrictamente crecientes.");
+                        resultadoFinal += (h_i / 2) * (y_vals[i] + y_vals[i+1]);
+                    }
+
+                    pasosTeX += "<h4>Regla del Trapecio Generalizada</h4>";
+                    pasosTeX += renderKatex(`I \\approx \\sum_{i=0}^{n-1} \\frac{x_{i+1}-x_i}{2} [f(x_i) + f(x_{i+1})]`);
+                    
+                    document.getElementById('metodo-nombre').innerText = "DATOS TABULARES";
+
+                    tracesPlotly.push({
+                        x: x_vals, y: y_vals,
+                        mode: 'lines+markers',
+                        name: 'Intervalos',
+                        line: { color: COLOR_LINEA, width: 2 },
+                        marker: { size: 10, color: COLOR_PUNTOS, symbol: 'circle' },
+                        fill: 'tozeroy',
+                        fillcolor: COLOR_AREA
+                    });
+
+                } else {
+                    const func = inputFuncion.value;
+                    const a = parseFloat(inputA.value);
+                    const b = parseFloat(inputB.value);
+                    let n = parseInt(inputN.value);
+
+                    // Curva base
+                    const steps = 200;
+                    const x_plot = Array.from({length: steps}, (_, i) => a + i * ((b - a) / (steps - 1)));
+                    const y_plot = x_plot.map(x => evaluar(func, x));
+
+                    tracesPlotly.push({
+                        x: x_plot, y: y_plot,
+                        mode: 'lines',
+                        name: 'f(x)',
+                        line: { color: COLOR_LINEA, width: 3, shape: 'spline' }
+                    });
+
+                    if (pestañaActual === 'trapecio-simple') {
+                        const fa = evaluar(func, a);
+                        const fb = evaluar(func, b);
+                        resultadoFinal = (b - a) * (fa + fb) / 2;
+                        pasosTeX += renderKatex(`I \\approx \\frac{${b}-${a}}{2} [f(${a}) + f(${b})]`);
+                        document.getElementById('metodo-nombre').innerText = "TRAPECIO SIMPLE";
+                        
+                        // Área y puntos
+                        tracesPlotly.push({
+                            x: [a, b], y: [fa, fb],
+                            mode: 'lines+markers',
+                            fill: 'tozeroy',
+                            fillcolor: COLOR_AREA,
+                            line: { color: COLOR_PUNTOS, dash: 'dot' },
+                            marker: { size: 12, color: COLOR_PUNTOS },
+                            name: 'Trapecio'
+                        });
+                    } 
+                    else if (pestañaActual === 'trapecio-compuesto') {
+                        const h = (b - a) / n;
+                        let x_nodes = [], y_nodes = [];
+                        let suma = evaluar(func, a) + evaluar(func, b);
+                        
+                        for(let i=0; i<=n; i++) {
+                            let xi = a + i*h;
+                            let yi = evaluar(func, xi);
+                            x_nodes.push(xi);
+                            y_nodes.push(yi);
+                            if(i > 0 && i < n) suma += 2 * yi;
+                        }
+                        
+                        resultadoFinal = (h/2) * suma;
+                        pasosTeX += renderKatex(`h = \\frac{${b}-${a}}{${n}} = ${h.toFixed(4)}`);
+                        pasosTeX += renderKatex(`I \\approx \\frac{h}{2} [f(x_0) + 2\\sum_{i=1}^{n-1} f(x_i) + f(x_n)]`);
+                        document.getElementById('metodo-nombre').innerText = "TRAPECIO COMPUESTO";
+
+                        tracesPlotly.push({
+                            x: x_nodes, y: y_nodes,
+                            mode: 'lines+markers',
+                            fill: 'tozeroy',
+                            fillcolor: COLOR_AREA,
+                            line: { color: COLOR_PUNTOS, width: 1.5 },
+                            marker: { size: 8, color: COLOR_PUNTOS },
+                            name: 'Intervalos'
+                        });
+                    }
+                    else if (pestañaActual === 'simpson-simple') {
+                        const m = (a + b) / 2;
+                        const fa = evaluar(func, a), fm = evaluar(func, m), fb = evaluar(func, b);
+                        resultadoFinal = (b - a) * (fa + 4*fm + fb) / 6;
+                        pasosTeX += renderKatex(`m = ${m.toFixed(4)} \\implies f(m) = ${fm.toFixed(4)}`);
+                        pasosTeX += renderKatex(`I \\approx \\frac{b-a}{6} [f(a) + 4f(m) + f(b)]`);
+                        document.getElementById('metodo-nombre').innerText = "SIMPSON 1/3 SIMPLE";
+
+                        tracesPlotly.push({
+                            x: [a, m, b], y: [fa, fm, fb],
+                            mode: 'markers',
+                            marker: { size: 12, color: COLOR_PUNTOS, symbol: 'diamond' },
+                            name: 'Puntos Simpson'
+                        });
+                        
+                        // Relleno aproximado Simpson
+                        let x_s = [a, m, b];
+                        let y_s = [fa, fm, fb];
+                        tracesPlotly.push({
+                            x: x_s, y: y_s, fill: 'tozeroy', fillcolor: COLOR_AREA, 
+                            line: {color: COLOR_PUNTOS}, name: 'Área Simpson'
+                        });
+                    }
+                    else if (pestañaActual === 'simpson-compuesto') {
+                        if (n % 2 !== 0) { n++; inputN.value = n; mostrarAdvertencia("Simpson requiere n par. Ajustado a " + n); }
+                        const h = (b - a) / n;
+                        let x_nodes = [], y_nodes = [];
+                        let suma = evaluar(func, a) + evaluar(func, b);
+                        for(let i=0; i<=n; i++) {
+                            let xi = a + i*h;
+                            let yi = evaluar(func, xi);
+                            x_nodes.push(xi);
+                            y_nodes.push(yi);
+                            if(i > 0 && i < n) suma += (i % 2 === 0 ? 2 : 4) * yi;
+                        }
+                        resultadoFinal = (h/3) * suma;
+                        pasosTeX += renderKatex(`I \\approx \\frac{h}{3} [f(x_0) + 4\\sum_{imp} f(x_i) + 2\\sum_{par} f(x_i) + f(x_n)]`);
+                        document.getElementById('metodo-nombre').innerText = "SIMPSON COMPUESTO";
+
+                        tracesPlotly.push({
+                            x: x_nodes, y: y_nodes,
+                            mode: 'markers',
+                            marker: { size: 7, color: COLOR_PUNTOS },
+                            name: 'Nodos'
+                        });
+                        tracesPlotly.push({
+                            x: x_nodes, y: y_nodes,
+                            fill: 'tozeroy', fillcolor: COLOR_AREA,
+                            line: { width: 0 }, name: 'Área'
+                        });
+                    }
+                }
+
+                document.getElementById('procedimiento-math').innerHTML = pasosTeX;
+                document.getElementById('resultado-valor').innerText = resultadoFinal.toLocaleString(undefined, {minimumFractionDigits: 6, maximumFractionDigits: 6});
+                document.getElementById('resultados-container').classList.remove('hidden');
+
+                const layout = {
+                    margin: { t: 20, r: 20, b: 40, l: 50 },
+                    xaxis: { gridcolor: '#F1F5F9', zeroline: true },
+                    yaxis: { gridcolor: '#F1F5F9', zeroline: true },
+                    plot_bgcolor: 'white',
+                    showlegend: true,
+                    legend: { orientation: 'h', y: -0.2 }
+                };
+                Plotly.newPlot('grafico', tracesPlotly, layout, {responsive: true});
+
+            } catch (e) {
+                mostrarError(e.message);
+            }
+        });
+
+        window.onload = () => {
+            cambiarPestaña('trapecio-simple');
+            setTimeout(() => btnCalcular.click(), 500);
+        };
+    </script>
+</body>
+</html>
