@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solucionador de EDO: 5 Opciones</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primario: '#1E3A8A',
+                        secundario: '#1E40AF',
+                        accent: '#2563EB',
+                        fondo: '#F8FAFC'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Librerías -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        .header-blue {
+            background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%);
+        }
+        .metodo-card {
+            transition: all 0.2s ease;
+            border: 2px solid #E2E8F0;
+            cursor: pointer;
+        }
+        .metodo-card.active {
+            border-color: #2563EB;
+            background-color: #EFF6FF;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+        }
+        #qrcode img { display: inline-block; }
+    </style>
+</head>
+<body class="bg-fondo text-slate-900 min-h-screen font-sans p-4 md:p-8">
+
+    <!-- Header con Autor y QR -->
+    <header class="max-w-6xl mx-auto header-blue rounded-2xl shadow-xl p-6 mb-8 flex flex-col md:flex-row items-center gap-8 text-white">
+        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" class="flex-shrink-0 group">
+            <div class="p-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl group-hover:bg-white/20 transition duration-300 shadow-sm">
+                <div id="qrcode" class="w-24 h-24 flex items-center justify-center bg-white rounded-lg p-1"></div>
+            </div>
+            <p class="text-[10px] text-center text-blue-200 mt-2 font-bold uppercase tracking-wider">Perfil CTI Vitae</p>
+        </a>
+        <div class="flex-1 text-center md:text-left">
+            <h1 class="text-3xl font-black mb-1 leading-tight tracking-tight">
+Solución Numérica de Ecuaciones Diferenciales Ordinarias
+</h1>
+            <p class="text-xl font-medium text-blue-100">Dr. Ronald F. Rodriguez Espinoza</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-3">
+                <span class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded border border-white/30 uppercase tracking-tighter">Comparación de Métodos Numéricos</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Panel de Configuración -->
+            <div class="lg:col-span-4 space-y-6">
+                <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-sm font-black uppercase tracking-widest mb-4 text-primario flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Parámetros
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">dy/dx = f(x, y)</label>
+                            <input type="text" id="input-fxy" value="y - x^2 + 1" class="w-full px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 font-mono focus:ring-2 focus:ring-accent outline-none">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">x₀</label>
+                                <input type="number" id="input-x0" value="0" step="any" class="w-full px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">y₀</label>
+                                <input type="number" id="input-y0" value="0.5" step="any" class="w-full px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">x Final</label>
+                                <input type="number" id="input-xf" value="2" step="any" class="w-full px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">h (paso)</label>
+                                <input type="number" id="input-h" value="0.2" step="0.01" class="w-full px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 italic">Selección de Método:</label>
+                            <div class="grid grid-cols-1 gap-2">
+                                <div onclick="setMetodo('euler')" id="btn-euler" class="metodo-card active p-3 rounded-xl">
+                                    <div class="font-bold text-xs uppercase">1. Euler</div>
+                                </div>
+                                <div onclick="setMetodo('heun')" id="btn-heun" class="metodo-card p-3 rounded-xl">
+                                    <div class="font-bold text-xs uppercase">2. Heun</div>
+                                </div>
+                                <div onclick="setMetodo('rk2')" id="btn-rk2" class="metodo-card p-3 rounded-xl">
+                                    <div class="font-bold text-xs uppercase">3. RK-2 (Punto Medio)</div>
+                                </div>
+                                <div onclick="setMetodo('rk4')" id="btn-rk4" class="metodo-card p-3 rounded-xl">
+                                    <div class="font-bold text-xs uppercase">4. RK-4</div>
+                                </div>
+                                <div onclick="setMetodo('todos')" id="btn-todos" class="metodo-card p-3 rounded-xl bg-slate-50 border-dashed">
+                                    <div class="font-black text-xs uppercase text-primario">🚀 5. Comparar Todos</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="btn-resolver" class="w-full bg-primario hover:bg-blue-800 text-white font-black py-4 rounded-xl transition-all shadow-lg active:scale-95">
+                            CALCULAR
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Panel de Resultados -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Recuadro de Respuesta -->
+                <div id="box-respuesta" class="bg-white p-6 rounded-2xl border-l-8 border-primario shadow-md flex items-center justify-between">
+                    <div>
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Resultado Final en x_f</h4>
+                        <div id="valor-respuesta" class="text-4xl font-black text-primario tracking-tighter">--</div>
+                    </div>
+                    <div class="text-right hidden md:block">
+                        <span id="label-metodo-grande" class="text-xs font-black px-3 py-1 bg-blue-100 text-blue-700 rounded-full uppercase">EULER</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                    <div id="grafico-edo" class="w-full h-[400px]"></div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-700 text-sm">DETALLE DE ITERACIONES</h3>
+                    </div>
+                    <div class="overflow-x-auto max-h-[350px]">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 sticky top-0">
+                                <tr id="tabla-cabecera">
+                                    <!-- Se genera dinámicamente -->
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-cuerpo" class="divide-y divide-slate-100">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let metodoActual = 'euler';
+        
+        window.addEventListener('load', () => {
+            const qrContainer = document.getElementById("qrcode");
+            new QRCode(qrContainer, {
+                text: "https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364",
+                width: 90, height: 90, colorDark : "#1E3A8A", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+            });
+            resolverEDO();
+        });
+
+        function setMetodo(m) {
+            metodoActual = m;
+            const metodos = ['euler', 'heun', 'rk2', 'rk4', 'todos'];
+            metodos.forEach(id => {
+                document.getElementById('btn-' + id).classList.toggle('active', id === m);
+            });
+            document.getElementById('label-metodo-grande').innerText = m === 'todos' ? 'COMPARATIVA' : m.toUpperCase();
+            resolverEDO();
+        }
+
+        function calcularMetodo(metodo, f, x0, y0, xf, h) {
+            let x = x0;
+            let y = y0;
+            let res = [{x, y}];
+            while (x < xf - (h/10)) {
+                if (metodo === 'euler') {
+                    y = y + h * f(x, y);
+                } else if (metodo === 'heun') {
+                    let k1 = f(x, y);
+                    let yp = y + h * k1;
+                    y = y + (h/2) * (k1 + f(x + h, yp));
+                } else if (metodo === 'rk2') {
+                    let k1 = f(x, y);
+                    y = y + h * f(x + h/2, y + (h*k1)/2);
+                } else if (metodo === 'rk4') {
+                    let k1 = f(x, y);
+                    let k2 = f(x + h/2, y + (h*k1)/2);
+                    let k3 = f(x + h/2, y + (h*k2)/2);
+                    let k4 = f(x + h, y + h*k3);
+                    y = y + (h/6) * (k1 + 2*k2 + 2*k3 + k4);
+                }
+                x = x + h;
+                res.push({x, y});
+                if (res.length > 500) break;
+            }
+            return res;
+        }
+
+        function resolverEDO() {
+            const f_str = document.getElementById('input-fxy').value;
+            const x0 = parseFloat(document.getElementById('input-x0').value);
+            const y0 = parseFloat(document.getElementById('input-y0').value);
+            const xf = parseFloat(document.getElementById('input-xf').value);
+            const h = parseFloat(document.getElementById('input-h').value);
+
+            try {
+                const node = math.parse(f_str);
+                const code = node.compile();
+                const f = (x, y) => code.evaluate({x, y});
+
+                let traces = [];
+                let tablaHTML = "";
+                let cabeceraHTML = `<th class="px-6 py-3 font-bold text-slate-500 border-b text-[10px] uppercase">x</th>`;
+                
+                if (metodoActual === 'todos') {
+                    const mList = ['euler', 'heun', 'rk2', 'rk4'];
+                    const colors = ['#94a3b8', '#fbbf24', '#f472b6', '#2563eb'];
+                    let dataMatriz = mList.map(m => calcularMetodo(m, f, x0, y0, xf, h));
+                    
+                    mList.forEach((m, idx) => {
+                        cabeceraHTML += `<th class="px-6 py-3 font-bold text-slate-500 border-b text-[10px] uppercase">y (${m})</th>`;
+                        traces.push({
+                            x: dataMatriz[idx].map(d => d.x),
+                            y: dataMatriz[idx].map(d => d.y),
+                            name: m.toUpperCase(),
+                            type: 'scatter', mode: 'lines',
+                            line: { color: colors[idx], width: m === 'rk4' ? 3 : 2 }
+                        });
+                    });
+
+                    // Llenar tabla comparativa
+                    for(let i=0; i < dataMatriz[0].length; i++) {
+                        let fila = `<td class="px-6 py-3 font-medium text-slate-600">${dataMatriz[0][i].x.toFixed(4)}</td>`;
+                        dataMatriz.forEach((dm, idx) => {
+                            fila += `<td class="px-6 py-3 font-mono text-xs ${idx === 3 ? 'text-blue-600 font-bold' : ''}">${dm[i].y.toFixed(6)}</td>`;
+                        });
+                        tablaHTML += `<tr>${fila}</tr>`;
+                    }
+                    document.getElementById('valor-respuesta').innerText = dataMatriz[3][dataMatriz[3].length - 1].y.toFixed(6);
+
+                } else {
+                    const res = calcularMetodo(metodoActual, f, x0, y0, xf, h);
+                    cabeceraHTML += `<th class="px-6 py-3 font-bold text-slate-500 border-b text-[10px] uppercase">y (${metodoActual})</th>`;
+                    traces.push({
+                        x: res.map(d => d.x),
+                        y: res.map(d => d.y),
+                        name: metodoActual.toUpperCase(),
+                        type: 'scatter', mode: 'lines+markers',
+                        line: { color: '#2563eb', width: 2.5 },
+                        fill: 'tozeroy', fillcolor: 'rgba(37, 99, 235, 0.05)'
+                    });
+
+                    res.forEach(d => {
+                        tablaHTML += `<tr><td class="px-6 py-3 font-medium text-slate-600">${d.x.toFixed(4)}</td><td class="px-6 py-3 font-bold text-blue-600">${d.y.toFixed(6)}</td></tr>`;
+                    });
+                    document.getElementById('valor-respuesta').innerText = res[res.length - 1].y.toFixed(6);
+                }
+
+                document.getElementById('tabla-cabecera').innerHTML = cabeceraHTML;
+                document.getElementById('tabla-cuerpo').innerHTML = tablaHTML;
+                
+                Plotly.newPlot('grafico-edo', traces, {
+                    xaxis: { title: 'x', gridcolor: '#f1f5f9' },
+                    yaxis: { title: 'y', gridcolor: '#f1f5f9' },
+                    margin: { t: 20, b: 40, l: 60, r: 20 },
+                    plot_bgcolor: 'white',
+                    legend: { orientation: 'h', y: -0.2 }
+                }, {responsive: true, displayModeBar: false});
+
+            } catch (e) {
+                document.getElementById('valor-respuesta').innerText = "Error f(x,y)";
+            }
+        }
+
+        document.getElementById('btn-resolver').onclick = resolverEDO;
+    </script>
+</body>
+</html>
+
