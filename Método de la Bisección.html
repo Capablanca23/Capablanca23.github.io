@@ -1,0 +1,415 @@
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método de Bisección - Dr. Rodriguez Espinoza</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Math.js para evaluar funciones matemáticas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+    
+    <!-- Plotly.js para gráficos interactivos -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        /* Ocultar flechas de inputs numéricos */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4 flex justify-center items-start text-gray-800">
+
+    <div class="w-full max-w-5xl bg-white rounded-2xl shadow-2xl overflow-hidden border-t-8 border-blue-600">
+        
+        <!-- Encabezado -->
+        <div class="bg-blue-600 p-6 md:p-8 text-center text-white relative overflow-hidden">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 relative z-10">Cálculo de Raíces: Método de Bisección</h1>
+            <p class="text-blue-100 text-lg font-medium tracking-wide relative z-10">Autor: Dr. Ronald F. Rodriguez Espinoza</p>
+            <!-- Decoración de fondo -->
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 20px 20px, white 2px, transparent 0); background-size: 40px 40px;"></div>
+        </div>
+
+        <div class="p-6 md:p-8">
+            
+            <!-- SECCIÓN DEL AUTOR Y QR -->
+            <div class="flex flex-col md:flex-row items-center justify-between bg-blue-50 rounded-xl p-6 mb-8 border border-blue-100 shadow-sm transition-transform hover:shadow-md">
+                <div class="flex-1 mb-4 md:mb-0 text-center md:text-left">
+                    <h2 class="text-2xl font-bold text-blue-900">Dr. Ronald F. Rodriguez Espinoza</h2>
+                    <p class="text-blue-700 font-medium">CTI Vitae - CONCYTEC</p>
+                    <p class="text-sm text-gray-600 mt-2 max-w-md">Resolución de ecuaciones no lineales mediante métodos numéricos iterativos cerrados.</p>
+                </div>
+                
+                <!-- QR Clickeable -->
+                <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" class="group relative cursor-pointer" title="Ver Perfil en CTI Vitae">
+                    <div class="bg-white p-2 rounded-xl shadow-md border-2 border-blue-200 transform transition-transform group-hover:scale-105 group-hover:border-blue-400">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fctivitae.concytec.gob.pe%2FappDirectorioCTI%2FVerDatosInvestigador.do%3Fid_investigador%3D0015364" 
+                             alt="QR Code CTI Vitae" 
+                             class="w-24 h-24 object-contain rounded-lg">
+                    </div>
+                    <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-xs font-semibold text-blue-600 whitespace-nowrap">
+                        Click para abrir perfil
+                    </div>
+                </a>
+            </div>
+
+            <!-- INSTRUCCIONES DE FUNCIONES -->
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-5 rounded-r-lg mb-8 shadow-sm">
+                <h3 class="text-amber-800 font-bold text-lg mb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Instrucciones de Uso (Funciones Especiales)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-amber-900">
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Potencias:</strong> Use <code class="bg-amber-100 px-1 rounded">^</code> (Ej: <code class="bg-amber-100 px-1 rounded">x^3 - 2</code>).</li>
+                        <li><strong>Multiplicación:</strong> Use <code class="bg-amber-100 px-1 rounded">*</code> (Ej: <code class="bg-amber-100 px-1 rounded">3*x</code>, no <del>3x</del>).</li>
+                        <li><strong>Raíz cuadrada:</strong> <code class="bg-amber-100 px-1 rounded">sqrt(x)</code>.</li>
+                    </ul>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Exponencial:</strong> <code class="bg-amber-100 px-1 rounded">exp(x)</code>.</li>
+                        <li><strong>Logaritmo Natural (ln):</strong> <code class="bg-amber-100 px-1 rounded">log(x)</code> o <code class="bg-amber-100 px-1 rounded">ln(x)</code>.</li>
+                        <li><strong>Trigonometría:</strong> <code class="bg-amber-100 px-1 rounded">sin(x)</code>, <code class="bg-amber-100 px-1 rounded">cos(x)</code>, <code class="bg-amber-100 px-1 rounded">tan(x)</code>. Para seno también sirve <code class="bg-amber-100 px-1 rounded">sen(x)</code>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Alertas de Error -->
+            <div id="error-alert" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r shadow-sm fade-in flex items-center gap-3">
+                <svg class="h-6 w-6 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span id="error-msg" class="font-medium">Mensaje de error</span>
+            </div>
+
+            <!-- FORMULARIO DE ENTRADA -->
+            <form id="bisection-form" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-inner">
+                
+                <div class="md:col-span-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Función Matemática, f(x):</label>
+                    <input type="text" id="func-input" value="x^3 - x - 2" required
+                           class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-lg font-mono text-blue-900 shadow-sm">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Límite Inferior (a):</label>
+                    <input type="number" id="limit-a" value="1" step="any" required
+                           class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-800 shadow-sm">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Límite Superior (b):</label>
+                    <input type="number" id="limit-b" value="2" step="any" required
+                           class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-800 shadow-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Tolerancia (Error):</label>
+                    <input type="number" id="tolerance" value="0.001" step="any" min="0" required
+                           class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all text-gray-800 shadow-sm">
+                </div>
+
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-transform transform hover:-translate-y-0.5 flex justify-center items-center gap-2">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        Calcular Raíz
+                    </button>
+                </div>
+            </form>
+
+            <!-- CONTENEDOR DE RESULTADOS -->
+            <div id="results-container" class="hidden fade-in space-y-8">
+                
+                <!-- Tarjeta de Resumen -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-6 rounded-xl shadow-sm text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-green-500"></div>
+                    <h3 class="text-green-800 font-bold mb-2 uppercase tracking-wide text-sm">Raíz Aproximada Encontrada</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-4">
+                        <div id="res-root" class="text-4xl md:text-5xl font-extrabold text-green-600 font-mono">0.000000</div>
+                    </div>
+                    <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm font-medium text-green-800">
+                        <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-green-100">
+                            Iteraciones: <span id="res-iters" class="font-bold">0</span>
+                        </div>
+                        <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-green-100">
+                            Error Final: <span id="res-error" class="font-bold font-mono">0.000</span>
+                        </div>
+                        <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-green-100">
+                            f(raíz) ≈ <span id="res-froot" class="font-bold font-mono">0.000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico Plotly -->
+                <div class="bg-white p-2 md:p-4 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2 ml-2 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                        Gráfica de la Función
+                    </h3>
+                    <div id="plot-container" class="w-full h-[400px]"></div>
+                </div>
+
+                <!-- Tabla de Iteraciones -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            Tabla de Iteraciones
+                        </h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm text-center">
+                            <thead class="bg-blue-600 text-white sticky top-0 z-10">
+                                <tr>
+                                    <th class="py-3 px-4 font-semibold tracking-wider">Iteración</th>
+                                    <th class="py-3 px-4 font-semibold tracking-wider">a</th>
+                                    <th class="py-3 px-4 font-semibold tracking-wider">b</th>
+                                    <th class="py-3 px-4 font-semibold tracking-wider bg-blue-700">c (Punto Medio)</th>
+                                    <th class="py-3 px-4 font-semibold tracking-wider">f(c)</th>
+                                    <th class="py-3 px-4 font-semibold tracking-wider">Error |c - c_ant|</th>
+                                </tr>
+                            </thead>
+                            <tbody id="iter-table-body" class="bg-white divide-y divide-gray-100 font-mono text-gray-700">
+                                <!-- Filas generadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('bisection-form');
+        
+        // Manejador de errores
+        function showError(msg) {
+            document.getElementById('error-msg').textContent = msg;
+            document.getElementById('error-alert').classList.remove('hidden');
+            document.getElementById('results-container').classList.add('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error-alert').classList.add('hidden');
+        }
+
+        // Formateador de números para la tabla
+        function formatNum(num) {
+            if (num === null || num === undefined || isNaN(num)) return "N/A";
+            if (Math.abs(num) < 0.00001 && num !== 0) return num.toExponential(4);
+            return num.toFixed(6);
+        }
+
+        // Evento Principal
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            hideError();
+
+            const funcStrRaw = document.getElementById('func-input').value.trim();
+            let a = parseFloat(document.getElementById('limit-a').value);
+            let b = parseFloat(document.getElementById('limit-b').value);
+            const tol = parseFloat(document.getElementById('tolerance').value);
+            const maxIter = 100;
+
+            if (a >= b) {
+                return showError("El límite inferior (a) debe ser estrictamente menor que el límite superior (b).");
+            }
+
+            try {
+                // Preprocesar función para hispanohablantes (ln -> log, sen -> sin)
+                // En Math.js, log(x) es logaritmo natural base e.
+                let funcStr = funcStrRaw.toLowerCase()
+                                        .replace(/ln\(/g, 'log(')
+                                        .replace(/sen\(/g, 'sin(');
+                
+                // Compilar la función con Math.js
+                const node = math.parse(funcStr);
+                const code = node.compile();
+                
+                // Wrapper seguro para evaluar
+                const f = (x) => {
+                    let res = code.evaluate({ x: x, e: Math.E, pi: Math.PI });
+                    if (isNaN(res) || !isFinite(res)) {
+                        throw new Error(`La función se indefine o es infinita en x = ${x}`);
+                    }
+                    return res;
+                };
+
+                // Comprobación inicial del Teorema de Bolzano
+                let fa = f(a);
+                let fb = f(b);
+
+                if (fa * fb > 0) {
+                    return showError(`No hay cambio de signo en el intervalo. f(${a}) = ${fa.toFixed(4)} y f(${b}) = ${fb.toFixed(4)} tienen el mismo signo. El método de bisección no garantiza raíz aquí.`);
+                }
+
+                // ==========================================
+                // ALGORITMO DE BISECCIÓN
+                // ==========================================
+                let iterations = [];
+                let c_prev = null;
+                let c = a;
+                let fc = 0;
+                let converged = false;
+
+                for (let i = 0; i < maxIter; i++) {
+                    c = (a + b) / 2;
+                    fc = f(c);
+                    
+                    let currentError = (i === 0) ? null : Math.abs(c - c_prev);
+                    
+                    iterations.push({
+                        iter: i + 1,
+                        a: a,
+                        b: b,
+                        c: c,
+                        fc: fc,
+                        error: currentError
+                    });
+
+                    // Criterio de parada
+                    if (currentError !== null && currentError <= tol) {
+                        converged = true;
+                        break;
+                    }
+                    if (Math.abs(fc) < 1e-15) { // Raíz exacta (casi 0)
+                        converged = true;
+                        break;
+                    }
+
+                    // Actualizar intervalo
+                    if (fa * fc < 0) {
+                        b = c;
+                        fb = fc;
+                    } else if (fc * fb < 0) {
+                        a = c;
+                        fa = fc;
+                    } else {
+                        // Raíz exacta encontrada
+                        break;
+                    }
+                    c_prev = c;
+                }
+
+                // ==========================================
+                // MOSTRAR RESULTADOS
+                // ==========================================
+                document.getElementById('res-root').textContent = formatNum(c);
+                document.getElementById('res-iters').textContent = iterations.length;
+                document.getElementById('res-error').textContent = iterations[iterations.length-1].error ? formatNum(iterations[iterations.length-1].error) : "0.000";
+                document.getElementById('res-froot').textContent = fc.toExponential(4);
+
+                // Llenar tabla
+                const tbody = document.getElementById('iter-table-body');
+                tbody.innerHTML = '';
+                iterations.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-blue-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="py-2 px-4 border-b border-gray-100 font-semibold text-gray-600">${row.iter}</td>
+                        <td class="py-2 px-4 border-b border-gray-100">${formatNum(row.a)}</td>
+                        <td class="py-2 px-4 border-b border-gray-100">${formatNum(row.b)}</td>
+                        <td class="py-2 px-4 border-b border-blue-200 bg-blue-50 font-bold text-blue-700">${formatNum(row.c)}</td>
+                        <td class="py-2 px-4 border-b border-gray-100 ${Math.abs(row.fc) < tol ? 'text-green-600 font-bold' : ''}">${formatNum(row.fc)}</td>
+                        <td class="py-2 px-4 border-b border-gray-100 text-purple-700">${formatNum(row.error)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // ==========================================
+                // GRÁFICO PLOTLY
+                // ==========================================
+                const origA = parseFloat(document.getElementById('limit-a').value);
+                const origB = parseFloat(document.getElementById('limit-b').value);
+                const margin = Math.abs(origB - origA) * 0.2;
+                const plotStart = origA - margin;
+                const plotEnd = origB + margin;
+                
+                const xVals = [];
+                const yVals = [];
+                const steps = 300;
+                const h = (plotEnd - plotStart) / steps;
+
+                for (let i = 0; i <= steps; i++) {
+                    let px = plotStart + i * h;
+                    try {
+                        let py = f(px);
+                        xVals.push(px);
+                        yVals.push(py);
+                    } catch(e) {
+                        // ignorar puntos indefinidos en gráfico
+                    }
+                }
+
+                const traceFunc = {
+                    x: xVals,
+                    y: yVals,
+                    mode: 'lines',
+                    name: `f(x) = ${funcStrRaw}`,
+                    line: { color: '#2563EB', width: 2.5 }
+                };
+
+                const traceRoot = {
+                    x: [c],
+                    y: [0], // Lo forzamos a 0 para visualización de raíz en el eje
+                    mode: 'markers',
+                    name: `Raíz ≈ ${formatNum(c)}`,
+                    marker: { color: '#DC2626', size: 10, line: {color: 'white', width: 2} }
+                };
+
+                const layout = {
+                    margin: { t: 20, r: 20, b: 40, l: 40 },
+                    xaxis: { title: 'x', zeroline: true, zerolinecolor: '#9CA3AF', zerolinewidth: 1.5, gridcolor: '#F3F4F6' },
+                    yaxis: { title: 'f(x)', zeroline: true, zerolinecolor: '#9CA3AF', zerolinewidth: 1.5, gridcolor: '#F3F4F6' },
+                    plot_bgcolor: 'white',
+                    paper_bgcolor: 'white',
+                    hovermode: 'closest',
+                    showlegend: true,
+                    legend: { x: 0, y: 1, bgcolor: 'rgba(255,255,255,0.8)' },
+                    shapes: [
+                        { type: 'line', x0: origA, x1: origA, y0: Math.min(...yVals), y1: Math.max(...yVals), line: {color: '#10B981', dash: 'dash', width: 1.5} },
+                        { type: 'line', x0: origB, x1: origB, y0: Math.min(...yVals), y1: Math.max(...yVals), line: {color: '#F59E0B', dash: 'dash', width: 1.5} }
+                    ]
+                };
+
+                Plotly.newPlot('plot-container', [traceFunc, traceRoot], layout, {responsive: true});
+
+                // Mostrar todo
+                document.getElementById('results-container').classList.remove('hidden');
+                
+                // Advertir si no convergió al 100% (límite de iteraciones)
+                if (!converged) {
+                    showError(`Se alcanzó el límite máximo de ${maxIter} iteraciones sin llegar a la tolerancia deseada. Los resultados mostrados son la mejor aproximación obtenida.`);
+                }
+
+            } catch (error) {
+                showError("Error al interpretar o evaluar la función. Verifica la sintaxis. (" + error.message + ")");
+            }
+        });
+    </script>
+</body>
+</html>
