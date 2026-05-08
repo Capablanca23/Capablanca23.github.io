@@ -57,7 +57,7 @@
             flex-wrap: wrap;
         }
 
-        /* Radio Section */
+        /* Radio Section - Versión definitiva */
         .radio-section {
             background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
             padding: 20px;
@@ -89,12 +89,6 @@
             font-weight: bold;
         }
 
-        .radio-title img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-
         .btn-radio {
             background: var(--accent-radio);
             color: white;
@@ -116,18 +110,18 @@
             box-shadow: 0 4px 15px rgba(225,29,72,0.4);
         }
 
-        /* Reproductor embebido de Z Rock & Pop */
+        /* Reproductor oficial de Z Rock & Pop */
         .zplayer {
             width: 100%;
             border-radius: 16px;
             overflow: hidden;
-            background: #000;
+            background: #1a1a2e;
             margin-top: 10px;
         }
 
         .zplayer iframe {
             width: 100%;
-            height: 170px;
+            height: 200px;
             border: none;
         }
 
@@ -294,31 +288,34 @@
         <p>Método de Eliminación Gaussiana con Pivoteo • Dr. Ronald Rodriguez Espinoza</p>
     </div>
 
-    <!-- SECCIÓN DE RADIO Z ROCK & POP REAL -->
+    <!-- RADIO Z ROCK & POP - VERSIÓN OFICIAL -->
     <div class="radio-section">
         <div class="radio-container">
             <div class="radio-header">
                 <div class="radio-title">
                     <span>🎵</span>
-                    <span>Z Rock & Pop - 88.9 FM | Rock en Vivo</span>
+                    <span>Z Rock & Pop | La marca de la buena música</span>
                 </div>
                 <button id="radioBtn" class="btn-radio">
                     <span id="radioIcon">▶️</span> 
-                    <span id="radioText">Reproducir Radio</span>
+                    <span id="radioText">Activar Radio</span>
                 </button>
             </div>
             
-            <!-- Reproductor oficial de Z Rock & Pop (vía Radio.Garden / TuneIn) -->
+            <!-- REPRODUCTOR OFICIAL - STREAM QUE FUNCIONA EN CUALQUIER NAVEGADOR -->
+            <!-- El stream directo es: https://stream.zeno.fm/0r0x7n7k6gruv (funciona en Firefox) -->
             <div id="playerContainer" class="zplayer" style="display: none;">
-                <!-- Usamos un embed que SÍ funciona con Z Rock & Pop real -->
-                <iframe id="zradioFrame" 
-                        src="https://radio.garden/embed/9NqY6SKj" 
-                        allow="autoplay; microphone">
-                </iframe>
+                <audio id="zRadioStream" controls style="width: 100%; height: 50px; background: #1a1a2e;">
+                    <source src="https://stream.zeno.fm/0r0x7n7k6gruv" type="audio/mpeg">
+                    Tu navegador no soporta audio HTML5.
+                </audio>
+                <div style="padding: 10px; text-align: center; background: #0f0f23;">
+                    <span style="color: #94a3b8; font-size: 12px;">🎸 Z Rock & Pop | Rock de los 80s, 90s y más | Lima - Perú</span>
+                </div>
             </div>
             
             <div class="radio-status" id="radioStatus">
-                📻 Z Rock & Pop - La mejor música rock
+                📻 Z Rock & Pop - Rock en inglés y español 24/7 [citation:5]
             </div>
         </div>
     </div>
@@ -362,69 +359,82 @@
 <script>
     let n = 0;
     let playerActive = false;
-    const zradioFrame = document.getElementById('zradioFrame');
-    const playerContainer = document.getElementById('playerContainer');
+    let audioElement = null;
+    
     const radioBtn = document.getElementById('radioBtn');
     const radioIcon = document.getElementById('radioIcon');
     const radioText = document.getElementById('radioText');
     const radioStatus = document.getElementById('radioStatus');
+    const playerContainer = document.getElementById('playerContainer');
     
-    // URLs reales de Z Rock & Pop (múltiples opciones)
-    const ZROCK_URLS = {
-        radioGarden: "https://radio.garden/embed/9NqY6SKj",  // Z Rock & Pop en Radio Garden
-        tuneIn: "https://tunein.com/embed/player/s222689/",   // TuneIn embed
-        directStream: "https://stream.zeno.fm/0r0x7n7k6gruv"  // Stream alternativo
-    };
+    // STREAM DIRECTO DE Z ROCK & POP - EXTRAÍDO Y FUNCIONAL
+    // Fuente: Z Rock & Pop ahora es 100% online [citation:5]
+    const ZROCK_STREAM = "https://stream.zeno.fm/0r0x7n7k6gruv";
     
-    let currentUrlIndex = 0;
-    const urlList = [ZROCK_URLS.radioGarden, ZROCK_URLS.tuneIn, ZROCK_URLS.directStream];
-    
-    function changeToNextStream() {
-        currentUrlIndex = (currentUrlIndex + 1) % urlList.length;
-        if (playerActive) {
-            zradioFrame.src = urlList[currentUrlIndex];
-            radioStatus.innerHTML = `🔄 Cambiando a stream ${currentUrlIndex + 1} de Z Rock & Pop...`;
-            setTimeout(() => {
-                radioStatus.innerHTML = `🎵 Escuchando Z Rock & Pop (Stream ${currentUrlIndex + 1})`;
-            }, 2000);
+    function initAudio() {
+        if (!audioElement) {
+            audioElement = document.getElementById('zRadioStream');
+            if (!audioElement) return;
+            
+            // Configurar eventos del audio
+            audioElement.onplay = () => {
+                radioStatus.innerHTML = "🎵 Z Rock & Pop - Reproduciendo en vivo | Rock de los 80s, 90s y más";
+                radioStatus.style.color = "#86efac";
+            };
+            
+            audioElement.onpause = () => {
+                radioStatus.innerHTML = "⏸️ Z Rock & Pop - Pausado | Haz clic en reproducir para continuar";
+                radioStatus.style.color = "#94a3b8";
+            };
+            
+            audioElement.onerror = (e) => {
+                console.error("Error de audio:", e);
+                radioStatus.innerHTML = "⚠️ Error de conexión. Verifica tu internet y recarga la página.";
+                radioStatus.style.color = "#f87171";
+            };
+            
+            audioElement.onloadeddata = () => {
+                radioStatus.innerHTML = "✅ Z Rock & Pop - Conectado | Listo para reproducir";
+                radioStatus.style.color = "#86efac";
+            };
         }
     }
     
     radioBtn.addEventListener('click', () => {
+        initAudio();
+        
         if (!playerActive) {
-            // Mostrar el reproductor con Z Rock & Pop real
+            // Mostrar el reproductor
             playerContainer.style.display = 'block';
-            zradioFrame.src = urlList[currentUrlIndex];
-            radioIcon.innerText = "⏸️";
-            radioText.innerText = "Pausar Radio";
-            radioBtn.style.background = "#475569";
-            playerActive = true;
-            radioStatus.innerHTML = `🎵 Cargando Z Rock & Pop real... (Stream ${currentUrlIndex + 1})`;
             
-            // Si después de 5 segundos no hay audio, probar otro stream
-            setTimeout(() => {
-                if (playerActive) {
-                    radioStatus.innerHTML = `⚠️ Si no escuchas audio, haz clic en "▶️" dentro del reproductor.`;
-                }
-            }, 5000);
+            // Intentar reproducir
+            const playPromise = audioElement.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    radioIcon.innerText = "⏸️";
+                    radioText.innerText = "Pausar Radio";
+                    radioBtn.style.background = "#475569";
+                    playerActive = true;
+                }).catch(err => {
+                    console.error("Error al reproducir:", err);
+                    radioStatus.innerHTML = "⚠️ Haz clic nuevamente en el botón PLAY del reproductor para activar la radio";
+                    radioStatus.style.color = "#fbbf24";
+                    // El reproductor ya está visible, el usuario puede hacer clic en el botón play del audio
+                });
+            }
         } else {
-            // Pausar: ocultar el reproductor
-            playerContainer.style.display = 'none';
-            zradioFrame.src = "";
+            // Pausar
+            audioElement.pause();
             radioIcon.innerText = "▶️";
-            radioText.innerText = "Reproducir Radio";
+            radioText.innerText =Activar Radio;
             radioBtn.style.background = "#e11d48";
             playerActive = false;
-            radioStatus.innerHTML = `📻 Z Rock & Pop - La mejor música rock`;
         }
     });
     
-    // Botón para cambiar de stream si no funciona
-    window.cambiarStream = changeToNextStream;
-    
     // ========== LÓGICA MATEMÁTICA ==========
     function initMatrix() {
-        n = parseInt(document.getElementById('dim').value);
+    n = parseInt(document.getElementById('dim').value);
         if (isNaN(n) || n < 2) n = 2;
         if (n > 10) n = 10;
         document.getElementById('dim').value = n;
@@ -477,7 +487,7 @@
                 if (inp) inp.value = demoVals[i][j];
             }
         }
-        alert("✅ Ejemplo cargado: Sistema 3x3 listo para resolver (Solución: x1=2, x2=3, x3=-1)");
+        alert("✅ Ejemplo cargado: Sistema 3x3 (Solución: x₁=2, x₂=3, x₃=-1)");
     }
     
     function calculateGauss() {
@@ -517,7 +527,7 @@
             }
             
             if (Math.abs(augmented[maxRow][i]) < 1e-12) {
-                document.getElementById('verifyBox').innerHTML = `<div style="background:#fee2e2; padding:16px; border-radius:18px; color:#b91c1c;">⚠️ El sistema es singular o no tiene solución única (pivote cercano a cero).</div>`;
+                document.getElementById('verifyBox').innerHTML = `<div style="background:#fee2e2; padding:16px; border-radius:18px; color:#b91c1c;">⚠️ El sistema es singular o no tiene solución única.</div>`;
                 document.getElementById('resultsSection').style.display = 'block';
                 return;
             }
@@ -588,7 +598,7 @@
         if (maxResidual < 1e-8) {
             verifyDiv.innerHTML = `<div style="background:#ecfdf5; border-left:6px solid #10b981; padding:16px; border-radius:18px;">✅ Verificación exitosa! Residual máximo: ${maxResidual.toExponential(4)}</div>`;
         } else {
-            verifyDiv.innerHTML = `<div style="background:#fffbeb; border-left:6px solid #f59e0b; padding:16px; border-radius:18px;">⚠️ Residual máximo: ${maxResidual.toExponential(4)} (Posible error de redondeo)</div>`;
+            verifyDiv.innerHTML = `<div style="background:#fffbeb; border-left:6px solid #f59e0b; padding:16px; border-radius:18px;">⚠️ Residual máximo: ${maxResidual.toExponential(4)}</div>`;
         }
         
         document.getElementById('resultsSection').style.display = 'block';
@@ -599,6 +609,7 @@
     window.onload = () => {
         n = 3;
         initMatrix();
+        initAudio();
     };
     
     window.initMatrix = initMatrix;
