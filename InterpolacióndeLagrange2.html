@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Lagrange Interpolator Pro | Radio con Multi-Emisora</title>
+    <title>Lagrange Interpolator Pro | Radio Multi-Emisora + Autor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- QR Code Generator Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         /* ----- ESTILOS PREMIUM ----- */
         * {
@@ -147,6 +149,22 @@
         }
         
         button:active { transform: scale(0.96); }
+        
+        /* Estilos para tarjeta de autor con QR */
+        .author-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.95));
+            border-radius: 1.5rem;
+            transition: all 0.2s;
+        }
+        .qr-container canvas, .qr-container img {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 12px;
+        }
+        .qr-container canvas:hover, .qr-container img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
     </style>
 </head>
 <body class="p-4 md:p-8 antialiased">
@@ -163,7 +181,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- COLUMNA IZQUIERDA: PUNTOS + CÁLCULO -->
+            <!-- COLUMNA IZQUIERDA: PUNTOS + CÁLCULO + AUTOR QR -->
             <div class="lg:col-span-4 space-y-6">
                 <!-- Tarjeta de puntos -->
                 <div class="glass-card p-6 rounded-2xl">
@@ -209,6 +227,31 @@
                 
                 <!-- Resultado dinámico -->
                 <div id="resultCard"></div>
+                
+                <!-- TARJETA AUTOR + QR (FUNCIONAL) -->
+                <div class="author-card p-5 rounded-2xl shadow-lg border border-gray-200/80 backdrop-blur-sm bg-white/80">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-indigo-100 p-2 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Dr. César A. Carranza Saravia</h3>
+                            <p class="text-xs text-gray-500">Investigador · Métodos Numéricos</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-4 flex-wrap">
+                        <div class="text-sm text-gray-600">
+                            <span class="font-semibold">CTI Vitae:</span> Especialista en análisis numérico<br>
+                            <span class="text-xs">🔍 Escanea el código QR para ver perfil</span>
+                        </div>
+                        <div id="qrcodeContainer" class="qr-container bg-white p-2 rounded-xl shadow-md cursor-pointer" title="Ver perfil CTI Vitae"></div>
+                    </div>
+                    <div class="text-[11px] text-center text-gray-400 mt-3 border-t pt-2">
+                        Método de Lagrange • Implementación interactiva
+                    </div>
+                </div>
             </div>
             
             <!-- COLUMNA DERECHA: GRÁFICO -->
@@ -230,12 +273,12 @@
         </div>
     </div>
 
-    <!-- RADIO FLOTANTE COMPLETA: MULTI-EMISORA + VOLUMEN Y MARCA ROJA EN GRÁFICA (YA IMPLEMENTADO) -->
+    <!-- RADIO FLOTANTE COMPLETA: MULTI-EMISORA + VOLUMEN -->
     <div id="radioWidget" class="radio-orb">
         <div class="radio-header flex justify-between items-center" onclick="toggleRadioPanel()">
             <div class="flex items-center gap-2">
                 <div class="w-2 h-2 bg-green-500 rounded-full blinking-dot"></div>
-                <span class="text-white font-bold text-sm tracking-wide">📻 RADIO FLOATING</span>
+                <span class="text-white font-bold text-sm tracking-wide">📻 RADIO STREAM</span>
                 <span id="radioStationLabelBadge" class="text-[10px] bg-blue-700/70 px-2 py-0.5 rounded-full text-white max-w-[130px] truncate">Zeno FM</span>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300 transition-transform" id="chevronIconRadio" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" /></svg>
@@ -257,7 +300,7 @@
                 </div>
             </div>
             
-            <!-- LISTA DE EMISORAS COMPLETA (5 alternativas + la principal) -->
+            <!-- LISTA DE EMISORAS COMPLETA -->
             <div>
                 <p class="text-[11px] font-bold text-blue-300 uppercase tracking-wide mb-2 flex items-center gap-1">🎶 CAMBIA DE EMISORA</p>
                 <div class="space-y-2 max-h-44 overflow-y-auto custom-scrollbar pr-1">
@@ -284,7 +327,7 @@
     </div>
 
 <script>
-    // ------------------------ 1. LÓGICA LAGRANGE Y GRÁFICA (CON MARCA ROJA CLARA) ------------------------
+    // ------------------------ 1. LÓGICA LAGRANGE Y GRÁFICA ------------------------
     let lagrangeChart = null;
     let puntosData = [
         {x: 1, y: 2.2},
@@ -292,7 +335,6 @@
         {x: 3, y: 5.1}
     ];
     
-    // Para guardar el último valor interpolado rojo
     let lastInterpolatedPoint = null;   // {x, y}
     
     function evaluarLagrange(x, puntos) {
@@ -341,7 +383,6 @@
             document.getElementById('newX').value = '';
             document.getElementById('newY').value = '';
             renderizarListaPuntos();
-            // Borrar marca roja previa para no confundir, se recalc gráfica
             lastInterpolatedPoint = null;
             actualizarGrafica();
         } else {
@@ -379,7 +420,6 @@
         actualizarGrafica(xTarget, yResultado);
     }
     
-    // Función principal de renderizado gráfico con marca roja destacada
     function actualizarGrafica(interpX = null, interpY = null) {
         const ctx = document.getElementById('graficoCanvas').getContext('2d');
         if (lagrangeChart) lagrangeChart.destroy();
@@ -397,7 +437,6 @@
             }
         ];
         
-        // Curva polinomial
         if (puntosData.length >= 2) {
             const xsReales = puntosData.map(p => p.x);
             let minX = Math.min(...xsReales) - 1.2;
@@ -420,7 +459,6 @@
             });
         }
         
-        // ---- MARCA ROJA: primero usar parámetros directos, si no existen usar último guardado ----
         let puntoRojo = null;
         if (interpX !== null && interpY !== null && !isNaN(interpX) && !isNaN(interpY)) {
             puntoRojo = { x: interpX, y: interpY };
@@ -430,14 +468,13 @@
         
         if (puntoRojo !== null && !isNaN(puntoRojo.x) && !isNaN(puntoRojo.y)) {
             datasets.push({
-                label: '🔴 Valor interpolado (resultado)',
+                label: '🔴 Valor interpolado',
                 data: [{ x: puntoRojo.x, y: puntoRojo.y }],
                 backgroundColor: '#ef4444',
                 pointRadius: 12,
                 pointBorderColor: '#ffffff',
                 borderWidth: 2,
-                pointStyle: 'circle',
-                pointShadow: true
+                pointStyle: 'circle'
             });
         }
         
@@ -448,13 +485,7 @@
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => {
-                                return ` (${context.parsed.x.toFixed(4)}, ${context.parsed.y.toFixed(4)})`;
-                            }
-                        }
-                    },
+                    tooltip: { callbacks: { label: (ctx) => ` (${ctx.parsed.x.toFixed(4)}, ${ctx.parsed.y.toFixed(4)})` } },
                     legend: { position: 'top', labels: { font: { size: 11 } } }
                 },
                 scales: {
@@ -465,14 +496,13 @@
         });
     }
     
-    // ------------------------ 2. RADIO CON MULTI-EMISORA Y VOLUMEN ------------------------
+    // ------------------------ 2. RADIO MULTI-EMISORA Y VOLUMEN ------------------------
     const audioRadio = new Audio();
     audioRadio.preload = 'auto';
     let currentRadioUrl = "http://stream.zeno.fm/0k6va3rg8rhvv";
     let currentRadioName = "Zeno FM • Relax";
     let isRadioPlayingState = false;
     
-    // Elementos UI radio
     const playRadioBtn = document.getElementById('playRadioBtn');
     const radioPlayIcon = document.getElementById('radioPlayIconSvg');
     const volumenSlider = document.getElementById('volumenControl');
@@ -509,13 +539,12 @@
                 isRadioPlayingState = true;
                 actualizarInterfazRadio();
             }).catch(e => {
-                console.warn("No se pudo reproducir automáticamente", e);
+                console.warn("Error auto play", e);
                 isRadioPlayingState = false;
                 actualizarInterfazRadio();
             });
         }
         actualizarInterfazRadio();
-        // Resaltar estación activa en la lista
         document.querySelectorAll('.station-card').forEach(card => {
             const stationUrl = card.getAttribute('data-url');
             if (stationUrl === url) {
@@ -544,8 +573,7 @@
                 isRadioPlayingState = true;
                 actualizarInterfazRadio();
             }).catch(err => {
-                console.error("Error al iniciar stream:", err);
-                alert("No se pudo reproducir el stream. Verifica la URL o tu conexión.");
+                alert("No se pudo reproducir el stream. Verifica la URL.");
                 isRadioPlayingState = false;
                 actualizarInterfazRadio();
             });
@@ -563,53 +591,49 @@
         e.stopPropagation();
         const url = this.getAttribute('data-url');
         const name = this.getAttribute('data-name') || this.innerText.trim();
-        if (url) {
-            cambiarEmisora(url, name);
-            // Si la radio está apagada, no la enciende automáticamente pero la deja lista. Opcional: si queremos que empiece a sonar al cambiar, se puede forzar.
-            // Pero mantenemos coherencia: si no está sonando, solo cambia la fuente.
-            if (!isRadioPlayingState) {
-                // Solo cambiamos pre-carga
-                nowPlayingSpan.innerText = `⏸ Listo: ${currentRadioName}`;
-            }
-        }
+        if (url) cambiarEmisora(url, name);
     }
     
     function inicializarRadio() {
         audioRadio.volume = 0.7;
         if (volumenSlider) volumenSlider.value = "0.7";
-        volumenSlider?.addEventListener('input', (e) => {
-            audioRadio.volume = parseFloat(e.target.value);
-        });
+        volumenSlider?.addEventListener('input', (e) => audioRadio.volume = parseFloat(e.target.value));
         audioRadio.src = currentRadioUrl;
         audioRadio.load();
         isRadioPlayingState = false;
         actualizarInterfazRadio();
         asignarEventosEstaciones();
-        audioRadio.onerror = () => {
-            if (isRadioPlayingState) {
-                isRadioPlayingState = false;
-                actualizarInterfazRadio();
-                nowPlayingSpan.innerText = "⚠️ Error en stream";
-            }
-        };
+        audioRadio.onerror = () => { if (isRadioPlayingState) { isRadioPlayingState = false; actualizarInterfazRadio(); } };
     }
     
-    // Panel Collapsible
     let panelExp = true;
     function toggleRadioPanel() {
         const bodyPanel = document.getElementById('radioBodyPanel');
         const chev = document.getElementById('chevronIconRadio');
-        if (panelExp) {
-            bodyPanel.classList.add('collapsed');
-            chev.style.transform = 'rotate(180deg)';
-        } else {
-            bodyPanel.classList.remove('collapsed');
-            chev.style.transform = 'rotate(0deg)';
-        }
+        if (panelExp) { bodyPanel.classList.add('collapsed'); chev.style.transform = 'rotate(180deg)'; }
+        else { bodyPanel.classList.remove('collapsed'); chev.style.transform = 'rotate(0deg)'; }
         panelExp = !panelExp;
     }
     
-    // Vincular funciones globales
+    // ------------------------ 3. QR Y AUTOR ------------------------
+    function generarQR() {
+        const container = document.getElementById('qrcodeContainer');
+        container.innerHTML = '';
+        const qr = new QRCode(container, {
+            text: "https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364",
+            width: 80,
+            height: 80,
+            colorDark: "#1e1e2f",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+        });
+        container.style.cursor = 'pointer';
+        container.addEventListener('click', () => {
+            window.open("https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364", "_blank");
+        });
+    }
+    
+    // Exponer funciones globales
     window.agregarPunto = agregarPunto;
     window.eliminarPunto = eliminarPunto;
     window.calcularInterpolacion = calcularInterpolacion;
@@ -619,9 +643,7 @@
     // Inicialización completa
     renderizarListaPuntos();
     inicializarRadio();
-    setTimeout(() => {
-        asignarEventosEstaciones();
-    }, 200);
+    setTimeout(() => { asignarEventosEstaciones(); generarQR(); }, 200);
 </script>
 </body>
 </html>
