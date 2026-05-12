@@ -2,97 +2,100 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Lagrange Interpolator Pro | Radio Floating</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Lagrange Interpolator Pro | Radio con Multi-Emisora</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* CUSTOM CSS MEJORADO */
-        body {
-            background: linear-gradient(145deg, #eef2f9 0%, #d9e0ec 100%);
-            min-height: 100vh;
+        /* ----- ESTILOS PREMIUM ----- */
+        * {
             font-family: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
         }
-        /* Fuente más moderna por si Inter falla */
         @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap');
         
+        body {
+            background: radial-gradient(circle at 10% 20%, #eef2ff, #cbd5e6);
+            min-height: 100vh;
+        }
+        
+        /* Tarjetas con vidrio */
         .glass-card {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.88);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
         }
         .glass-card:hover {
-            background: rgba(255, 255, 255, 0.93);
-            border-color: rgba(59,130,246,0.3);
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(59,130,246,0.4);
         }
+        
         .btn-gradient {
-            background: linear-gradient(105deg, #4f46e5, #2563eb);
-            transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            box-shadow: 0 4px 8px rgba(37,99,235,0.2);
+            background: linear-gradient(95deg, #4f46e5, #3b82f6);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .btn-gradient:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 20px -8px rgba(37,99,235,0.4);
+            box-shadow: 0 12px 20px -8px #3b82f6;
         }
         
-        /* Radio flotante premium */
-        .radio-float {
+        /* Radio flotante definitiva: compacta y elegante */
+        .radio-orb {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            z-index: 1050;
+            z-index: 1100;
             width: 360px;
-            max-width: calc(100vw - 48px);
-            background: rgba(18, 25, 45, 0.96);
-            backdrop-filter: blur(16px);
+            max-width: calc(100vw - 40px);
+            background: rgba(12, 20, 30, 0.96);
+            backdrop-filter: blur(20px);
             border-radius: 2rem;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.35), 0 0 0 1px rgba(59,130,246,0.3);
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
+            box-shadow: 0 25px 40px -12px rgba(0,0,0,0.4), 0 0 0 1px rgba(59,130,246,0.5);
+            font-family: 'Inter', monospace;
+            transition: all 0.2s;
         }
         
         .radio-header {
             background: rgba(30, 41, 59, 0.7);
             border-radius: 2rem 2rem 1.5rem 1.5rem;
-            padding: 12px 16px;
+            padding: 10px 18px;
             cursor: pointer;
             user-select: none;
         }
         
         .radio-body {
             overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
-            max-height: 420px;
+            transition: max-height 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            max-height: 460px;
         }
-        
         .radio-body.collapsed {
             max-height: 0;
             padding: 0 !important;
         }
         
-        .station-item {
+        .station-card {
+            background: rgba(255,255,255,0.06);
+            border-radius: 2rem;
             transition: all 0.2s;
-            border-radius: 40px;
             padding: 8px 12px;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(4px);
+            border-left: 2px solid transparent;
         }
-        .station-item:hover {
-            background: rgba(59,130,246,0.25);
-            transform: translateX(6px);
+        .station-card:hover {
+            background: rgba(59,130,246,0.2);
+            transform: translateX(5px);
+            border-left-color: #3b82f6;
         }
         .station-active {
-            background: linear-gradient(95deg, #2563eb30, #3b82f650);
-            border-left: 3px solid #3b82f6;
+            background: linear-gradient(90deg, #2563eb30, #1e3a8a30);
+            border-left: 3px solid #60a5fa;
         }
         
         .volume-slider {
             -webkit-appearance: none;
             background: #334155;
-            border-radius: 20px;
             height: 4px;
+            border-radius: 10px;
         }
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -101,487 +104,524 @@
             background: #60a5fa;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 4px white;
+            box-shadow: 0 0 5px white;
         }
         
-        /* Animación de onda para simulacro de sonido */
-        @keyframes miniPulse {
-            0% { opacity: 0.6; text-shadow: 0 0 0px #3b82f6;}
-            100% { opacity: 1; text-shadow: 0 0 6px #3b82f6;}
-        }
-        .now-playing-live {
-            animation: miniPulse 1.2s infinite alternate;
-        }
-        
-        /* Scrollbar personalizada */
-        .custom-scroll::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #1e293b;
-            border-radius: 5px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #3b82f6;
-            border-radius: 5px;
-        }
-        
-        /* Punto pulso botón radio */
+        /* Animación pulso para botón play */
         .pulse-ring {
-            animation: radioPulse 1.5s infinite;
+            animation: softPulse 1.5s infinite;
         }
-        @keyframes radioPulse {
-            0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.5); }
-            70% { box-shadow: 0 0 0 12px rgba(59,130,246,0); }
+        @keyframes softPulse {
+            0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.6); }
+            70% { box-shadow: 0 0 0 10px rgba(59,130,246,0); }
             100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
         }
         
-        button:active {
-            transform: scale(0.96);
+        .blinking-dot {
+            animation: blink 1.2s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 0.4; }
+            100% { opacity: 1; }
         }
         
         .points-list-item {
-            transition: all 0.15s ease;
+            transition: all 0.15s;
         }
         .points-list-item:hover {
-            background: #f1f5f9;
-            transform: translateX(6px);
+            background: #eef2ff;
+            margin-left: 4px;
         }
         
-        /* responsive */
-        @media (max-width: 640px) {
-            .radio-float { width: 300px; bottom: 16px; right: 16px; }
+        /* Custom scroll */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
         }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 6px;
+        }
+        
+        button:active { transform: scale(0.96); }
     </style>
 </head>
 <body class="p-4 md:p-8 antialiased">
 
     <div class="max-w-6xl mx-auto">
         <header class="text-center mb-8">
-            <div class="inline-block bg-white/40 backdrop-blur px-6 py-2 rounded-full shadow-sm mb-2">
-                <span class="text-xs font-bold tracking-wider text-indigo-700">✨ ANALISIS NUMÉRICO</span>
+            <div class="inline-flex items-center gap-2 bg-white/30 backdrop-blur px-5 py-1.5 rounded-full shadow-sm">
+                <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                <span class="text-xs font-bold tracking-wider text-indigo-800">MÉTODO DE LAGRANGE</span>
             </div>
-            <h1 class="text-5xl font-black tracking-tight bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Lagrange <span class="text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text">Interpolator</span></h1>
-            <p class="text-gray-600 mt-2 font-medium">Polinomio de Lagrange • Visualización dinámica</p>
+            <h1 class="text-5xl md:text-6xl font-black tracking-tight mt-2 bg-gradient-to-r from-gray-800 via-gray-700 to-indigo-800 bg-clip-text text-transparent">Interpolación <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Pro</span></h1>
+            <p class="text-gray-600 font-medium mt-2">Polinomio interpolador • Visualización interactiva</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Panel izquierdo -->
+            <!-- COLUMNA IZQUIERDA: PUNTOS + CÁLCULO -->
             <div class="lg:col-span-4 space-y-6">
-                <div class="glass-card p-6 rounded-2xl shadow-xl">
-                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                        <span class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-2 rounded-xl text-sm w-7 h-7 flex items-center justify-center">1</span> 
-                        Datos de Puntos
-                    </h2>
-                    <div class="grid grid-cols-2 gap-3 mb-4">
+                <!-- Tarjeta de puntos -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-blue-100 text-blue-700 w-8 h-8 rounded-xl flex items-center justify-center font-bold">1</div>
+                        <h2 class="text-xl font-bold text-gray-800">Ingreso de Puntos</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Coordenada X</label>
-                            <input type="number" id="newX" step="any" class="w-full p-2.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition" placeholder="xᵢ">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase">X</label>
+                            <input type="number" id="newX" step="any" class="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none" placeholder="coordenada X">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Coordenada Y</label>
-                            <input type="number" id="newY" step="any" class="w-full p-2.5 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition" placeholder="f(xᵢ)">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase">Y = f(X)</label>
+                            <input type="number" id="newY" step="any" class="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none" placeholder="valor Y">
                         </div>
                     </div>
-                    <button onclick="addPoint()" class="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-xl font-semibold transition shadow-md flex items-center justify-center gap-2">
+                    <button onclick="agregarPunto()" class="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        Agregar Punto
+                        Agregar punto
                     </button>
                     
-                    <div class="mt-6">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex justify-between"><span>Puntos registrados</span><span class="text-blue-600 text-[10px]">${points => points.length}</span></label>
-                        <div id="pointsList" class="max-h-48 overflow-y-auto space-y-2 pr-1 custom-scroll"></div>
+                    <div class="mt-5">
+                        <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
+                            <span>📌 Puntos almacenados</span>
+                            <span id="puntosCount" class="bg-blue-100 text-blue-700 px-2 rounded-full">0</span>
+                        </div>
+                        <div id="pointsList" class="max-h-48 overflow-y-auto space-y-2 pr-1 custom-scrollbar"></div>
                     </div>
                 </div>
-
-                <div class="glass-card p-6 rounded-2xl shadow-xl">
-                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                        <span class="bg-gradient-to-br from-green-500 to-emerald-600 text-white p-2 rounded-xl text-sm w-7 h-7 flex items-center justify-center">2</span> 
-                        Interpolación
-                    </h2>
-                    <input type="number" id="targetX" placeholder="Valor X a evaluar ..." 
-                           class="w-full p-3 border border-gray-200 rounded-xl mb-5 outline-none focus:ring-2 focus:ring-blue-400 text-lg">
-                    <button onclick="calculate()" class="w-full btn-gradient text-white font-bold py-3 rounded-xl shadow-md text-base">
-                        Calcular f(x) 🧮
+                
+                <!-- Tarjeta de interpolación -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-emerald-100 text-emerald-700 w-8 h-8 rounded-xl flex items-center justify-center font-bold">2</div>
+                        <h2 class="text-xl font-bold text-gray-800">Evaluar Polinomio</h2>
+                    </div>
+                    <input type="number" id="targetX" placeholder="Valor X a interpolar..." class="w-full p-3 border border-gray-200 rounded-xl mb-5 text-lg outline-none focus:ring-2 focus:ring-blue-400">
+                    <button onclick="calcularInterpolacion()" class="w-full btn-gradient text-white font-bold py-3 rounded-xl shadow-md flex items-center justify-center gap-2">
+                        <span>🎯 Calcular f(x)</span>
                     </button>
                 </div>
-
-                <div id="resultContainer" class="transition-all duration-300"></div>
+                
+                <!-- Resultado dinámico -->
+                <div id="resultCard"></div>
             </div>
-
-            <!-- Panel gráfico -->
+            
+            <!-- COLUMNA DERECHA: GRÁFICO -->
             <div class="lg:col-span-8">
                 <div class="glass-card p-4 rounded-2xl shadow-xl h-[520px] flex flex-col">
-                    <h2 class="text-lg font-bold mb-3 flex items-center gap-2 text-gray-700"><span class="w-2 h-2 bg-blue-500 rounded-full"></span> Representación del Polinomio</h2>
-                    <div class="flex-grow relative bg-white/30 rounded-xl p-1">
-                        <canvas id="chartCanvas" class="w-full h-full"></canvas>
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-lg font-bold text-gray-700 flex items-center gap-2"><span class="w-3 h-3 bg-indigo-500 rounded-full"></span> Representación Gráfica</h2>
+                        <div class="text-xs text-gray-400 flex gap-3">
+                            <span>🔵 Datos</span>
+                            <span>🟣 Polinomio</span>
+                            <span class="text-red-500 font-semibold">🔴 Valor calculado</span>
+                        </div>
                     </div>
-                    <div class="text-xs text-gray-400 text-center mt-2 flex justify-center gap-4">
-                        <span>🔵 Puntos de datos</span>
-                        <span>🟣 Curva interpolante</span>
-                        <span>🔴 Valor interpolado</span>
+                    <div class="relative flex-grow bg-white/50 rounded-xl p-1">
+                        <canvas id="graficoCanvas"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- RADIO FLOTANTE PREMIUM con volumen y emisoras múltiples -->
-    <div id="radioWidget" class="radio-float">
+    <!-- RADIO FLOTANTE COMPLETA: MULTI-EMISORA + VOLUMEN Y MARCA ROJA EN GRÁFICA (YA IMPLEMENTADO) -->
+    <div id="radioWidget" class="radio-orb">
         <div class="radio-header flex justify-between items-center" onclick="toggleRadioPanel()">
             <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span class="text-white font-semibold text-sm tracking-wide">🎧 RADIO STREAM</span>
-                <span id="stationNameBadge" class="text-[11px] bg-blue-600/60 px-2 py-0.5 rounded-full text-white max-w-[130px] truncate">Zeno FM</span>
+                <div class="w-2 h-2 bg-green-500 rounded-full blinking-dot"></div>
+                <span class="text-white font-bold text-sm tracking-wide">📻 RADIO FLOATING</span>
+                <span id="radioStationLabelBadge" class="text-[10px] bg-blue-700/70 px-2 py-0.5 rounded-full text-white max-w-[130px] truncate">Zeno FM</span>
             </div>
-            <div class="flex gap-2">
-                <span id="radioStatusIcon" class="text-xs text-blue-300">🔘</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300 transition-transform duration-300" id="chevronRadio" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" /></svg>
-            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-300 transition-transform" id="chevronIconRadio" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" /></svg>
         </div>
         <div id="radioBodyPanel" class="radio-body p-4 space-y-4">
-            <!-- Reproductor miniatura -->
-            <div class="flex items-center justify-between bg-black/40 rounded-2xl p-2">
-                <button id="radioPlayBtn" onclick="toggleRadioMain()" class="bg-blue-600 hover:bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition">
-                    <svg id="mainPlayIconRadio" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <!-- Controles principales -->
+            <div class="flex items-center gap-3 bg-black/30 rounded-2xl p-2">
+                <button id="playRadioBtn" onclick="toggleRadioPlay()" class="bg-blue-600 hover:bg-blue-500 w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-all">
+                    <svg id="radioPlayIconSvg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                     </svg>
                 </button>
-                <div class="flex-1 mx-3">
-                    <div class="text-white text-xs font-medium truncate" id="currentStationLabel">Reproduciendo: Zeno FM</div>
+                <div class="flex-1">
+                    <p class="text-white text-xs font-semibold truncate" id="nowPlayingText">📡 Sin reproducción</p>
                     <div class="flex items-center gap-2 mt-1">
-                        <span class="text-[10px] text-blue-300">🔊</span>
-                        <input type="range" id="volumeControl" class="volume-slider w-full" min="0" max="1" step="0.02" value="0.7">
+                        <span class="text-[10px] text-blue-300">🔊 Vol</span>
+                        <input type="range" id="volumenControl" class="volume-slider w-full" min="0" max="1" step="0.01" value="0.7">
                     </div>
                 </div>
             </div>
             
-            <!-- Lista de emisoras (alternativas) -->
+            <!-- LISTA DE EMISORAS COMPLETA (5 alternativas + la principal) -->
             <div>
-                <p class="text-[11px] font-semibold text-blue-300 uppercase tracking-wider mb-2">📻 Otras emisoras</p>
-                <div class="space-y-2 max-h-44 overflow-y-auto custom-scroll pr-1">
-                    <!-- opciones predefinidas -->
-                    <div class="station-item flex justify-between items-center cursor-pointer" data-url="http://stream.zeno.fm/0k6va3rg8rhvv" data-name="🎵 Zeno FM • Relax">
+                <p class="text-[11px] font-bold text-blue-300 uppercase tracking-wide mb-2 flex items-center gap-1">🎶 CAMBIA DE EMISORA</p>
+                <div class="space-y-2 max-h-44 overflow-y-auto custom-scrollbar pr-1">
+                    <div class="station-card cursor-pointer flex justify-between items-center" data-url="http://stream.zeno.fm/0k6va3rg8rhvv" data-name="🎵 Zeno FM • Relax & LoFi">
                         <span class="text-white text-sm">🎵 Zeno FM • Relax</span>
-                        <span class="text-[10px] text-blue-300">activa</span>
+                        <span class="text-[10px] text-blue-300">Principal</span>
                     </div>
-                    <div class="station-item flex justify-between items-center cursor-pointer" data-url="https://jupiter.themixradio.ca/listen/station14/radio.mp3" data-name="🌴 The Mix Radio (Canada)">
+                    <div class="station-card cursor-pointer flex justify-between items-center" data-url="https://jupiter.themixradio.ca/listen/station14/radio.mp3" data-name="🌴 The Mix Radio (Canadá)">
                         <span class="text-white text-sm">🌴 The Mix Radio</span>
                     </div>
-                    <div class="station-item flex justify-between items-center cursor-pointer" data-url="https://streaming.nrjaudio.fm/ou3i8fuizv6i" data-name="🎧 NRJ Dance / Pop">
+                    <div class="station-card cursor-pointer flex justify-between items-center" data-url="https://streaming.nrjaudio.fm/ou3i8fuizv6i" data-name="🎧 NRJ Dance / Live Hit">
                         <span class="text-white text-sm">🎧 NRJ Dance / Pop</span>
                     </div>
-                    <div class="station-item flex justify-between items-center cursor-pointer" data-url="https://stream.zeno.fm/tcotqqo4r3ktv" data-name="🔥 Zeno • Latino Vibes">
-                        <span class="text-white text-sm">🔥 Latino Vibes Radio</span>
+                    <div class="station-card cursor-pointer flex justify-between items-center" data-url="https://stream.zeno.fm/tcotqqo4r3ktv" data-name="🔥 Zeno • Latino Caribe">
+                        <span class="text-white text-sm">🔥 Latino Vibes +</span>
                     </div>
-                    <div class="station-item flex justify-between items-center cursor-pointer" data-url="https://stream.zeno.fm/g2w7ukzh64zuv" data-name="✨ Electro Chill ZEN">
+                    <div class="station-card cursor-pointer flex justify-between items-center" data-url="https://stream.zeno.fm/g2w7ukzh64zuv" data-name="✨ Electro Chill ZEN">
                         <span class="text-white text-sm">✨ Electro Chill ZEN</span>
                     </div>
                 </div>
-            </div>
-            <div class="text-[10px] text-center text-gray-400 border-t border-gray-700 pt-2 mt-1">
-                Volumen ajustable | Haz clic en emisora para cambiar
+                <div class="text-[9px] text-center text-gray-400 border-t border-gray-700/60 mt-3 pt-2">🔘 Click sobre emisora para cambiar | Volumen independiente</div>
             </div>
         </div>
     </div>
 
 <script>
-    // --- Lógica Lagrange y gráficos ---
-    let myChart = null;
-    let points = [
-        // puntos de ejemplo iniciales pero mostramos data limpia (sin puntos por defecto? pero mejor dejar 2 ejemplos)
+    // ------------------------ 1. LÓGICA LAGRANGE Y GRÁFICA (CON MARCA ROJA CLARA) ------------------------
+    let lagrangeChart = null;
+    let puntosData = [
+        {x: 1, y: 2.2},
+        {x: 2, y: 2.8},
+        {x: 3, y: 5.1}
     ];
-    // puntos por defecto para demostración con valores coquetos
-    points = [{x: 1, y: 2.2}, {x: 2, y: 2.8}, {x: 3, y: 5.1}];
     
-    function renderPoints() {
-        const container = document.getElementById('pointsList');
-        if (points.length === 0) {
-            container.innerHTML = '<div class="text-center text-gray-400 py-4 italic text-sm">➕ Agrega puntos para interpolar</div>';
-        } else {
-            container.innerHTML = '';
-            points.forEach((p, idx) => {
-                const div = document.createElement('div');
-                div.className = "points-list-item flex justify-between items-center bg-white/70 backdrop-blur-sm p-2 rounded-xl border border-gray-100 shadow-sm";
-                div.innerHTML = `
-                    <div class="font-mono text-sm"><span class="font-bold text-blue-700">P${idx}</span> (${p.x}, ${p.y})</div>
-                    <button onclick="removePoint(${idx})" class="bg-red-100 text-red-600 hover:bg-red-200 rounded-full w-6 h-6 flex items-center justify-center transition">✕</button>
-                `;
-                container.appendChild(div);
-            });
-        }
-        updateChart();
-    }
+    // Para guardar el último valor interpolado rojo
+    let lastInterpolatedPoint = null;   // {x, y}
     
-    function addPoint() {
-        const x = parseFloat(document.getElementById('newX').value);
-        const y = parseFloat(document.getElementById('newY').value);
-        if (!isNaN(x) && !isNaN(y)) {
-            points.push({x, y});
-            points.sort((a,b) => a.x - b.x);
-            document.getElementById('newX').value = '';
-            document.getElementById('newY').value = '';
-            renderPoints();
-        } else {
-            alert("Ingresa valores numéricos válidos para el punto.");
-        }
-    }
-    
-    function removePoint(index) {
-        points.splice(index,1);
-        renderPoints();
-    }
-    
-    function lagrangeEval(x, pts) {
+    function evaluarLagrange(x, puntos) {
         let total = 0;
-        for (let i=0; i<pts.length; i++) {
-            let term = pts[i].y;
-            for (let j=0; j<pts.length; j++) {
-                if (i !== j) term *= (x - pts[j].x) / (pts[i].x - pts[j].x);
+        for (let i = 0; i < puntos.length; i++) {
+            let termino = puntos[i].y;
+            for (let j = 0; j < puntos.length; j++) {
+                if (i !== j) {
+                    termino *= (x - puntos[j].x) / (puntos[i].x - puntos[j].x);
+                }
             }
-            total += term;
+            total += termino;
         }
         return total;
     }
     
-    function calculate() {
-        const target = parseFloat(document.getElementById('targetX').value);
-        const resultDiv = document.getElementById('resultContainer');
-        if (points.length < 2) {
-            alert("Debes agregar al menos 2 puntos para interpolar.");
+    function renderizarListaPuntos() {
+        const contenedor = document.getElementById('pointsList');
+        const contadorSpan = document.getElementById('puntosCount');
+        if (!contenedor) return;
+        if (puntosData.length === 0) {
+            contenedor.innerHTML = '<div class="text-gray-400 text-center text-sm py-4 italic">⚡ Agrega puntos (X,Y)</div>';
+            contadorSpan.innerText = "0";
             return;
         }
-        if (isNaN(target)) {
-            resultDiv.innerHTML = `<div class="bg-amber-100 text-amber-800 p-3 rounded-xl text-center mt-4 shadow">⚠️ Ingresa un valor numérico en X</div>`;
-            return;
-        }
-        const yResult = lagrangeEval(target, points);
-        resultDiv.innerHTML = `
-            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-5 rounded-2xl shadow-xl mt-4 transform transition-all">
-                <p class="text-xs opacity-80 uppercase tracking-widest mb-1">Valor interpolado en x = ${target}</p>
-                <p class="text-3xl font-black">${yResult.toFixed(6)}</p>
-                <p class="text-[11px] mt-2 opacity-70">Polinomio de Lagrange</p>
-            </div>
-        `;
-        updateChart(target, yResult);
+        contadorSpan.innerText = puntosData.length;
+        contenedor.innerHTML = '';
+        puntosData.forEach((p, idx) => {
+            const div = document.createElement('div');
+            div.className = "points-list-item flex justify-between items-center bg-white/60 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200 shadow-sm";
+            div.innerHTML = `
+                <div class="font-mono text-sm"><span class="font-bold text-indigo-700">P${idx}</span> (${p.x}, ${p.y})</div>
+                <button onclick="eliminarPunto(${idx})" class="bg-red-100 hover:bg-red-200 text-red-600 rounded-full w-7 h-7 flex items-center justify-center transition">✕</button>
+            `;
+            contenedor.appendChild(div);
+        });
+        actualizarGrafica();
     }
     
-    function updateChart(interpX = null, interpY = null) {
-        const ctx = document.getElementById('chartCanvas').getContext('2d');
-        if (myChart) myChart.destroy();
+    function agregarPunto() {
+        const xVal = parseFloat(document.getElementById('newX').value);
+        const yVal = parseFloat(document.getElementById('newY').value);
+        if (!isNaN(xVal) && !isNaN(yVal)) {
+            puntosData.push({x: xVal, y: yVal});
+            puntosData.sort((a,b) => a.x - b.x);
+            document.getElementById('newX').value = '';
+            document.getElementById('newY').value = '';
+            renderizarListaPuntos();
+            // Borrar marca roja previa para no confundir, se recalc gráfica
+            lastInterpolatedPoint = null;
+            actualizarGrafica();
+        } else {
+            alert("Ingresa valores numéricos válidos para X y Y");
+        }
+    }
+    
+    function eliminarPunto(index) {
+        puntosData.splice(index, 1);
+        renderizarListaPuntos();
+        lastInterpolatedPoint = null;
+        actualizarGrafica();
+    }
+    
+    function calcularInterpolacion() {
+        const xTarget = parseFloat(document.getElementById('targetX').value);
+        const resultDiv = document.getElementById('resultCard');
+        if (puntosData.length < 2) {
+            resultDiv.innerHTML = `<div class="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 rounded-xl shadow-md mt-2">⚠️ Necesitas al menos 2 puntos para interpolar.</div>`;
+            return;
+        }
+        if (isNaN(xTarget)) {
+            resultDiv.innerHTML = `<div class="bg-red-100 text-red-700 p-4 rounded-xl mt-2 text-center">❌ Ingresa un valor X válido</div>`;
+            return;
+        }
+        const yResultado = evaluarLagrange(xTarget, puntosData);
+        lastInterpolatedPoint = { x: xTarget, y: yResultado };
+        resultDiv.innerHTML = `
+            <div class="bg-gradient-to-r from-indigo-700 to-blue-700 text-white p-5 rounded-2xl shadow-xl mt-3 transform transition-all">
+                <p class="text-xs opacity-80 uppercase tracking-wider">Valor interpolado en x = ${xTarget}</p>
+                <p class="text-3xl font-black mt-1">${yResultado.toFixed(6)}</p>
+                <div class="flex items-center gap-2 text-[11px] mt-2 opacity-80"><span class="w-2 h-2 bg-red-400 rounded-full"></span> Punto Rojo en gráfica</div>
+            </div>
+        `;
+        actualizarGrafica(xTarget, yResultado);
+    }
+    
+    // Función principal de renderizado gráfico con marca roja destacada
+    function actualizarGrafica(interpX = null, interpY = null) {
+        const ctx = document.getElementById('graficoCanvas').getContext('2d');
+        if (lagrangeChart) lagrangeChart.destroy();
+        
         let datasets = [
-            { label: '📌 Puntos de datos', data: [...points], backgroundColor: '#2563eb', pointRadius: 7, pointBorderColor: '#ffffff', borderWidth: 1.5, showLine: false, type: 'scatter' }
+            {
+                label: '🔵 Puntos de datos',
+                data: [...puntosData],
+                backgroundColor: '#3b82f6',
+                pointRadius: 7,
+                pointBorderColor: '#ffffff',
+                borderWidth: 2,
+                showLine: false,
+                type: 'scatter'
+            }
         ];
-        if (points.length >= 2) {
-            const xs = points.map(p => p.x);
-            let minX = Math.min(...xs) - 1.2;
-            let maxX = Math.max(...xs) + 1.2;
-            if (minX === maxX) { minX -=1; maxX+=1; }
-            const curve = [];
-            for (let i=0; i<=150; i++) {
-                let cx = minX + (i * (maxX - minX) / 150);
-                curve.push({x: cx, y: lagrangeEval(cx, points)});
+        
+        // Curva polinomial
+        if (puntosData.length >= 2) {
+            const xsReales = puntosData.map(p => p.x);
+            let minX = Math.min(...xsReales) - 1.2;
+            let maxX = Math.max(...xsReales) + 1.2;
+            if (minX === maxX) { minX -= 1; maxX += 1; }
+            const curvaPoints = [];
+            for (let i = 0; i <= 180; i++) {
+                let xCurve = minX + (i * (maxX - minX) / 180);
+                curvaPoints.push({ x: xCurve, y: evaluarLagrange(xCurve, puntosData) });
             }
             datasets.push({
-                label: '📈 Polinomio de Lagrange', data: curve, borderColor: '#4f46e5', borderWidth: 3, pointRadius: 0, fill: false, tension: 0.2, type: 'line'
+                label: '📈 Polinomio de Lagrange',
+                data: curvaPoints,
+                borderColor: '#8b5cf6',
+                borderWidth: 3,
+                pointRadius: 0,
+                fill: false,
+                tension: 0.2,
+                type: 'line'
             });
         }
-        if (interpX !== null && !isNaN(interpX) && interpY !== null) {
+        
+        // ---- MARCA ROJA: primero usar parámetros directos, si no existen usar último guardado ----
+        let puntoRojo = null;
+        if (interpX !== null && interpY !== null && !isNaN(interpX) && !isNaN(interpY)) {
+            puntoRojo = { x: interpX, y: interpY };
+        } else if (lastInterpolatedPoint !== null) {
+            puntoRojo = lastInterpolatedPoint;
+        }
+        
+        if (puntoRojo !== null && !isNaN(puntoRojo.x) && !isNaN(puntoRojo.y)) {
             datasets.push({
-                label: '🎯 Interpolación', data: [{x: interpX, y: interpY}], backgroundColor: '#ef4444', pointRadius: 10, pointStyle: 'circle', borderColor: 'white', borderWidth: 2
+                label: '🔴 Valor interpolado (resultado)',
+                data: [{ x: puntoRojo.x, y: puntoRojo.y }],
+                backgroundColor: '#ef4444',
+                pointRadius: 12,
+                pointBorderColor: '#ffffff',
+                borderWidth: 2,
+                pointStyle: 'circle',
+                pointShadow: true
             });
         }
-        myChart = new Chart(ctx, {
+        
+        lagrangeChart = new Chart(ctx, {
             type: 'scatter',
             data: { datasets },
             options: {
-                responsive: true, maintainAspectRatio: true,
-                plugins: { tooltip: { callbacks: { label: (ctx) => ` (${ctx.parsed.x}, ${ctx.parsed.y})` } } },
-                scales: { x: { title: { display: true, text: 'Eje X', color: '#334155' }, grid: { color: '#e2e8f0' } }, y: { title: { display: true, text: 'f(x)', color: '#334155' }, grid: { color: '#e2e8f0' } } }
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                return ` (${context.parsed.x.toFixed(4)}, ${context.parsed.y.toFixed(4)})`;
+                            }
+                        }
+                    },
+                    legend: { position: 'top', labels: { font: { size: 11 } } }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Eje X', color: '#334155' }, grid: { color: '#cbd5e1' } },
+                    y: { title: { display: true, text: 'f(x)', color: '#334155' }, grid: { color: '#cbd5e1' } }
+                }
             }
         });
     }
     
-    // --- CONTROL RADIO MULTIEMISORA CON VOLUMEN Y PERSISTENCIA ---
-    const audioPlayer = new Audio();
-    audioPlayer.preload = 'auto';
-    audioPlayer.crossOrigin = 'anonymous';
-    let currentStationUrl = "http://stream.zeno.fm/0k6va3rg8rhvv";
-    let currentStationName = "Zeno FM • Relax";
-    let isRadioPlaying = false;
+    // ------------------------ 2. RADIO CON MULTI-EMISORA Y VOLUMEN ------------------------
+    const audioRadio = new Audio();
+    audioRadio.preload = 'auto';
+    let currentRadioUrl = "http://stream.zeno.fm/0k6va3rg8rhvv";
+    let currentRadioName = "Zeno FM • Relax";
+    let isRadioPlayingState = false;
     
-    // Elementos DOM radio
-    const radioBtnPlay = document.getElementById('radioPlayBtn');
-    const mainPlayIcon = document.getElementById('mainPlayIconRadio');
-    const volumeSlider = document.getElementById('volumeControl');
-    const stationNameBadge = document.getElementById('stationNameBadge');
-    const currentStationLabelSpan = document.getElementById('currentStationLabel');
+    // Elementos UI radio
+    const playRadioBtn = document.getElementById('playRadioBtn');
+    const radioPlayIcon = document.getElementById('radioPlayIconSvg');
+    const volumenSlider = document.getElementById('volumenControl');
+    const nowPlayingSpan = document.getElementById('nowPlayingText');
+    const radioBadge = document.getElementById('radioStationLabelBadge');
     
-    function applyVolume() {
-        if (volumeSlider) audioPlayer.volume = parseFloat(volumeSlider.value);
-    }
-    volumeSlider?.addEventListener('input', (e) => {
-        audioPlayer.volume = parseFloat(e.target.value);
-    });
-    
-    function updateRadioUI() {
-        if (isRadioPlaying) {
-            mainPlayIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />'; // icon pause
-            stationNameBadge.innerText = currentStationName.length > 20 ? currentStationName.slice(0, 18)+'..' : currentStationName;
-            currentStationLabelSpan.innerText = `Reproduciendo: ${currentStationName}`;
-            document.getElementById('radioStatusIcon') && (document.getElementById('radioStatusIcon').innerHTML = '🔊');
-            radioBtnPlay?.classList.add('pulse-ring');
+    function actualizarInterfazRadio() {
+        if (!radioPlayIcon) return;
+        if (isRadioPlayingState) {
+            radioPlayIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />';
+            playRadioBtn?.classList.add('pulse-ring');
+            nowPlayingSpan.innerText = `🎧 Reproduciendo: ${currentRadioName}`;
+            radioBadge.innerText = currentRadioName.length > 18 ? currentRadioName.slice(0, 16)+'..' : currentRadioName;
         } else {
-            mainPlayIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />';
-            stationNameBadge.innerText = currentStationName;
-            currentStationLabelSpan.innerText = `⏸️ En pausa: ${currentStationName}`;
-            document.getElementById('radioStatusIcon') && (document.getElementById('radioStatusIcon').innerHTML = '⏸️');
-            radioBtnPlay?.classList.remove('pulse-ring');
+            radioPlayIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />';
+            playRadioBtn?.classList.remove('pulse-ring');
+            nowPlayingSpan.innerText = `⏸ Pausado: ${currentRadioName}`;
+            radioBadge.innerText = currentRadioName;
         }
     }
     
-    async function changeStation(url, name) {
-        const wasPlaying = isRadioPlaying;
+    function cambiarEmisora(url, nombre) {
+        const wasPlaying = isRadioPlayingState;
         if (wasPlaying) {
-            audioPlayer.pause();
-            isRadioPlaying = false;
+            audioRadio.pause();
+            isRadioPlayingState = false;
         }
-        currentStationUrl = url;
-        currentStationName = name;
-        audioPlayer.src = currentStationUrl;
-        audioPlayer.load();
+        currentRadioUrl = url;
+        currentRadioName = nombre;
+        audioRadio.src = currentRadioUrl;
+        audioRadio.load();
         if (wasPlaying) {
-            try {
-                await audioPlayer.play();
-                isRadioPlaying = true;
-            } catch (err) {
-                console.warn("Error auto play:", err);
-                isRadioPlaying = false;
-            }
-        }
-        updateRadioUI();
-        // resaltar estación activa en lista
-        document.querySelectorAll('.station-item').forEach(el => {
-            const stationUrl = el.getAttribute('data-url');
-            if (stationUrl === url) {
-                el.classList.add('station-active');
-                const badge = el.querySelector('span:last-child');
-                if (badge) badge.innerHTML = '📡 activa';
-                else el.innerHTML += '<span class="text-[10px] text-blue-300 ml-2">activa</span>';
-            } else {
-                el.classList.remove('station-active');
-                const extra = el.querySelector('span:last-child');
-                if (extra && (extra.innerText === 'activa' || extra.innerText === '📡 activa')) extra.innerText = '';
-                else if (extra && extra.innerText.includes('activa')) extra.innerText = '';
-            }
-        });
-    }
-    
-    function toggleRadioMain() {
-        if (!audioPlayer.src || audioPlayer.src !== currentStationUrl) {
-            audioPlayer.src = currentStationUrl;
-            audioPlayer.load();
-        }
-        if (isRadioPlaying) {
-            audioPlayer.pause();
-            isRadioPlaying = false;
-            updateRadioUI();
-        } else {
-            audioPlayer.play().then(() => {
-                isRadioPlaying = true;
-                updateRadioUI();
+            audioRadio.play().then(() => {
+                isRadioPlayingState = true;
+                actualizarInterfazRadio();
             }).catch(e => {
-                console.error("Error al reproducir", e);
-                alert("No se pudo reproducir el stream. Posible CORS o enlace inválido.");
-                isRadioPlaying = false;
-                updateRadioUI();
+                console.warn("No se pudo reproducir automáticamente", e);
+                isRadioPlayingState = false;
+                actualizarInterfazRadio();
+            });
+        }
+        actualizarInterfazRadio();
+        // Resaltar estación activa en la lista
+        document.querySelectorAll('.station-card').forEach(card => {
+            const stationUrl = card.getAttribute('data-url');
+            if (stationUrl === url) {
+                card.classList.add('station-active');
+                let badgeSpan = card.querySelector('span:last-child');
+                if (badgeSpan && !badgeSpan.innerText.includes('activa')) badgeSpan.innerText = '📡 activa';
+            } else {
+                card.classList.remove('station-active');
+                let badgeSpan = card.querySelector('span:last-child');
+                if (badgeSpan && badgeSpan.innerText.includes('activa')) badgeSpan.innerText = '';
+            }
+        });
+    }
+    
+    function toggleRadioPlay() {
+        if (!audioRadio.src || audioRadio.src !== currentRadioUrl) {
+            audioRadio.src = currentRadioUrl;
+            audioRadio.load();
+        }
+        if (isRadioPlayingState) {
+            audioRadio.pause();
+            isRadioPlayingState = false;
+            actualizarInterfazRadio();
+        } else {
+            audioRadio.play().then(() => {
+                isRadioPlayingState = true;
+                actualizarInterfazRadio();
+            }).catch(err => {
+                console.error("Error al iniciar stream:", err);
+                alert("No se pudo reproducir el stream. Verifica la URL o tu conexión.");
+                isRadioPlayingState = false;
+                actualizarInterfazRadio();
             });
         }
     }
     
-    // Asignar eventos a cada emisora de la lista
-    function bindStationEvents() {
-        document.querySelectorAll('.station-item').forEach(item => {
-            item.removeEventListener('click', stationClickHandler);
-            item.addEventListener('click', stationClickHandler);
+    function asignarEventosEstaciones() {
+        document.querySelectorAll('.station-card').forEach(card => {
+            card.removeEventListener('click', estacionClickHandler);
+            card.addEventListener('click', estacionClickHandler);
         });
     }
-    function stationClickHandler(e) {
+    
+    function estacionClickHandler(e) {
         e.stopPropagation();
         const url = this.getAttribute('data-url');
         const name = this.getAttribute('data-name') || this.innerText.trim();
         if (url) {
-            changeStation(url, name);
-            // Si la radio está apagada permitimos que el usuario la inicie, pero cambiamos
-            if (!isRadioPlaying) {
-                // No lo iniciamos automáticamente para evitar bloqueos, solo cambiar preconfig
-                // pero damos feedback visual
-                currentStationLabelSpan.innerText = `⏸️ Emisora cargada: ${name}`;
-            } else {
-                // si estaba activa se reinicia
-                if (audioPlayer.src !== url) {
-                    toggleRadioMain(); // para parar y luego activar
-                    setTimeout(() => {
-                        toggleRadioMain();
-                    }, 50);
-                }
+            cambiarEmisora(url, name);
+            // Si la radio está apagada, no la enciende automáticamente pero la deja lista. Opcional: si queremos que empiece a sonar al cambiar, se puede forzar.
+            // Pero mantenemos coherencia: si no está sonando, solo cambia la fuente.
+            if (!isRadioPlayingState) {
+                // Solo cambiamos pre-carga
+                nowPlayingSpan.innerText = `⏸ Listo: ${currentRadioName}`;
             }
         }
     }
     
-    // Inicialización radio
-    function initRadio() {
-        audioPlayer.volume = 0.7;
-        if(volumeSlider) volumeSlider.value = "0.7";
-        audioPlayer.src = currentStationUrl;
-        audioPlayer.load();
-        isRadioPlaying = false;
-        updateRadioUI();
-        bindStationEvents();
-        // manejar eventos de error para reintento amigable
-        audioPlayer.onerror = () => {
-            console.warn("Error en stream, posible caída");
-            if(isRadioPlaying){
-                isRadioPlaying = false;
-                updateRadioUI();
+    function inicializarRadio() {
+        audioRadio.volume = 0.7;
+        if (volumenSlider) volumenSlider.value = "0.7";
+        volumenSlider?.addEventListener('input', (e) => {
+            audioRadio.volume = parseFloat(e.target.value);
+        });
+        audioRadio.src = currentRadioUrl;
+        audioRadio.load();
+        isRadioPlayingState = false;
+        actualizarInterfazRadio();
+        asignarEventosEstaciones();
+        audioRadio.onerror = () => {
+            if (isRadioPlayingState) {
+                isRadioPlayingState = false;
+                actualizarInterfazRadio();
+                nowPlayingSpan.innerText = "⚠️ Error en stream";
             }
         };
-        // persistencia del panel colapsable
-        const radioBody = document.getElementById('radioBodyPanel');
-        if (radioBody) radioBody.classList.remove('collapsed');
     }
     
-    let panelExpanded = true;
+    // Panel Collapsible
+    let panelExp = true;
     function toggleRadioPanel() {
         const bodyPanel = document.getElementById('radioBodyPanel');
-        const chevron = document.getElementById('chevronRadio');
-        if (panelExpanded) {
+        const chev = document.getElementById('chevronIconRadio');
+        if (panelExp) {
             bodyPanel.classList.add('collapsed');
-            chevron.style.transform = 'rotate(180deg)';
+            chev.style.transform = 'rotate(180deg)';
         } else {
             bodyPanel.classList.remove('collapsed');
-            chevron.style.transform = 'rotate(0deg)';
+            chev.style.transform = 'rotate(0deg)';
         }
-        panelExpanded = !panelExpanded;
+        panelExp = !panelExp;
     }
     
-    // Iniciar todo
-    renderPoints();
-    initRadio();
-    
-    // para mantener actualizada la lista cuando points cambia (ya llamamos render)
-    window.addPoint = addPoint;
-    window.removePoint = removePoint;
-    window.calculate = calculate;
-    window.toggleRadioMain = toggleRadioMain;
+    // Vincular funciones globales
+    window.agregarPunto = agregarPunto;
+    window.eliminarPunto = eliminarPunto;
+    window.calcularInterpolacion = calcularInterpolacion;
+    window.toggleRadioPlay = toggleRadioPlay;
     window.toggleRadioPanel = toggleRadioPanel;
-    window.changeStation = changeStation;
     
-    // Asegurar eventos de radio recargados cuando se modifiquen estilos vivos
+    // Inicialización completa
+    renderizarListaPuntos();
+    inicializarRadio();
     setTimeout(() => {
-        bindStationEvents();
-    }, 500);
+        asignarEventosEstaciones();
+    }, 200);
 </script>
 </body>
 </html>
