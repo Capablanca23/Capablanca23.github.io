@@ -3,46 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Lagrange Interpolator Pro | Radio Multi-Emisora + Autor</title>
+    <title>Interpolación Lagrange - Dr. Ronald Rodriguez</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- QR Code Generator Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <!-- Fuentes -->
     <style>
-        /* ----- ESTILOS PREMIUM ----- */
-        * {
-            font-family: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
-        }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,700;1,400&display=swap');
         
-        body {
-            background: radial-gradient(circle at 10% 20%, #eef2ff, #cbd5e6);
-            min-height: 100vh;
-        }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(145deg, #f0f4fa 0%, #e2e8f0 100%); min-height: 100vh; }
         
-        /* Tarjetas con vidrio */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.5);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .glass-card:hover {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: rgba(59,130,246,0.4);
-        }
-        
-        .btn-gradient {
-            background: linear-gradient(95deg, #4f46e5, #3b82f6);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 20px -8px #3b82f6;
-        }
-        
-        /* Radio flotante definitiva: compacta y elegante */
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+        /* Estilos para radio flotante */
         .radio-orb {
             position: fixed;
             bottom: 24px;
@@ -54,7 +33,6 @@
             backdrop-filter: blur(20px);
             border-radius: 2rem;
             box-shadow: 0 25px 40px -12px rgba(0,0,0,0.4), 0 0 0 1px rgba(59,130,246,0.5);
-            font-family: 'Inter', monospace;
             transition: all 0.2s;
         }
         
@@ -109,7 +87,6 @@
             box-shadow: 0 0 5px white;
         }
         
-        /* Animación pulso para botón play */
         .pulse-ring {
             animation: softPulse 1.5s infinite;
         }
@@ -127,15 +104,6 @@
             100% { opacity: 1; }
         }
         
-        .points-list-item {
-            transition: all 0.15s;
-        }
-        .points-list-item:hover {
-            background: #eef2ff;
-            margin-left: 4px;
-        }
-        
-        /* Custom scroll */
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
         }
@@ -150,126 +118,100 @@
         
         button:active { transform: scale(0.96); }
         
-        /* Estilos para tarjeta de autor con QR */
-        .author-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.95));
-            border-radius: 1.5rem;
-            transition: all 0.2s;
-        }
-        .qr-container canvas, .qr-container img {
-            cursor: pointer;
+        .qr-hover-effect {
             transition: transform 0.2s, box-shadow 0.2s;
-            border-radius: 12px;
         }
-        .qr-container canvas:hover, .qr-container img:hover {
+        .qr-hover-effect:hover {
             transform: scale(1.02);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
         }
     </style>
 </head>
-<body class="p-4 md:p-8 antialiased">
+<body>
 
-    <div class="max-w-6xl mx-auto">
-        <header class="text-center mb-8">
-            <div class="inline-flex items-center gap-2 bg-white/30 backdrop-blur px-5 py-1.5 rounded-full shadow-sm">
-                <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
-                <span class="text-xs font-bold tracking-wider text-indigo-800">MÉTODO DE LAGRANGE</span>
+<div id="app" class="min-h-screen flex flex-col items-center p-4 pb-32">
+    
+    <!-- SECCIÓN DEL AUTOR (QR y Datos) - AL INICIO -->
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden mb-6 transform transition-all hover:shadow-2xl animate-fade-in" style="animation-delay: 0.1s;">
+        <div class="bg-gradient-to-r from-blue-800 to-indigo-900 p-6 flex flex-col items-center text-center relative">
+            
+            <!-- Contenedor del QR (Clickeable) -->
+            <div class="relative group cursor-pointer mb-4" title="Ir al perfil CTI Vitae">
+                <div class="bg-white p-2 rounded-xl shadow-lg transform transition-transform group-hover:scale-105 qr-hover-effect">
+                    <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank">
+                        <!-- QR generado dinámicamente con la URL del perfil CTI -->
+                        <img id="authorQr" 
+                             src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fctivitae.concytec.gob.pe%2FappDirectorioCTI%2FVerDatosInvestigador.do%3Fid_investigador%3D0015364" 
+                             alt="QR Code CTI Vitae" 
+                             class="w-32 h-32 object-contain rounded-lg">
+                    </a>
+                </div>
+                <div class="absolute inset-x-0 -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-light">
+                    Toca para visitar perfil
+                </div>
             </div>
-            <h1 class="text-5xl md:text-6xl font-black tracking-tight mt-2 bg-gradient-to-r from-gray-800 via-gray-700 to-indigo-800 bg-clip-text text-transparent">Interpolación <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Pro</span></h1>
-            <p class="text-gray-600 font-medium mt-2">Polinomio interpolador • Visualización interactiva</p>
-        </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            <!-- COLUMNA IZQUIERDA: PUNTOS + CÁLCULO + AUTOR QR -->
-            <div class="lg:col-span-4 space-y-6">
-                <!-- Tarjeta de puntos -->
-                <div class="glass-card p-6 rounded-2xl">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="bg-blue-100 text-blue-700 w-8 h-8 rounded-xl flex items-center justify-center font-bold">1</div>
-                        <h2 class="text-xl font-bold text-gray-800">Ingreso de Puntos</h2>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase">X</label>
-                            <input type="number" id="newX" step="any" class="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none" placeholder="coordenada X">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase">Y = f(X)</label>
-                            <input type="number" id="newY" step="any" class="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-400 outline-none" placeholder="valor Y">
-                        </div>
-                    </div>
-                    <button onclick="agregarPunto()" class="w-full mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                        Agregar punto
-                    </button>
-                    
-                    <div class="mt-5">
-                        <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
-                            <span>📌 Puntos almacenados</span>
-                            <span id="puntosCount" class="bg-blue-100 text-blue-700 px-2 rounded-full">0</span>
-                        </div>
-                        <div id="pointsList" class="max-h-48 overflow-y-auto space-y-2 pr-1 custom-scrollbar"></div>
-                    </div>
-                </div>
-                
-                <!-- Tarjeta de interpolación -->
-                <div class="glass-card p-6 rounded-2xl">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="bg-emerald-100 text-emerald-700 w-8 h-8 rounded-xl flex items-center justify-center font-bold">2</div>
-                        <h2 class="text-xl font-bold text-gray-800">Evaluar Polinomio</h2>
-                    </div>
-                    <input type="number" id="targetX" placeholder="Valor X a interpolar..." class="w-full p-3 border border-gray-200 rounded-xl mb-5 text-lg outline-none focus:ring-2 focus:ring-blue-400">
-                    <button onclick="calcularInterpolacion()" class="w-full btn-gradient text-white font-bold py-3 rounded-xl shadow-md flex items-center justify-center gap-2">
-                        <span>🎯 Calcular f(x)</span>
-                    </button>
-                </div>
-                
-                <!-- Resultado dinámico -->
-                <div id="resultCard"></div>
-                
-                <!-- TARJETA AUTOR + QR (FUNCIONAL) -->
-                <div class="author-card p-5 rounded-2xl shadow-lg border border-gray-200/80 backdrop-blur-sm bg-white/80">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="bg-indigo-100 p-2 rounded-full">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-gray-800">Dr. César A. Carranza Saravia</h3>
-                            <p class="text-xs text-gray-500">Investigador · Métodos Numéricos</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between gap-4 flex-wrap">
-                        <div class="text-sm text-gray-600">
-                            <span class="font-semibold">CTI Vitae:</span> Especialista en análisis numérico<br>
-                            <span class="text-xs">🔍 Escanea el código QR para ver perfil</span>
-                        </div>
-                        <div id="qrcodeContainer" class="qr-container bg-white p-2 rounded-xl shadow-md cursor-pointer" title="Ver perfil CTI Vitae"></div>
-                    </div>
-                    <div class="text-[11px] text-center text-gray-400 mt-3 border-t pt-2">
-                        Método de Lagrange • Implementación interactiva
-                    </div>
-                </div>
+            <!-- Datos del Autor -->
+            <h2 class="text-white font-bold text-xl font-serif tracking-wide">Dr. Ronald F. Rodriguez Espinoza</h2>
+            <p class="text-blue-200 text-sm font-medium mt-1">CTI Vitae - CONCYTEC | Especialista en Métodos Numéricos</p>
+            <p class="text-blue-300 text-xs mt-2">Investigador · Análisis Computacional</p>
+        </div>
+    </div>
+
+    <!-- CALCULADORA DE INTERPOLACIÓN -->
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 animate-fade-in" style="animation-delay: 0.2s;">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Interpolación de Lagrange</h1>
+        <p class="text-gray-500 text-sm mb-6 text-center">Ingrese los puntos (x, y) conocidos y el valor a interpolar.</p>
+
+        <!-- Ingreso de Puntos -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-gray-700 text-xs font-bold mb-1">Valor X</label>
+                <input type="number" id="inputX" step="any" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: 1">
             </div>
-            
-            <!-- COLUMNA DERECHA: GRÁFICO -->
-            <div class="lg:col-span-8">
-                <div class="glass-card p-4 rounded-2xl shadow-xl h-[520px] flex flex-col">
-                    <div class="flex justify-between items-center mb-2">
-                        <h2 class="text-lg font-bold text-gray-700 flex items-center gap-2"><span class="w-3 h-3 bg-indigo-500 rounded-full"></span> Representación Gráfica</h2>
-                        <div class="text-xs text-gray-400 flex gap-3">
-                            <span>🔵 Datos</span>
-                            <span>🟣 Polinomio</span>
-                            <span class="text-red-500 font-semibold">🔴 Valor calculado</span>
-                        </div>
-                    </div>
-                    <div class="relative flex-grow bg-white/50 rounded-xl p-1">
-                        <canvas id="graficoCanvas"></canvas>
-                    </div>
-                </div>
+            <div>
+                <label class="block text-gray-700 text-xs font-bold mb-1">Valor Y</label>
+                <input type="number" id="inputY" step="any" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: 2">
             </div>
+        </div>
+        
+        <button onclick="addPoint()" class="w-full mb-6 bg-gray-100 hover:bg-gray-200 text-blue-700 font-semibold py-2 px-4 rounded border border-blue-200 transition-colors flex justify-center items-center">
+            <span class="text-xl mr-2">+</span> Agregar Punto
+        </button>
+
+        <!-- Tabla de Puntos -->
+        <div class="mb-6 overflow-hidden rounded-lg border border-gray-200" id="pointsTableContainer" style="display:none;">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="py-2 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">X</th>
+                        <th class="py-2 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Y</th>
+                        <th class="py-2 px-4 text-right"></th>
+                    </tr>
+                </thead>
+                <tbody id="pointsList" class="divide-y divide-gray-200">
+                    <!-- Los puntos se agregan aquí -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sección de Cálculo -->
+        <div class="border-t border-gray-200 pt-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Valor a interpolar (x)</label>
+            <div class="flex gap-2">
+                <input type="number" id="targetX" step="any" class="shadow border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 text-lg" placeholder="¿Qué valor de Y buscas?">
+                <button onclick="calculate()" class="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-2 px-6 rounded shadow-md transform transition-transform active:scale-95">
+                    Calcular
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultado -->
+        <div id="resultContainer" class="mt-6"></div>
+        
+        <!-- Gráfica -->
+        <div class="mt-8">
+            <canvas id="chartCanvas"></canvas>
         </div>
     </div>
 
@@ -300,7 +242,7 @@
                 </div>
             </div>
             
-            <!-- LISTA DE EMISORAS COMPLETA -->
+            <!-- LISTA DE EMISORAS COMPLETA (5 emisoras) -->
             <div>
                 <p class="text-[11px] font-bold text-blue-300 uppercase tracking-wide mb-2 flex items-center gap-1">🎶 CAMBIA DE EMISORA</p>
                 <div class="space-y-2 max-h-44 overflow-y-auto custom-scrollbar pr-1">
@@ -321,182 +263,262 @@
                         <span class="text-white text-sm">✨ Electro Chill ZEN</span>
                     </div>
                 </div>
-                <div class="text-[9px] text-center text-gray-400 border-t border-gray-700/60 mt-3 pt-2">🔘 Click sobre emisora para cambiar | Volumen independiente</div>
+                <div class="text-[9px] text-center text-gray-400 border-t border-gray-700/60 mt-3 pt-2">🔘 Click sobre emisora para cambiar | Volumen ajustable</div>
             </div>
         </div>
     </div>
 
+</div>
+
 <script>
-    // ------------------------ 1. LÓGICA LAGRANGE Y GRÁFICA ------------------------
-    let lagrangeChart = null;
-    let puntosData = [
+    // ==========================================
+    // 1. ESTADO DE LA APLICACIÓN - LAGRANGE
+    // ==========================================
+    let points = [
         {x: 1, y: 2.2},
         {x: 2, y: 2.8},
         {x: 3, y: 5.1}
     ];
-    
-    let lastInterpolatedPoint = null;   // {x, y}
-    
-    function evaluarLagrange(x, puntos) {
-        let total = 0;
-        for (let i = 0; i < puntos.length; i++) {
-            let termino = puntos[i].y;
-            for (let j = 0; j < puntos.length; j++) {
+    let myChart = null;
+    let lastInterpolatedPoint = null;
+
+    // ==========================================
+    // LÓGICA DE LAGRANGE
+    // ==========================================
+    function calculateLagrange(x, dataPoints) {
+        let result = 0;
+        const n = dataPoints.length;
+        for (let i = 0; i < n; i++) {
+            let term = dataPoints[i].y;
+            for (let j = 0; j < n; j++) {
                 if (i !== j) {
-                    termino *= (x - puntos[j].x) / (puntos[i].x - puntos[j].x);
+                    term *= (x - dataPoints[j].x) / (dataPoints[i].x - dataPoints[j].x);
                 }
             }
-            total += termino;
+            result += term;
         }
-        return total;
+        return result;
     }
-    
-    function renderizarListaPuntos() {
-        const contenedor = document.getElementById('pointsList');
-        const contadorSpan = document.getElementById('puntosCount');
-        if (!contenedor) return;
-        if (puntosData.length === 0) {
-            contenedor.innerHTML = '<div class="text-gray-400 text-center text-sm py-4 italic">⚡ Agrega puntos (X,Y)</div>';
-            contadorSpan.innerText = "0";
+
+    // ==========================================
+    // MANEJO DE PUNTOS
+    // ==========================================
+    function addPoint() {
+        const xInput = document.getElementById('inputX');
+        const yInput = document.getElementById('inputY');
+        
+        const x = parseFloat(xInput.value);
+        const y = parseFloat(yInput.value);
+
+        if (isNaN(x) || isNaN(y)) {
+            alert("Por favor ingrese valores numéricos válidos.");
             return;
         }
-        contadorSpan.innerText = puntosData.length;
-        contenedor.innerHTML = '';
-        puntosData.forEach((p, idx) => {
-            const div = document.createElement('div');
-            div.className = "points-list-item flex justify-between items-center bg-white/60 backdrop-blur-sm p-2.5 rounded-xl border border-gray-200 shadow-sm";
-            div.innerHTML = `
-                <div class="font-mono text-sm"><span class="font-bold text-indigo-700">P${idx}</span> (${p.x}, ${p.y})</div>
-                <button onclick="eliminarPunto(${idx})" class="bg-red-100 hover:bg-red-200 text-red-600 rounded-full w-7 h-7 flex items-center justify-center transition">✕</button>
-            `;
-            contenedor.appendChild(div);
-        });
-        actualizarGrafica();
-    }
-    
-    function agregarPunto() {
-        const xVal = parseFloat(document.getElementById('newX').value);
-        const yVal = parseFloat(document.getElementById('newY').value);
-        if (!isNaN(xVal) && !isNaN(yVal)) {
-            puntosData.push({x: xVal, y: yVal});
-            puntosData.sort((a,b) => a.x - b.x);
-            document.getElementById('newX').value = '';
-            document.getElementById('newY').value = '';
-            renderizarListaPuntos();
-            lastInterpolatedPoint = null;
-            actualizarGrafica();
-        } else {
-            alert("Ingresa valores numéricos válidos para X y Y");
+
+        if (points.some(p => Math.abs(p.x - x) < 0.000001)) {
+            alert("El valor de X ya existe. Los valores de X deben ser únicos.");
+            return;
         }
-    }
-    
-    function eliminarPunto(index) {
-        puntosData.splice(index, 1);
-        renderizarListaPuntos();
+
+        points.push({ x, y });
+        points.sort((a, b) => a.x - b.x);
+
+        xInput.value = '';
+        yInput.value = '';
+        xInput.focus();
+
+        renderPoints();
         lastInterpolatedPoint = null;
-        actualizarGrafica();
+        updateChart();
+        document.getElementById('resultContainer').innerHTML = '';
     }
-    
-    function calcularInterpolacion() {
-        const xTarget = parseFloat(document.getElementById('targetX').value);
-        const resultDiv = document.getElementById('resultCard');
-        if (puntosData.length < 2) {
-            resultDiv.innerHTML = `<div class="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 rounded-xl shadow-md mt-2">⚠️ Necesitas al menos 2 puntos para interpolar.</div>`;
-            return;
-        }
-        if (isNaN(xTarget)) {
-            resultDiv.innerHTML = `<div class="bg-red-100 text-red-700 p-4 rounded-xl mt-2 text-center">❌ Ingresa un valor X válido</div>`;
-            return;
-        }
-        const yResultado = evaluarLagrange(xTarget, puntosData);
-        lastInterpolatedPoint = { x: xTarget, y: yResultado };
-        resultDiv.innerHTML = `
-            <div class="bg-gradient-to-r from-indigo-700 to-blue-700 text-white p-5 rounded-2xl shadow-xl mt-3 transform transition-all">
-                <p class="text-xs opacity-80 uppercase tracking-wider">Valor interpolado en x = ${xTarget}</p>
-                <p class="text-3xl font-black mt-1">${yResultado.toFixed(6)}</p>
-                <div class="flex items-center gap-2 text-[11px] mt-2 opacity-80"><span class="w-2 h-2 bg-red-400 rounded-full"></span> Punto Rojo en gráfica</div>
-            </div>
-        `;
-        actualizarGrafica(xTarget, yResultado);
+
+    function removePoint(index) {
+        points.splice(index, 1);
+        renderPoints();
+        lastInterpolatedPoint = null;
+        updateChart();
+        document.getElementById('resultContainer').innerHTML = '';
     }
-    
-    function actualizarGrafica(interpX = null, interpY = null) {
-        const ctx = document.getElementById('graficoCanvas').getContext('2d');
-        if (lagrangeChart) lagrangeChart.destroy();
+
+    function renderPoints() {
+        const list = document.getElementById('pointsList');
+        const container = document.getElementById('pointsTableContainer');
         
-        let datasets = [
+        list.innerHTML = '';
+        
+        if (points.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+        
+        container.style.display = 'block';
+
+        points.forEach((p, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="py-2 px-4 text-gray-800">${p.x}</td>
+                <td class="py-2 px-4 text-gray-800">${p.y}</td>
+                <td class="py-2 px-4 text-right">
+                    <button onclick="removePoint(${index})" class="text-red-500 hover:text-red-700 font-bold text-sm">Eliminar</button>
+                </td>
+            `;
+            list.appendChild(row);
+        });
+    }
+
+    // ==========================================
+    // CÁLCULO E INTERFAZ
+    // ==========================================
+    function calculate() {
+        const targetInput = document.getElementById('targetX');
+        const valX = parseFloat(targetInput.value);
+        const resultDiv = document.getElementById('resultContainer');
+
+        if (points.length < 2) {
+            resultDiv.innerHTML = `
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded shadow-sm">
+                    <p>Se necesitan al menos 2 puntos para interpolar.</p>
+                </div>`;
+            return;
+        }
+
+        if (isNaN(valX)) {
+            resultDiv.innerHTML = `
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm">
+                    <p>Ingrese un valor X válido.</p>
+                </div>`;
+            return;
+        }
+
+        try {
+            const resultY = calculateLagrange(valX, points);
+            lastInterpolatedPoint = { x: valX, y: resultY };
+            
+            resultDiv.innerHTML = `
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-900 p-6 rounded-xl shadow-lg text-center animate-fade-in">
+                    <p class="text-sm font-medium opacity-75 mb-1">Resultado para x = ${valX}</p>
+                    <p class="text-4xl font-extrabold text-green-700">${resultY.toFixed(6)}</p>
+                    <p class="text-xs text-green-800 mt-2">y = P(${valX})</p>
+                    <div class="flex items-center justify-center gap-2 mt-2"><span class="w-2 h-2 bg-red-500 rounded-full"></span><span class="text-xs">Punto rojo en gráfica</span></div>
+                </div>
+            `;
+            
+            updateChart(valX, resultY);
+
+        } catch (e) {
+            console.error(e);
+            resultDiv.innerHTML = `<p class="text-red-500">Error en el cálculo.</p>`;
+        }
+    }
+
+    // ==========================================
+    // GRÁFICOS (Chart.js) - CON MARCA ROJA CLARA
+    // ==========================================
+    function updateChart(interpolatedX = null, interpolatedY = null) {
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+
+        if (points.length < 2) {
+            if (myChart) myChart.destroy();
+            return;
+        }
+
+        const minX = Math.min(...points.map(p => p.x));
+        const maxX = Math.max(...points.map(p => p.x));
+        const range = maxX - minX;
+        const start = minX - (range * 0.2);
+        const end = maxX + (range * 0.2);
+        const steps = 120;
+
+        const curvePoints = [];
+        for (let i = 0; i <= steps; i++) {
+            const cx = start + (i * (end - start)) / steps;
+            const cy = calculateLagrange(cx, points);
+            curvePoints.push({ x: cx, y: cy });
+        }
+
+        const datasets = [
             {
-                label: '🔵 Puntos de datos',
-                data: [...puntosData],
-                backgroundColor: '#3b82f6',
+                label: '🔵 Puntos Datos',
+                data: points,
+                backgroundColor: 'rgba(59, 130, 246, 1)',
                 pointRadius: 7,
-                pointBorderColor: '#ffffff',
-                borderWidth: 2,
+                pointHoverRadius: 9,
                 showLine: false,
-                type: 'scatter'
-            }
-        ];
-        
-        if (puntosData.length >= 2) {
-            const xsReales = puntosData.map(p => p.x);
-            let minX = Math.min(...xsReales) - 1.2;
-            let maxX = Math.max(...xsReales) + 1.2;
-            if (minX === maxX) { minX -= 1; maxX += 1; }
-            const curvaPoints = [];
-            for (let i = 0; i <= 180; i++) {
-                let xCurve = minX + (i * (maxX - minX) / 180);
-                curvaPoints.push({ x: xCurve, y: evaluarLagrange(xCurve, puntosData) });
-            }
-            datasets.push({
+                order: 2
+            },
+            {
                 label: '📈 Polinomio de Lagrange',
-                data: curvaPoints,
-                borderColor: '#8b5cf6',
-                borderWidth: 3,
+                data: curvePoints,
+                borderColor: 'rgba(79, 70, 229, 0.9)',
+                borderWidth: 2.5,
                 pointRadius: 0,
                 fill: false,
-                tension: 0.2,
-                type: 'line'
-            });
-        }
-        
-        let puntoRojo = null;
-        if (interpX !== null && interpY !== null && !isNaN(interpX) && !isNaN(interpY)) {
-            puntoRojo = { x: interpX, y: interpY };
-        } else if (lastInterpolatedPoint !== null) {
-            puntoRojo = lastInterpolatedPoint;
-        }
-        
-        if (puntoRojo !== null && !isNaN(puntoRojo.x) && !isNaN(puntoRojo.y)) {
-            datasets.push({
-                label: '🔴 Valor interpolado',
-                data: [{ x: puntoRojo.x, y: puntoRojo.y }],
-                backgroundColor: '#ef4444',
-                pointRadius: 12,
-                pointBorderColor: '#ffffff',
-                borderWidth: 2,
-                pointStyle: 'circle'
-            });
-        }
-        
-        lagrangeChart = new Chart(ctx, {
-            type: 'scatter',
-            data: { datasets },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    tooltip: { callbacks: { label: (ctx) => ` (${ctx.parsed.x.toFixed(4)}, ${ctx.parsed.y.toFixed(4)})` } },
-                    legend: { position: 'top', labels: { font: { size: 11 } } }
-                },
-                scales: {
-                    x: { title: { display: true, text: 'Eje X', color: '#334155' }, grid: { color: '#cbd5e1' } },
-                    y: { title: { display: true, text: 'f(x)', color: '#334155' }, grid: { color: '#cbd5e1' } }
-                }
+                type: 'line',
+                tension: 0.3,
+                order: 3
             }
-        });
+        ];
+
+        // Si hay punto interpolado (rojo brillante)
+        if (interpolatedX !== null && !isNaN(interpolatedX) && interpolatedY !== null) {
+            datasets.push({
+                label: '🔴 Valor Interpolado',
+                data: [{x: interpolatedX, y: interpolatedY}],
+                backgroundColor: 'rgba(220, 38, 38, 1)',
+                pointRadius: 10,
+                pointBorderColor: 'white',
+                borderWidth: 2,
+                pointStyle: 'circle',
+                showLine: false,
+                order: 1
+            });
+        } else if (lastInterpolatedPoint !== null) {
+            datasets.push({
+                label: '🔴 Último cálculo',
+                data: [{x: lastInterpolatedPoint.x, y: lastInterpolatedPoint.y}],
+                backgroundColor: 'rgba(220, 38, 38, 1)',
+                pointRadius: 10,
+                pointBorderColor: 'white',
+                borderWidth: 2,
+                pointStyle: 'circle',
+                showLine: false,
+                order: 1
+            });
+        }
+
+        if (myChart) {
+            myChart.data.datasets = datasets;
+            myChart.update();
+        } else {
+            myChart = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `(${context.parsed.x.toFixed(4)}, ${context.parsed.y.toFixed(4)})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { type: 'linear', position: 'bottom', title: { display: true, text: 'X' } },
+                        y: { title: { display: true, text: 'Y' } }
+                    }
+                }
+            });
+        }
     }
-    
-    // ------------------------ 2. RADIO MULTI-EMISORA Y VOLUMEN ------------------------
+
+    // ==========================================
+    // 2. RADIO MULTI-EMISORA Y VOLUMEN
+    // ==========================================
     const audioRadio = new Audio();
     audioRadio.preload = 'auto';
     let currentRadioUrl = "http://stream.zeno.fm/0k6va3rg8rhvv";
@@ -539,12 +561,13 @@
                 isRadioPlayingState = true;
                 actualizarInterfazRadio();
             }).catch(e => {
-                console.warn("Error auto play", e);
+                console.warn("No se pudo reproducir automáticamente", e);
                 isRadioPlayingState = false;
                 actualizarInterfazRadio();
             });
         }
         actualizarInterfazRadio();
+        // Resaltar estación activa
         document.querySelectorAll('.station-card').forEach(card => {
             const stationUrl = card.getAttribute('data-url');
             if (stationUrl === url) {
@@ -573,7 +596,8 @@
                 isRadioPlayingState = true;
                 actualizarInterfazRadio();
             }).catch(err => {
-                alert("No se pudo reproducir el stream. Verifica la URL.");
+                console.error("Error al iniciar stream:", err);
+                alert("No se pudo reproducir el stream. Verifica la URL o tu conexión.");
                 isRadioPlayingState = false;
                 actualizarInterfazRadio();
             });
@@ -597,53 +621,52 @@
     function inicializarRadio() {
         audioRadio.volume = 0.7;
         if (volumenSlider) volumenSlider.value = "0.7";
-        volumenSlider?.addEventListener('input', (e) => audioRadio.volume = parseFloat(e.target.value));
+        volumenSlider?.addEventListener('input', (e) => {
+            audioRadio.volume = parseFloat(e.target.value);
+        });
         audioRadio.src = currentRadioUrl;
         audioRadio.load();
         isRadioPlayingState = false;
         actualizarInterfazRadio();
         asignarEventosEstaciones();
-        audioRadio.onerror = () => { if (isRadioPlayingState) { isRadioPlayingState = false; actualizarInterfazRadio(); } };
+        audioRadio.onerror = () => {
+            if (isRadioPlayingState) {
+                isRadioPlayingState = false;
+                actualizarInterfazRadio();
+                nowPlayingSpan.innerText = "⚠️ Error en stream";
+            }
+        };
     }
     
+    // Panel Collapsible
     let panelExp = true;
     function toggleRadioPanel() {
         const bodyPanel = document.getElementById('radioBodyPanel');
         const chev = document.getElementById('chevronIconRadio');
-        if (panelExp) { bodyPanel.classList.add('collapsed'); chev.style.transform = 'rotate(180deg)'; }
-        else { bodyPanel.classList.remove('collapsed'); chev.style.transform = 'rotate(0deg)'; }
+        if (panelExp) {
+            bodyPanel.classList.add('collapsed');
+            chev.style.transform = 'rotate(180deg)';
+        } else {
+            bodyPanel.classList.remove('collapsed');
+            chev.style.transform = 'rotate(0deg)';
+        }
         panelExp = !panelExp;
     }
     
-    // ------------------------ 3. QR Y AUTOR ------------------------
-    function generarQR() {
-        const container = document.getElementById('qrcodeContainer');
-        container.innerHTML = '';
-        const qr = new QRCode(container, {
-            text: "https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364",
-            width: 80,
-            height: 80,
-            colorDark: "#1e1e2f",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.M
-        });
-        container.style.cursor = 'pointer';
-        container.addEventListener('click', () => {
-            window.open("https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364", "_blank");
-        });
-    }
-    
     // Exponer funciones globales
-    window.agregarPunto = agregarPunto;
-    window.eliminarPunto = eliminarPunto;
-    window.calcularInterpolacion = calcularInterpolacion;
+    window.addPoint = addPoint;
+    window.removePoint = removePoint;
+    window.calculate = calculate;
     window.toggleRadioPlay = toggleRadioPlay;
     window.toggleRadioPanel = toggleRadioPanel;
     
     // Inicialización completa
-    renderizarListaPuntos();
+    renderPoints();
+    updateChart();
     inicializarRadio();
-    setTimeout(() => { asignarEventosEstaciones(); generarQR(); }, 200);
+    setTimeout(() => {
+        asignarEventosEstaciones();
+    }, 200);
 </script>
 </body>
 </html>
