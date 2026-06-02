@@ -21,6 +21,10 @@
         .tab-inactive { border-bottom: 2px solid transparent; color: #4b5563; }
         .tab-inactive:hover { background-color: #f9fafb; border-bottom-color: #94a3b8; }
         .radio-orb { position: fixed; bottom: 24px; right: 24px; z-index: 999; transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
+        .station-list-scroll { max-height: 280px; overflow-y: auto; }
+        .station-list-scroll::-webkit-scrollbar { width: 4px; }
+        .station-list-scroll::-webkit-scrollbar-track { background: #e5e7eb; border-radius: 4px; }
+        .station-list-scroll::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
     </style>
 </head>
 <body class="antialiased">
@@ -119,39 +123,40 @@
     </div>
 </div>
 
-<!-- Reproductor flotante de Radio -->
-<div id="radioContainer" class="radio-orb bg-white text-gray-800 p-3 rounded-full shadow-2xl border border-gray-200 flex items-center gap-2 max-w-sm md:max-w-md overflow-hidden transition-all">
-    <button id="radioToggleButton" onclick="toggleRadioExpand()" class="bg-indigo-700 text-white p-2.5 rounded-full hover:bg-indigo-800 shadow-md transition-transform active:scale-95 flex-shrink-0">
-        📻
-    </button>
-    <div id="radioExpandedPanel" class="flex flex-col w-56 md:w-72 transition-all duration-300">
-        <div id="radioGenresView" class="block">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Música Selecta:</span>
-            <div class="flex gap-1 mt-1">
-                <button onclick="selectGenre('salsa')" class="bg-gray-100 hover:bg-indigo-100 text-xs px-2 py-1 rounded-full">💃 Salsa</button>
-                <button onclick="selectGenre('pop')" class="bg-gray-100 hover:bg-indigo-100 text-xs px-2 py-1 rounded-full">🎵 Pop</button>
-                <button onclick="selectGenre('rock')" class="bg-gray-100 hover:bg-indigo-100 text-xs px-2 py-1 rounded-full">🎸 Rock</button>
-            </div>
+<!-- Reproductor flotante de Radio - CON TODAS LAS EMISORAS ORIGINALES -->
+<div id="radioContainer" class="radio-orb bg-white text-gray-800 p-3 rounded-xl shadow-2xl border border-gray-200 w-80 md:w-96 transition-all">
+    <div class="flex items-center gap-2">
+        <button id="radioToggleButton" onclick="toggleRadioExpand()" class="bg-indigo-700 text-white p-2.5 rounded-full hover:bg-indigo-800 shadow-md transition-transform active:scale-95 flex-shrink-0">
+            📻
+        </button>
+        <div class="flex-1">
+            <div id="radioStatus" class="text-xs text-gray-500 truncate">Radio Digital - Selecciona género</div>
+            <div id="currentStationName" class="text-sm font-semibold text-gray-800 truncate">Sin emisora</div>
         </div>
-        <div id="radioPlayerView" class="hidden flex-col">
-            <div class="flex justify-between items-center">
-                <span id="currentGenreLabel" class="text-[11px] font-bold text-indigo-600">SALSA</span>
-                <button onclick="backToGenres()" class="text-[9px] text-gray-400 hover:text-red-500">◀ Volver</button>
-            </div>
-            <select id="stationSelect" onchange="changeStation()" class="text-xs p-1 mt-1 bg-gray-50 border rounded-lg w-full"></select>
-            <div class="flex items-center gap-2 mt-2">
-                <span id="volIcon">🔊</span>
-                <input id="volSlider" type="range" min="0" max="1" step="0.05" value="0.6" class="w-full h-1 accent-indigo-600">
-            </div>
-            <audio id="radioAudio" class="hidden"></audio>
-            <div id="radioStatus" class="text-[9px] text-gray-400 mt-1 truncate">Selecciona estación</div>
-            <div class="flex gap-2 mt-1 justify-center">
-                <button onclick="prevStationRadio()" class="text-blue-600 text-xs">⏮</button>
-                <button onclick="togglePlayRadio()" class="bg-indigo-100 px-2 rounded-full text-xs font-bold">▶️</button>
-                <button onclick="nextStationRadio()" class="text-blue-600 text-xs">⏭</button>
-            </div>
+        <button onclick="togglePlayRadio()" class="bg-green-600 text-white p-2 rounded-full hover:bg-green-700 w-9 h-9 flex items-center justify-center">
+            <span id="playPauseIcon">▶️</span>
+        </button>
+    </div>
+    
+    <div id="radioExpandedPanel" class="hidden mt-3 border-t pt-3">
+        <div class="flex gap-2 mb-3">
+            <button onclick="selectGenre('salsa')" class="flex-1 bg-red-100 hover:bg-red-200 text-red-700 text-sm py-1.5 rounded-lg transition">💃 Salsa</button>
+            <button onclick="selectGenre('pop')" class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm py-1.5 rounded-lg transition">🎵 Pop</button>
+            <button onclick="selectGenre('rock')" class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 text-sm py-1.5 rounded-lg transition">🎸 Rock</button>
+        </div>
+        
+        <div class="mb-3">
+            <div class="text-xs text-gray-500 mb-1">📻 Lista de emisoras:</div>
+            <div id="stationListContainer" class="station-list-scroll max-h-48 overflow-y-auto space-y-1"></div>
+        </div>
+        
+        <div class="flex items-center gap-2 pt-2 border-t">
+            <span id="volIcon">🔊</span>
+            <input id="volSlider" type="range" min="0" max="1" step="0.01" value="0.6" class="flex-1 h-1.5 rounded-lg accent-indigo-600">
+            <button onclick="backToGenres()" class="text-xs text-gray-400 hover:text-gray-600">▲ Minimizar</button>
         </div>
     </div>
+    <audio id="radioAudio" class="hidden"></audio>
 </div>
 
 <!-- Modal Ayuda -->
@@ -168,6 +173,152 @@
 </div>
 
 <script>
+    // ==================== TODAS LAS EMISORAS ORIGINALES ====================
+    const radioStationsDatabase = {
+        salsa: [
+            { name: "Zeno FM Salsa", url: "https://stream.zeno.fm/jepsiojbklltv" },
+            { name: "RCast Salsa HD", url: "https://stream3.rcast.net/60446/" },
+            { name: "El Pozo Salsa Live", url: "https://cast4.my-control-panel.com/proxy/elpozosalsa/stream" },
+            { name: "RCast Salsa Stream", url: "https://stream.rcast.net/60446" },
+            { name: "Panama Panama Listening", url: "https://azura.panamastreaming.com/listen/salsa_106_radio/radio.mp3" },
+            { name: "La Radio SSL Online", url: "https://laradiossl.online:12010/stream" },
+            { name: "Zeno Live Salsa Wave", url: "https://stream.zenolive.com/tgzmw19rqrquv" },
+            { name: "StreamingHD Radio2", url: "https://radiohd2.streaminghd.co:7634/stream" }
+        ],
+        pop: [
+            { name: "Classic Pop Netradio", url: "https://netradio.classicpop.dk/classicpoptrekant" },
+            { name: "Pop31 Stream", url: "http://stream.pop31.com:8100/" },
+            { name: "Streamgates 100Britpop", url: "https://gb25.streamgates.net/radios-audio/100Britpop/icecast.audio" },
+            { name: "Live365 Pop Stream", url: "https://streaming.live365.com/a57693" },
+            { name: "RFM LMN Station", url: "https://rfm.lmn.fm/rfm-wr10.mp3" },
+            { name: "ILoveMusic New Pop", url: "https://play.ilovemusic.de/ilm_ilovenewpop/" },
+            { name: "Pure Pop Radio", url: "https://cheetah.streemlion.com/purepopradio" },
+            { name: "Zeno FM Hits", url: "https://stream.zeno.fm/2x2m1q526zmtv" },
+            { name: "Hitradio RTL Top40", url: "https://web.radio.hitradio-rtl.de/hrrtl-top40/stream/mp3" },
+            { name: "Only Hits Radio", url: "https://cdn.onlyhitsradio.net/tophits" }
+        ],
+        rock: [
+            { name: "Rock Antenne Hard Rock", url: "https://stream.rockantenne.de/rock-antenne-hard-rock/stream/mp3" },
+            { name: "Digital Rock Live", url: "http://5.9.16.111:10280/stream" },
+            { name: "Star FM Xmas", url: "https://stream.starfm.de/xmas/mp3-192/" },
+            { name: "Feierfreund Rockparty", url: "https://streams.feierfreund.de/rockparty/mp3-192/" },
+            { name: "Landeswelle Rockwelle", url: "https://frontend.streamonkey.net/landeswelle-rockwelle/stream/mp3" },
+            { name: "RadioKing Rockealo", url: "https://play.radioking.io/rockealo" },
+            { name: "Rock Antenne 80er Rock", url: "https://stream.rockantenne.de/80er-rock/stream/mp3" },
+            { name: "Klassik Radio Rock", url: "https://stream.klassikradio.de/klassikrock/mp3-192/" },
+            { name: "Rock Antenne Modern Rock", url: "https://stream.rockantenne.de/modern-rock/stream/mp3" },
+            { name: "Live365 Classic Rock", url: "https://streaming.live365.com/a24346" },
+            { name: "Star FM Sachsen", url: "http://stream.starfm.de/sachsen/mp3-192/" },
+            { name: "Rock Antenne Biker Rock", url: "https://stream.rockantenne.de/biker-rock/stream/mp3" },
+            { name: "Radio Bob Rockparty", url: "https://streams.radiobob.de/rockparty/mp3-192/" },
+            { name: "ABRadio Rock Zabava", url: "http://ice.abradio.cz:8000/rockzabava128.mp3" },
+            { name: "Rock Antenne Rockabilly", url: "https://stream.rockantenne.de/rockabilly/stream/mp3" },
+            { name: "Rock Antenne Rock'n'Roll", url: "https://stream.rockantenne.de/rockandroll/stream/mp3" },
+            { name: "Hemnos CDNStream", url: "https://hemnos.cdnstream.com/1881_128" }
+        ]
+    };
+
+    // Estado del radio
+    let currentGenre = "salsa";
+    let currentStationIndex = 0;
+    let radioExpanded = false;
+    let radioAudio = null;
+    let isPlaying = false;
+
+    function toggleRadioExpand() {
+        const panel = document.getElementById('radioExpandedPanel');
+        radioExpanded = !radioExpanded;
+        panel.style.display = radioExpanded ? "block" : "none";
+    }
+
+    function selectGenre(genre) {
+        currentGenre = genre;
+        currentStationIndex = 0;
+        renderStationList();
+        const stations = radioStationsDatabase[genre];
+        if(stations && stations.length > 0) {
+            loadStation(0);
+        }
+    }
+
+    function renderStationList() {
+        const container = document.getElementById('stationListContainer');
+        const stations = radioStationsDatabase[currentGenre] || [];
+        container.innerHTML = '';
+        stations.forEach((station, idx) => {
+            const btn = document.createElement('button');
+            btn.className = `w-full text-left px-2 py-1.5 text-sm rounded-lg transition ${idx === currentStationIndex ? 'bg-indigo-100 text-indigo-700 font-medium' : 'hover:bg-gray-100 text-gray-700'}`;
+            btn.innerHTML = `${idx + 1}. ${station.name}`;
+            btn.onclick = () => loadStation(idx);
+            container.appendChild(btn);
+        });
+        document.getElementById('radioStatus').innerHTML = `${currentGenre.toUpperCase()} · ${stations.length} emisoras`;
+    }
+
+    function loadStation(index) {
+        const stations = radioStationsDatabase[currentGenre];
+        if(!stations || index >= stations.length) return;
+        currentStationIndex = index;
+        const station = stations[currentStationIndex];
+        if(radioAudio) {
+            radioAudio.src = station.url;
+            radioAudio.load();
+            document.getElementById('currentStationName').innerHTML = station.name;
+            if(isPlaying) {
+                radioAudio.play().catch(e => console.log("Error al reproducir:", e));
+            }
+        }
+        renderStationList();
+    }
+
+    function togglePlayRadio() {
+        if(!radioAudio) {
+            radioAudio = document.getElementById('radioAudio');
+            radioAudio.volume = document.getElementById('volSlider').value;
+        }
+        
+        if(isPlaying) {
+            radioAudio.pause();
+            isPlaying = false;
+            document.getElementById('playPauseIcon').innerHTML = '▶️';
+            document.getElementById('radioStatus').innerHTML = 'Pausado';
+        } else {
+            if(!radioAudio.src) {
+                const stations = radioStationsDatabase[currentGenre];
+                if(stations && stations.length) {
+                    radioAudio.src = stations[0].url;
+                    radioAudio.load();
+                }
+            }
+            radioAudio.play().then(() => {
+                isPlaying = true;
+                document.getElementById('playPauseIcon').innerHTML = '⏸️';
+                document.getElementById('radioStatus').innerHTML = `🎵 Reproduciendo`;
+            }).catch(e => {
+                document.getElementById('radioStatus').innerHTML = '⚠️ Error de conexión';
+            });
+        }
+    }
+
+    function backToGenres() {
+        toggleRadioExpand();
+    }
+
+    // Inicializar radio
+    (function initRadio() {
+        radioAudio = document.getElementById('radioAudio');
+        const volSlider = document.getElementById('volSlider');
+        const volIcon = document.getElementById('volIcon');
+        volSlider.addEventListener('input', (e) => {
+            if(radioAudio) radioAudio.volume = parseFloat(e.target.value);
+            const val = parseFloat(e.target.value);
+            volIcon.innerText = val > 0.7 ? "🔊" : (val > 0.2 ? "🔉" : "🔈");
+        });
+        radioAudio.volume = 0.6;
+        renderStationList();
+    })();
+
+    // ==================== INTEGRACIÓN TRAPECIOS ====================
     let currentMethod = "simple";
     let chartIntegral = null;
 
@@ -208,7 +359,6 @@
         return h * suma;
     }
 
-    // Gráfica con trapecios individuales y colores transparentes
     function actualizarGrafica(f, a, b, n, metodo) {
         const canvas = document.getElementById('graficaIntegral');
         if(!canvas) return;
@@ -218,7 +368,6 @@
         const xMin = a - extra;
         const xMax = b + extra;
         
-        // Curva suave de la función
         const puntosCurva = [];
         const stepsCurva = 400;
         for(let i=0; i<=stepsCurva; i++) {
@@ -242,38 +391,27 @@
         let nTrapecios = (metodo === 'simple') ? 1 : n;
         let h = (b - a) / nTrapecios;
         
-        // Colores transparentes para cada trapecio
         const colores = [
-            'rgba(59, 130, 246, 0.25)',   // Azul transparente
-            'rgba(16, 185, 129, 0.25)',   // Verde transparente
-            'rgba(139, 92, 246, 0.25)',   // Morado transparente
-            'rgba(245, 158, 11, 0.25)',   // Naranja transparente
-            'rgba(236, 72, 153, 0.25)',   // Rosa transparente
-            'rgba(6, 182, 212, 0.25)'     // Cian transparente
+            'rgba(59, 130, 246, 0.25)', 'rgba(16, 185, 129, 0.25)', 'rgba(139, 92, 246, 0.25)',
+            'rgba(245, 158, 11, 0.25)', 'rgba(236, 72, 153, 0.25)', 'rgba(6, 182, 212, 0.25)'
         ];
         
-        // Crear un dataset por cada trapecio individual
         for(let i=0; i<nTrapecios; i++) {
             let xi = a + i * h;
             let xi1 = a + (i+1) * h;
             let yi = f(xi);
             let yi1 = f(xi1);
             
-            // Polígono del trapecio: base inferior (xi,0) -> (xi1,0) -> (xi1,yi1) -> (xi,yi) -> cierre
             const trapezoidX = [xi, xi1, xi1, xi];
             const trapezoidY = [0, 0, yi1, yi];
-            
             const trapezoidData = trapezoidX.map((x, idx) => ({x: x, y: trapezoidY[idx]}));
-            
-            // Color según índice (cíclico)
             const colorIndex = i % colores.length;
-            const bordeColor = colores[colorIndex].replace('0.25', '0.6');
             
             datasets.push({
                 label: i === 0 ? `Trapecios (${nTrapecios} subintervalos)` : undefined,
                 data: trapezoidData,
                 backgroundColor: colores[colorIndex],
-                borderColor: bordeColor,
+                borderColor: colores[colorIndex].replace('0.25', '0.6'),
                 borderWidth: 1.5,
                 fill: true,
                 pointRadius: 0,
@@ -282,11 +420,10 @@
             });
         }
         
-        // Agregar líneas verticales punteadas en los puntos de partición
         for(let i=0; i<=nTrapecios; i++) {
             let xi = a + i*h;
             datasets.push({
-                label: i===0 ? 'Puntos de partición' : undefined,
+                label: i===0 ? 'Partición' : undefined,
                 data: [{x: xi, y: 0}, {x: xi, y: f(xi)}],
                 borderColor: '#9ca3af',
                 borderWidth: 1,
@@ -305,26 +442,10 @@
                 responsive: true,
                 maintainAspectRatio: true,
                 scales: {
-                    x: { 
-                        type: 'linear', 
-                        title: { display: true, text: 'x', font: { weight: 'bold' } },
-                        ticks: { callback: (val) => val.toFixed(3) }
-                    },
-                    y: { 
-                        title: { display: true, text: 'f(x)', font: { weight: 'bold' } }
-                    }
+                    x: { type: 'linear', title: { display: true, text: 'x', font: { weight: 'bold' } } },
+                    y: { title: { display: true, text: 'f(x)', font: { weight: 'bold' } } }
                 },
-                plugins: {
-                    tooltip: { 
-                        callbacks: { 
-                            label: (ctx) => {
-                                if(ctx.dataset.label === 'f(x) exacta') return `Valor: ${ctx.raw.y?.toFixed(5)}`;
-                                return `Área del trapecio`;
-                            }
-                        } 
-                    },
-                    legend: { position: 'top', labels: { font: { size: 11 } } }
-                },
+                plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
                 elements: { point: { radius: 0 } }
             }
         });
@@ -415,108 +536,6 @@
     function toggleHelpModal() { 
         document.getElementById('helpModal').classList.toggle('hidden'); 
     }
-    
-    // RADIO FUNCTIONS (compactas)
-    const radioStations = {
-        salsa: [{ name: "Zeno FM Salsa", url: "https://stream.zeno.fm/jepsiojbklltv" }, { name: "RCast Salsa HD", url: "https://stream3.rcast.net/60446/" }],
-        pop: [{ name: "Classic Pop DK", url: "https://netradio.classicpop.dk/classicpoptrekant" }, { name: "Pop31 Stream", url: "http://stream.pop31.com:8100/" }],
-        rock: [{ name: "Rock Antenne Hard", url: "https://stream.rockantenne.de/rock-antenne-hard-rock/stream/mp3" }, { name: "Digital Rock Live", url: "http://5.9.16.111:10280/stream" }]
-    };
-    
-    let currentGenreRadio = "salsa";
-    let currentStationIndex = 0;
-    let radioExpanded = false;
-    let radioAudio = null;
-    let radioStationList = [];
-
-    function toggleRadioExpand() {
-        const panel = document.getElementById('radioExpandedPanel');
-        const container = document.getElementById('radioContainer');
-        if (!radioExpanded) {
-            panel.style.display = "flex";
-            container.style.borderRadius = "1.5rem";
-            radioExpanded = true;
-        } else {
-            panel.style.display = "none";
-            container.style.borderRadius = "9999px";
-            radioExpanded = false;
-            if(radioAudio) radioAudio.pause();
-        }
-    }
-
-    function selectGenre(genre) {
-        currentGenreRadio = genre;
-        document.getElementById('currentGenreLabel').innerText = genre.toUpperCase();
-        const select = document.getElementById('stationSelect');
-        select.innerHTML = '<option value="">-- Elige --</option>';
-        radioStationList = radioStations[genre] || [];
-        radioStationList.forEach((st, idx) => {
-            const opt = document.createElement('option');
-            opt.value = idx;
-            opt.textContent = st.name;
-            select.appendChild(opt);
-        });
-        currentStationIndex = 0;
-        if(radioStationList.length) select.value = "0";
-        document.getElementById('radioGenresView').classList.add('hidden');
-        document.getElementById('radioPlayerView').classList.remove('hidden');
-        if(radioAudio) radioAudio.pause();
-        document.getElementById('radioStatus').innerText = "Selecciona estación ▶";
-    }
-
-    function backToGenres() {
-        if(radioAudio) radioAudio.pause();
-        document.getElementById('radioPlayerView').classList.add('hidden');
-        document.getElementById('radioGenresView').classList.remove('hidden');
-    }
-
-    function changeStation() {
-        const idx = parseInt(document.getElementById('stationSelect').value);
-        if(isNaN(idx)) return;
-        currentStationIndex = idx;
-        const st = radioStationList[currentStationIndex];
-        if(st && radioAudio) {
-            radioAudio.src = st.url;
-            radioAudio.load();
-            radioAudio.play().then(() => {
-                document.getElementById('radioStatus').innerHTML = `🎵 Reproduciendo: ${st.name}`;
-            }).catch(e => { document.getElementById('radioStatus').innerHTML = "⚠️ Error stream"; });
-        }
-    }
-
-    function togglePlayRadio() {
-        if(!radioAudio) radioAudio = document.getElementById('radioAudio');
-        if(radioAudio.paused) {
-            if(radioAudio.src) radioAudio.play().catch(()=>{});
-            else changeStation();
-        } else radioAudio.pause();
-    }
-
-    function nextStationRadio() {
-        if(!radioStationList.length) return;
-        currentStationIndex = (currentStationIndex+1)%radioStationList.length;
-        const select = document.getElementById('stationSelect');
-        select.value = currentStationIndex;
-        changeStation();
-    }
-
-    function prevStationRadio() {
-        if(!radioStationList.length) return;
-        currentStationIndex = (currentStationIndex-1+radioStationList.length)%radioStationList.length;
-        document.getElementById('stationSelect').value = currentStationIndex;
-        changeStation();
-    }
-    
-    (function initRadio() {
-        radioAudio = document.getElementById('radioAudio');
-        const volSlider = document.getElementById('volSlider');
-        const volIcon = document.getElementById('volIcon');
-        volSlider.addEventListener('input', (e) => {
-            radioAudio.volume = parseFloat(e.target.value);
-            volIcon.innerText = radioAudio.volume > 0.7 ? "🔊" : (radioAudio.volume > 0.2 ? "🔉" : "🔈");
-        });
-        radioAudio.volume = 0.6;
-    })();
     
     window.onload = () => {
         switchMethod('simple');
