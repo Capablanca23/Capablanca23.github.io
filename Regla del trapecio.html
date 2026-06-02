@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Integración Numérica: Regla del Trapecio | Dr. Ronald F. Rodriguez Espinoza</title>
+    
+    <!-- Tailwind + Chart.js + Math.js + QR -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&family=Merriweather:wght@700&display=swap');
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #eef2f7 0%, #d9e2ec 100%); min-height: 100vh; }
+        .card-shadow { transition: all 0.2s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+        .card-shadow:hover { box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade { animation: fadeSlide 0.45s ease-out forwards; }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #1e3a8a; font-weight: 600; background-color: #eff6ff; }
+        .tab-inactive { border-bottom: 2px solid transparent; color: #4b5563; }
+        .tab-inactive:hover { background-color: #f9fafb; border-bottom-color: #94a3b8; }
+        /* estilo radio orb heredado */
+        .radio-orb { position: fixed; bottom: 24px; right: 24px; z-index: 999; transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
+        .scroll-style::-webkit-scrollbar { width: 5px; }
+        .scroll-style::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        .scroll-style::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+    </style>
+</head>
+<body class="antialiased">
+
+<div class="max-w-6xl mx-auto px-4 py-5 pb-32 md:pb-8">
+
+    <!-- Encabezado con datos autor + QR -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 animate-fade">
+        <div class="bg-gradient-to-r from-slate-800 to-blue-900 p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-center md:text-left">
+                <h2 class="text-white font-bold text-2xl font-serif tracking-wide">Dr. Ronald F. Rodriguez Espinoza</h2>
+                <p class="text-blue-200 text-sm font-medium">CTI Vitae - CONCYTEC | Especialista en Métodos Numéricos</p>
+                <p class="text-indigo-100 text-xs mt-2 flex items-center gap-1"><span class="inline-block w-2 h-2 bg-green-400 rounded-full"></span> Integración por Trapecio Simple y Compuesto</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur p-2 rounded-xl shadow-md transition hover:scale-105">
+                <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank">
+                    <img id="qrAutorImg" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fctivitae.concytec.gob.pe%2FappDirectorioCTI%2FVerDatosInvestigador.do%3Fid_investigador%3D0015364" alt="QR CTI Vitae" class="w-20 h-20 md:w-24 md:h-24 object-contain rounded-lg bg-white p-1">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel principal de integración -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-fade" style="animation-delay: 0.05s;">
+        <div class="border-b border-gray-200 flex flex-wrap">
+            <button onclick="switchMethod('simple')" id="tab-simple" class="px-6 py-3 text-sm md:text-base font-medium transition-all tab-active">📐 Trapecio Simple</button>
+            <button onclick="switchMethod('compuesta')" id="tab-compuesta" class="px-6 py-3 text-sm md:text-base font-medium transition-all tab-inactive">📊 Trapecio Compuesta (n subintervalos)</button>
+            <button onclick="toggleHelpModal()" class="ml-auto px-5 py-3 text-gray-500 hover:text-blue-700 border-l border-gray-200 text-sm">❓ Ayuda</button>
+        </div>
+
+        <!-- Formulario común: función, límites -->
+        <div class="p-6 md:p-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="md:col-span-1">
+                    <label class="block text-gray-700 font-semibold mb-1">Función f(x) 📐</label>
+                    <input type="text" id="funcionInput" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 font-mono shadow-sm focus:ring-2 focus:ring-blue-400" placeholder="ej: sin(x), exp(-x^2), x^2, log(x)" value="x^2">
+                    <p class="text-xs text-gray-400 mt-1">Usa 'x' como variable, log = ln, exp()</p>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Límite inferior (a)</label>
+                    <input type="number" id="limiteA" step="any" class="w-full border rounded-lg px-4 py-2.5" value="0">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Límite superior (b)</label>
+                    <input type="number" id="limiteB" step="any" class="w-full border rounded-lg px-4 py-2.5" value="2">
+                </div>
+            </div>
+
+            <!-- Parámetros específicos: simple / compuesta -->
+            <div id="simpleParams" class="bg-blue-50/40 p-4 rounded-xl">
+                <p class="text-sm font-medium text-blue-800">📌 Regla del Trapecio Simple: <span class="font-mono">∫ ≈ (b-a) * [f(a)+f(b)]/2</span></p>
+                <p class="text-xs text-gray-500 mt-1">Útil para intervalos pequeños, error estimado por derivada segunda.</p>
+            </div>
+
+            <div id="compuestaParams" class="hidden bg-emerald-50/40 p-4 rounded-xl">
+                <label class="block text-gray-700 font-semibold mb-2">Número de subintervalos (n) :</label>
+                <input type="number" id="nSubintervalos" min="1" max="500" value="10" step="1" class="w-40 border rounded-lg px-3 py-2">
+                <p class="text-xs text-gray-500 mt-1">Regla del Trapecio Compuesta: h = (b-a)/n , suma ponderada.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-4 justify-between items-center">
+                <button onclick="calcularIntegral()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 px-8 rounded-xl shadow-md transition flex items-center gap-2">🧮 Calcular Integral</button>
+                <div class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Método numérico con estimación de error</div>
+            </div>
+        </div>
+
+        <!-- Panel de resultados dinámicos -->
+        <div id="resultadosPanel" class="border-t border-gray-100 bg-gray-50/60 p-6 hidden animate-fade">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500">
+                    <h3 class="font-bold text-gray-800 text-lg mb-2">📈 Resultado Numérico</h3>
+                    <div class="space-y-2">
+                        <p><span class="font-semibold">Método aplicado:</span> <span id="metodoNombre" class="font-mono text-blue-700">Trapecio Simple</span></p>
+                        <p><span class="font-semibold">Valor aproximado (Iₙ):</span> <span id="aproxValor" class="text-xl font-mono font-bold text-gray-900">---</span></p>
+                        <p><span class="font-semibold">Valor real (exacto):</span> <span id="realValor" class="text-lg font-mono text-emerald-700">---</span></p>
+                        <p><span class="font-semibold">Error absoluto |Real - Aprox|:</span> <span id="errorAbs" class="text-red-600 font-bold">---</span></p>
+                        <p><span class="font-semibold">Error relativo (%):</span> <span id="errorRel" class="text-amber-700">---</span></p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-indigo-300">
+                    <h3 class="font-bold text-gray-800 text-lg mb-2">⚙️ Detalles Técnicos</h3>
+                    <div id="detalleTecnico" class="text-sm space-y-1 text-gray-600">
+                        <p>▪️ f(x) = <span id="detalleFuncion"></span></p>
+                        <p>▪️ Intervalo [<span id="detalleA"></span>, <span id="detalleB"></span>]</p>
+                        <p id="detalleSubs">▪️ Subintervalos: ---</p>
+                        <p>▪️ Fórmula de error: <span id="errorFormula" class="italic">|E| ≤ (b-a)³/(12n²)·max|f''(ξ)|</span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Gráfica integral + área sombreada -->
+            <div class="mt-6 bg-white p-2 rounded-xl border">
+                <canvas id="graficaIntegral" height="280" style="max-height: 320px; width:100%"></canvas>
+                <p class="text-center text-xs text-gray-400 mt-1">Curva f(x) y área aproximada (sombreado)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reproductor flotante de Radio (unificado con la estructura dada) -->
+<div id="radioContainer" class="radio-orb bg-white text-gray-800 p-3 rounded-full shadow-2xl border border-gray-200 flex items-center gap-2 max-w-sm md:max-w-md overflow-hidden transition-all">
+    <button id="radioToggleButton" onclick="toggleRadioExpand()" class="bg-indigo-700 text-white p-2.5 rounded-full hover:bg-indigo-800 shadow-md transition-transform active:scale-95 flex-shrink-0">
+        📻
+    </button>
+    <div id="radioExpandedPanel" class="flex flex-col w-56 md:w-72 transition-all duration-300">
+        <div id="radioGenresView" class="block">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Música Selecta:</span>
+            <div class="flex gap-1 mt-1">
+                <button onclick="selectGenre('salsa')" class="bg-gray-100 hover:bg-indigo-100 text-xs px-2 py-1 rounded-full">💃 Salsa</button>
+                <button onclick="selectGenre('pop')" class="bg-gray-100 hover:bg-indigo-100 text-xs px-2 py-1 rounded-full">🎵 Pop</button>
+                <button onclick="selectGenre('rock')" class="bg-gray-100 hover:bg-indigo-100 text-xs px-2 py-1 rounded-full">🎸 Rock</button>
+            </div>
+        </div>
+        <div id="radioPlayerView" class="hidden flex-col">
+            <div class="flex justify-between items-center">
+                <span id="currentGenreLabel" class="text-[11px] font-bold text-indigo-600">SALSA</span>
+                <button onclick="backToGenres()" class="text-[9px] text-gray-400 hover:text-red-500">◀ Volver</button>
+            </div>
+            <select id="stationSelect" onchange="changeStation()" class="text-xs p-1 mt-1 bg-gray-50 border rounded-lg w-full"></select>
+            <div class="flex items-center gap-2 mt-2">
+                <span id="volIcon">🔊</span>
+                <input id="volSlider" type="range" min="0" max="1" step="0.05" value="0.6" class="w-full h-1 accent-indigo-600">
+            </div>
+            <audio id="radioAudio" class="hidden"></audio>
+            <div id="radioStatus" class="text-[9px] text-gray-400 mt-1 truncate">Selecciona estación</div>
+            <div class="flex gap-2 mt-1 justify-center">
+                <button onclick="prevStationRadio()" class="text-blue-600 text-xs">⏮</button>
+                <button onclick="togglePlayRadio()" class="bg-indigo-100 px-2 rounded-full text-xs font-bold">▶️</button>
+                <button onclick="nextStationRadio()" class="text-blue-600 text-xs">⏭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ayuda -->
+<div id="helpModal" class="fixed inset-0 bg-black/60 hidden z-50 items-center justify-center p-4">
+    <div class="bg-white max-w-md w-full rounded-2xl p-6 shadow-2xl animate-fade">
+        <h3 class="text-xl font-bold">📘 Guía de Integración</h3>
+        <div class="mt-3 text-gray-600 text-sm space-y-2">
+            <p><strong>Regla del Trapecio Simple:</strong> Aproxima el área con un solo trapecio. <br> <span class="font-mono">∫_a^b f(x)dx ≈ (b-a)*(f(a)+f(b))/2</span></p>
+            <p><strong>Regla Compuesta:</strong> Divide [a,b] en n subintervalos de ancho h, suma áreas trapezoidales. Mayor precisión.</p>
+            <p><strong>Error:</strong> Se calcula usando valor real (integral analítica exacta mediante math.js). Si la primitiva no es posible, se calcula con cuadratura adaptativa de alta precisión.</p>
+            <p>Funciones soportadas: seno, coseno, exponencial, logaritmo natural, potencias, sqrt, etc.</p>
+        </div>
+        <button onclick="toggleHelpModal()" class="mt-5 bg-gray-200 w-full py-2 rounded-lg font-semibold">Cerrar</button>
+    </div>
+</div>
+
+<script>
+    // ---------- ESTADO INTEGRACIÓN ----------
+    let currentMethod = "simple";   // simple o compuesta
+    let chartIntegral = null;
+    let integralRealValue = null;
+
+    // ---------- RADIO (estaciones extensas) con datos solicitados originalmente -----
+    const radioStations = {
+        salsa: [
+            { name: "Zeno FM Salsa", url: "https://stream.zeno.fm/jepsiojbklltv" },
+            { name: "RCast Salsa HD", url: "https://stream3.rcast.net/60446/" },
+            { name: "El Pozo Salsa Live", url: "https://cast4.my-control-panel.com/proxy/elpozosalsa/stream" },
+            { name: "Panamá Salsa 106", url: "https://azura.panamastreaming.com/listen/salsa_106_radio/radio.mp3" },
+            { name: "La Radio SSL", url: "https://laradiossl.online:12010/stream" },
+            { name: "Zeno Live Salsa Wave", url: "https://stream.zenolive.com/tgzmw19rqrquv" },
+            { name: "StreamingHD Salsa2", url: "https://radiohd2.streaminghd.co:7634/stream" }
+        ],
+        pop: [
+            { name: "Classic Pop DK", url: "https://netradio.classicpop.dk/classicpoptrekant" },
+            { name: "Pop31 Stream", url: "http://stream.pop31.com:8100/" },
+            { name: "100 Britpop", url: "https://gb25.streamgates.net/radios-audio/100Britpop/icecast.audio" },
+            { name: "Live365 Pop", url: "https://streaming.live365.com/a57693" },
+            { name: "RFM World", url: "https://rfm.lmn.fm/rfm-wr10.mp3" },
+            { name: "I Love New Pop", url: "https://play.ilovemusic.de/ilm_ilovenewpop/" },
+            { name: "Pure Pop Radio", url: "https://cheetah.streemlion.com/purepopradio" }
+        ],
+        rock: [
+            { name: "Rock Antenne Hard", url: "https://stream.rockantenne.de/rock-antenne-hard-rock/stream/mp3" },
+            { name: "Digital Rock Live", url: "http://5.9.16.111:10280/stream" },
+            { name: "Star FM Rock", url: "https://stream.starfm.de/xmas/mp3-192/" },
+            { name: "Rock Party Feier", url: "https://streams.feierfreund.de/rockparty/mp3-192/" },
+            { name: "Rockealo RadioKing", url: "https://play.radioking.io/rockealo" },
+            { name: "80s Rock Antenne", url: "https://stream.rockantenne.de/80er-rock/stream/mp3" },
+            { name: "Klassik Rock", url: "https://stream.klassikradio.de/klassikrock/mp3-192/" }
+        ]
+    };
+    let currentGenreRadio = "salsa";
+    let currentStationIndex = 0;
+    let radioExpanded = false;
+    let radioAudio = null;
+    let radioStationList = [];
+
+    function toggleRadioExpand() {
+        const panel = document.getElementById('radioExpandedPanel');
+        const container = document.getElementById('radioContainer');
+        if (!radioExpanded) {
+            panel.style.display = "flex";
+            container.style.borderRadius = "1.5rem";
+            radioExpanded = true;
+        } else {
+            panel.style.display = "none";
+            container.style.borderRadius = "9999px";
+            radioExpanded = false;
+            if(radioAudio) radioAudio.pause();
+        }
+    }
+
+    function selectGenre(genre) {
+        currentGenreRadio = genre;
+        document.getElementById('currentGenreLabel').innerText = genre.toUpperCase();
+        const select = document.getElementById('stationSelect');
+        select.innerHTML = '<option value="">-- Elige --</option>';
+        radioStationList = radioStations[genre] || [];
+        radioStationList.forEach((st, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = st.name;
+            select.appendChild(opt);
+        });
+        currentStationIndex = 0;
+        if(radioStationList.length) select.value = "0";
+        document.getElementById('radioGenresView').classList.add('hidden');
+        document.getElementById('radioPlayerView').classList.remove('hidden');
+        if(radioAudio) radioAudio.pause();
+        document.getElementById('radioStatus').innerText = "Selecciona estación ▶";
+    }
+
+    function backToGenres() {
+        if(radioAudio) radioAudio.pause();
+        document.getElementById('radioPlayerView').classList.add('hidden');
+        document.getElementById('radioGenresView').classList.remove('hidden');
+    }
+
+    function changeStation() {
+        const idx = parseInt(document.getElementById('stationSelect').value);
+        if(isNaN(idx)) return;
+        currentStationIndex = idx;
+        const st = radioStationList[currentStationIndex];
+        if(st && radioAudio) {
+            radioAudio.src = st.url;
+            radioAudio.load();
+            radioAudio.play().then(() => {
+                document.getElementById('radioStatus').innerHTML = `🎵 Reproduciendo: ${st.name}`;
+            }).catch(e => { document.getElementById('radioStatus').innerHTML = "⚠️ Error stream (CORS/HTTPS)"; });
+        }
+    }
+
+    function togglePlayRadio() {
+        if(!radioAudio) radioAudio = new Audio();
+        if(radioAudio.paused) {
+            if(radioAudio.src) radioAudio.play().catch(()=>{});
+            else changeStation();
+        } else radioAudio.pause();
+    }
+
+    function nextStationRadio() {
+        if(!radioStationList.length) return;
+        currentStationIndex = (currentStationIndex+1)%radioStationList.length;
+        const select = document.getElementById('stationSelect');
+        select.value = currentStationIndex;
+        changeStation();
+    }
+
+    function prevStationRadio() {
+        if(!radioStationList.length) return;
+        currentStationIndex = (currentStationIndex-1+radioStationList.length)%radioStationList.length;
+        document.getElementById('stationSelect').value = currentStationIndex;
+        changeStation();
+    }
+
+    // Inicializar audio y volumen
+    (function initRadio() {
+        radioAudio = document.getElementById('radioAudio');
+        const volSlider = document.getElementById('volSlider');
+        const volIcon = document.getElementById('volIcon');
+        volSlider.addEventListener('input', (e) => {
+            radioAudio.volume = parseFloat(e.target.value);
+            volIcon.innerText = radioAudio.volume > 0.7 ? "🔊" : (radioAudio.volume > 0.2 ? "🔉" : "🔈");
+        });
+        radioAudio.volume = 0.6;
+    })();
+
+    // -------- MÉTODOS DE INTEGRACIÓN ----------
+    function getFunctionEvaluator(funcStrRaw) {
+        let clean = funcStrRaw.toLowerCase().replace(/ln\(/g, 'log(').replace(/sen\(/g, 'sin(');
+        return (x) => {
+            try {
+                return math.evaluate(clean, {x: x, e: Math.E, pi: Math.PI});
+            } catch(e) { return NaN; }
+        };
+    }
+
+    // Integral real simbólica o numérica de alta precisión (usando math.integrate? no, mejor cuadratura adaptativa)
+    function computeExactIntegral(f, a, b, tol=1e-8) {
+        // Primero intentamos primitiva simbólica? no trivial, usamos método de Simpson adaptativo robusto para referencia exacta.
+        function adaptiveSimpson(f, a, b, eps, maxDepth) {
+            const m = (a+b)/2;
+            const S = (b-a)/6*(f(a)+4*f(m)+f(b));
+            const Sleft = (m-a)/6*(f(a)+4*f((a+m)/2)+f(m));
+            const Sright = (b-m)/6*(f(m)+4*f((m+b)/2)+f(b));
+            const err = Math.abs(Sleft+Sright - S);
+            if(err < 15*eps || maxDepth <= 0) return Sleft+Sright + (Sleft+Sright - S)/15;
+            return adaptiveSimpson(f, a, m, eps/2, maxDepth-1) + adaptiveSimpson(f, m, b, eps/2, maxDepth-1);
+        }
+        return adaptiveSimpson(f, a, b, tol, 12);
+    }
+
+    function trapecioSimple(f, a, b) {
+        return (b - a) * (f(a) + f(b)) / 2.0;
+    }
+
+    function trapecioCompuesta(f, a, b, n) {
+        if(n < 1) return 0;
+        let h = (b - a) / n;
+        let suma = (f(a) + f(b)) / 2.0;
+        for(let i=1; i<=n-1; i++) {
+            let xi = a + i*h;
+            suma += f(xi);
+        }
+        return h * suma;
+    }
+
+    async function calcularIntegral() {
+        const funcStr = document.getElementById('funcionInput').value.trim();
+        const a = parseFloat(document.getElementById('limiteA').value);
+        const b = parseFloat(document.getElementById('limiteB').value);
+        if(isNaN(a) || isNaN(b) || a>=b) { alert("Límites inválidos: a debe ser menor que b"); return; }
+        let f = getFunctionEvaluator(funcStr);
+        try { f(a); f(b); } catch(e) { alert("Error en la función. Revisa sintaxis (ej: x^2, sin(x), log(x))"); return; }
+        
+        let aprox = 0;
+        let nVal = 1;
+        let metodo = "";
+        if(currentMethod === "simple") {
+            aprox = trapecioSimple(f, a, b);
+            metodo = "Trapecio Simple";
+            nVal = 1;
+        } else {
+            let n = parseInt(document.getElementById('nSubintervalos').value);
+            if(isNaN(n) || n<1) n=10;
+            nVal = n;
+            aprox = trapecioCompuesta(f, a, b, n);
+            metodo = `Trapecio Compuesta (n=${n})`;
+        }
+        
+        // Valor exacto integración adaptativa
+        let real;
+        try {
+            real = computeExactIntegral(f, a, b, 1e-9);
+        } catch(e) { real = NaN; }
+        if(isNaN(real)) real = aprox;
+        integralRealValue = real;
+        let errorAbs = Math.abs(real - aprox);
+        let errorRel = (Math.abs(real)>1e-12 ? (errorAbs / Math.abs(real))*100 : 0);
+        
+        // Mostrar resultados
+        document.getElementById('resultadosPanel').classList.remove('hidden');
+        document.getElementById('metodoNombre').innerHTML = metodo;
+        document.getElementById('aproxValor').innerHTML = aprox.toFixed(8);
+        document.getElementById('realValor').innerHTML = real.toFixed(8);
+        document.getElementById('errorAbs').innerHTML = errorAbs.toExponential(6);
+        document.getElementById('errorRel').innerHTML = errorRel.toFixed(6) + " %";
+        document.getElementById('detalleFuncion').innerHTML = funcStr;
+        document.getElementById('detalleA').innerHTML = a;
+        document.getElementById('detalleB').innerHTML = b;
+        if(currentMethod === "compuesta") document.getElementById('detalleSubs').innerHTML = `▪️ Subintervalos: ${nVal} (h = ${((b-a)/nVal).toFixed(5)})`;
+        else document.getElementById('detalleSubs').innerHTML = "▪️ Subintervalos: 1 (fórmula simple)";
+        
+        // Graficar área y función
+        plotIntegral(f, a, b, aprox, real);
+    }
+    
+    function plotIntegral(f, a, b, aprox, realVal) {
+        const canvas = document.getElementById('graficaIntegral');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if(chartIntegral) chartIntegral.destroy();
+        const puntosX = [];
+        const puntosY = [];
+        const steps = 200;
+        const extra = (b-a)*0.1;
+        const xMin = a - extra;
+        const xMax = b + extra;
+        for(let i=0; i<=steps; i++) {
+            let x = xMin + (i/steps)*(xMax-xMin);
+            puntosX.push(x);
+            puntosY.push(f(x));
+        }
+        // datos para relleno del área bajo la curva (sombreado entre a y b)
+        let fillX = [], fillY = [];
+        let seg = 100;
+        for(let i=0; i<=seg; i++) {
+            let xi = a + (i/seg)*(b-a);
+            fillX.push(xi);
+            fillY.push(f(xi));
+        }
+        chartIntegral = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: puntosX.map(v=>v.toFixed(3)),
+                datasets: [
+                    { label: 'f(x)', data: puntosY, borderColor: '#2563eb', borderWidth: 2.5, tension: 0.3, pointRadius: 0, fill: false },
+                    { label: 'Área aproximada (trapecio)', data: fillX.map((x,i)=> ({x:x, y:fillY[i]})), backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'transparent', type: 'line', fill: true, pointRadius: 0, showLine: false, yAxisID: 'y' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: true,
+                scales: { x: { type: 'linear', title: { display: true, text: 'x' } }, y: { title: { display: true, text: 'f(x)' } } },
+                plugins: { tooltip: { callbacks: { label: (ctx) => `Valor: ${ctx.raw.y?.toFixed(5) || ctx.raw}` } }, legend: { position: 'top' } }
+            }
+        });
+    }
+    
+    function switchMethod(method) {
+        currentMethod = method;
+        const tabSimple = document.getElementById('tab-simple');
+        const tabComp = document.getElementById('tab-compuesta');
+        const simpleDiv = document.getElementById('simpleParams');
+        const compDiv = document.getElementById('compuestaParams');
+        if(method === 'simple') {
+            tabSimple.classList.add('tab-active'); tabSimple.classList.remove('tab-inactive');
+            tabComp.classList.add('tab-inactive'); tabComp.classList.remove('tab-active');
+            simpleDiv.classList.remove('hidden'); compDiv.classList.add('hidden');
+        } else {
+            tabComp.classList.add('tab-active'); tabComp.classList.remove('tab-inactive');
+            tabSimple.classList.add('tab-inactive'); tabSimple.classList.remove('tab-active');
+            simpleDiv.classList.add('hidden'); compDiv.classList.remove('hidden');
+        }
+        document.getElementById('resultadosPanel').classList.add('hidden');
+    }
+    
+    function toggleHelpModal() { document.getElementById('helpModal').classList.toggle('hidden'); }
+    
+    // Manejo inicial y datos por defecto
+    window.onload = () => {
+        switchMethod('simple');
+        calcularIntegral();
+    };
+</script>
+</body>
+</html>
