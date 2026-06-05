@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Método de Simpson | Radio con TODAS las Emisoras Originales</title>
+    <title>Método de Simpson | Integración + Radio Neon (Todas las Emisoras)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -17,6 +17,8 @@
                         exito: '#10B981',
                         advertencia: '#F59E0B',
                         error: '#EF4444',
+                        fondo: '#F8FAFC',
+                        texto: '#0F172A'
                     }
                 }
             }
@@ -132,7 +134,7 @@
         </div>
     </div>
 
-    <!-- Reproductor de Radio Flotante - TODAS LAS EMISORAS ORIGINALES (verificadas funcionales) -->
+    <!-- Reproductor de Radio Flotante con TODAS las emisoras -->
     <div id="radioWidget" class="floating-radio bg-gray-900/95 backdrop-blur-xl rounded-2xl neon-border overflow-hidden">
         <div class="radio-minimized-badge hidden cursor-pointer" onclick="toggleMinimizeRadio()">
             <span class="text-green-400 text-lg">🎵</span>
@@ -141,12 +143,12 @@
         </div>
         <div class="radio-expandable">
             <div class="p-3 border-b border-white/10 flex justify-between items-center bg-black/40">
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span><span class="text-xs font-bold text-green-300">🎧 TODAS LAS EMISORAS ORIGINALES</span></div>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span><span class="text-xs font-bold text-green-300">🎧 RADIO NEON (TODAS LAS EMISORAS)</span></div>
                 <button onclick="toggleMinimizeRadio()" class="text-slate-300 hover:text-white text-lg">−</button>
             </div>
             <div class="p-4">
                 <div id="current-genre-label" class="text-[11px] text-cyan-300 uppercase tracking-wider font-semibold">Salsa Clásica</div>
-                <div id="current-station-name" class="text-white font-bold text-base truncate my-1">Presiona Play</div>
+                <div id="current-station-name" class="text-white font-bold text-base truncate my-1">Cargando...</div>
                 <div id="visualizer-radio" class="flex items-center justify-center gap-1 my-2 h-12"></div>
                 
                 <div class="flex gap-2 my-3">
@@ -156,9 +158,9 @@
                 </div>
                 
                 <div class="flex items-center justify-between gap-3 my-2">
-                    <button id="radio-prev" class="w-9 h-9 rounded-full bg-white/10 text-cyan-300 flex items-center justify-center hover:bg-white/20 transition">⏮</button>
+                    <button id="radio-prev" class="w-9 h-9 rounded-full bg-white/10 text-cyan-300 flex items-center justify-center hover:bg-white/20">⏮</button>
                     <button id="radio-play-pause" class="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold shadow-md hover:scale-105 transition">▶</button>
-                    <button id="radio-next" class="w-9 h-9 rounded-full bg-white/10 text-cyan-300 flex items-center justify-center hover:bg-white/20 transition">⏭</button>
+                    <button id="radio-next" class="w-9 h-9 rounded-full bg-white/10 text-cyan-300 flex items-center justify-center hover:bg-white/20">⏭</button>
                 </div>
                 
                 <div class="flex justify-center gap-6 mt-2">
@@ -169,13 +171,13 @@
                 
                 <div class="flex items-center gap-2 mt-3">
                     <span class="text-white/70 text-xs">🔊</span>
-                    <input type="radio" name="vol" id="radio-volume" min="0" max="1" step="0.01" value="0.7" class="w-full h-1 rounded-full bg-white/30 accent-green-400">
+                    <input type="range" id="radio-volume" min="0" max="1" step="0.01" value="0.7" class="w-full h-1 rounded-full bg-white/30 accent-green-400">
                 </div>
                 
                 <div class="mt-3 max-h-32 overflow-y-auto station-list pr-1">
                     <ul id="radio-station-list" class="space-y-1"></ul>
                 </div>
-                <div class="text-right text-[9px] text-green-400 mt-2">✅ {salsa:12, pop:13, rock:17} emisoras activas</div>
+                <div class="text-right text-[9px] text-slate-400 mt-2">📻 Todas las emisoras incluidas</div>
             </div>
         </div>
     </div>
@@ -183,7 +185,7 @@
     <audio id="radio-audio" preload="none"></audio>
 
     <script>
-        // ================== EMISORAS ORIGINALES COMPLETAS (verificadas) ==================
+        // ================== TODAS LAS EMISORAS (COMPLETAS) ==================
         const playlist = {
             salsa: [
                 { n: "Salsa Zeno Premium", u: "https://stream.zeno.fm/jepsiojbklltv" },
@@ -324,7 +326,7 @@
             } catch(e) { mostrarError(e.message); }
         });
 
-        // ================== RADIO - TODAS LAS EMISORAS FUNCIONALES ==================
+        // ================== RADIO (TODAS LAS EMISORAS) ==================
         const radioAudio = document.getElementById('radio-audio');
         let currentGenre = 'salsa', currentIndex = 0, isShuffle = false, isLoop = false;
         
@@ -336,86 +338,36 @@
                 let li = document.createElement('li');
                 li.className = `text-xs p-1.5 rounded cursor-pointer transition ${idx === currentIndex ? 'active-track' : ''}`;
                 li.innerText = s.n;
-                li.onclick = () => { currentIndex = idx; loadRadio(); if(radioAudio.paused) togglePlay(); };
+                li.onclick = () => { currentIndex = idx; loadRadio(); if(radioAudio.paused) togglePlay(); else radioAudio.play().catch(()=>{}); };
                 list.appendChild(li);
             });
         }
         
         function loadRadio() {
             const st = playlist[currentGenre][currentIndex];
-            if(!st) return;
             radioAudio.src = st.u;
             document.getElementById('current-station-name').innerText = st.n;
             document.getElementById('minimizedStationName').innerText = st.n.substring(0,25);
             renderStationListRad();
-            // Si estaba reproduciendo, reintentar
-            if(!radioAudio.paused) {
-                radioAudio.play().catch(e => console.log("Autoplay bloqueado, necesita interacción"));
-            }
+            if(!radioAudio.paused) radioAudio.play().catch(()=>{});
         }
         
         function togglePlay() {
             if(radioAudio.paused) {
-                const playPromise = radioAudio.play();
-                if(playPromise !== undefined) {
-                    playPromise.then(() => {
-                        document.getElementById('radio-play-pause').innerHTML = '⏸';
-                        document.getElementById('visualizer-radio').classList.add('playing');
-                    }).catch(() => {
-                        // Si falla, intentar con la siguiente
-                        nextStation();
-                    });
-                }
+                radioAudio.play().then(()=>{ document.getElementById('radio-play-pause').innerHTML = '⏸'; document.getElementById('visualizer-radio').classList.add('playing'); }).catch(()=>{});
             } else {
-                radioAudio.pause();
-                document.getElementById('radio-play-pause').innerHTML = '▶';
-                document.getElementById('visualizer-radio').classList.remove('playing');
+                radioAudio.pause(); document.getElementById('radio-play-pause').innerHTML = '▶'; document.getElementById('visualizer-radio').classList.remove('playing');
             }
         }
         
-        function nextStation() {
-            const arr = playlist[currentGenre];
-            if(arr.length === 0) return;
-            if(isShuffle) {
-                let newIdx;
-                do { newIdx = Math.floor(Math.random() * arr.length); } while(newIdx === currentIndex && arr.length > 1);
-                currentIndex = newIdx;
-            } else {
-                currentIndex = (currentIndex + 1) % arr.length;
-            }
-            loadRadio();
-            if(!radioAudio.paused) {
-                radioAudio.play().catch(() => {});
-            }
-        }
-        
-        function prevStation() {
-            const arr = playlist[currentGenre];
-            currentIndex = (currentIndex - 1 + arr.length) % arr.length;
-            loadRadio();
-            if(!radioAudio.paused) radioAudio.play().catch(() => {});
-        }
-        
+        function nextStation() { const arr = playlist[currentGenre]; currentIndex = isShuffle ? Math.floor(Math.random()*arr.length) : (currentIndex+1)%arr.length; loadRadio(); if(!radioAudio.paused) radioAudio.play().catch(()=>{}); }
+        function prevStation() { const arr = playlist[currentGenre]; currentIndex = (currentIndex-1+arr.length)%arr.length; loadRadio(); if(!radioAudio.paused) radioAudio.play().catch(()=>{}); }
         function toggleShuffleRad() { isShuffle = !isShuffle; document.getElementById('radio-shuffle').style.color = isShuffle ? '#00ff88' : '#cbd5e1'; }
         function toggleLoopRad() { isLoop = !isLoop; radioAudio.loop = isLoop; document.getElementById('radio-loop').style.color = isLoop ? '#00ff88' : '#cbd5e1'; }
+        function changeGenre(g) { currentGenre = g; currentIndex = 0; loadRadio(); renderStationListRad(); document.querySelectorAll('.genre-tab').forEach(t=>t.classList.remove('active-genre')); document.querySelector(`.genre-tab[data-genre="${g}"]`).classList.add('active-genre'); document.getElementById('current-genre-label').innerHTML = g==='salsa'?'🕺 Salsa (12 emisoras)':(g==='pop'?'🎤 Pop (13 emisoras)':'🎸 Rock (17 emisoras)'); }
         
-        function changeGenre(g) {
-            currentGenre = g;
-            currentIndex = 0;
-            loadRadio();
-            renderStationListRad();
-            document.querySelectorAll('.genre-tab').forEach(t=>t.classList.remove('active-genre'));
-            document.querySelector(`.genre-tab[data-genre="${g}"]`).classList.add('active-genre');
-            let counts = { salsa: 12, pop: 13, rock: 17 };
-            document.getElementById('current-genre-label').innerHTML = g==='salsa'?`🕺 Salsa (${counts.salsa} emisoras)`:(g==='pop'?`🎤 Pop (${counts.pop} emisoras)`: `🎸 Rock (${counts.rock} emisoras)`);
-        }
-        
-        // Manejo de errores: si falla, pasa a la siguiente
-        radioAudio.onerror = () => { nextStation(); };
         radioAudio.onended = () => { if(!isLoop) nextStation(); };
-        
-        // Controles
-        document.getElementById('radio-volume').addEventListener('input', (e) => { radioAudio.volume = parseFloat(e.target.value); });
+        document.getElementById('radio-volume').oninput = (e) => { radioAudio.volume = parseFloat(e.target.value); };
         document.getElementById('radio-mute').onclick = () => { radioAudio.muted = !radioAudio.muted; };
         document.getElementById('radio-play-pause').onclick = togglePlay;
         document.getElementById('radio-next').onclick = nextStation;
@@ -424,37 +376,16 @@
         document.getElementById('radio-loop').onclick = toggleLoopRad;
         document.querySelectorAll('.genre-tab').forEach(btn=>btn.addEventListener('click',()=>changeGenre(btn.dataset.genre)));
         
-        // Visualizador
         const viz = document.getElementById('visualizer-radio');
         for(let i=0;i<18;i++){ let b=document.createElement('div'); b.className='v-bar'; b.style.height='6px'; viz.appendChild(b); }
-        setInterval(()=>{
-            if(!radioAudio.paused && radioAudio.currentTime > 0) {
-                document.querySelectorAll('#visualizer-radio .v-bar').forEach((b,i)=>{
-                    let h = 8 + Math.sin(Date.now()/180 + i) * 14;
-                    b.style.height = Math.min(44, Math.max(8, h)) + 'px';
-                });
-            } else {
-                document.querySelectorAll('#visualizer-radio .v-bar').forEach(b=>b.style.height='6px');
-            }
-        }, 150);
+        setInterval(()=>{ if(!radioAudio.paused) { document.querySelectorAll('#visualizer-radio .v-bar').forEach((b,i)=>{ let h = 8+Math.sin(Date.now()/180+i)*14; b.style.height = Math.min(44,Math.max(8,h))+'px'; }); } else { document.querySelectorAll('#visualizer-radio .v-bar').forEach(b=>b.style.height='6px'); } }, 150);
         
         function toggleMinimizeRadio() { document.getElementById('radioWidget').classList.toggle('minimized'); }
         
-        // Inicialización
         window.cambiarPestaña('simpson-simple');
         changeGenre('salsa');
+        loadRadio();
         setTimeout(()=>btnCalcular.click(), 300);
-        
-        // Mensaje amigable: recordar hacer clic en Play
-        setTimeout(() => {
-            if(radioAudio.paused) {
-                const msg = document.createElement('div');
-                msg.className = 'fixed bottom-28 right-28 bg-black/80 text-green-400 text-xs p-2 rounded-xl z-[10000] animate-pulse';
-                msg.innerText = '🎵 Haz clic en PLAY para activar la radio';
-                document.body.appendChild(msg);
-                setTimeout(() => msg.remove(), 4000);
-            }
-        }, 1000);
     </script>
 </body>
 </html>
