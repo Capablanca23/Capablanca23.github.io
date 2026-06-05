@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regla de Simpson | Integración + Radio Neon (Todas las Emisoras)</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primario: '#0F2B6D',
+                        secundario: '#1E3A8A',
+                        terciario: '#3B82F6',
+                        exito: '#10B981',
+                        advertencia: '#F59E0B',
+                        error: '#EF4444',
+                        fondo: '#F8FAFC',
+                        texto: '#0F172A'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #F8FAFC; }
+        .tab-active { border-bottom: 4px solid #1E40AF; color: #1E40AF; font-weight: bold; background-color: #EFF6FF; }
+        .tab-inactive { color: #64748B; }
+        .katex-display { margin: 0.5em 0; overflow-x: auto; }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .header-blue { background: linear-gradient(135deg, #0F2B6D 0%, #1E3A8A 100%); }
+        
+        .floating-radio {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 9999;
+            width: 380px;
+            max-width: calc(100vw - 40px);
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            border-radius: 1.5rem;
+        }
+        .floating-radio.minimized { width: auto; background: #0a0f1cd9; backdrop-filter: blur(12px); border-radius: 40px; cursor: pointer; }
+        .floating-radio.minimized .radio-expandable { display: none; }
+        .floating-radio:not(.minimized) .radio-minimized-badge { display: none; }
+        .floating-radio.minimized .radio-minimized-badge { display: flex; align-items: center; gap: 8px; padding: 10px 18px; color: #00ff88; font-weight: bold; }
+        @media (max-width: 640px) { .floating-radio { width: 340px; right: 10px; bottom: 10px; } }
+        .neon-border { border: 1px solid rgba(0, 255, 136, 0.4); box-shadow: 0 0 12px rgba(0, 255, 136, 0.3); }
+        .v-bar { width: 4px; background: linear-gradient(to top, #00ff88, #00a3ff); border-radius: 4px; }
+        .playing .v-bar { animation: neonWave 0.8s ease-in-out infinite alternate; }
+        @keyframes neonWave { 0% { height: 10px; } 100% { height: 38px; } }
+        .station-list li { color: #e2e8f0 !important; background: rgba(15, 25, 45, 0.7); transition: all 0.2s; cursor: pointer; }
+        .station-list li.active-track { background: linear-gradient(90deg, rgba(0, 102, 255, 0.5), rgba(0, 255, 136, 0.2)); border-left: 3px solid #00ff88; color: #ffffff !important; font-weight: 500; }
+        .station-list li:hover { background: rgba(0, 255, 136, 0.25); color: #ccffdd !important; }
+        .genre-tab.active-genre { background-color: #00ff8844; border-color: #00ff88; color: white; box-shadow: 0 0 6px #00ff88; }
+        .station-list::-webkit-scrollbar { width: 4px; }
+        .station-list::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+        .station-list::-webkit-scrollbar-thumb { background: #00ff88; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-texto p-4 md:p-8">
+
+    <!-- Header con QR y Autor -->
+    <div class="max-w-6xl mx-auto header-blue rounded-2xl shadow-xl p-6 mb-8 flex flex-col md:flex-row items-center gap-8 text-white">
+        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" class="flex-shrink-0 group">
+            <div class="p-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl group-hover:bg-white/20 transition">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                     alt="QR Investigador" class="w-28 h-28 transform group-hover:scale-105 transition rounded-lg">
+            </div>
+            <p class="text-[10px] text-center text-blue-200 mt-2 font-bold uppercase">Perfil Científico</p>
+        </a>
+        <div class="flex-1 text-center md:text-left">
+            <h1 class="text-3xl font-black mb-2">REGLA DE SIMPSON (1/3)</h1>
+            <p class="text-xl font-medium text-blue-100 mb-1">Dr. Ronald F. Rodriguez Espinoza</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-4 mt-2">
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Regla de Simpson Simple</span>
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Simpson Compuesto</span>
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Integración Numérica</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal Solo Simpson -->
+    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+        <div class="flex flex-wrap border-b border-gray-200 bg-slate-50">
+            <button onclick="cambiarPestaña('simpson-simple')" id="btn-simpson-simple" class="flex-1 py-4 px-2 text-sm md:text-base text-center transition-all tab-active">Simpson 1/3 Simple</button>
+            <button onclick="cambiarPestaña('simpson-compuesto')" id="btn-simpson-compuesto" class="flex-1 py-4 px-2 text-sm md:text-base text-center transition-all tab-inactive hover:bg-gray-100">Simpson Compuesto</button>
+            <button onclick="cambiarPestaña('datos-tabulares')" id="btn-datos-tabulares" class="flex-1 py-4 px-2 text-sm md:text-base text-center transition-all tab-inactive hover:bg-gray-100 font-bold text-blue-700">📊 Datos Tabulares</button>
+        </div>
+
+        <div class="p-6 md:p-10">
+            <div id="alerta-error" class="hidden bg-red-50 border-l-4 border-error text-error p-4 rounded-md mb-6"><div><span class="font-bold">Error:</span> <span id="texto-error"></span></div></div>
+            <div id="alerta-advertencia" class="hidden bg-amber-50 border-l-4 border-advertencia text-amber-800 p-4 rounded-md mb-6"><span id="texto-advertencia"></span></div>
+
+            <div id="controles-funcion" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 items-end">
+                <div class="md:col-span-2"><label class="block text-xs font-black text-slate-500 uppercase mb-2">Función f(x):</label><input type="text" id="input-funcion" value="x * sin(x) + 2" class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-mono text-lg"></div>
+                <div><label class="block text-xs font-black text-slate-500 uppercase mb-2">Límite a:</label><input type="number" id="input-a" value="0" step="any" class="w-full px-4 py-3 bg-slate-50 border rounded-xl"></div>
+                <div><label class="block text-xs font-black text-slate-500 uppercase mb-2">Límite b:</label><input type="number" id="input-b" value="6" step="any" class="w-full px-4 py-3 bg-slate-50 border rounded-xl"></div>
+                <div id="container-n" class="hidden"><label class="block text-xs font-black text-slate-500 uppercase mb-2">Subintervalos (n, par):</label><input type="number" id="input-n" value="6" min="2" step="2" class="w-full px-4 py-3 bg-slate-50 border rounded-xl"></div>
+            </div>
+
+            <div id="controles-tabular" class="hidden mb-8 space-y-4">
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <label class="block text-xs font-black text-blue-700 uppercase mb-2">Pares (x, y) | Separar con "|"</label>
+                    <textarea id="input-datos" rows="3" class="w-full px-4 py-3 bg-white border border-blue-200 rounded-xl font-mono text-sm" placeholder="0, 2 | 1, 3 | 2, 4 | 3, 3.5 | 4, 2.5 | 5, 1.8 | 6, 2"></textarea>
+                </div>
+            </div>
+
+            <div class="mb-10">
+                <button id="btn-calcular" class="w-full py-4 bg-primario text-white font-black text-lg rounded-xl shadow-lg hover:bg-blue-800 transition-all flex items-center justify-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    <span>CALCULAR INTEGRAL (SIMPSON)</span>
+                </button>
+            </div>
+
+            <div id="resultados-container" class="hidden space-y-10 animate-fade-in-up">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200"><h3 class="text-sm font-black uppercase mb-6 flex items-center text-primario"><span class="p-2 bg-blue-100 rounded-lg mr-3">📐</span> Procedimiento</h3><div id="procedimiento-math"></div></div>
+                    <div class="space-y-6">
+                        <div class="bg-white p-8 rounded-2xl border-2 border-primario shadow-xl"><h3 id="metodo-nombre" class="text-xs font-black uppercase text-slate-400 mb-2">SIMPSON</h3><div id="resultado-valor" class="text-5xl font-black text-primario mb-4">0.000000</div><p id="interpretacion-texto" class="text-slate-500 text-sm italic"></p></div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200"><div id="grafico" class="w-full h-[380px]"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reproductor de Radio Flotante con TODAS las emisoras -->
+    <div id="radioWidget" class="floating-radio bg-gray-900/95 backdrop-blur-xl rounded-2xl neon-border overflow-hidden">
+        <div class="radio-minimized-badge hidden cursor-pointer" onclick="toggleMinimizeRadio()">
+            <span class="text-green-400 text-lg">🎵</span>
+            <span class="text-white text-sm font-medium" id="minimizedStationName">Radio encendida</span>
+            <span class="text-cyan-300 text-xs">⏵</span>
+        </div>
+        <div class="radio-expandable">
+            <div class="p-3 border-b border-white/10 flex justify-between items-center bg-black/40">
+                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span><span class="text-xs font-bold text-green-300">🎧 RADIO NEON (TODAS LAS EMISORAS)</span></div>
+                <button onclick="toggleMinimizeRadio()" class="text-slate-300 hover:text-white text-lg">−</button>
+            </div>
+            <div class="p-4">
+                <div id="current-genre-label" class="text-[11px] text-cyan-300 uppercase tracking-wider font-semibold">Salsa Clásica</div>
+                <div id="current-station-name" class="text-white font-bold text-base truncate my-1">Cargando...</div>
+                <div id="visualizer-radio" class="flex items-center justify-center gap-1 my-2 h-12"></div>
+                
+                <div class="flex gap-2 my-3">
+                    <button class="genre-tab text-xs px-3 py-1.5 rounded-full bg-white/10 text-white border border-white/20 transition-all" data-genre="salsa">🕺 Salsa</button>
+                    <button class="genre-tab text-xs px-3 py-1.5 rounded-full bg-white/10 text-white border border-white/20 transition-all" data-genre="pop">🎤 Pop</button>
+                    <button class="genre-tab text-xs px-3 py-1.5 rounded-full bg-white/10 text-white border border-white/20 transition-all" data-genre="rock">🎸 Rock</button>
+                </div>
+                
+                <div class="flex items-center justify-between gap-3 my-2">
+                    <button id="radio-prev" class="w-9 h-9 rounded-full bg-white/10 text-cyan-300 flex items-center justify-center hover:bg-white/20">⏮</button>
+                    <button id="radio-play-pause" class="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold shadow-md hover:scale-105 transition">▶</button>
+                    <button id="radio-next" class="w-9 h-9 rounded-full bg-white/10 text-cyan-300 flex items-center justify-center hover:bg-white/20">⏭</button>
+                </div>
+                
+                <div class="flex justify-center gap-6 mt-2">
+                    <button id="radio-shuffle" class="text-slate-300 text-xs flex flex-col items-center gap-0.5 hover:text-green-400 transition"><span>🔀</span><span class="text-[9px]">Aleatorio</span></button>
+                    <button id="radio-loop" class="text-slate-300 text-xs flex flex-col items-center gap-0.5 hover:text-green-400 transition"><span>🔁</span><span class="text-[9px]">Repetir</span></button>
+                    <button id="radio-mute" class="text-slate-300 text-xs flex flex-col items-center gap-0.5 hover:text-green-400 transition"><span>🔇</span><span class="text-[9px]">Silencio</span></button>
+                </div>
+                
+                <div class="flex items-center gap-2 mt-3">
+                    <span class="text-white/70 text-xs">🔊</span>
+                    <input type="range" id="radio-volume" min="0" max="1" step="0.01" value="0.7" class="w-full h-1 rounded-full bg-white/30 accent-green-400">
+                </div>
+                
+                <div class="mt-3 max-h-32 overflow-y-auto station-list pr-1">
+                    <ul id="radio-station-list" class="space-y-1"></ul>
+                </div>
+                <div class="text-right text-[9px] text-slate-400 mt-2">📻 Todas las emisoras incluidas</div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="radio-audio" preload="none"></audio>
+
+    <script>
+        // ================== TODAS LAS EMISORAS (COMPLETAS) ==================
+        const playlist = {
+            salsa: [
+                { n: "Salsa Zeno Premium", u: "https://stream.zeno.fm/jepsiojbklltv" },
+                { n: "Rumba Estéreo 3", u: "https://stream3.rcast.net/60446/" },
+                { n: "El Pozo Salsa Club", u: "https://cast4.my-control-panel.com/proxy/elpozosalsa/stream" },
+                { n: "Salsa RCast Network", u: "https://stream.rcast.net/60446" },
+                { n: "Salsa 106 Panamá", u: "https://azura.panamastreaming.com/listen/salsa_106_radio/radio.mp3" },
+                { n: "La Radio SSL Online", u: "https://laradiossl.online:12010/stream" },
+                { n: "Salsa Zeno Live HD", u: "https://stream.zenolive.com/tgzmw19rqrquv" },
+                { n: "Streaming HD Salsa", u: "https://radiohd2.streaminghd.co:7634/stream" },
+                { n: "Conectar Salsa 2032", u: "https://cloudstream2032.conectarhosting.com/8132/stream" },
+                { n: "VSG Tech Salsa", u: "https://cloud8.vsgtech.co/8004/stream" },
+                { n: "Nexus Salsa Cast", u: "https://ssl.nexuscast.com:9078/stream" },
+                { n: "MyRadioStream Salsa", u: "https://s17.myradiostream.com/:4450/listen.mp3" }
+            ],
+            pop: [
+                { n: "Classic Pop Trekant", u: "https://netradio.classicpop.dk/classicpoptrekant" },
+                { n: "Pop 31 Stream", u: "http://stream.pop31.com:8100/" },
+                { n: "100 BritPop Hits", u: "https://gb25.streamgates.net/radios-audio/100Britpop/icecast.audio" },
+                { n: "Live365 Pop Station", u: "https://streaming.live365.com/a57693" },
+                { n: "RFM World Radio", u: "https://rfm.lmn.fm/rfm-wr10.mp3" },
+                { n: "I Love New Pop", u: "https://play.ilovemusic.de/ilm_ilovenewpop/" },
+                { n: "Pure Pop Lion", u: "https://cheetah.streemlion.com/purepopradio" },
+                { n: "Zeno Pop Hits", u: "https://stream.zeno.fm/2x2m1q526zmtv" },
+                { n: "HitRadio RTL Top 40", u: "https://web.radio.hitradio-rtl.de/hrrtl-top40/stream/mp3" },
+                { n: "Only Hits Radio", u: "https://cdn.onlyhitsradio.net/tophits" },
+                { n: "Energy 80er Hits", u: "https://edge12.streamonkey.net/energy-80erhits" },
+                { n: "AudioVision Pop", u: "http://audiovision.cdnstream1.com/b14981_128mp3" },
+                { n: "HotMix Hits France", u: "https://streaming.hotmixradio.com/hotmix-hits-en-mp3" }
+            ],
+            rock: [
+                { n: "Hard Rock Antenne", u: "https://stream.rockantenne.de/rock-antenne-hard-rock/stream/mp3" },
+                { n: "Rock 10280 Stream", u: "http://5.9.16.111:10280/stream" },
+                { n: "Star FM Christmas", u: "https://stream.starfm.de/xmas/mp3-192/" },
+                { n: "Rock Party Feierfreund", u: "https://streams.feierfreund.de/rockparty/mp3-192/" },
+                { n: "LandesWelle Rock", u: "https://frontend.streamonkey.net/landeswelle-rockwelle/stream/mp3" },
+                { n: "Rockealo Radio King", u: "https://play.radioking.io/rockealo" },
+                { n: "80s Rock Antenne", u: "https://stream.rockantenne.de/80er-rock/stream/mp3" },
+                { n: "Klassik Radio Rock", u: "https://stream.klassikradio.de/klassikrock/mp3-192/" },
+                { n: "Modern Rock Antenne", u: "https://stream.rockantenne.de/modern-rock/stream/mp3" },
+                { n: "Live365 Rock Classics", u: "https://streaming.live365.com/a24346" },
+                { n: "Star FM Sachsen", u: "http://stream.starfm.de/sachsen/mp3-192/" },
+                { n: "Biker Rock Radio", u: "https://stream.rockantenne.de/biker-rock/stream/mp3" },
+                { n: "Radio Bob Party", u: "https://streams.radiobob.de/rockparty/mp3-192/" },
+                { n: "ABRadio Rock Zabava", u: "http://ice.abradio.cz:8000/rockzabava128.mp3" },
+                { n: "Rockabilly Antenne", u: "https://stream.rockantenne.de/rockabilly/stream/mp3" },
+                { n: "Rock'n'Roll Antenne", u: "https://stream.rockantenne.de/rockandroll/stream/mp3" },
+                { n: "Hemnos Rock Global", u: "https://hemnos.cdnstream.com/1881_128" }
+            ]
+        };
+
+        // ================== LÓGICA DE SIMPSON ==================
+        let pestañaActual = 'simpson-simple';
+        const inputFuncion = document.getElementById('input-funcion');
+        const inputA = document.getElementById('input-a');
+        const inputB = document.getElementById('input-b');
+        const inputN = document.getElementById('input-n');
+        const inputDatos = document.getElementById('input-datos');
+        const containerN = document.getElementById('container-n');
+        const ctrlFuncion = document.getElementById('controles-funcion');
+        const ctrlTabular = document.getElementById('controles-tabular');
+        const btnCalcular = document.getElementById('btn-calcular');
+
+        function mostrarError(m) { const a = document.getElementById('alerta-error'); document.getElementById('texto-error').innerText = m; a.classList.remove('hidden'); document.getElementById('resultados-container').classList.add('hidden'); }
+        function ocultarError() { document.getElementById('alerta-error').classList.add('hidden'); document.getElementById('alerta-advertencia').classList.add('hidden'); }
+        function mostrarAdvertencia(m) { const a = document.getElementById('alerta-advertencia'); document.getElementById('texto-advertencia').innerText = m; a.classList.remove('hidden'); }
+        function renderKatex(str) { try { return katex.renderToString(str, { displayMode: true, throwOnError: false }); } catch(e) { return str; } }
+        function evaluar(fStr, x) { let expr = fStr.replace(/\*\*/g, '^'); return math.parse(expr).compile().evaluate({ x: x, e: Math.E, pi: Math.PI }); }
+
+        window.cambiarPestaña = function(metodo) {
+            pestañaActual = metodo;
+            ['simpson-simple', 'simpson-compuesto', 'datos-tabulares'].forEach(b => {
+                const btn = document.getElementById('btn-'+b);
+                if(b === metodo) { btn.classList.add('tab-active'); btn.classList.remove('tab-inactive'); }
+                else { btn.classList.remove('tab-active'); btn.classList.add('tab-inactive'); }
+            });
+            if(metodo === 'datos-tabulares') { ctrlFuncion.classList.add('hidden'); ctrlTabular.classList.remove('hidden'); containerN.style.display = 'none'; }
+            else { ctrlFuncion.classList.remove('hidden'); ctrlTabular.classList.add('hidden'); containerN.style.display = (metodo === 'simpson-compuesto') ? 'block' : 'none'; }
+            document.getElementById('resultados-container').classList.add('hidden'); ocultarError();
+        };
+
+        btnCalcular.addEventListener('click', () => {
+            ocultarError();
+            let pasosTeX = "", resultadoFinal = 0;
+            let traces = [];
+            const COLOR_CURVA = '#1E40AF', COLOR_RELLENO = 'rgba(245, 158, 11, 0.25)', COLOR_NODOS = '#F59E0B';
+            try {
+                if(pestañaActual === 'datos-tabulares') {
+                    const raw = inputDatos.value;
+                    const pares = raw.split('|').map(p => { let sp = p.split(','); return [parseFloat(sp[0]), parseFloat(sp[1])]; }).filter(p => !isNaN(p[0]) && !isNaN(p[1]));
+                    if(pares.length < 3) throw new Error("Se necesitan al menos 3 puntos.");
+                    pares.sort((a,b)=>a[0]-b[0]);
+                    let xv = pares.map(p=>p[0]), yv = pares.map(p=>p[1]);
+                    let n = xv.length-1;
+                    if(n % 2 !== 0) mostrarAdvertencia("Número impar de intervalos: se usará Simpson solo en los primeros pares.");
+                    let h = (xv[n] - xv[0]) / (n % 2 === 0 ? n : n-1);
+                    let sum = yv[0] + yv[n];
+                    for(let i=1; i<n; i++) { if(i%2===0) sum += 2*yv[i]; else sum += 4*yv[i]; }
+                    resultadoFinal = (h/3)*sum;
+                    pasosTeX = renderKatex(`I \\approx \\frac{h}{3}[f_0+4\\sum_{impar}f_i+2\\sum_{par}f_i+f_n]`);
+                    document.getElementById('metodo-nombre').innerHTML = "SIMPSON (DATOS)";
+                    traces.push({ x: xv, y: yv, mode: 'lines+markers', name: 'Datos', line: { color: COLOR_CURVA }, marker: { size: 8, color: COLOR_NODOS }, fill: 'tozeroy', fillcolor: COLOR_RELLENO });
+                } else {
+                    let func = inputFuncion.value, a = parseFloat(inputA.value), b = parseFloat(inputB.value);
+                    if(a>=b) throw new Error("a debe ser menor que b");
+                    let x_plot = Array.from({length: 250}, (_,i)=> a + i*(b-a)/249);
+                    let y_plot = x_plot.map(x=> evaluar(func, x));
+                    traces.push({ x: x_plot, y: y_plot, mode: 'lines', name: 'f(x)', line: { color: COLOR_CURVA, width: 3 } });
+                    
+                    if(pestañaActual === 'simpson-simple') {
+                        let m = (a+b)/2;
+                        let fa=evaluar(func,a), fm=evaluar(func,m), fb=evaluar(func,b);
+                        resultadoFinal = (b-a)*(fa+4*fm+fb)/6;
+                        pasosTeX = renderKatex(`I \\approx \\frac{b-a}{6}[f(a)+4f(m)+f(b)] = ${resultadoFinal.toFixed(6)}`);
+                        document.getElementById('metodo-nombre').innerHTML = "SIMPSON 1/3 SIMPLE";
+                        traces.push({ x: [a,m,b], y: [fa,fm,fb], mode: 'markers', marker: { size: 12, color: '#10b981', symbol: 'diamond' }, name: 'Nodos' });
+                        traces.push({ x: [a,m,b], y: [fa,fm,fb], fill: 'tozeroy', fillcolor: COLOR_RELLENO, line: { width: 0 }, name: 'Área' });
+                    } else if(pestañaActual === 'simpson-compuesto') {
+                        let n = parseInt(inputN.value);
+                        if(isNaN(n) || n<2) n=4;
+                        if(n % 2 !== 0) { n++; inputN.value=n; mostrarAdvertencia("n ajustado a par: "+n); }
+                        let h = (b-a)/n;
+                        let sum = evaluar(func,a) + evaluar(func,b);
+                        let xnodes = [], ynodes = [];
+                        for(let i=1;i<n;i++) { let xi = a + i*h; let yi = evaluar(func, xi); xnodes.push(xi); ynodes.push(yi); if(i%2===0) sum += 2*yi; else sum += 4*yi; }
+                        resultadoFinal = (h/3)*sum;
+                        pasosTeX = renderKatex(`h=${h.toFixed(5)}`) + renderKatex(`I \\approx \\frac{h}{3}[f_0+4\\sum_{impar}f_i+2\\sum_{par}f_i+f_n] = ${resultadoFinal.toFixed(6)}`);
+                        document.getElementById('metodo-nombre').innerHTML = "SIMPSON COMPUESTO";
+                        let todosX = [a, ...xnodes, b], todosY = [evaluar(func,a), ...ynodes, evaluar(func,b)];
+                        traces.push({ x: todosX, y: todosY, mode: 'markers', marker: { size: 6, color: '#f97316' }, name: 'Nodos' });
+                        traces.push({ x: todosX, y: todosY, fill: 'tozeroy', fillcolor: COLOR_RELLENO, line: { width: 0 }, name: 'Área' });
+                    }
+                }
+                document.getElementById('procedimiento-math').innerHTML = pasosTeX;
+                document.getElementById('resultado-valor').innerHTML = resultadoFinal.toLocaleString(undefined, {minimumFractionDigits:6, maximumFractionDigits:6});
+                document.getElementById('resultados-container').classList.remove('hidden');
+                Plotly.newPlot('grafico', traces, { margin: { t:20, l:45, r:20, b:40 }, xaxis: { gridcolor:'#e2e8f0' }, yaxis: { gridcolor:'#e2e8f0' }, plot_bgcolor: 'white' }, {responsive:true});
+            } catch(e) { mostrarError(e.message); }
+        });
+
+        // ================== RADIO (TODAS LAS EMISORAS) ==================
+        const radioAudio = document.getElementById('radio-audio');
+        let currentGenre = 'salsa', currentIndex = 0, isShuffle = false, isLoop = false;
+        
+        function renderStationListRad() {
+            const list = document.getElementById('radio-station-list');
+            const st = playlist[currentGenre];
+            list.innerHTML = '';
+            st.forEach((s, idx) => {
+                let li = document.createElement('li');
+                li.className = `text-xs p-1.5 rounded cursor-pointer transition ${idx === currentIndex ? 'active-track' : ''}`;
+                li.innerText = s.n;
+                li.onclick = () => { currentIndex = idx; loadRadio(); if(radioAudio.paused) togglePlay(); else radioAudio.play().catch(()=>{}); };
+                list.appendChild(li);
+            });
+        }
+        
+        function loadRadio() {
+            const st = playlist[currentGenre][currentIndex];
+            radioAudio.src = st.u;
+            document.getElementById('current-station-name').innerText = st.n;
+            document.getElementById('minimizedStationName').innerText = st.n.substring(0,25);
+            renderStationListRad();
+            if(!radioAudio.paused) radioAudio.play().catch(()=>{});
+        }
+        
+        function togglePlay() {
+            if(radioAudio.paused) {
+                radioAudio.play().then(()=>{ document.getElementById('radio-play-pause').innerHTML = '⏸'; document.getElementById('visualizer-radio').classList.add('playing'); }).catch(()=>{});
+            } else {
+                radioAudio.pause(); document.getElementById('radio-play-pause').innerHTML = '▶'; document.getElementById('visualizer-radio').classList.remove('playing');
+            }
+        }
+        
+        function nextStation() { const arr = playlist[currentGenre]; currentIndex = isShuffle ? Math.floor(Math.random()*arr.length) : (currentIndex+1)%arr.length; loadRadio(); if(!radioAudio.paused) radioAudio.play().catch(()=>{}); }
+        function prevStation() { const arr = playlist[currentGenre]; currentIndex = (currentIndex-1+arr.length)%arr.length; loadRadio(); if(!radioAudio.paused) radioAudio.play().catch(()=>{}); }
+        function toggleShuffleRad() { isShuffle = !isShuffle; document.getElementById('radio-shuffle').style.color = isShuffle ? '#00ff88' : '#cbd5e1'; }
+        function toggleLoopRad() { isLoop = !isLoop; radioAudio.loop = isLoop; document.getElementById('radio-loop').style.color = isLoop ? '#00ff88' : '#cbd5e1'; }
+        function changeGenre(g) { currentGenre = g; currentIndex = 0; loadRadio(); renderStationListRad(); document.querySelectorAll('.genre-tab').forEach(t=>t.classList.remove('active-genre')); document.querySelector(`.genre-tab[data-genre="${g}"]`).classList.add('active-genre'); document.getElementById('current-genre-label').innerHTML = g==='salsa'?'🕺 Salsa (12 emisoras)':(g==='pop'?'🎤 Pop (13 emisoras)':'🎸 Rock (17 emisoras)'); }
+        
+        radioAudio.onended = () => { if(!isLoop) nextStation(); };
+        document.getElementById('radio-volume').oninput = (e) => { radioAudio.volume = parseFloat(e.target.value); };
+        document.getElementById('radio-mute').onclick = () => { radioAudio.muted = !radioAudio.muted; };
+        document.getElementById('radio-play-pause').onclick = togglePlay;
+        document.getElementById('radio-next').onclick = nextStation;
+        document.getElementById('radio-prev').onclick = prevStation;
+        document.getElementById('radio-shuffle').onclick = toggleShuffleRad;
+        document.getElementById('radio-loop').onclick = toggleLoopRad;
+        document.querySelectorAll('.genre-tab').forEach(btn=>btn.addEventListener('click',()=>changeGenre(btn.dataset.genre)));
+        
+        const viz = document.getElementById('visualizer-radio');
+        for(let i=0;i<18;i++){ let b=document.createElement('div'); b.className='v-bar'; b.style.height='6px'; viz.appendChild(b); }
+        setInterval(()=>{ if(!radioAudio.paused) { document.querySelectorAll('#visualizer-radio .v-bar').forEach((b,i)=>{ let h = 8+Math.sin(Date.now()/180+i)*14; b.style.height = Math.min(44,Math.max(8,h))+'px'; }); } else { document.querySelectorAll('#visualizer-radio .v-bar').forEach(b=>b.style.height='6px'); } }, 150);
+        
+        function toggleMinimizeRadio() { document.getElementById('radioWidget').classList.toggle('minimized'); }
+        
+        window.cambiarPestaña('simpson-simple');
+        changeGenre('salsa');
+        loadRadio();
+        setTimeout(()=>btnCalcular.click(), 300);
+    </script>
+</body>
+</html>
