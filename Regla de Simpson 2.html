@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Simpson | Dr. Ronald F. Rodriguez Espinoza</title>
+    
+    <!-- Tailwind + Chart.js + Math.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    
+    <style>
+        /* Fondo ORIGINAL (grises suaves, sin cambios) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;600;700&family=Merriweather:wght@700&display=swap');
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #eef2f7 0%, #d9e2ec 100%); min-height: 100vh; }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade { animation: fadeSlide 0.45s ease-out forwards; }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #1e3a8a; font-weight: 600; background-color: #eff6ff; }
+        .tab-inactive { border-bottom: 2px solid transparent; color: #4b5563; }
+        .tab-inactive:hover { background-color: #f9fafb; border-bottom-color: #94a3b8; }
+        
+        /* ===== REPRODUCTOR ESTILO "CABEZA DE ROBOT" ===== */
+        .robot-head {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+            width: 320px;
+            background: linear-gradient(145deg, #2c2e3a, #1a1c26);
+            border-radius: 60px 60px 48px 48px;
+            box-shadow: 0 20px 30px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 1px solid #4a4e6b;
+            transition: all 0.25s ease;
+            font-family: 'Inter', monospace;
+        }
+        /* antena */
+        .robot-head::before {
+            content: "⚡";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 26px;
+            filter: drop-shadow(0 0 4px cyan);
+            color: cyan;
+            text-shadow: 0 0 5px #0ff;
+        }
+        /* luces laterales tipo led */
+        .robot-led {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff3b3b;
+            border-radius: 50%;
+            top: 18px;
+            box-shadow: 0 0 6px red;
+            animation: pulseLed 1.2s infinite alternate;
+        }
+        .robot-led.left { left: 20px; }
+        .robot-led.right { right: 20px; background: #0f0; box-shadow: 0 0 6px #0f0; animation-delay: 0.6s; }
+        @keyframes pulseLed {
+            0% { opacity: 0.4; transform: scale(0.9);}
+            100% { opacity: 1; transform: scale(1.2);}
+        }
+        .robot-panel {
+            background: #0b0d14;
+            border-radius: 40px;
+            padding: 12px 14px;
+            margin: 10px;
+            border: 1px solid #5f6a8a;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 2px 5px rgba(0,255,255,0.1);
+        }
+        .robot-screen {
+            background: #010105;
+            border-radius: 28px;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #0ff;
+            box-shadow: 0 0 6px rgba(0,255,255,0.3);
+        }
+        .robot-btn {
+            background: #1f2330;
+            border: 1px solid #3e4a6b;
+            border-radius: 30px;
+            color: #bbf0ff;
+            transition: 0.1s linear;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 3px black;
+        }
+        .robot-btn:active {
+            transform: scale(0.94);
+            box-shadow: inset 0 1px 3px black;
+            border-color: cyan;
+        }
+        .cyber-grid {
+            background: repeating-linear-gradient(45deg, rgba(0,255,255,0.05) 0px, rgba(0,255,255,0.05) 2px, transparent 2px, transparent 8px);
+        }
+        .station-scroll-robot {
+            max-height: 180px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        .station-scroll-robot::-webkit-scrollbar { width: 4px; }
+        .station-scroll-robot::-webkit-scrollbar-track { background: #111; border-radius: 4px; }
+        .station-scroll-robot::-webkit-scrollbar-thumb { background: #0ff; border-radius: 4px; }
+    </style>
+</head>
+<body class="antialiased">
+
+<div class="max-w-6xl mx-auto px-4 py-5 pb-32 md:pb-8">
+
+    <!-- Encabezado con autor + QR (original) -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 animate-fade">
+        <div class="bg-gradient-to-r from-slate-800 to-blue-900 p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="text-center md:text-left">
+                <h2 class="text-white font-bold text-2xl font-serif tracking-wide">Dr. Ronald F. Rodriguez Espinoza</h2>
+                <p class="text-blue-200 text-sm font-medium">CTI Vitae - CONCYTEC | Especialista en Métodos Numéricos</p>
+                <p class="text-indigo-100 text-xs mt-2 flex items-center gap-1"><span class="inline-block w-2 h-2 bg-green-400 rounded-full"></span> Integración por Simpson 1/3 (Simple y Compuesta)</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur p-2 rounded-xl shadow-md transition hover:scale-105">
+                <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fctivitae.concytec.gob.pe%2FappDirectorioCTI%2FVerDatosInvestigador.do%3Fid_investigador%3D0015364" alt="QR CTI Vitae" class="w-20 h-20 md:w-24 md:h-24 object-contain rounded-lg bg-white p-1">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel principal de integración Simpson -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-fade" style="animation-delay: 0.05s;">
+        <div class="border-b border-gray-200 flex flex-wrap">
+            <button onclick="switchMethod('simple')" id="tab-simple" class="px-6 py-3 text-sm md:text-base font-medium transition-all tab-active">📐 Simpson Simple (1/3)</button>
+            <button onclick="switchMethod('compuesta')" id="tab-compuesta" class="px-6 py-3 text-sm md:text-base font-medium transition-all tab-inactive">📊 Simpson Compuesta (n pares)</button>
+            <button onclick="toggleHelpModal()" class="ml-auto px-5 py-3 text-gray-500 hover:text-blue-700 border-l border-gray-200 text-sm">❓ Ayuda</button>
+        </div>
+
+        <div class="p-6 md:p-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="md:col-span-1">
+                    <label class="block text-gray-700 font-semibold mb-1">Función f(x) 📐</label>
+                    <input type="text" id="funcionInput" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 font-mono shadow-sm focus:ring-2 focus:ring-blue-400" value="x^2">
+                    <p class="text-xs text-gray-400 mt-1">Ej: sin(x), exp(x), ln(x), x^3</p>
+                </div>
+                <div><label class="block text-gray-700 font-semibold mb-1">Límite inferior (a)</label><input type="number" id="limiteA" step="any" class="w-full border rounded-lg px-4 py-2.5" value="0"></div>
+                <div><label class="block text-gray-700 font-semibold mb-1">Límite superior (b)</label><input type="number" id="limiteB" step="any" class="w-full border rounded-lg px-4 py-2.5" value="2"></div>
+            </div>
+            <div id="simpleParams" class="bg-blue-50/40 p-4 rounded-xl"><p class="text-sm font-medium text-blue-800">📌 Simpson Simple: <span class="font-mono">∫ ≈ (b-a)/6 * [f(a) + 4f((a+b)/2) + f(b)]</span></p></div>
+            <div id="compuestaParams" class="hidden bg-emerald-50/40 p-4 rounded-xl"><label class="block text-gray-700 font-semibold mb-2">Subintervalos (n) — PAR:</label><input type="number" id="nSubintervalos" min="2" step="2" value="6" class="w-40 border rounded-lg px-3 py-2"><p class="text-xs text-gray-500 mt-1">Divide en n partes iguales, suma parábolas.</p></div>
+            <div class="flex flex-wrap gap-4 justify-between"><button onclick="calcularIntegral()" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 px-8 rounded-xl shadow-md">🧮 Calcular Integral</button><button onclick="resetEjemplo()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm">↺ Ejemplo x²</button></div>
+        </div>
+
+        <div id="resultadosPanel" class="border-t border-gray-100 bg-gray-50/60 p-6 hidden animate-fade">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500"><h3 class="font-bold text-gray-800 text-lg mb-2">📈 Resultado Numérico</h3><div class="space-y-2"><p><span class="font-semibold">Método:</span> <span id="metodoNombre" class="font-mono text-blue-700">---</span></p><p><span class="font-semibold">Aproximación:</span> <span id="aproxValor" class="text-xl font-mono font-bold text-gray-900">---</span></p><p><span class="font-semibold">Valor real exacto:</span> <span id="realValor" class="text-lg font-mono text-emerald-700">---</span></p><p><span class="font-semibold">Error absoluto:</span> <span id="errorAbs" class="text-red-600 font-bold">---</span></p><p><span class="font-semibold">Error relativo:</span> <span id="errorRel" class="text-amber-700">---</span></p></div></div>
+                <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-indigo-300"><h3 class="font-bold text-gray-800 text-lg mb-2">⚙️ Detalles</h3><div class="text-sm space-y-1 text-gray-600"><p>▪️ f(x) = <span id="detalleFuncion"></span></p><p>▪️ Intervalo [<span id="detalleA"></span>, <span id="detalleB"></span>]</p><p id="detalleSubs">▪️ Subintervalos: ---</p><p>▪️ h = <span id="detalleH"></span></p></div></div>
+            </div>
+            <div class="mt-6 bg-white p-3 rounded-xl border"><canvas id="graficaIntegral" height="340" style="max-height: 380px; width:100%"></canvas><p class="text-center text-xs text-gray-400 mt-2">🎨 Áreas sombreadas = Aprox. Simpson (parábolas) | Línea azul = función exacta</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- REPRODUCTOR ESTILO CABEZA DE ROBOT (robot-head) con todos los controles avanzados -->
+<div class="robot-head" id="robotRadio">
+    <div class="robot-led left"></div>
+    <div class="robot-led right"></div>
+    <div class="robot-panel">
+        <!-- Panel superior tipo "visor" -->
+        <div class="robot-screen flex items-center justify-between mb-2">
+            <span class="text-cyan-300 text-[10px] font-mono">🤖 SYS.ON</span>
+            <span id="radioTimeStatus" class="text-[9px] text-cyan-400 font-mono">LIVE</span>
+        </div>
+        
+        <!-- info principal -->
+        <div class="flex items-center gap-2 mb-2">
+            <button id="toggleExpandRobot" onclick="toggleRadioExpand()" class="robot-btn w-7 h-7 flex items-center justify-center text-sm">🔘</button>
+            <div class="flex-1 overflow-hidden">
+                <div id="currentStationNameRobot" class="text-cyan-300 font-bold text-sm truncate tracking-wide">Sin emisora</div>
+                <div id="radioStatusRobot" class="text-[10px] text-gray-400 truncate">🔊 esperando...</div>
+            </div>
+            <button onclick="togglePlayRadio()" class="robot-btn w-8 h-8 flex items-center justify-center text-md" id="robotPlayBtn">▶️</button>
+        </div>
+        
+        <!-- Panel expandible con lista y controles robóticos -->
+        <div id="robotExpandedPanel" class="hidden mt-2 border-t border-cyan-700/50 pt-2">
+            <!-- Botones género estilo panel robot -->
+            <div class="flex gap-1 mb-3">
+                <button onclick="selectGenre('salsa')" class="flex-1 robot-btn text-[11px] py-1">💃 SALSA</button>
+                <button onclick="selectGenre('pop')" class="flex-1 robot-btn text-[11px] py-1">🎵 POP</button>
+                <button onclick="selectGenre('rock')" class="flex-1 robot-btn text-[11px] py-1">🎸 ROCK</button>
+            </div>
+            
+            <!-- Controles secuencia: anterior, aleatorio, siguiente con iconos mecánicos -->
+            <div class="flex justify-around items-center mb-3 bg-black/40 rounded-full py-1 px-2">
+                <button onclick="prevStation()" class="robot-btn w-7 h-7 flex items-center justify-center text-sm" title="Anterior">⏮</button>
+                <button onclick="randomStation()" class="robot-btn w-7 h-7 flex items-center justify-center text-sm" title="Aleatorio">🎲</button>
+                <button onclick="nextStation()" class="robot-btn w-7 h-7 flex items-center justify-center text-sm" title="Siguiente">⏭</button>
+            </div>
+            
+            <!-- Lista de emisoras estilo consola -->
+            <div class="mb-2">
+                <div class="text-[9px] text-cyan-400 mb-1 flex gap-2"><span>📡 EMISORAS</span><span id="genreLabel" class="text-gray-400">salsa</span></div>
+                <div id="stationListRobot" class="station-scroll-robot max-h-40 space-y-1 pr-1 text-[11px]"></div>
+            </div>
+            
+            <!-- Volumen y botón minimizar -->
+            <div class="flex items-center gap-2 pt-1 border-t border-cyan-800/40">
+                <span id="volIconRobot" class="text-cyan-400 text-xs">🔊</span>
+                <input id="volSliderRobot" type="range" min="0" max="1" step="0.01" value="0.6" class="flex-1 h-1 rounded-full accent-cyan-400 bg-gray-700">
+                <button onclick="minimizeRobotPanel()" class="robot-btn text-[10px] px-2 py-0.5">▼ MIN</button>
+            </div>
+        </div>
+    </div>
+    <audio id="radioAudioRobot" class="hidden"></audio>
+</div>
+
+<!-- Modal Ayuda -->
+<div id="helpModal" class="fixed inset-0 bg-black/60 hidden z-50 items-center justify-center p-4">
+    <div class="bg-white max-w-md w-full rounded-2xl p-6 shadow-2xl animate-fade">
+        <h3 class="text-xl font-bold">📘 Regla de Simpson 1/3</h3>
+        <div class="mt-3 text-gray-600 text-sm space-y-2">
+            <p><strong>Simple:</strong> Parábola única, precisa para funciones suaves.</p>
+            <p><strong>Compuesta:</strong> Divide en n pares, suma de parábolas consecutivas.</p>
+            <p><strong>Gráfica:</strong> Regiones coloreadas = aproximación parabólica.</p>
+        </div>
+        <button onclick="toggleHelpModal()" class="mt-5 bg-gray-200 w-full py-2 rounded-lg font-semibold">Cerrar</button>
+    </div>
+</div>
+
+<script>
+    // ================= RADIO CON ESTILO ROBOT (MISMA BASE DE EMISORAS) ==================
+    const radioStationsDatabase = {
+        salsa: [
+            { name: "Zeno FM Salsa", url: "https://stream.zeno.fm/jepsiojbklltv" },
+            { name: "RCast Salsa HD", url: "https://stream3.rcast.net/60446/" },
+            { name: "El Pozo Salsa Live", url: "https://cast4.my-control-panel.com/proxy/elpozosalsa/stream" },
+            { name: "RCast Salsa Stream", url: "https://stream.rcast.net/60446" },
+            { name: "Panama Panama Streaming", url: "https://azura.panamastreaming.com/listen/salsa_106_radio/radio.mp3" },
+            { name: "La Radio SSL Online", url: "https://laradiossl.online:12010/stream" },
+            { name: "Zeno Live Salsa Wave", url: "https://stream.zenolive.com/tgzmw19rqrquv" },
+            { name: "StreamingHD Radio2", url: "https://radiohd2.streaminghd.co:7634/stream" }
+        ],
+        pop: [
+            { name: "Classic Pop Netradio", url: "https://netradio.classicpop.dk/classicpoptrekant" },
+            { name: "Pop31 Stream", url: "http://stream.pop31.com:8100/" },
+            { name: "Streamgates 100Britpop", url: "https://gb25.streamgates.net/radios-audio/100Britpop/icecast.audio" },
+            { name: "Live365 Pop Stream", url: "https://streaming.live365.com/a57693" },
+            { name: "RFM LMN Station", url: "https://rfm.lmn.fm/rfm-wr10.mp3" },
+            { name: "ILoveMusic New Pop", url: "https://play.ilovemusic.de/ilm_ilovenewpop/" },
+            { name: "Pure Pop Radio", url: "https://cheetah.streemlion.com/purepopradio" },
+            { name: "Zeno FM Hits", url: "https://stream.zeno.fm/2x2m1q526zmtv" },
+            { name: "Hitradio RTL Top40", url: "https://web.radio.hitradio-rtl.de/hrrtl-top40/stream/mp3" },
+            { name: "Only Hits Radio", url: "https://cdn.onlyhitsradio.net/tophits" }
+        ],
+        rock: [
+            { name: "Rock Antenne Hard Rock", url: "https://stream.rockantenne.de/rock-antenne-hard-rock/stream/mp3" },
+            { name: "Digital Rock Live", url: "http://5.9.16.111:10280/stream" },
+            { name: "Star FM Xmas", url: "https://stream.starfm.de/xmas/mp3-192/" },
+            { name: "Feierfreund Rockparty", url: "https://streams.feierfreund.de/rockparty/mp3-192/" },
+            { name: "Landeswelle Rockwelle", url: "https://frontend.streamonkey.net/landeswelle-rockwelle/stream/mp3" },
+            { name: "RadioKing Rockealo", url: "https://play.radioking.io/rockealo" },
+            { name: "Rock Antenne 80er Rock", url: "https://stream.rockantenne.de/80er-rock/stream/mp3" },
+            { name: "Klassik Radio Rock", url: "https://stream.klassikradio.de/klassikrock/mp3-192/" },
+            { name: "Rock Antenne Modern Rock", url: "https://stream.rockantenne.de/modern-rock/stream/mp3" },
+            { name: "Live365 Classic Rock", url: "https://streaming.live365.com/a24346" },
+            { name: "Star FM Sachsen", url: "http://stream.starfm.de/sachsen/mp3-192/" },
+            { name: "Rock Antenne Biker Rock", url: "https://stream.rockantenne.de/biker-rock/stream/mp3" },
+            { name: "Radio Bob Rockparty", url: "https://streams.radiobob.de/rockparty/mp3-192/" },
+            { name: "ABRadio Rock Zabava", url: "http://ice.abradio.cz:8000/rockzabava128.mp3" },
+            { name: "Rock Antenne Rockabilly", url: "https://stream.rockantenne.de/rockabilly/stream/mp3" },
+            { name: "Rock Antenne Rock'n'Roll", url: "https://stream.rockantenne.de/rockandroll/stream/mp3" },
+            { name: "Hemnos CDNStream", url: "https://hemnos.cdnstream.com/1881_128" }
+        ]
+    };
+
+    let currentGenreRobot = "salsa";
+    let currentStationIndexRobot = 0;
+    let radioExpandedRobot = false;
+    let radioAudioRobot = null;
+    let isPlayingRobot = false;
+
+    function toggleRadioExpand() {
+        const panel = document.getElementById('robotExpandedPanel');
+        radioExpandedRobot = !radioExpandedRobot;
+        panel.style.display = radioExpandedRobot ? "block" : "none";
+    }
+    
+    function selectGenre(genre) {
+        currentGenreRobot = genre;
+        currentStationIndexRobot = 0;
+        renderStationListRobot();
+        const stations = radioStationsDatabase[genre];
+        if(stations && stations.length) loadStationRobot(0);
+        document.getElementById('genreLabel').innerHTML = genre;
+    }
+    
+    function nextStation() {
+        const stations = radioStationsDatabase[currentGenreRobot];
+        if(!stations || stations.length === 0) return;
+        let newIdx = currentStationIndexRobot + 1;
+        if(newIdx >= stations.length) newIdx = 0;
+        loadStationRobot(newIdx);
+    }
+    function prevStation() {
+        const stations = radioStationsDatabase[currentGenreRobot];
+        if(!stations || stations.length === 0) return;
+        let newIdx = currentStationIndexRobot - 1;
+        if(newIdx < 0) newIdx = stations.length - 1;
+        loadStationRobot(newIdx);
+    }
+    function randomStation() {
+        const stations = radioStationsDatabase[currentGenreRobot];
+        if(!stations || stations.length === 0) return;
+        const rand = Math.floor(Math.random() * stations.length);
+        loadStationRobot(rand);
+    }
+    
+    function renderStationListRobot() {
+        const container = document.getElementById('stationListRobot');
+        const stations = radioStationsDatabase[currentGenreRobot] || [];
+        container.innerHTML = '';
+        stations.forEach((station, idx) => {
+            const btn = document.createElement('button');
+            btn.className = `w-full text-left px-2 py-1 rounded-md text-[11px] transition ${idx === currentStationIndexRobot ? 'bg-cyan-800 text-white border-l-2 border-cyan-300' : 'hover:bg-gray-700 text-gray-300'}`;
+            btn.innerHTML = `${idx+1}. ${station.name}`;
+            btn.onclick = () => loadStationRobot(idx);
+            container.appendChild(btn);
+        });
+        const statDiv = document.getElementById('radioStatusRobot');
+        if(statDiv) statDiv.innerHTML = `⚙️ ${currentGenreRobot.toUpperCase()} · ${stations.length} streams`;
+    }
+    
+    function loadStationRobot(index) {
+        const stations = radioStationsDatabase[currentGenreRobot];
+        if(!stations || index >= stations.length) return;
+        currentStationIndexRobot = index;
+        const station = stations[currentStationIndexRobot];
+        if(radioAudioRobot) {
+            const wasPlaying = isPlayingRobot;
+            radioAudioRobot.pause();
+            radioAudioRobot.src = station.url;
+            radioAudioRobot.load();
+            document.getElementById('currentStationNameRobot').innerHTML = station.name;
+            if(wasPlaying) {
+                radioAudioRobot.play().catch(e => console.log);
+                isPlayingRobot = true;
+                document.getElementById('robotPlayBtn').innerHTML = '⏸️';
+                document.getElementById('radioStatusRobot').innerHTML = '🎧 LIVE ROBOT';
+            } else {
+                isPlayingRobot = false;
+                document.getElementById('robotPlayBtn').innerHTML = '▶️';
+            }
+        }
+        renderStationListRobot();
+    }
+    
+    function togglePlayRadio() {
+        if(!radioAudioRobot) {
+            radioAudioRobot = document.getElementById('radioAudioRobot');
+            radioAudioRobot.volume = document.getElementById('volSliderRobot').value;
+        }
+        if(isPlayingRobot) {
+            radioAudioRobot.pause();
+            isPlayingRobot = false;
+            document.getElementById('robotPlayBtn').innerHTML = '▶️';
+            document.getElementById('radioStatusRobot').innerHTML = '⏸ PAUSE';
+        } else {
+            if(!radioAudioRobot.src) {
+                const stations = radioStationsDatabase[currentGenreRobot];
+                if(stations && stations.length) {
+                    radioAudioRobot.src = stations[0].url;
+                    radioAudioRobot.load();
+                    currentStationIndexRobot = 0;
+                    document.getElementById('currentStationNameRobot').innerHTML = stations[0].name;
+                    renderStationListRobot();
+                }
+            }
+            radioAudioRobot.play().then(() => {
+                isPlayingRobot = true;
+                document.getElementById('robotPlayBtn').innerHTML = '⏸️';
+                document.getElementById('radioStatusRobot').innerHTML = '🤖 TRANSMITIENDO';
+            }).catch(() => {
+                document.getElementById('radioStatusRobot').innerHTML = '⚠️ ERROR LINK';
+            });
+        }
+    }
+    
+    function minimizeRobotPanel() {
+        if(radioExpandedRobot) toggleRadioExpand();
+    }
+    
+    (function initRobotRadio() {
+        radioAudioRobot = document.getElementById('radioAudioRobot');
+        const volSlider = document.getElementById('volSliderRobot');
+        const volIcon = document.getElementById('volIconRobot');
+        volSlider.addEventListener('input', (e) => {
+            if(radioAudioRobot) radioAudioRobot.volume = parseFloat(e.target.value);
+            const val = parseFloat(e.target.value);
+            volIcon.innerText = val > 0.7 ? "🔊" : (val > 0.2 ? "🔉" : "🔈");
+        });
+        radioAudioRobot.volume = 0.6;
+        const initialStations = radioStationsDatabase.salsa;
+        if(initialStations.length) {
+            radioAudioRobot.src = initialStations[0].url;
+            radioAudioRobot.load();
+            document.getElementById('currentStationNameRobot').innerHTML = initialStations[0].name;
+            currentStationIndexRobot = 0;
+        }
+        renderStationListRobot();
+        document.getElementById('genreLabel').innerHTML = 'salsa';
+    })();
+    
+    // ================= MÉTODOS NUMÉRICOS SIMPSON ==================
+    let currentMethod = "simple";
+    let chartIntegral = null;
+    
+    function getFunctionEvaluator(funcStrRaw) {
+        let clean = funcStrRaw.toLowerCase().replace(/ln\(/g, 'log(').replace(/sen\(/g, 'sin(');
+        return (x) => { try { return math.evaluate(clean, {x: x, e: Math.E, pi: Math.PI}); } catch(e) { return NaN; } };
+    }
+    function computeExactIntegral(f, a, b, tol=1e-9) {
+        function adaptiveSimpson(f, a, b, eps, maxDepth) {
+            const m = (a+b)/2;
+            const S = (b-a)/6*(f(a)+4*f(m)+f(b));
+            const Sleft = (m-a)/6*(f(a)+4*f((a+m)/2)+f(m));
+            const Sright = (b-m)/6*(f(m)+4*f((m+b)/2)+f(b));
+            const err = Math.abs(Sleft+Sright - S);
+            if(err < 15*eps || maxDepth <= 0) return Sleft+Sright + (Sleft+Sright - S)/15;
+            return adaptiveSimpson(f, a, m, eps/2, maxDepth-1) + adaptiveSimpson(f, m, b, eps/2, maxDepth-1);
+        }
+        return adaptiveSimpson(f, a, b, tol, 12);
+    }
+    function simpsonSimple(f, a, b) { const m = (a+b)/2; return (b-a)/6 * (f(a) + 4*f(m) + f(b)); }
+    function simpsonCompuesta(f, a, b, n) { if(n%2!==0) n=Math.max(2,Math.floor(n/2)*2); let h=(b-a)/n; let sum=f(a)+f(b); for(let i=1;i<n;i++){ let x=a+i*h; sum+=(i%2===0)?2*f(x):4*f(x); } return (h/3)*sum; }
+    
+    function actualizarGraficaSimpson(f, a, b, nSegments, metodo) {
+        const canvas = document.getElementById('graficaIntegral');
+        if(!canvas) return;
+        if(chartIntegral) chartIntegral.destroy();
+        const xMin = a - (b-a)*0.2, xMax = b + (b-a)*0.2;
+        const puntosCurva = [];
+        for(let i=0;i<=400;i++){ let x=xMin+(i/400)*(xMax-xMin); puntosCurva.push({x,y:f(x)}); }
+        let datasets = [{ label: 'f(x) exacta', data: puntosCurva, borderColor: '#1e40af', borderWidth: 2.5, tension: 0.2, pointRadius:0, fill:false, order:10 }];
+        let n = (metodo === 'simple') ? 1 : nSegments;
+        if(metodo === 'compuesta' && n%2!==0) n=Math.max(2,Math.floor(n/2)*2);
+        const h = (b-a)/n;
+        const colores = ['rgba(59,130,246,0.25)','rgba(16,185,129,0.25)','rgba(139,92,246,0.25)','rgba(245,158,11,0.25)'];
+        if(metodo === 'simple'){
+            const m=(a+b)/2; let puntosP=[];
+            for(let t=0;t<=50;t++){ let x=a+(t/50)*(b-a); let L0=((x-m)*(x-b))/((a-m)*(a-b)); let L1=((x-a)*(x-b))/((m-a)*(m-b)); let L2=((x-a)*(x-m))/((b-a)*(b-m)); puntosP.push({x,y:f(a)*L0+f(m)*L1+f(b)*L2}); }
+            datasets.push({label:'Parábola Simpson', data:puntosP, backgroundColor:'rgba(59,130,246,0.3)', borderColor:'#3b82f6', fill:true, pointRadius:0, tension:0.1, order:5});
+        } else {
+            for(let i=0;i<n;i+=2){
+                let x0=a+i*h, x1=a+(i+1)*h, x2=a+(i+2)*h, f0=f(x0), f1=f(x1), f2=f(x2); let seg=[];
+                for(let t=0;t<=40;t++){ let x=x0+(t/40)*(x2-x0); let L0=((x-x1)*(x-x2))/((x0-x1)*(x0-x2)); let L1=((x-x0)*(x-x2))/((x1-x0)*(x1-x2)); let L2=((x-x0)*(x-x1))/((x2-x0)*(x2-x1)); seg.push({x,y:f0*L0+f1*L1+f2*L2}); }
+                datasets.push({label:i===0?'Parábolas Simpson':undefined, data:seg, backgroundColor:colores[(i/2)%colores.length], borderColor:'#3b82f6', fill:true, pointRadius:0, tension:0.1, order:5});
+            }
+        }
+        chartIntegral = new Chart(canvas.getContext('2d'), { type:'line', data:{datasets}, options:{ responsive:true, maintainAspectRatio:true, scales:{x:{type:'linear', title:{display:true, text:'x'}}, y:{title:{display:true, text:'f(x)'}}}, plugins:{legend:{position:'top'}} } });
+    }
+    
+    async function calcularIntegral(){
+        const funcStr=document.getElementById('funcionInput').value.trim();
+        let a=parseFloat(document.getElementById('limiteA').value), b=parseFloat(document.getElementById('limiteB').value);
+        if(isNaN(a)||isNaN(b)||a>=b){ alert("Intervalo inválido"); return; }
+        let f=getFunctionEvaluator(funcStr);
+        try{ f(a); f((a+b)/2); f(b); } catch(e){ alert("Función inválida"); return; }
+        let aprox=0, metodoTexto="", nVal=1;
+        if(currentMethod==="simple"){ aprox=simpsonSimple(f,a,b); metodoTexto="Simpson Simple"; nVal=1; }
+        else{ let n=parseInt(document.getElementById('nSubintervalos').value); if(isNaN(n)||n<2) n=6; if(n%2!==0) n++; nVal=n; aprox=simpsonCompuesta(f,a,b,n); metodoTexto=`Simpson Compuesta (n=${n})`; }
+        let real=computeExactIntegral(f,a,b);
+        let errorAbs=Math.abs(real-aprox), errorRel=(Math.abs(real)>1e-12)?(errorAbs/Math.abs(real))*100:0;
+        document.getElementById('resultadosPanel').classList.remove('hidden');
+        document.getElementById('metodoNombre').innerHTML=metodoTexto;
+        document.getElementById('aproxValor').innerHTML=aprox.toFixed(8);
+        document.getElementById('realValor').innerHTML=real.toFixed(8);
+        document.getElementById('errorAbs').innerHTML=errorAbs.toExponential(6);
+        document.getElementById('errorRel').innerHTML=errorRel.toFixed(6)+" %";
+        document.getElementById('detalleFuncion').innerHTML=funcStr;
+        document.getElementById('detalleA').innerHTML=a; document.getElementById('detalleB').innerHTML=b;
+        document.getElementById('detalleH').innerHTML=((b-a)/(currentMethod==="compuesta"?nVal:1)).toFixed(6);
+        document.getElementById('detalleSubs').innerHTML=currentMethod==="compuesta"?`▪️ Subintervalos: ${nVal} (pares)`:"▪️ Subintervalos: 1 (única parábola)";
+        actualizarGraficaSimpson(f,a,b,nVal,currentMethod);
+    }
+    function switchMethod(method){ currentMethod=method; const s=document.getElementById('tab-simple'),c=document.getElementById('tab-compuesta'),sp=document.getElementById('simpleParams'),cp=document.getElementById('compuestaParams'); if(method==='simple'){ s.classList.add('tab-active');s.classList.remove('tab-inactive');c.classList.add('tab-inactive');c.classList.remove('tab-active');sp.classList.remove('hidden');cp.classList.add('hidden');} else{ c.classList.add('tab-active');c.classList.remove('tab-inactive');s.classList.add('tab-inactive');s.classList.remove('tab-active');sp.classList.add('hidden');cp.classList.remove('hidden');} document.getElementById('resultadosPanel').classList.add('hidden');}
+    function resetEjemplo(){ document.getElementById('funcionInput').value="x^2"; document.getElementById('limiteA').value="0"; document.getElementById('limiteB').value="2"; calcularIntegral(); }
+    function toggleHelpModal(){ document.getElementById('helpModal').classList.toggle('hidden'); }
+    window.onload=()=>{ switchMethod('simple'); calcularIntegral(); };
+</script>
+</body>
+</html>
