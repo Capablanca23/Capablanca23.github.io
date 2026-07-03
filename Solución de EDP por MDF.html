@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDP - Método de Diferencias Finitas | Dr. Ronald Rodriguez</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primario: '#0F172A',
+                        secundario: '#1E293B',
+                        accent: '#3B82F6',
+                        accent2: '#8B5CF6',
+                        fondo: '#F1F5F9',
+                        card: '#FFFFFF',
+                        neon: '#00FFE5',
+                        neonPurple: '#B026FF',
+                        neonPink: '#FF2D95'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Librerías -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header-premium {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #312E81 100%);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px -15px rgba(15, 23, 42, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .header-premium::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .header-premium::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .metodo-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #E2E8F0;
+            cursor: pointer;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .metodo-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .metodo-card:hover::before { opacity: 1; }
+        .metodo-card.active {
+            border-color: #3B82F6;
+            background: linear-gradient(135deg, #EFF6FF, #F5F3FF);
+            box-shadow: 0 8px 25px -8px rgba(59, 130, 246, 0.25);
+            transform: scale(1.02);
+        }
+        .metodo-card.active .metodo-numero {
+            background: #3B82F6;
+            color: white;
+        }
+        .metodo-numero {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #E2E8F0;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 800;
+            transition: all 0.3s ease;
+        }
+
+        .resultado-box {
+            background: linear-gradient(135deg, #0F172A, #1E293B);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .resultado-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent 70%);
+            border-radius: 50%;
+        }
+        .resultado-valor {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .input-moderno {
+            background: #F8FAFC;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 10px 14px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        .input-moderno:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            outline: none;
+            background: white;
+        }
+        .input-moderno:hover {
+            border-color: #94A3B8;
+        }
+
+        .btn-calcular {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            border: none;
+            color: white;
+            font-weight: 800;
+            padding: 14px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            letter-spacing: 0.5px;
+        }
+        .btn-calcular:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        .btn-calcular:active {
+            transform: scale(0.96);
+        }
+
+        .badge-metodo {
+            background: linear-gradient(135deg, #EFF6FF, #F5F3FF);
+            border: 1px solid #BFDBFE;
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #1E40AF;
+        }
+
+        #grafico-container {
+            border-radius: 16px;
+            background: white;
+            border: 1px solid #E2E8F0;
+            height: 450px;
+        }
+
+        .tabla-container {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #E2E8F0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .tabla-container thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
+        }
+        .tabla-container tbody tr:nth-child(even) { background: #FAFAFA; }
+        .tabla-container tbody tr:nth-child(odd) { background: #FFFFFF; }
+        .tabla-container::-webkit-scrollbar { width: 6px; }
+        .tabla-container::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 8px; }
+        .tabla-container::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 8px; }
+
+        .label-con-tooltip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tooltip-trigger {
+            position: relative;
+            cursor: help;
+        }
+        .tooltip-trigger .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background: #0F172A;
+            color: white;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px 12px;
+            position: absolute;
+            z-index: 100;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-size: 11px;
+            font-weight: 400;
+            line-height: 1.5;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .tooltip-trigger .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #0F172A transparent transparent transparent;
+        }
+        .tooltip-trigger:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tooltip-trigger .tooltip-text .tooltip-title {
+            font-weight: 700;
+            color: #60A5FA;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .icono-info {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #E2E8F0;
+            color: #475569;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        /* Radio Neon */
+        @keyframes neonPulse {
+            0%, 100% { text-shadow: 0 0 7px #00FFE5, 0 0 15px #00FFE5, 0 0 30px #00FFE5; }
+            50% { text-shadow: 0 0 10px #00FFE5, 0 0 25px #00FFE5, 0 0 50px #00FFE5; }
+        }
+        @keyframes borderGlow {
+            0%, 100% { border-color: #00FFE5; box-shadow: 0 0 10px rgba(0, 255, 229, 0.3), inset 0 0 10px rgba(0, 255, 229, 0.1); }
+            50% { border-color: #B026FF; box-shadow: 0 0 20px rgba(176, 38, 255, 0.3), inset 0 0 20px rgba(176, 38, 255, 0.1); }
+        }
+        @keyframes ledNeon {
+            0%, 100% { opacity: 0.5; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        .robot-head {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+            width: 360px;
+            background: linear-gradient(145deg, #0a0b1a, #05060f);
+            border-radius: 60px 60px 48px 48px;
+            box-shadow: 0 25px 50px -10px rgba(0,0,0,0.9), 0 0 40px rgba(0, 255, 229, 0.05);
+            border: 2px solid rgba(0, 255, 229, 0.2);
+            transition: all 0.3s ease;
+            animation: borderGlow 3s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+        }
+        .robot-head:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 30px 60px -10px rgba(0,0,0,0.9), 0 0 60px rgba(0, 255, 229, 0.1);
+        }
+        .robot-head::before {
+            content: "📡";
+            position: absolute;
+            top: -26px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 22px;
+            filter: drop-shadow(0 0 15px rgba(0, 255, 229, 0.6));
+            animation: neonPulse 2s ease-in-out infinite;
+        }
+
+        .robot-led {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            top: 16px;
+            animation: ledNeon 1.5s ease-in-out infinite alternate;
+        }
+        .robot-led.left {
+            left: 16px;
+            background: #FF2D95;
+            box-shadow: 0 0 20px #FF2D95, 0 0 40px #FF2D95;
+        }
+        .robot-led.right {
+            right: 16px;
+            background: #00FFE5;
+            box-shadow: 0 0 20px #00FFE5, 0 0 40px #00FFE5;
+            animation-delay: 0.75s;
+        }
+
+        .robot-panel {
+            background: rgba(5, 6, 15, 0.98);
+            border-radius: 40px;
+            padding: 14px 16px;
+            margin: 10px;
+            border: 1px solid rgba(0, 255, 229, 0.15);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 0 20px rgba(0, 255, 229, 0.05);
+        }
+
+        .robot-screen {
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 24px;
+            padding: 8px 14px;
+            border: 1px solid rgba(0, 255, 229, 0.2);
+            box-shadow: inset 0 0 30px rgba(0, 255, 229, 0.05), 0 0 15px rgba(0, 255, 229, 0.05);
+        }
+        .robot-screen .neon-text {
+            color: #00FFE5;
+            animation: neonPulse 2s ease-in-out infinite;
+        }
+
+        .robot-btn {
+            background: rgba(0, 255, 229, 0.05);
+            border: 1px solid rgba(0, 255, 229, 0.2);
+            border-radius: 30px;
+            color: #00FFE5;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+            text-shadow: 0 0 10px rgba(0, 255, 229, 0.3);
+        }
+        .robot-btn:hover {
+            background: rgba(0, 255, 229, 0.15);
+            border-color: #00FFE5;
+            color: #00FFE5;
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 255, 229, 0.2);
+        }
+        .robot-btn:active {
+            transform: scale(0.92);
+        }
+
+        .station-scroll {
+            max-height: 160px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #00FFE5 transparent;
+        }
+        .station-scroll::-webkit-scrollbar { width: 4px; }
+        .station-scroll::-webkit-scrollbar-track { background: rgba(0, 255, 229, 0.05); border-radius: 4px; }
+        .station-scroll::-webkit-scrollbar-thumb { background: #00FFE5; border-radius: 4px; box-shadow: 0 0 10px rgba(0, 255, 229, 0.3); }
+
+        .station-item {
+            transition: all 0.2s ease;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #94A3B8;
+            cursor: pointer;
+        }
+        .station-item:hover {
+            background: rgba(0, 255, 229, 0.1);
+            color: #00FFE5;
+            text-shadow: 0 0 10px rgba(0, 255, 229, 0.3);
+        }
+        .station-item.active {
+            background: rgba(0, 255, 229, 0.15);
+            color: #00FFE5;
+            border-left: 2px solid #00FFE5;
+            text-shadow: 0 0 15px rgba(0, 255, 229, 0.4);
+            box-shadow: inset 0 0 20px rgba(0, 255, 229, 0.05);
+        }
+
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(0, 255, 229, 0.5), 0 0 20px rgba(0, 255, 229, 0.3);
+        }
+
+        @media (max-width: 640px) {
+            .robot-head { width: 320px; right: 12px; bottom: 12px; }
+            .resultado-valor { font-size: 1.5rem; }
+            body { padding: 12px; }
+        }
+
+        .ejemplo-destacado {
+            background: linear-gradient(135deg, #EFF6FF, #F5F3FF);
+            border: 2px solid #3B82F6;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        
+        .alerta-auto {
+            background: #FEF3C7;
+            border: 1px solid #F59E0B;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #92400E;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="max-w-7xl mx-auto">
+
+    <!-- HEADER -->
+    <header class="header-premium p-6 md:p-8 mb-8 flex flex-col md:flex-row items-center gap-6 text-white relative">
+        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" class="flex-shrink-0 relative z-10">
+            <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3 hover:bg-white/20 transition-all duration-300 shadow-lg">
+                <div id="qrcode" class="w-24 h-24 flex items-center justify-center bg-white rounded-xl p-1"></div>
+            </div>
+            <p class="text-[10px] text-center text-blue-300 mt-2 font-bold uppercase tracking-widest">CTI Vitae</p>
+        </a>
+        <div class="flex-1 text-center md:text-left relative z-10">
+            <div class="flex items-center justify-center md:justify-start gap-3 mb-1">
+                <span class="bg-blue-500/20 text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full border border-blue-400/30 uppercase tracking-wider">Métodos Numéricos</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-black leading-tight tracking-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                EDP · Método de Diferencias Finitas
+            </h1>
+            <p class="text-xl font-medium text-blue-200/90">Dr. Ronald F. Rodriguez Espinoza</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-3">
+                <span class="bg-white/10 text-white/80 text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">Explícito</span>
+                <span class="bg-white/10 text-white/80 text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">Implícito</span>
+                <span class="bg-white/10 text-white/80 text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">Crank-Nicolson</span>
+                <span class="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded-full">Laplace</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- PANEL CONFIGURACIÓN -->
+        <div class="lg:col-span-4 space-y-6">
+            <section class="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+                <h2 class="text-sm font-black uppercase tracking-widest mb-5 text-slate-700 flex items-center gap-2">
+                    <span class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-sm">⚙</span>
+                    Configuración
+                </h2>
+
+                <div class="space-y-4">
+                    <!-- Selección de problema -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Tipo de EDP:</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div onclick="setTipoEDP('calor')" id="tipo-calor" class="metodo-card active p-3 rounded-xl text-center">
+                                <span class="text-xl">🔥</span>
+                                <p class="text-[10px] font-bold mt-1">Calor</p>
+                                <p class="text-[8px] text-slate-400">Parabólica</p>
+                            </div>
+                            <div onclick="setTipoEDP('onda')" id="tipo-onda" class="metodo-card p-3 rounded-xl text-center">
+                                <span class="text-xl">🌊</span>
+                                <p class="text-[10px] font-bold mt-1">Onda</p>
+                                <p class="text-[8px] text-slate-400">Hiperbólica</p>
+                            </div>
+                            <div onclick="setTipoEDP('laplace')" id="tipo-laplace" class="metodo-card p-3 rounded-xl text-center">
+                                <span class="text-xl">⚡</span>
+                                <p class="text-[10px] font-bold mt-1">Laplace</p>
+                                <p class="text-[8px] text-slate-400">Elíptica</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parámetros generales -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                N (espacial)
+                                <span class="tooltip-trigger">
+                                    <span class="icono-info">?</span>
+                                    <span class="tooltip-text">
+                                        <span class="tooltip-title">Número de intervalos en x</span>
+                                        ∆x = L/N. A mayor N, mayor precisión espacial.
+                                        <span class="tooltip-ejemplo">Ej: 5 → ∆x = 0.2</span>
+                                    </span>
+                                </span>
+                            </label>
+                            <input type="number" id="input-N" value="5" step="1" min="2" class="input-moderno w-full">
+                        </div>
+                        <div>
+                            <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                M (temporal)
+                                <span class="tooltip-trigger">
+                                    <span class="icono-info">?</span>
+                                    <span class="tooltip-text">
+                                        <span class="tooltip-title">Número de pasos de tiempo</span>
+                                        ∆t = T/M. Para el PDF: M = 1 (solo un paso)
+                                        <span class="tooltip-ejemplo">Ej: 1 → solo t₁</span>
+                                    </span>
+                                </span>
+                            </label>
+                            <input type="number" id="input-M" value="1" step="1" min="1" class="input-moderno w-full">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                L (longitud)
+                                <span class="tooltip-trigger">
+                                    <span class="icono-info">?</span>
+                                    <span class="tooltip-text">
+                                        <span class="tooltip-title">Longitud del dominio</span>
+                                        Dominio espacial: 0 ≤ x ≤ L
+                                        <span class="tooltip-ejemplo">Ej: 1.0</span>
+                                    </span>
+                                </span>
+                            </label>
+                            <input type="number" id="input-L" value="1" step="0.1" class="input-moderno w-full">
+                        </div>
+                        <div>
+                            <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                T (tiempo final)
+                                <span class="tooltip-trigger">
+                                    <span class="icono-info">?</span>
+                                    <span class="tooltip-text">
+                                        <span class="tooltip-title">Tiempo final de simulación</span>
+                                        Para el PDF: T = 0.1 (un paso de 0.1s)
+                                        <span class="tooltip-ejemplo">Ej: 0.1</span>
+                                    </span>
+                                </span>
+                            </label>
+                            <input type="number" id="input-T" value="0.1" step="0.001" class="input-moderno w-full">
+                        </div>
+                    </div>
+
+                    <!-- Condiciones de frontera EDITABLES -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                T₁ (izquierda)
+                                <span class="tooltip-trigger">
+                                    <span class="icono-info">?</span>
+                                    <span class="tooltip-text">
+                                        <span class="tooltip-title">Temperatura en x=0</span>
+                                        Valor fijo en la frontera izquierda.
+                                        <span class="tooltip-ejemplo">Ej: 0, 100, 25</span>
+                                    </span>
+                                </span>
+                            </label>
+                            <input type="number" id="input-T1" value="0" step="1" class="input-moderno w-full">
+                        </div>
+                        <div>
+                            <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                T₂ (derecha)
+                                <span class="tooltip-trigger">
+                                    <span class="icono-info">?</span>
+                                    <span class="tooltip-text">
+                                        <span class="tooltip-title">Temperatura en x=L</span>
+                                        Valor fijo en la frontera derecha.
+                                        <span class="tooltip-ejemplo">Ej: 0, 50, 100</span>
+                                    </span>
+                                </span>
+                            </label>
+                            <input type="number" id="input-T2" value="0" step="1" class="input-moderno w-full">
+                        </div>
+                    </div>
+
+                    <!-- Parámetros específicos -->
+                    <div id="parametros-especificos">
+                        <div id="param-alfa" class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                    α (difusividad)
+                                    <span class="tooltip-trigger">
+                                        <span class="icono-info">?</span>
+                                        <span class="tooltip-text">
+                                            <span class="tooltip-title">Difusividad térmica</span>
+                                            Coeficiente de la ecuación de calor. Para el PDF: α = 0.1
+                                            <span class="tooltip-ejemplo">Ej: 0.1</span>
+                                        </span>
+                                    </span>
+                                </label>
+                                <input type="number" id="input-alfa" value="0.1" step="0.01" class="input-moderno w-full">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Método</label>
+                                <select id="input-metodo" class="input-moderno w-full">
+                                    <option value="explicito">Explícito (FTCS)</option>
+                                    <option value="implicito">Implícito (BTCS)</option>
+                                    <option value="crank">Crank-Nicolson</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="param-onda" class="hidden grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                    c (velocidad)
+                                    <span class="tooltip-trigger">
+                                        <span class="icono-info">?</span>
+                                        <span class="tooltip-text">
+                                            <span class="tooltip-title">Velocidad de propagación</span>
+                                            Velocidad de la onda. c ≥ 1.
+                                            <span class="tooltip-ejemplo">Ej: 1.0</span>
+                                        </span>
+                                    </span>
+                                </label>
+                                <input type="number" id="input-c" value="1" step="0.1" min="0.1" class="input-moderno w-full">
+                            </div>
+                            <div>
+                                <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                                    CFL
+                                    <span class="tooltip-trigger">
+                                        <span class="icono-info">?</span>
+                                        <span class="tooltip-text">
+                                            <span class="tooltip-title">Número de Courant</span>
+                                            CFL = c·Δt/Δx. Debe ser ≤ 1 para estabilidad.
+                                            <span class="tooltip-ejemplo">Ej: 0.5 (estable)</span>
+                                        </span>
+                                    </span>
+                                </label>
+                                <input type="number" id="input-cfl" value="0.5" step="0.05" min="0.01" max="1" class="input-moderno w-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Condición inicial -->
+                    <div>
+                        <label class="label-con-tooltip block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                            u(x,0) = f(x)
+                            <span class="tooltip-trigger">
+                                <span class="icono-info">?</span>
+                                <span class="tooltip-text">
+                                    <span class="tooltip-title">Condición inicial</span>
+                                    Para el PDF: u(x,0) = 100·x·(1-x)
+                                    <span class="tooltip-ejemplo">Ej: 100*x*(1-x), sin(pi*x)</span>
+                                </span>
+                            </span>
+                        </label>
+                        <input type="text" id="input-f" value="100*x*(1-x)" class="input-moderno w-full font-mono">
+                        <p class="text-[9px] text-slate-400 mt-1">Usa x como variable. Ej: sin(pi*x), x*(1-x), 100*x*(1-x)</p>
+                    </div>
+
+                    <!-- Alerta de ajuste automático -->
+                    <div id="alerta-auto" class="alerta-auto">
+                        ⚡ <span id="mensaje-auto">Ajuste automático realizado</span>
+                    </div>
+
+                    <!-- Botón resolver -->
+                    <button id="btn-resolver" class="btn-calcular w-full">
+                        🚀 RESOLVER EDP
+                    </button>
+
+                    <!-- Ejemplo del PDF -->
+                    <div class="ejemplo-destacado">
+                        <p class="text-[10px] font-bold text-blue-700">📘 Ejemplo 3.1 del PDF</p>
+                        <p class="text-[9px] text-slate-600">∂u/∂t = 0.1·∂²u/∂x², α=0.1, L=1</p>
+                        <p class="text-[9px] text-slate-600">∆x=0.2, ∆t=0.1, u(x,0)=100·x·(1-x)</p>
+                        <p class="text-[9px] text-slate-600">u(0,t)=u(1,t)=0</p>
+                        <button onclick="cargarEjemploPDF()" class="text-[9px] font-bold text-blue-600 hover:text-blue-800">Cargar este ejemplo →</button>
+                    </div>
+                    
+                    <!-- Ejemplo de Onda -->
+                    <div class="ejemplo-destacado border-purple-500" style="background: linear-gradient(135deg, #F5F3FF, #EDE9FE); border-color: #8B5CF6;">
+                        <p class="text-[10px] font-bold text-purple-700">🌊 Ejemplo de Onda</p>
+                        <p class="text-[9px] text-slate-600">∂²u/∂t² = c²·∂²u/∂x², c=1, L=1, N=20, M=100</p>
+                        <p class="text-[9px] text-slate-600">u(x,0)=sin(π·x), u(0,t)=u(1,t)=0</p>
+                        <button onclick="cargarEjemploOnda()" class="text-[9px] font-bold text-purple-600 hover:text-purple-800">Cargar este ejemplo →</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- PANEL RESULTADOS -->
+        <div class="lg:col-span-8 space-y-6">
+
+            <!-- Resultado Principal -->
+            <div class="resultado-box flex flex-col md:flex-row items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-black text-blue-300 uppercase tracking-widest">Resultado en el centro</p>
+                    <div id="valor-respuesta" class="resultado-valor">--</div>
+                </div>
+                <div class="flex items-center gap-3 mt-3 md:mt-0">
+                    <span id="label-metodo-grande" class="badge-metodo">CALOR</span>
+                    <span id="info-estabilidad" class="text-blue-300/50 text-xs">s = 0.25</span>
+                </div>
+            </div>
+
+            <!-- Gráfico -->
+            <div class="bg-white p-4 rounded-2xl shadow-lg border border-slate-100">
+                <div id="grafico-container"></div>
+            </div>
+
+            <!-- Tabla de resultados -->
+            <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex justify-between items-center">
+                    <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2">
+                        <span class="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white text-[10px]">📋</span>
+                        Tabla de resultados u(i,j)
+                    </h3>
+                    <span class="text-[10px] text-slate-400">i = espacial, j = temporal</span>
+                </div>
+                <div class="tabla-container">
+                    <table class="w-full text-left text-sm">
+                        <thead id="tabla-head">
+                        </thead>
+                        <tbody id="tabla-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== RADIO NEÓN ===== -->
+<div class="robot-head" id="robotRadio">
+    <div class="robot-led left"></div>
+    <div class="robot-led right"></div>
+    <div class="robot-panel">
+        <div class="robot-screen flex items-center justify-between mb-2">
+            <span class="neon-text text-[10px] font-mono font-bold">🤖 NEON RADIO</span>
+            <span id="radioTimeStatus" class="text-[9px] text-[#00FFE5] font-mono opacity-80">● LIVE</span>
+        </div>
+
+        <div class="flex items-center gap-2 mb-2">
+            <button onclick="toggleRadioExpand()" class="robot-btn w-7 h-7 flex items-center justify-center text-sm">🔘</button>
+            <div class="flex-1 overflow-hidden">
+                <div id="currentStationNameRobot" class="text-[#00FFE5] font-bold text-sm truncate neon-glow">Sin emisora</div>
+                <div id="radioStatusRobot" class="text-[10px] text-slate-400 truncate">🔊 esperando...</div>
+            </div>
+            <button onclick="togglePlayRadio()" class="robot-btn w-8 h-8 flex items-center justify-center text-md" id="robotPlayBtn">▶️</button>
+        </div>
+
+        <div id="robotExpandedPanel" class="hidden mt-2 border-t border-[#00FFE5]/20 pt-2">
+            <div class="flex gap-1 mb-3">
+                <button onclick="selectGenre('salsa')" class="flex-1 robot-btn text-[11px] py-1.5" style="color: #FF2D95; border-color: rgba(255, 45, 149, 0.3);">💃 SALSA</button>
+                <button onclick="selectGenre('pop')" class="flex-1 robot-btn text-[11px] py-1.5" style="color: #00FFE5; border-color: rgba(0, 255, 229, 0.3);">🎵 POP</button>
+                <button onclick="selectGenre('rock')" class="flex-1 robot-btn text-[11px] py-1.5" style="color: #B026FF; border-color: rgba(176, 38, 255, 0.3);">🎸 ROCK</button>
+            </div>
+
+            <div class="flex justify-around items-center mb-3 bg-black/60 rounded-full py-1.5 px-2 border border-[#00FFE5]/10">
+                <button onclick="prevStation()" class="robot-btn w-7 h-7 flex items-center justify-center text-sm">⏮</button>
+                <button onclick="randomStation()" class="robot-btn w-7 h-7 flex items-center justify-center text-sm">🎲</button>
+                <button onclick="nextStation()" class="robot-btn w-7 h-7 flex items-center justify-center text-sm">⏭</button>
+            </div>
+
+            <div class="mb-2">
+                <div class="text-[9px] text-[#00FFE5] mb-1 flex gap-2">
+                    <span>📡 EMISORAS</span>
+                    <span id="genreLabel" class="text-slate-400">salsa</span>
+                    <span class="ml-auto text-[#00FFE5] opacity-50" id="stationCount">0</span>
+                </div>
+                <div id="stationListRobot" class="station-scroll space-y-0.5 pr-1"></div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1 border-t border-[#00FFE5]/10">
+                <span id="volIconRobot" class="text-[#00FFE5] text-xs">🔊</span>
+                <input id="volSliderRobot" type="range" min="0" max="1" step="0.01" value="0.6" class="flex-1 h-1 rounded-full accent-[#00FFE5] bg-slate-700" style="accent-color: #00FFE5;">
+                <button onclick="minimizeRobotPanel()" class="robot-btn text-[10px] px-2 py-0.5">▼</button>
+            </div>
+        </div>
+    </div>
+    <audio id="radioAudioRobot" class="hidden"></audio>
+</div>
+
+<script>
+    // ==================== RADIO NEÓN ====================
+    const radioStationsDatabase = {
+        salsa: [
+            { name: "Zeno FM Salsa", url: "https://stream.zeno.fm/jepsiojbklltv" },
+            { name: "RCast Salsa HD", url: "https://stream3.rcast.net/60446/" },
+            { name: "El Pozo Salsa Live", url: "https://cast4.my-control-panel.com/proxy/elpozosalsa/stream" },
+            { name: "RCast Salsa Stream", url: "https://stream.rcast.net/60446" },
+            { name: "Panama Panama Streaming", url: "https://azura.panamastreaming.com/listen/salsa_106_radio/radio.mp3" },
+            { name: "La Radio SSL Online", url: "https://laradiossl.online:12010/stream" },
+            { name: "Zeno Live Salsa Wave", url: "https://stream.zenolive.com/tgzmw19rqrquv" },
+            { name: "StreamingHD Radio2", url: "https://radiohd2.streaminghd.co:7634/stream" }
+        ],
+        pop: [
+            { name: "Classic Pop Netradio", url: "https://netradio.classicpop.dk/classicpoptrekant" },
+            { name: "Pop31 Stream", url: "http://stream.pop31.com:8100/" },
+            { name: "Streamgates 100Britpop", url: "https://gb25.streamgates.net/radios-audio/100Britpop/icecast.audio" },
+            { name: "Live365 Pop Stream", url: "https://streaming.live365.com/a57693" },
+            { name: "RFM LMN Station", url: "https://rfm.lmn.fm/rfm-wr10.mp3" },
+            { name: "ILoveMusic New Pop", url: "https://play.ilovemusic.de/ilm_ilovenewpop/" },
+            { name: "Pure Pop Radio", url: "https://cheetah.streemlion.com/purepopradio" },
+            { name: "Zeno FM Hits", url: "https://stream.zeno.fm/2x2m1q526zmtv" },
+            { name: "Hitradio RTL Top40", url: "https://web.radio.hitradio-rtl.de/hrrtl-top40/stream/mp3" },
+            { name: "Only Hits Radio", url: "https://cdn.onlyhitsradio.net/tophits" }
+        ],
+        rock: [
+            { name: "Rock Antenne Hard Rock", url: "https://stream.rockantenne.de/rock-antenne-hard-rock/stream/mp3" },
+            { name: "Digital Rock Live", url: "http://5.9.16.111:10280/stream" },
+            { name: "Star FM Xmas", url: "https://stream.starfm.de/xmas/mp3-192/" },
+            { name: "Feierfreund Rockparty", url: "https://streams.feierfreund.de/rockparty/mp3-192/" },
+            { name: "Landeswelle Rockwelle", url: "https://frontend.streamonkey.net/landeswelle-rockwelle/stream/mp3" },
+            { name: "RadioKing Rockealo", url: "https://play.radioking.io/rockealo" },
+            { name: "Rock Antenne 80er Rock", url: "https://stream.rockantenne.de/80er-rock/stream/mp3" },
+            { name: "Klassik Radio Rock", url: "https://stream.klassikradio.de/klassikrock/mp3-192/" },
+            { name: "Rock Antenne Modern Rock", url: "https://stream.rockantenne.de/modern-rock/stream/mp3" },
+            { name: "Live365 Classic Rock", url: "https://streaming.live365.com/a24346" },
+            { name: "Star FM Sachsen", url: "http://stream.starfm.de/sachsen/mp3-192/" },
+            { name: "Rock Antenne Biker Rock", url: "https://stream.rockantenne.de/biker-rock/stream/mp3" },
+            { name: "Radio Bob Rockparty", url: "https://streams.radiobob.de/rockparty/mp3-192/" },
+            { name: "ABRadio Rock Zabava", url: "http://ice.abradio.cz:8000/rockzabava128.mp3" },
+            { name: "Rock Antenne Rockabilly", url: "https://stream.rockantenne.de/rockabilly/stream/mp3" },
+            { name: "Rock Antenne Rock'n'Roll", url: "https://stream.rockantenne.de/rockandroll/stream/mp3" },
+            { name: "Hemnos CDNStream", url: "https://hemnos.cdnstream.com/1881_128" }
+        ]
+    };
+
+    let currentGenreRobot = "salsa";
+    let currentStationIndexRobot = 0;
+    let radioExpandedRobot = false;
+    let radioAudioRobot = null;
+    let isPlayingRobot = false;
+
+    function toggleRadioExpand() {
+        const panel = document.getElementById('robotExpandedPanel');
+        radioExpandedRobot = !radioExpandedRobot;
+        panel.style.display = radioExpandedRobot ? "block" : "none";
+    }
+
+    function selectGenre(genre) {
+        currentGenreRobot = genre;
+        currentStationIndexRobot = 0;
+        renderStationListRobot();
+        const stations = radioStationsDatabase[genre];
+        if(stations && stations.length) loadStationRobot(0);
+        document.getElementById('genreLabel').innerHTML = genre;
+        document.getElementById('stationCount').innerHTML = stations ? stations.length : 0;
+    }
+
+    function nextStation() {
+        const stations = radioStationsDatabase[currentGenreRobot];
+        if(!stations || stations.length === 0) return;
+        let newIdx = currentStationIndexRobot + 1;
+        if(newIdx >= stations.length) newIdx = 0;
+        loadStationRobot(newIdx);
+    }
+    function prevStation() {
+        const stations = radioStationsDatabase[currentGenreRobot];
+        if(!stations || stations.length === 0) return;
+        let newIdx = currentStationIndexRobot - 1;
+        if(newIdx < 0) newIdx = stations.length - 1;
+        loadStationRobot(newIdx);
+    }
+    function randomStation() {
+        const stations = radioStationsDatabase[currentGenreRobot];
+        if(!stations || stations.length === 0) return;
+        const rand = Math.floor(Math.random() * stations.length);
+        loadStationRobot(rand);
+    }
+
+    function renderStationListRobot() {
+        const container = document.getElementById('stationListRobot');
+        const stations = radioStationsDatabase[currentGenreRobot] || [];
+        container.innerHTML = '';
+        stations.forEach((station, idx) => {
+            const btn = document.createElement('button');
+            btn.className = `station-item ${idx === currentStationIndexRobot ? 'active' : ''}`;
+            btn.innerHTML = `${idx+1}. ${station.name}`;
+            btn.onclick = () => loadStationRobot(idx);
+            container.appendChild(btn);
+        });
+        const statDiv = document.getElementById('radioStatusRobot');
+        if(statDiv) statDiv.innerHTML = `⚙️ ${currentGenreRobot.toUpperCase()} · ${stations.length} streams`;
+        document.getElementById('stationCount').innerHTML = stations.length;
+    }
+
+    function loadStationRobot(index) {
+        const stations = radioStationsDatabase[currentGenreRobot];
+        if(!stations || index >= stations.length) return;
+        currentStationIndexRobot = index;
+        const station = stations[currentStationIndexRobot];
+        if(radioAudioRobot) {
+            const wasPlaying = isPlayingRobot;
+            radioAudioRobot.pause();
+            radioAudioRobot.src = station.url;
+            radioAudioRobot.load();
+            document.getElementById('currentStationNameRobot').innerHTML = station.name;
+            if(wasPlaying) {
+                radioAudioRobot.play().catch(e => console.log);
+                isPlayingRobot = true;
+                document.getElementById('robotPlayBtn').innerHTML = '⏸️';
+                document.getElementById('radioStatusRobot').innerHTML = '🎧 NEON LIVE';
+            } else {
+                isPlayingRobot = false;
+                document.getElementById('robotPlayBtn').innerHTML = '▶️';
+            }
+        }
+        renderStationListRobot();
+    }
+
+    function togglePlayRadio() {
+        if(!radioAudioRobot) {
+            radioAudioRobot = document.getElementById('radioAudioRobot');
+            radioAudioRobot.volume = document.getElementById('volSliderRobot').value;
+        }
+        if(isPlayingRobot) {
+            radioAudioRobot.pause();
+            isPlayingRobot = false;
+            document.getElementById('robotPlayBtn').innerHTML = '▶️';
+            document.getElementById('radioStatusRobot').innerHTML = '⏸ PAUSE';
+        } else {
+            if(!radioAudioRobot.src) {
+                const stations = radioStationsDatabase[currentGenreRobot];
+                if(stations && stations.length) {
+                    radioAudioRobot.src = stations[0].url;
+                    radioAudioRobot.load();
+                    currentStationIndexRobot = 0;
+                    document.getElementById('currentStationNameRobot').innerHTML = stations[0].name;
+                    renderStationListRobot();
+                }
+            }
+            radioAudioRobot.play().then(() => {
+                isPlayingRobot = true;
+                document.getElementById('robotPlayBtn').innerHTML = '⏸️';
+                document.getElementById('radioStatusRobot').innerHTML = '🤖 NEON TRANSMITIENDO';
+            }).catch(() => {
+                document.getElementById('radioStatusRobot').innerHTML = '⚠️ ERROR';
+            });
+        }
+    }
+
+    function minimizeRobotPanel() {
+        if(radioExpandedRobot) toggleRadioExpand();
+    }
+
+    (function initRobotRadio() {
+        radioAudioRobot = document.getElementById('radioAudioRobot');
+        const volSlider = document.getElementById('volSliderRobot');
+        const volIcon = document.getElementById('volIconRobot');
+        volSlider.addEventListener('input', (e) => {
+            if(radioAudioRobot) radioAudioRobot.volume = parseFloat(e.target.value);
+            const val = parseFloat(e.target.value);
+            volIcon.innerText = val > 0.7 ? "🔊" : (val > 0.2 ? "🔉" : "🔈");
+        });
+        radioAudioRobot.volume = 0.6;
+        const initialStations = radioStationsDatabase.salsa;
+        if(initialStations.length) {
+            radioAudioRobot.src = initialStations[0].url;
+            radioAudioRobot.load();
+            document.getElementById('currentStationNameRobot').innerHTML = initialStations[0].name;
+            currentStationIndexRobot = 0;
+        }
+        renderStationListRobot();
+        document.getElementById('genreLabel').innerHTML = 'salsa';
+        document.getElementById('stationCount').innerHTML = initialStations.length;
+    })();
+
+    // ==================== EDP SOLVER ====================
+    let tipoEDPActual = 'calor';
+    let metodoActual = 'explicito';
+
+    window.addEventListener('load', () => {
+        const qrContainer = document.getElementById("qrcode");
+        new QRCode(qrContainer, {
+            text: "https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364",
+            width: 90, height: 90, colorDark: "#1E3A8A", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H
+        });
+        cargarEjemploPDF();
+        resolverEDP();
+    });
+
+    function cargarEjemploPDF() {
+        document.getElementById('input-N').value = 5;
+        document.getElementById('input-M').value = 1;
+        document.getElementById('input-L').value = 1;
+        document.getElementById('input-T').value = 0.1;
+        document.getElementById('input-alfa').value = 0.1;
+        document.getElementById('input-f').value = '100*x*(1-x)';
+        document.getElementById('input-metodo').value = 'explicito';
+        document.getElementById('input-T1').value = 0;
+        document.getElementById('input-T2').value = 0;
+        setTipoEDP('calor');
+        resolverEDP();
+    }
+
+    function cargarEjemploOnda() {
+        document.getElementById('input-N').value = 20;
+        document.getElementById('input-M').value = 100;
+        document.getElementById('input-L').value = 1;
+        document.getElementById('input-T').value = 1;
+        document.getElementById('input-f').value = 'sin(pi*x)';
+        document.getElementById('input-c').value = 1;
+        document.getElementById('input-cfl').value = 0.5;
+        document.getElementById('input-T1').value = 0;
+        document.getElementById('input-T2').value = 0;
+        document.getElementById('input-alfa').value = 1;
+        document.getElementById('input-metodo').value = 'explicito';
+        setTipoEDP('onda');
+        resolverEDP();
+    }
+
+    function setTipoEDP(tipo) {
+        tipoEDPActual = tipo;
+        const tipos = ['calor', 'onda', 'laplace'];
+        tipos.forEach(id => {
+            document.getElementById('tipo-' + id).classList.toggle('active', id === tipo);
+        });
+
+        document.getElementById('param-alfa').style.display = (tipo === 'calor') ? 'grid' : 'none';
+        document.getElementById('param-onda').style.display = (tipo === 'onda') ? 'grid' : 'none';
+
+        const labelMap = {
+            'calor': 'CALOR',
+            'onda': 'ONDA',
+            'laplace': 'LAPLACE'
+        };
+        document.getElementById('label-metodo-grande').innerText = labelMap[tipo] || tipo.toUpperCase();
+
+        resolverEDP();
+    }
+
+    function resolverEDP() {
+        try {
+            const N = parseInt(document.getElementById('input-N').value);
+            let M = parseInt(document.getElementById('input-M').value);
+            const L = parseFloat(document.getElementById('input-L').value);
+            const T = parseFloat(document.getElementById('input-T').value);
+            const T1 = parseFloat(document.getElementById('input-T1').value);
+            const T2 = parseFloat(document.getElementById('input-T2').value);
+            const f_str = document.getElementById('input-f').value;
+
+            if (N < 2 || M < 1) {
+                alert('N debe ser >= 2 y M >= 1');
+                return;
+            }
+
+            const dx = L / N;
+            let dt = T / M;
+            let ajusteRealizado = false;
+            let mensajeAjuste = '';
+
+            // ===== FUNCIÓN f_eval CORREGIDA =====
+            const f_eval = (x) => {
+                try {
+                    // Reemplazar ^ por ** para math.js
+                    let expr = f_str.replace(/\^/g, '**');
+                    // Reemplazar funciones comunes
+                    expr = expr.replace(/pi/g, 'pi');
+                    // Usar math.evaluate directamente
+                    const resultado = math.evaluate(expr, {x: x});
+                    return resultado;
+                } catch (e) {
+                    console.error('Error evaluando f(x):', e);
+                    return 0;
+                }
+            };
+
+            let resultado = null;
+            let titulo = '';
+            let valores_x = [];
+            let valores_t = [];
+
+            if (tipoEDPActual === 'calor') {
+                // Ecuación de Calor
+                const alfa = parseFloat(document.getElementById('input-alfa').value);
+                const metodo = document.getElementById('input-metodo').value;
+                metodoActual = metodo;
+                const s = (alfa * dt) / (dx * dx);
+
+                // Inicializar matriz u(i,j) donde i = espacial, j = temporal
+                let u = Array.from({length: M + 1}, () => Array(N + 1).fill(0));
+
+                // Condición inicial: u(i,0) = f(x_i)
+                for (let i = 0; i <= N; i++) {
+                    const x = i * dx;
+                    u[0][i] = f_eval(x);
+                }
+
+                // Condiciones de frontera EDITABLES: u(0,j) = T1, u(N,j) = T2
+                for (let j = 0; j <= M; j++) {
+                    u[j][0] = T1;
+                    u[j][N] = T2;
+                }
+
+                if (metodo === 'explicito') {
+                    for (let j = 0; j < M; j++) {
+                        for (let i = 1; i < N; i++) {
+                            u[j+1][i] = s * u[j][i-1] + (1 - 2*s) * u[j][i] + s * u[j][i+1];
+                        }
+                    }
+                    document.getElementById('info-estabilidad').innerHTML = `s = ${s.toFixed(4)} ${s <= 0.5 ? '✅' : '⚠️'}`;
+                } else if (metodo === 'implicito') {
+                    for (let j = 0; j < M; j++) {
+                        const A = [];
+                        const b = [];
+                        for (let i = 1; i < N; i++) {
+                            b[i-1] = u[j][i];
+                        }
+                        for (let i = 0; i < N-1; i++) {
+                            A[i] = [];
+                            for (let k = 0; k < N-1; k++) {
+                                if (i === k) A[i][k] = 1 + 2*s;
+                                else if (Math.abs(i - k) === 1) A[i][k] = -s;
+                                else A[i][k] = 0;
+                            }
+                        }
+                        const sol = resolverTridiagonal(A, b);
+                        for (let i = 1; i < N; i++) {
+                            u[j+1][i] = sol[i-1];
+                        }
+                    }
+                    document.getElementById('info-estabilidad').innerHTML = `s = ${s.toFixed(4)} (incondicional)`;
+                } else if (metodo === 'crank') {
+                    for (let j = 0; j < M; j++) {
+                        const A = [];
+                        const b = [];
+                        for (let i = 1; i < N; i++) {
+                            b[i-1] = (s/2)*u[j][i-1] + (1-s)*u[j][i] + (s/2)*u[j][i+1];
+                        }
+                        for (let i = 0; i < N-1; i++) {
+                            A[i] = [];
+                            for (let k = 0; k < N-1; k++) {
+                                if (i === k) A[i][k] = 1 + s;
+                                else if (Math.abs(i - k) === 1) A[i][k] = -s/2;
+                                else A[i][k] = 0;
+                            }
+                        }
+                        const sol = resolverTridiagonal(A, b);
+                        for (let i = 1; i < N; i++) {
+                            u[j+1][i] = sol[i-1];
+                        }
+                    }
+                    document.getElementById('info-estabilidad').innerHTML = `s = ${s.toFixed(4)} (incondicional)`;
+                }
+
+                resultado = u;
+                titulo = `Ecuación de Calor - ${metodo.toUpperCase()}`;
+                valores_x = Array.from({length: N + 1}, (_, i) => i * dx);
+                valores_t = Array.from({length: M + 1}, (_, i) => i * dt);
+
+                const idx_centro = Math.floor(N / 2);
+                const val = u[M][idx_centro];
+                document.getElementById('valor-respuesta').innerHTML = val.toFixed(6);
+
+                mostrarTabla(u, valores_x, valores_t, 'j');
+                graficarCalor(resultado, valores_x, valores_t, titulo);
+
+            } else if (tipoEDPActual === 'onda') {
+                // ===== ECUACIÓN DE ONDA =====
+                const c = parseFloat(document.getElementById('input-c').value);
+                let cfl = parseFloat(document.getElementById('input-cfl').value);
+                
+                // Validar CFL
+                if (cfl > 1) {
+                    cfl = 0.5;
+                    document.getElementById('input-cfl').value = 0.5;
+                    ajusteRealizado = true;
+                    mensajeAjuste = 'CFL ajustado a 0.5 (debe ser ≤ 1)';
+                }
+                
+                // Calcular dt requerido para estabilidad
+                const dt_estable = (cfl * dx) / c;
+                
+                // Verificar si necesitamos ajustar M
+                if (dt_estable > T / M) {
+                    const M_auto = Math.ceil(T / dt_estable);
+                    const M_nuevo = Math.max(M_auto, 2);
+                    if (M_nuevo > M) {
+                        M = M_nuevo;
+                        document.getElementById('input-M').value = M;
+                        dt = T / M;
+                        ajusteRealizado = true;
+                        mensajeAjuste = `M ajustado a ${M} para cumplir CFL ≤ 1`;
+                    }
+                } else {
+                    dt = T / M;
+                }
+                
+                // Mostrar alerta si hubo ajuste
+                const alerta = document.getElementById('alerta-auto');
+                if (ajusteRealizado) {
+                    alerta.style.display = 'block';
+                    document.getElementById('mensaje-auto').innerText = mensajeAjuste;
+                    setTimeout(() => { alerta.style.display = 'none'; }, 5000);
+                } else {
+                    alerta.style.display = 'none';
+                }
+
+                const r = (c * dt / dx);
+                const Nt = M;
+                
+                let u = Array.from({length: Nt + 1}, () => Array(N + 1).fill(0));
+                
+                // Condición inicial: u(x,0) = f(x)
+                for (let i = 0; i <= N; i++) {
+                    const x = i * dx;
+                    u[0][i] = f_eval(x);
+                }
+
+                // Condiciones de frontera
+                for (let n = 0; n <= Nt; n++) {
+                    u[n][0] = T1;
+                    u[n][N] = T2;
+                }
+
+                // Primer paso
+                for (let i = 1; i < N; i++) {
+                    u[1][i] = u[0][i] + 0.5 * r * r * (u[0][i-1] - 2*u[0][i] + u[0][i+1]);
+                }
+
+                // Esquema de diferencias finitas para onda
+                for (let n = 1; n < Nt; n++) {
+                    for (let i = 1; i < N; i++) {
+                        u[n+1][i] = 2*u[n][i] - u[n-1][i] + r*r*(u[n][i-1] - 2*u[n][i] + u[n][i+1]);
+                    }
+                    u[n+1][0] = T1;
+                    u[n+1][N] = T2;
+                }
+
+                resultado = u;
+                titulo = 'Ecuación de Onda';
+                valores_x = Array.from({length: N + 1}, (_, i) => i * dx);
+                valores_t = Array.from({length: Nt + 1}, (_, i) => i * dt);
+
+                const idx_centro = Math.floor(N / 2);
+                const val = u[Nt][idx_centro];
+                document.getElementById('valor-respuesta').innerHTML = val.toFixed(6);
+
+                const cfl_real = (c * dt / dx);
+                document.getElementById('info-estabilidad').innerHTML = `CFL = ${cfl_real.toFixed(3)} ${cfl_real <= 1 ? '✅' : '⚠️'}`;
+                mostrarTabla(u, valores_x, valores_t, 'n');
+                graficarOnda(resultado, valores_x, valores_t, titulo);
+
+            } else if (tipoEDPActual === 'laplace') {
+                // Ecuación de Laplace
+                const maxIter = 10000;
+                const tol = 1e-6;
+                const Ny = M;
+                const Ly = T;
+                const dy = Ly / Ny;
+                
+                let u = Array.from({length: N + 1}, () => Array(Ny + 1).fill(0));
+                
+                for (let i = 0; i <= N; i++) {
+                    const x = i * dx;
+                    u[i][0] = f_eval(x);
+                    u[i][Ny] = f_eval(x);
+                }
+                for (let j = 0; j <= Ny; j++) {
+                    u[0][j] = T1;
+                    u[N][j] = T2;
+                }
+
+                let iter = 0;
+                let error = 1;
+                while (iter < maxIter && error > tol) {
+                    error = 0;
+                    for (let i = 1; i < N; i++) {
+                        for (let j = 1; j < Ny; j++) {
+                            const u_old = u[i][j];
+                            u[i][j] = 0.25 * (u[i-1][j] + u[i+1][j] + u[i][j-1] + u[i][j+1]);
+                            error = Math.max(error, Math.abs(u[i][j] - u_old));
+                        }
+                    }
+                    iter++;
+                }
+
+                resultado = u;
+                titulo = `Ecuación de Laplace (${iter} iteraciones)`;
+                valores_x = Array.from({length: N + 1}, (_, i) => i * dx);
+                valores_t = Array.from({length: Ny + 1}, (_, i) => i * dy);
+
+                const idx_centro_x = Math.floor(N / 2);
+                const idx_centro_y = Math.floor(Ny / 2);
+                const val = u[idx_centro_x][idx_centro_y];
+                document.getElementById('valor-respuesta').innerHTML = val.toFixed(6);
+                document.getElementById('info-estabilidad').innerHTML = `✅ Convergente (${iter} iteraciones)`;
+
+                graficarLaplace(resultado, valores_x, valores_t, titulo);
+                mostrarTablaLaplace(u, valores_x, valores_t);
+            }
+
+        } catch (e) {
+            document.getElementById('valor-respuesta').innerHTML = "Error";
+            console.error(e);
+            alert('Error: ' + e.message);
+        }
+    }
+
+    function graficarCalor(resultado, valores_x, valores_t, titulo) {
+        const traces = [];
+        traces.push({
+            x: valores_x,
+            y: resultado[0],
+            name: 't = 0',
+            type: 'scatter',
+            mode: 'lines+markers',
+            line: { color: '#3B82F6', width: 2 },
+            marker: { color: '#3B82F6', size: 6 }
+        });
+
+        if (resultado.length > 1) {
+            const ultimo = resultado.length - 1;
+            traces.push({
+                x: valores_x,
+                y: resultado[ultimo],
+                name: `t = ${valores_t[ultimo].toFixed(4)}`,
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#EF4444', width: 2 },
+                marker: { color: '#EF4444', size: 6 }
+            });
+        }
+
+        const layout = {
+            title: titulo,
+            xaxis: { title: 'x (posición)' },
+            yaxis: { title: 'u(x,t) (temperatura)' },
+            margin: { l: 60, r: 30, b: 50, t: 50 },
+            legend: { orientation: 'h', y: -0.2 },
+            hovermode: 'x unified'
+        };
+
+        Plotly.newPlot('grafico-container', traces, layout, {responsive: true});
+    }
+
+    function graficarOnda(resultado, valores_x, valores_t, titulo) {
+        const traces = [];
+        const saltos = Math.min(5, resultado.length - 1);
+        const indices = [];
+        for (let i = 0; i <= saltos; i++) {
+            indices.push(Math.floor(i * (resultado.length - 1) / saltos));
+        }
+        
+        const colores = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
+        indices.forEach((idx, pos) => {
+            traces.push({
+                x: valores_x,
+                y: resultado[idx],
+                name: `t = ${valores_t[idx].toFixed(3)}`,
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: colores[pos % colores.length], width: 2 }
+            });
+        });
+
+        const layout = {
+            title: titulo,
+            xaxis: { title: 'x (posición)' },
+            yaxis: { title: 'u(x,t) (desplazamiento)' },
+            margin: { l: 60, r: 30, b: 50, t: 50 },
+            legend: { orientation: 'h', y: -0.2 },
+            hovermode: 'x unified'
+        };
+
+        Plotly.newPlot('grafico-container', traces, layout, {responsive: true});
+    }
+
+    function graficarLaplace(resultado, valores_x, valores_y, titulo) {
+        const trace = {
+            z: resultado,
+            x: valores_x,
+            y: valores_y,
+            type: 'surface',
+            colorscale: 'Viridis',
+            colorbar: { title: 'Potencial' }
+        };
+
+        const layout = {
+            title: titulo,
+            scene: {
+                xaxis: { title: 'x' },
+                yaxis: { title: 'y' },
+                zaxis: { title: 'u(x,y)' }
+            },
+            margin: { l: 0, r: 0, b: 0, t: 50 }
+        };
+
+        Plotly.newPlot('grafico-container', [trace], layout, {responsive: true});
+    }
+
+    function mostrarTabla(u, valores_x, valores_t, label_temporal) {
+        const head = document.getElementById('tabla-head');
+        const body = document.getElementById('tabla-body');
+
+        let headHTML = '<tr><th class="px-4 py-2 font-bold text-slate-600 border-b text-[10px] uppercase">i</th>';
+        headHTML += '<th class="px-4 py-2 font-bold text-slate-600 border-b text-[10px] uppercase">x</th>';
+        const maxJ = Math.min(u.length - 1, 10);
+        for (let j = 0; j <= maxJ; j++) {
+            headHTML += `<th class="px-4 py-2 font-bold text-slate-600 border-b text-[10px] uppercase">${label_temporal}=${j}</th>`;
+        }
+        if (u.length - 1 > 10) {
+            headHTML += `<th class="px-4 py-2 font-bold text-slate-600 border-b text-[10px] uppercase">...</th>`;
+        }
+        headHTML += '</tr>';
+        head.innerHTML = headHTML;
+
+        let bodyHTML = '';
+        const maxI = Math.min(u[0].length - 1, 20);
+        for (let i = 0; i <= maxI; i++) {
+            bodyHTML += `<tr class="${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">`;
+            bodyHTML += `<td class="px-4 py-2 font-medium text-slate-600 text-[11px]">${i}</td>`;
+            bodyHTML += `<td class="px-4 py-2 font-medium text-slate-600 text-[11px]">${valores_x[i].toFixed(3)}</td>`;
+            for (let j = 0; j <= maxJ; j++) {
+                const val = u[j][i];
+                const color = (i === 0 || i === u[0].length - 1) ? 'text-slate-400' : 'text-blue-600';
+                bodyHTML += `<td class="px-4 py-2 font-mono text-[11px] ${color}">${val.toFixed(4)}</td>`;
+            }
+            if (u.length - 1 > 10) {
+                bodyHTML += `<td class="px-4 py-2 text-slate-400 text-[11px]">...</td>`;
+            }
+            bodyHTML += '</tr>';
+        }
+        if (u[0].length - 1 > 20) {
+            bodyHTML += `<tr class="bg-slate-50"><td colspan="100" class="px-4 py-2 text-center text-slate-400 text-[11px]">... más puntos espaciales ...</td></tr>`;
+        }
+        body.innerHTML = bodyHTML;
+    }
+
+    function mostrarTablaLaplace(u, valores_x, valores_y) {
+        const head = document.getElementById('tabla-head');
+        const body = document.getElementById('tabla-body');
+
+        let headHTML = '<tr><th class="px-4 py-2 font-bold text-slate-600 border-b text-[10px] uppercase">i\\j</th>';
+        const maxJ = Math.min(u[0].length - 1, 10);
+        for (let j = 0; j <= maxJ; j++) {
+            headHTML += `<th class="px-4 py-2 font-bold text-slate-600 border-b text-[10px] uppercase">${valores_y[j].toFixed(2)}</th>`;
+        }
+        if (u[0].length - 1 > 10) {
+            headHTML += `<th class="px-4 py-2 font-bold text-slate-600 border-b text-[10px] uppercase">...</th>`;
+        }
+        headHTML += '</tr>';
+        head.innerHTML = headHTML;
+
+        let bodyHTML = '';
+        const maxI = Math.min(u.length - 1, 20);
+        for (let i = 0; i <= maxI; i++) {
+            bodyHTML += `<tr class="${i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}">`;
+            bodyHTML += `<td class="px-4 py-2 font-medium text-slate-600 text-[11px]">${valores_x[i].toFixed(2)}</td>`;
+            for (let j = 0; j <= maxJ; j++) {
+                const val = u[i][j];
+                bodyHTML += `<td class="px-4 py-2 font-mono text-[11px] text-blue-600">${val.toFixed(2)}</td>`;
+            }
+            if (u[0].length - 1 > 10) {
+                bodyHTML += `<td class="px-4 py-2 text-slate-400 text-[11px]">...</td>`;
+            }
+            bodyHTML += '</tr>';
+        }
+        body.innerHTML = bodyHTML;
+    }
+
+    function resolverTridiagonal(A, b) {
+        const n = b.length;
+        if (n === 0) return [];
+        const c = [];
+        const d = [];
+        for (let i = 0; i < n-1; i++) c[i] = A[i][i+1];
+        for (let i = 0; i < n; i++) d[i] = A[i][i];
+        const e = [];
+        for (let i = 1; i < n; i++) e[i] = A[i][i-1];
+
+        const c_prime = [];
+        const d_prime = [];
+        c_prime[0] = c[0] / d[0];
+        d_prime[0] = b[0] / d[0];
+        for (let i = 1; i < n; i++) {
+            const denom = d[i] - e[i] * c_prime[i-1];
+            if (i < n-1) c_prime[i] = c[i] / denom;
+            d_prime[i] = (b[i] - e[i] * d_prime[i-1]) / denom;
+        }
+
+        const x = Array(n).fill(0);
+        x[n-1] = d_prime[n-1];
+        for (let i = n-2; i >= 0; i--) {
+            x[i] = d_prime[i] - c_prime[i] * x[i+1];
+        }
+        return x;
+    }
+
+    document.getElementById('btn-resolver').onclick = resolverEDP;
+
+    document.querySelectorAll('#input-N, #input-M, #input-L, #input-T, #input-T1, #input-T2, #input-alfa, #input-metodo, #input-c, #input-cfl, #input-f').forEach(el => {
+        el.addEventListener('change', resolverEDP);
+    });
+
+    // Inicializar
+    resolverEDP();
+</script>
+
+</body>
+</html>
