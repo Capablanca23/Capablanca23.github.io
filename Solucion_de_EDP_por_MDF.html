@@ -416,6 +416,47 @@
             text-shadow: 0 0 10px rgba(0, 255, 229, 0.5), 0 0 20px rgba(0, 255, 229, 0.3);
         }
 
+        /* Nuevo estilo para el slider de M */
+        .slider-m-container {
+            background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #E2E8F0;
+        }
+        .slider-m-container input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .slider-m-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+            border: 2px solid #3B82F6;
+            transition: all 0.2s ease;
+        }
+        .slider-m-container input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.6);
+        }
+        .slider-m-container input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            border: 2px solid #3B82F6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+
         @media (max-width: 640px) {
             .robot-head { width: 320px; right: 12px; bottom: 12px; }
             .resultado-valor { font-size: 1.5rem; }
@@ -436,6 +477,15 @@
             padding: 8px 12px;
             font-size: 11px;
             color: #92400E;
+            display: none;
+        }
+        .alerta-estabilidad {
+            background: #FEE2E2;
+            border: 1px solid #EF4444;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #991B1B;
             display: none;
         }
     </style>
@@ -526,12 +576,25 @@
                                     <span class="icono-info">?</span>
                                     <span class="tooltip-text">
                                         <span class="tooltip-title">Número de pasos de tiempo</span>
-                                        ∆t = T/M. Para el PDF: M = 1 (solo un paso)
-                                        <span class="tooltip-ejemplo">Ej: 1 → solo t₁</span>
+                                        ∆t = T/M. A mayor M, mayor precisión temporal.
+                                        <span class="tooltip-ejemplo">Ej: 10 → ∆t = 0.01</span>
                                     </span>
                                 </span>
                             </label>
                             <input type="number" id="input-M" value="1" step="1" min="1" class="input-moderno w-full">
+                        </div>
+                    </div>
+
+                    <!-- Slider interactivo para M -->
+                    <div class="slider-m-container">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            Ajuste rápido de M: <span id="slider-m-value" class="text-blue-600">1</span>
+                        </label>
+                        <input type="range" id="slider-M" min="1" max="50" value="1" step="1"
+                               oninput="document.getElementById('input-M').value = this.value; document.getElementById('slider-m-value').textContent = this.value; resolverEDP()">
+                        <div class="flex justify-between text-[8px] text-slate-400 mt-1">
+                            <span>1</span>
+                            <span>50</span>
                         </div>
                     </div>
 
@@ -673,9 +736,12 @@
                         <p class="text-[9px] text-slate-400 mt-1">Usa x como variable. Ej: sin(pi*x), x*(1-x), 100*x*(1-x)</p>
                     </div>
 
-                    <!-- Alerta de ajuste automático -->
+                    <!-- Alertas -->
                     <div id="alerta-auto" class="alerta-auto">
                         ⚡ <span id="mensaje-auto">Ajuste automático realizado</span>
+                    </div>
+                    <div id="alerta-estabilidad" class="alerta-estabilidad">
+                        ⚠️ <span id="mensaje-estabilidad">s > 0.5, método inestable</span>
                     </div>
 
                     <!-- Botón resolver -->
@@ -1006,6 +1072,8 @@
         document.getElementById('input-metodo').value = 'explicito';
         document.getElementById('input-T1').value = 0;
         document.getElementById('input-T2').value = 0;
+        document.getElementById('slider-M').value = 1;
+        document.getElementById('slider-m-value').textContent = '1';
         setTipoEDP('calor');
         resolverEDP();
     }
@@ -1022,6 +1090,8 @@
         document.getElementById('input-T2').value = 0;
         document.getElementById('input-alfa').value = 1;
         document.getElementById('input-metodo').value = 'explicito';
+        document.getElementById('slider-M').value = 100;
+        document.getElementById('slider-m-value').textContent = '100';
         setTipoEDP('onda');
         resolverEDP();
     }
@@ -1069,11 +1139,8 @@
             // ===== FUNCIÓN f_eval CORREGIDA =====
             const f_eval = (x) => {
                 try {
-                    // Reemplazar ^ por ** para math.js
                     let expr = f_str.replace(/\^/g, '**');
-                    // Reemplazar funciones comunes
                     expr = expr.replace(/pi/g, 'pi');
-                    // Usar math.evaluate directamente
                     const resultado = math.evaluate(expr, {x: x});
                     return resultado;
                 } catch (e) {
@@ -1088,25 +1155,36 @@
             let valores_t = [];
 
             if (tipoEDPActual === 'calor') {
-                // Ecuación de Calor
+                // ===== ECUACIÓN DE CALOR CORREGIDA =====
                 const alfa = parseFloat(document.getElementById('input-alfa').value);
                 const metodo = document.getElementById('input-metodo').value;
                 metodoActual = metodo;
                 const s = (alfa * dt) / (dx * dx);
 
                 // Inicializar matriz u(i,j) donde i = espacial, j = temporal
+                // CORREGIDO: usar M+1 para tener todos los pasos de tiempo
                 let u = Array.from({length: M + 1}, () => Array(N + 1).fill(0));
 
-                // Condición inicial: u(i,0) = f(x_i)
+                // Condición inicial: u(0,i) = f(x_i)
                 for (let i = 0; i <= N; i++) {
                     const x = i * dx;
                     u[0][i] = f_eval(x);
                 }
 
-                // Condiciones de frontera EDITABLES: u(0,j) = T1, u(N,j) = T2
+                // Condiciones de frontera
                 for (let j = 0; j <= M; j++) {
                     u[j][0] = T1;
                     u[j][N] = T2;
+                }
+
+                // Mostrar alerta de estabilidad
+                const alertaEstabilidad = document.getElementById('alerta-estabilidad');
+                if (metodo === 'explicito' && s > 0.5) {
+                    alertaEstabilidad.style.display = 'block';
+                    document.getElementById('mensaje-estabilidad').textContent = 
+                        `s = ${s.toFixed(4)} > 0.5 → MÉTODO INESTABLE. Aumenta M o reduce T.`;
+                } else {
+                    alertaEstabilidad.style.display = 'none';
                 }
 
                 if (metodo === 'explicito') {
@@ -1177,7 +1255,6 @@
                 const c = parseFloat(document.getElementById('input-c').value);
                 let cfl = parseFloat(document.getElementById('input-cfl').value);
                 
-                // Validar CFL
                 if (cfl > 1) {
                     cfl = 0.5;
                     document.getElementById('input-cfl').value = 0.5;
@@ -1185,16 +1262,15 @@
                     mensajeAjuste = 'CFL ajustado a 0.5 (debe ser ≤ 1)';
                 }
                 
-                // Calcular dt requerido para estabilidad
                 const dt_estable = (cfl * dx) / c;
-                
-                // Verificar si necesitamos ajustar M
                 if (dt_estable > T / M) {
                     const M_auto = Math.ceil(T / dt_estable);
                     const M_nuevo = Math.max(M_auto, 2);
                     if (M_nuevo > M) {
                         M = M_nuevo;
                         document.getElementById('input-M').value = M;
+                        document.getElementById('slider-M').value = M;
+                        document.getElementById('slider-m-value').textContent = M;
                         dt = T / M;
                         ajusteRealizado = true;
                         mensajeAjuste = `M ajustado a ${M} para cumplir CFL ≤ 1`;
@@ -1203,7 +1279,6 @@
                     dt = T / M;
                 }
                 
-                // Mostrar alerta si hubo ajuste
                 const alerta = document.getElementById('alerta-auto');
                 if (ajusteRealizado) {
                     alerta.style.display = 'block';
@@ -1218,24 +1293,20 @@
                 
                 let u = Array.from({length: Nt + 1}, () => Array(N + 1).fill(0));
                 
-                // Condición inicial: u(x,0) = f(x)
                 for (let i = 0; i <= N; i++) {
                     const x = i * dx;
                     u[0][i] = f_eval(x);
                 }
 
-                // Condiciones de frontera
                 for (let n = 0; n <= Nt; n++) {
                     u[n][0] = T1;
                     u[n][N] = T2;
                 }
 
-                // Primer paso
                 for (let i = 1; i < N; i++) {
                     u[1][i] = u[0][i] + 0.5 * r * r * (u[0][i-1] - 2*u[0][i] + u[0][i+1]);
                 }
 
-                // Esquema de diferencias finitas para onda
                 for (let n = 1; n < Nt; n++) {
                     for (let i = 1; i < N; i++) {
                         u[n+1][i] = 2*u[n][i] - u[n-1][i] + r*r*(u[n][i-1] - 2*u[n][i] + u[n][i+1]);
@@ -1316,28 +1387,28 @@
 
     function graficarCalor(resultado, valores_x, valores_t, titulo) {
         const traces = [];
-        traces.push({
-            x: valores_x,
-            y: resultado[0],
-            name: 't = 0',
-            type: 'scatter',
-            mode: 'lines+markers',
-            line: { color: '#3B82F6', width: 2 },
-            marker: { color: '#3B82F6', size: 6 }
-        });
-
-        if (resultado.length > 1) {
-            const ultimo = resultado.length - 1;
+        // Mostrar múltiples curvas intermedias
+        const numCurvas = Math.min(6, resultado.length);
+        const indices = [];
+        for (let i = 0; i < numCurvas; i++) {
+            indices.push(Math.floor(i * (resultado.length - 1) / (numCurvas - 1 || 1)));
+        }
+        
+        const colores = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
+        indices.forEach((idx, pos) => {
+            const label = idx === 0 ? 't = 0' : 
+                         idx === resultado.length - 1 ? `t = ${valores_t[idx].toFixed(4)}` :
+                         `t = ${valores_t[idx].toFixed(4)}`;
             traces.push({
                 x: valores_x,
-                y: resultado[ultimo],
-                name: `t = ${valores_t[ultimo].toFixed(4)}`,
+                y: resultado[idx],
+                name: label,
                 type: 'scatter',
                 mode: 'lines+markers',
-                line: { color: '#EF4444', width: 2 },
-                marker: { color: '#EF4444', size: 6 }
+                line: { color: colores[pos % colores.length], width: 2 },
+                marker: { color: colores[pos % colores.length], size: 5 }
             });
-        }
+        });
 
         const layout = {
             title: titulo,
@@ -1353,10 +1424,10 @@
 
     function graficarOnda(resultado, valores_x, valores_t, titulo) {
         const traces = [];
-        const saltos = Math.min(5, resultado.length - 1);
+        const saltos = Math.min(6, resultado.length - 1);
         const indices = [];
         for (let i = 0; i <= saltos; i++) {
-            indices.push(Math.floor(i * (resultado.length - 1) / saltos));
+            indices.push(Math.floor(i * (resultado.length - 1) / (saltos || 1)));
         }
         
         const colores = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
@@ -1508,6 +1579,7 @@
 
     document.querySelectorAll('#input-N, #input-M, #input-L, #input-T, #input-T1, #input-T2, #input-alfa, #input-metodo, #input-c, #input-cfl, #input-f').forEach(el => {
         el.addEventListener('change', resolverEDP);
+        el.addEventListener('input', resolverEDP);
     });
 
     // Inicializar
