@@ -236,7 +236,6 @@
             height: 350px;
         }
 
-        /* Botón de acción en menú */
         .btn-menu {
             background: linear-gradient(135deg, #1E293B, #0F172A);
             border: none;
@@ -388,6 +387,9 @@
             <button onclick="mostrarPanelEliminar()" class="btn-menu btn-menu-delete text-[11px] py-1.5 px-4 flex items-center gap-1">
                 🗑️ Eliminar libro
             </button>
+            
+            <!-- ELEMENTO AGREGADO: filtroActivo -->
+            <span id="filtroActivo" class="text-[10px] text-slate-400 ml-2">Mostrando todos los libros</span>
         </div>
     </div>
 
@@ -569,7 +571,7 @@
 
 <script>
 // ============================================================
-// DATOS COMPLETOS
+// DATOS COMPLETOS (CORREGIDOS - SIN DUPLICADOS)
 // ============================================================
 const librosData = [
     { N: 1, Autor: "A. I. Oparin", Titulo: "El origen de la vida", Pais: "Rusia", Anio: 1936, Idioma: "Ruso" },
@@ -845,8 +847,8 @@ const librosData = [
     { N: 271, Autor: "Steven Heggings", Titulo: "50 rechazos que hicieron historia", Pais: "Inglaterra", Anio: 2014, Idioma: "Inglés" },
     { N: 272, Autor: "Stefan Zweig", Titulo: "Momentos estelares de la humanidad", Pais: "Austria", Anio: 1927, Idioma: "Alemán" },
     { N: 273, Autor: "Yuval Noah Harari", Titulo: "21 lecciones para el siglo XXI", Pais: "Israel", Anio: 2018, Idioma: "Hebreo" },
-    { N: 274, Autor: "Antoine de Saint-Exupéry", Titulo: "El Principito", Pais: "Francia", Anio: 1943, Idioma: "Francés" },
-    { N: 275, Autor: "David Lagercrantz", Titulo: "La chica que vivió dos veces", Pais: "Suecia", Anio: 2019, Idioma: "Sueco" },
+    // N° 274 ELIMINADO (El Principito duplicado, ya existe en N° 29)
+    { N: 275, Autor: "David Lagercrantz", Titulo: "La chica que vivió dos veces", Pais: "Suecia", Anio: 2017, Idioma: "Sueco" }, // Año corregido: 2017
     { N: 276, Autor: "Maurice Leblanc", Titulo: "El tapón de cristal", Pais: "Francia", Anio: 1912, Idioma: "Francés" },
     { N: 277, Autor: "José Antonio Lozano Teruel", Titulo: "100 relatos científicos que debemos conocer", Pais: "España", Anio: 2020, Idioma: "Español" },
     { N: 278, Autor: "Maurice Leblanc", Titulo: "Arsenio Lupin, caballero y ladrón", Pais: "Francia", Anio: 1907, Idioma: "Francés" },
@@ -921,7 +923,7 @@ const librosData = [
     { N: 347, Autor: "Lara Ríos", Titulo: "Pantalones cortos", Pais: "Perú", Anio: 2010, Idioma: "Español" },
     { N: 348, Autor: "Alejandro Dumas", Titulo: "Crímenes célebres. Los Medicis", Pais: "Francia", Anio: 1840, Idioma: "Francés" },
     { N: 349, Autor: "Roald Dahl", Titulo: "Las brujas", Pais: "Inglaterra", Anio: 1983, Idioma: "Inglés" },
-    { N: 350, Autor: "Carlo Collodi", Titulo: "Las aventuras de Pinocho", Pais: "Italia", Anio: 1883, Idioma: "Italiano" },
+    // N° 350 ELIMINADO (Pinocho duplicado, ya existe en N° 322)
     { N: 351, Autor: "EPA", Titulo: "Understanding Oil Spills And Oil Spill Response", Pais: "Estados Unidos", Anio: 1999, Idioma: "Inglés" },
     { N: 352, Autor: "Agustina Bazterrica", Titulo: "Cadaver exquisito", Pais: "Argentina", Anio: 2017, Idioma: "Español" },
     { N: 353, Autor: "Paul Strathern", Titulo: "Einstein y la relatividad", Pais: "Inglaterra", Anio: 1996, Idioma: "Inglés" },
@@ -1063,7 +1065,12 @@ function filtrarTabla() {
     let texto = 'Mostrando todos los libros';
     if (filtro) texto = `🔍 Buscando: "${filtro}"`;
     if (pais) texto += ` · País: ${pais}`;
-    document.getElementById('filtroActivo').textContent = texto;
+    
+    // ELEMENTO CORREGIDO: Verificar que exista antes de usarlo
+    let filtroActivo = document.getElementById('filtroActivo');
+    if (filtroActivo) {
+        filtroActivo.textContent = texto;
+    }
 }
 
 function ordenarPor(campo) {
@@ -1363,7 +1370,12 @@ window.addEventListener('load', () => {
     document.getElementById('ordenAscDesc').textContent = '⬆ Ascendente';
     actualizarEstadisticas();
     renderizarTabla();
-    document.getElementById('filtroActivo').textContent = 'Mostrando todos los libros';
+    
+    // Mostrar mensaje inicial en filtroActivo
+    let filtroActivo = document.getElementById('filtroActivo');
+    if (filtroActivo) {
+        filtroActivo.textContent = 'Mostrando todos los libros';
+    }
 });
 </script>
 
