@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>📚 Libros Leídos - Dr. Ronald Rodriguez</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%); min-height: 100vh; padding: 20px; }
+        .header-premium { background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #312E81 100%); border-radius: 24px; box-shadow: 0 20px 60px -15px rgba(15, 23, 42, 0.4); position: relative; overflow: hidden; }
+        .header-premium::before { content: ''; position: absolute; top: -50%; right: -20%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%); border-radius: 50%; }
+        .header-premium::after { content: ''; position: absolute; bottom: -40%; left: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%); border-radius: 50%; }
+        .stats-card { background: rgba(255, 255, 255, 0.06); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 16px 20px; transition: all 0.3s ease; }
+        .stats-card:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
+        .input-moderno { background: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 12px; padding: 10px 14px; transition: all 0.2s ease; font-size: 14px; }
+        .input-moderno:focus { border-color: #6366F1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); outline: none; background: white; }
+        .btn-primary { background: linear-gradient(135deg, #6366F1, #8B5CF6); border: none; color: white; font-weight: 700; padding: 12px 24px; border-radius: 14px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); cursor: pointer; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4); }
+        .btn-success { background: linear-gradient(135deg, #22C55E, #16A34A); border: none; color: white; font-weight: 700; padding: 12px 24px; border-radius: 14px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3); cursor: pointer; }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4); }
+        .btn-secondary { background: #E2E8F0; border: none; color: #1E293B; font-weight: 600; padding: 10px 20px; border-radius: 12px; transition: all 0.3s ease; cursor: pointer; }
+        .btn-secondary:hover { background: #CBD5E1; transform: translateY(-2px); }
+        .tabla-container { border-radius: 16px; overflow: hidden; border: 1px solid #E2E8F0; max-height: 550px; overflow-y: auto; }
+        .tabla-container thead { position: sticky; top: 0; z-index: 10; background: linear-gradient(135deg, #F1F5F9, #E2E8F0); }
+        .tabla-container tbody tr:nth-child(even) { background: #FAFAFA; }
+        .tabla-container tbody tr:nth-child(odd) { background: #FFFFFF; }
+        .tabla-container tbody tr:hover { background: #EEF2FF; }
+        .tabla-container::-webkit-scrollbar { width: 6px; }
+        .tabla-container::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 8px; }
+        .tabla-container::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 8px; }
+        .filtro-input { background: white; border: 2px solid #E2E8F0; border-radius: 12px; padding: 8px 14px; transition: all 0.2s ease; font-size: 13px; width: 100%; }
+        .filtro-input:focus { border-color: #6366F1; outline: none; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: white; border-radius: 24px; padding: 32px; max-width: 600px; width: 95%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3); animation: modalIn 0.3s ease; }
+        @keyframes modalIn { from { transform: scale(0.95) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        .badge-pais { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; background: #EEF2FF; color: #4338CA; }
+        .total-books { font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #6366F1, #8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .orden-btn { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 2px solid #E2E8F0; background: white; transition: all 0.2s ease; cursor: pointer; }
+        .orden-btn:hover { border-color: #6366F1; background: #EEF2FF; }
+        .orden-btn.active { border-color: #6366F1; background: #6366F1; color: white; }
+        .grafico-stats { background: white; border-radius: 16px; border: 1px solid #E2E8F0; padding: 16px; height: 350px; }
+        .btn-menu { background: linear-gradient(135deg, #1E293B, #0F172A); border: none; color: white; font-weight: 700; padding: 10px 20px; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.3); cursor: pointer; font-size: 13px; }
+        .btn-menu:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(15, 23, 42, 0.4); }
+        .btn-menu-edit { background: linear-gradient(135deg, #F59E0B, #D97706); }
+        .btn-menu-edit:hover { box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4); }
+        .btn-menu-delete { background: linear-gradient(135deg, #EF4444, #DC2626); }
+        .btn-menu-delete:hover { box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4); }
+        @media (max-width: 768px) { .tabla-container { max-height: 400px; } .modal-content { padding: 20px; } .total-books { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+
+<div class="max-w-7xl mx-auto">
+    <!-- HEADER -->
+    <header class="header-premium p-6 md:p-8 mb-8 flex flex-col md:flex-row items-center gap-6 text-white relative">
+        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" class="flex-shrink-0 relative z-10">
+            <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3 hover:bg-white/20 transition-all duration-300 shadow-lg">
+                <div id="qrcode" class="w-24 h-24 flex items-center justify-center bg-white rounded-xl p-1"></div>
+            </div>
+            <p class="text-[10px] text-center text-blue-300 mt-2 font-bold uppercase tracking-widest">CTI Vitae</p>
+        </a>
+        <div class="flex-1 text-center md:text-left relative z-10">
+            <div class="flex items-center justify-center md:justify-start gap-3 mb-1">
+                <span class="bg-blue-500/20 text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full border border-blue-400/30 uppercase tracking-wider">📚 Biblioteca Personal</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-black leading-tight tracking-tight bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">Libros que he leído</h1>
+            <p class="text-xl font-medium text-blue-200/90">Dr. Ronald F. Rodriguez Espinoza</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-3">
+                <span class="bg-white/10 text-white/80 text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">📖 Lectura</span>
+                <span class="bg-white/10 text-white/80 text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">🌍 Cultura</span>
+                <span class="bg-white/10 text-white/80 text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">🔬 Ciencia</span>
+                <span class="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded-full">📚 +360 libros</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 text-center">
+            <div class="total-books" id="totalLibros">0</div>
+            <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Libros leídos</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 text-center">
+            <div class="text-2xl font-bold text-indigo-600" id="totalAutores">0</div>
+            <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Autores</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 text-center">
+            <div class="text-2xl font-bold text-emerald-600" id="totalPaises">0</div>
+            <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Países</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 text-center">
+            <div class="text-2xl font-bold text-purple-600" id="totalIdiomas">0</div>
+            <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Idiomas</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 text-center">
+            <div class="text-2xl font-bold text-rose-600" id="topAutor">-</div>
+            <div class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Autor más leído</div>
+        </div>
+    </div>
+
+    <!-- CONTROLES -->
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-4 md:p-6 mb-6">
+        <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                <div class="relative flex-1 min-w-[180px]">
+                    <input type="text" id="filtroBusqueda" placeholder="🔍 Buscar libro, autor o país..." class="filtro-input" oninput="filtrarTabla()">
+                </div>
+                <select id="filtroPais" class="filtro-input min-w-[120px]" onchange="filtrarTabla()">
+                    <option value="">Todos los países</option>
+                </select>
+            </div>
+            
+            <!-- Botones Públicos -->
+            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                <button onclick="toggleAdmin()" id="btnAdmin" class="btn-secondary text-sm flex items-center gap-1">
+                    🔒 Modo Admin
+                </button>
+                <button onclick="mostrarGraficos()" class="btn-secondary text-sm flex items-center gap-1">📊 Estadísticas</button>
+                <button onclick="exportarCSV()" class="btn-secondary text-sm flex items-center gap-1">📥 CSV</button>
+            </div>
+        </div>
+
+        <!-- CONTROLES DE ADMINISTRADOR (Ocultos por defecto) -->
+        <div id="adminControls" class="flex flex-wrap gap-2 w-full md:w-auto mt-4 pt-4 border-t border-slate-100" style="display: none;">
+            <span class="text-[10px] font-bold text-green-600 uppercase tracking-wider flex items-center gap-1 mr-2">✅ Modo Admin Activo</span>
+            <button onclick="abrirModal(null)" class="btn-primary w-full md:w-auto flex items-center justify-center gap-2 text-sm">
+                <span>➕</span> Agregar libro
+            </button>
+            <button onclick="mostrarPanelEdicion()" class="btn-menu btn-menu-edit text-sm py-2 px-4 flex items-center gap-1">
+                ✏️ Editar
+            </button>
+            <button onclick="mostrarPanelEliminar()" class="btn-menu btn-menu-delete text-sm py-2 px-4 flex items-center gap-1">
+                🗑️ Eliminar
+            </button>
+        </div>
+
+        <!-- Ordenamiento -->
+        <div class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ordenar por:</span>
+            <button onclick="ordenarPor('N')" class="orden-btn active" data-orden="N">#</button>
+            <button onclick="ordenarPor('Autor')" class="orden-btn" data-orden="Autor">Autor</button>
+            <button onclick="ordenarPor('Pais')" class="orden-btn" data-orden="Pais">País</button>
+            <button onclick="ordenarPor('Anio')" class="orden-btn" data-orden="Anio">Año</button>
+            <button onclick="ordenarPor('Titulo')" class="orden-btn" data-orden="Titulo">Título</button>
+            <span id="ordenAscDesc" class="text-[10px] text-slate-400 ml-2">⬆ Ascendente</span>
+            <span id="filtroActivo" class="text-[10px] text-slate-400 ml-4">Mostrando todos los libros</span>
+        </div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+        <div class="tabla-container">
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-3 font-bold text-slate-600 text-[10px] uppercase tracking-wider border-b">#</th>
+                        <th class="px-4 py-3 font-bold text-slate-600 text-[10px] uppercase tracking-wider border-b">Autor</th>
+                        <th class="px-4 py-3 font-bold text-slate-600 text-[10px] uppercase tracking-wider border-b">Título</th>
+                        <th class="px-4 py-3 font-bold text-slate-600 text-[10px] uppercase tracking-wider border-b">País</th>
+                        <th class="px-4 py-3 font-bold text-slate-600 text-[10px] uppercase tracking-wider border-b">Año</th>
+                        <th class="px-4 py-3 font-bold text-slate-600 text-[10px] uppercase tracking-wider border-b">Idioma</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-body"></tbody>
+            </table>
+        </div>
+        <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+            <span id="infoPaginacion">Mostrando 0 libros</span>
+            <div class="flex gap-4">
+                <span id="infoPaises">0 países</span>
+                <span id="infoIdiomas">0 idiomas</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODALES (Agregar/Editar, Eliminar, Editar Info, Gráficos) -->
+<!-- Se mantienen idénticos a tu versión original, solo se ajustó la lógica JS -->
+<div class="modal-overlay" id="modalAgregar">
+    <div class="modal-content">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span id="modalIcon">📖</span> <span id="modalTitulo">Nuevo libro leído</span></h2>
+            <button onclick="cerrarModal()" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+        </div>
+        <form id="formLibro" onsubmit="guardarLibro(event)">
+            <input type="hidden" id="editIndex" value="-1">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Autor *</label><input type="text" id="inputAutor" required class="input-moderno w-full" placeholder="Ej: Gabriel García Márquez"></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Título *</label><input type="text" id="inputTitulo" required class="input-moderno w-full" placeholder="Ej: Cien años de soledad"></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">País</label><input type="text" id="inputPais" class="input-moderno w-full" placeholder="Ej: Colombia" list="listaPaises"><datalist id="listaPaises"></datalist></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Año de publicación</label><input type="number" id="inputAnio" class="input-moderno w-full" placeholder="Ej: 1967" min="1000" max="2100"></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Idioma original</label><input type="text" id="inputIdioma" class="input-moderno w-full" placeholder="Ej: Español" list="listaIdiomas"><datalist id="listaIdiomas"><option value="Español"><option value="Inglés"><option value="Francés"><option value="Alemán"><option value="Ruso"><option value="Portugués"><option value="Italiano"><option value="Quechua"><option value="Japonés"><option value="Latín"></datalist></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nº</label><input type="number" id="inputNumero" class="input-moderno w-full" placeholder="Auto-asignado" min="1" readonly></div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button type="submit" class="btn-success flex-1 flex items-center justify-center gap-2">💾 Guardar en base de datos</button>
+                <button type="button" onclick="cerrarModal()" class="btn-secondary">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalEliminar">
+    <div class="modal-content" style="max-width: 450px;">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span>🗑️</span> Eliminar libro</h2>
+            <button onclick="cerrarModalEliminar()" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+        </div>
+        <p class="text-sm text-slate-600 mb-4">Ingresa el número del libro y la contraseña para eliminarlo permanentemente de la base de datos.</p>
+        <form onsubmit="eliminarLibroConfirm(event)">
+            <div class="space-y-4">
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Número del libro</label><input type="number" id="inputEliminarNumero" class="input-moderno w-full" placeholder="Ej: 42" min="1" required></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Contraseña</label><input type="password" id="inputEliminarPassword" class="input-moderno w-full" placeholder="Contraseña" required></div>
+                <div class="flex gap-3 mt-2">
+                    <button type="submit" class="btn-menu btn-menu-delete flex-1 text-center py-2.5">🗑️ Eliminar</button>
+                    <button type="button" onclick="cerrarModalEliminar()" class="btn-secondary">Cancelar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalEditar">
+    <div class="modal-content" style="max-width: 450px;">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span>✏️</span> Editar libro</h2>
+            <button onclick="cerrarModalEditar()" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+        </div>
+        <p class="text-sm text-slate-600 mb-4">Ingresa el número del libro y la contraseña para cargar sus datos y editarlos.</p>
+        <form onsubmit="editarLibroConfirm(event)">
+            <div class="space-y-4">
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Número del libro</label><input type="number" id="inputEditarNumero" class="input-moderno w-full" placeholder="Ej: 42" min="1" required></div>
+                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Contraseña</label><input type="password" id="inputEditarPassword" class="input-moderno w-full" placeholder="Contraseña" required></div>
+                <div class="flex gap-3 mt-2">
+                    <button type="submit" class="btn-menu btn-menu-edit flex-1 text-center py-2.5">✏️ Cargar para editar</button>
+                    <button type="button" onclick="cerrarModalEditar()" class="btn-secondary">Cancelar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalGraficos">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span>📊</span> Estadísticas de lectura</h2>
+            <button onclick="cerrarGraficos()" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grafico-stats" id="graficoPaises"></div>
+            <div class="grafico-stats" id="graficoIdiomas"></div>
+            <div class="grafico-stats md:col-span-2" id="graficoAnios"></div>
+            <div class="grafico-stats md:col-span-2" id="graficoAutores"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURACIÓN Y ESTADO
+// ============================================================
+let libros = [];
+let nextId = 1;
+let ordenActual = 'N';
+let ordenAsc = true;
+let isAdmin = false; // Estado del modo administrador
+
+const ADMIN_PASSWORD = 'ferd23';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvcnyl2A_9wKhArpuen6-1gErFBcWn_UAmK1tRVNXi5t1fF-_PYBMnSIP9efLOLTjE/exec'; 
+
+// ============================================================
+// FUNCIONES DE ADMINISTRADOR
+// ============================================================
+function toggleAdmin() {
+    if (isAdmin) {
+        isAdmin = false;
+        document.getElementById('adminControls').style.display = 'none';
+        document.getElementById('btnAdmin').innerHTML = '🔒 Modo Admin';
+        document.getElementById('btnAdmin').classList.remove('bg-green-100', 'text-green-700', 'border-green-300');
+        return;
+    }
+    
+    const pass = prompt('🔒 Ingrese contraseña de administrador:');
+    if (pass === ADMIN_PASSWORD) {
+        isAdmin = true;
+        document.getElementById('adminControls').style.display = 'flex';
+        document.getElementById('btnAdmin').innerHTML = '🔓 Salir de Admin';
+        document.getElementById('btnAdmin').classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-300');
+        alert('✅ Modo administrador activado. Ahora puedes Agregar, Editar y Eliminar.');
+    } else if (pass !== null) {
+        alert('❌ Contraseña incorrecta');
+    }
+}
+
+// ============================================================
+// FUNCIONES DE BASE DE DATOS (FETCH)
+// ============================================================
+async function cargarDatos() {
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const data = await response.json();
+        libros = data;
+        nextId = libros.length > 0 ? Math.max(...libros.map(l => l.N)) + 1 : 1;
+        actualizarEstadisticas();
+        renderizarTabla();
+    } catch (error) {
+        console.error("Error cargando datos:", error);
+        alert('⚠️ No se pudo conectar con la base de datos. Mostrando datos en caché.');
+    }
+}
+
+async function guardarLibro(e) {
+    e.preventDefault();
+    if (!isAdmin) { alert('🔒 Acceso denegado. Activa el modo administrador primero.'); return; }
+    
+    const autor = document.getElementById('inputAutor').value.trim();
+    const titulo = document.getElementById('inputTitulo').value.trim();
+    const pais = document.getElementById('inputPais').value.trim() || 'Desconocido';
+    const anio = parseInt(document.getElementById('inputAnio').value) || null;
+    const idioma = document.getElementById('inputIdioma').value.trim() || 'Desconocido';
+    const editIndex = parseInt(document.getElementById('editIndex').value);
+
+    if (!autor || !titulo) { alert('Autor y Título son obligatorios'); return; }
+
+    const btnGuardar = e.target.querySelector('button[type="submit"]');
+    const textoOriginal = btnGuardar.innerHTML;
+    btnGuardar.innerHTML = '💾 Guardando...';
+    btnGuardar.disabled = true;
+
+    const action = editIndex > 0 ? 'edit' : 'add';
+    const libroData = { 
+        action: action,
+        password: ADMIN_PASSWORD, // Se valida en el servidor
+        N: editIndex > 0 ? editIndex : nextId,
+        Autor: autor, Titulo: titulo, Pais: pais, Anio: anio, Idioma: idioma 
+    };
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(libroData) });
+        const result = await response.json();
+        
+        if (result.success) {
+            if (action === 'add') { libros.push(libroData); nextId++; } 
+            else { const idx = libros.findIndex(l => l.N === editIndex); if (idx !== -1) libros[idx] = libroData; }
+            
+            localStorage.setItem('misLibros', JSON.stringify(libros));
+            actualizarEstadisticas();
+            renderizarTabla();
+            cerrarModal();
+            alert('✅ Operación exitosa en la base de datos.');
+        } else {
+            alert('❌ Error del servidor: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error de conexión. Verifica tu internet.');
+    } finally {
+        btnGuardar.innerHTML = textoOriginal;
+        btnGuardar.disabled = false;
+    }
+}
+
+async function eliminarLibroConfirm(e) {
+    e.preventDefault();
+    if (!isAdmin) { alert('🔒 Acceso denegado. Activa el modo administrador primero.'); return; }
+    
+    const numero = parseInt(document.getElementById('inputEliminarNumero').value);
+    const password = document.getElementById('inputEliminarPassword').value;
+
+    if (password !== ADMIN_PASSWORD) { alert('❌ Contraseña incorrecta'); return; }
+    if (!confirm(`¿Eliminar permanentemente el libro #${numero} de la base de datos?`)) return;
+
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '🗑️ Eliminando...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'delete', password: ADMIN_PASSWORD, N: numero })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            libros = libros.filter(l => l.N !== numero);
+            localStorage.setItem('misLibros', JSON.stringify(libros));
+            actualizarEstadisticas();
+            renderizarTabla();
+            cerrarModalEliminar();
+            alert('✅ Libro eliminado permanentemente de la base de datos.');
+        } else {
+            alert('❌ Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('❌ Error de conexión al eliminar.');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+function editarLibroConfirm(e) {
+    e.preventDefault();
+    if (!isAdmin) { alert('🔒 Acceso denegado. Activa el modo administrador primero.'); return; }
+    
+    const numero = parseInt(document.getElementById('inputEditarNumero').value);
+    const password = document.getElementById('inputEditarPassword').value;
+
+    if (password !== ADMIN_PASSWORD) { alert('❌ Contraseña incorrecta'); return; }
+
+    const libro = libros.find(l => l.N === numero);
+    if (!libro) { alert(`❌ No se encontró el libro #${numero}`); return; }
+
+    cerrarModalEditar();
+    abrirModal(libro);
+}
+
+// ============================================================
+// FUNCIONES DE INTERFAZ (UI)
+// ============================================================
+function actualizarEstadisticas() {
+    document.getElementById('totalLibros').textContent = libros.length;
+    document.getElementById('totalAutores').textContent = new Set(libros.map(l => l.Autor)).size;
+    document.getElementById('totalPaises').textContent = new Set(libros.map(l => l.Pais).filter(p => p)).size;
+    document.getElementById('totalIdiomas').textContent = new Set(libros.map(l => l.Idioma).filter(i => i)).size;
+
+    const conteoAutores = {};
+    libros.forEach(l => { conteoAutores[l.Autor] = (conteoAutores[l.Autor] || 0) + 1; });
+    let topAutor = '-', maxCount = 0;
+    for (const [autor, count] of Object.entries(conteoAutores)) {
+        if (count > maxCount) { maxCount = count; topAutor = autor; }
+    }
+    document.getElementById('topAutor').textContent = topAutor !== '-' ? `${topAutor} (${maxCount})` : '-';
+
+    const selectPais = document.getElementById('filtroPais');
+    const currentVal = selectPais.value;
+    const opciones = new Set(libros.map(l => l.Pais).filter(p => p));
+    selectPais.innerHTML = '<option value="">Todos los países</option>';
+    [...opciones].sort().forEach(p => { selectPais.innerHTML += `<option value="${p}">${p}</option>`; });
+    if (currentVal) selectPais.value = currentVal;
+
+    const datalist = document.getElementById('listaPaises');
+    datalist.innerHTML = '';
+    [...opciones].sort().forEach(p => { datalist.innerHTML += `<option value="${p}">`; });
+}
+
+function renderizarTabla() {
+    const body = document.getElementById('tabla-body');
+    const filtro = document.getElementById('filtroBusqueda').value.toLowerCase();
+    const filtroPais = document.getElementById('filtroPais').value;
+
+    let filtrados = libros.filter(libro => {
+        const matchTexto = libro.Autor.toLowerCase().includes(filtro) || libro.Titulo.toLowerCase().includes(filtro) || (libro.Pais && libro.Pais.toLowerCase().includes(filtro));
+        const matchPais = !filtroPais || libro.Pais === filtroPais;
+        return matchTexto && matchPais;
+    });
+
+    filtrados.sort((a, b) => {
+        if (ordenActual === 'N' || ordenActual === 'Anio') {
+            const valA = a[ordenActual] || -9999, valB = b[ordenActual] || -9999;
+            return ordenAsc ? valA - valB : valB - valA;
+        }
+        const valA = String(a[ordenActual] || '').toLowerCase();
+        const valB = String(b[ordenActual] || '').toLowerCase();
+        return ordenAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    });
+
+    if (filtrados.length === 0) {
+        body.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400 text-sm">📭 No se encontraron libros</td></tr>`;
+        return;
+    }
+
+    body.innerHTML = filtrados.map(libro => `
+        <tr class="hover:bg-indigo-50 transition-colors">
+            <td class="px-4 py-2.5 text-slate-500 text-xs font-medium">${libro.N}</td>
+            <td class="px-4 py-2.5 text-slate-800 text-xs font-medium">${libro.Autor}</td>
+            <td class="px-4 py-2.5 text-slate-700 text-xs">${libro.Titulo}</td>
+            <td class="px-4 py-2.5"><span class="badge-pais">${libro.Pais || '—'}</span></td>
+            <td class="px-4 py-2.5 text-slate-600 text-xs">${libro.Anio || '—'}</td>
+            <td class="px-4 py-2.5 text-slate-600 text-xs">${libro.Idioma || '—'}</td>
+        </tr>
+    `).join('');
+
+    document.getElementById('infoPaginacion').textContent = `Mostrando ${filtrados.length} de ${libros.length} libros`;
+    document.getElementById('infoPaises').textContent = `${new Set(filtrados.map(l => l.Pais).filter(p => p)).size} países`;
+    document.getElementById('infoIdiomas').textContent = `${new Set(filtrados.map(l => l.Idioma).filter(i => i)).size} idiomas`;
+}
+
+function filtrarTabla() { renderizarTabla(); }
+function ordenarPor(campo) {
+    if (ordenActual === campo) ordenAsc = !ordenAsc;
+    else { ordenActual = campo; ordenAsc = true; }
+    document.querySelectorAll('.orden-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-orden="${campo}"]`).classList.add('active');
+    document.getElementById('ordenAscDesc').textContent = ordenAsc ? '⬆ Ascendente' : '⬇ Descendente';
+    renderizarTabla();
+}
+
+function abrirModal(libro) {
+    const editIndex = document.getElementById('editIndex');
+    if (libro) {
+        document.getElementById('modalTitulo').textContent = 'Editar libro';
+        document.getElementById('modalIcon').textContent = '✏️';
+        editIndex.value = libro.N;
+        document.getElementById('inputAutor').value = libro.Autor;
+        document.getElementById('inputTitulo').value = libro.Titulo;
+        document.getElementById('inputPais').value = libro.Pais || '';
+        document.getElementById('inputAnio').value = libro.Anio || '';
+        document.getElementById('inputIdioma').value = libro.Idioma || '';
+        document.getElementById('inputNumero').value = libro.N;
+    } else {
+        document.getElementById('modalTitulo').textContent = 'Nuevo libro leído';
+        document.getElementById('modalIcon').textContent = '📖';
+        editIndex.value = '-1';
+        document.getElementById('formLibro').reset();
+        document.getElementById('inputNumero').value = nextId;
+    }
+    document.getElementById('modalAgregar').classList.add('active');
+}
+function cerrarModal() { document.getElementById('modalAgregar').classList.remove('active'); }
+function mostrarPanelEliminar() { document.getElementById('modalEliminar').classList.add('active'); }
+function cerrarModalEliminar() { document.getElementById('modalEliminar').classList.remove('active'); document.getElementById('inputEliminarNumero').value = ''; document.getElementById('inputEliminarPassword').value = ''; }
+function mostrarPanelEdicion() { document.getElementById('modalEditar').classList.add('active'); }
+function cerrarModalEditar() { document.getElementById('modalEditar').classList.remove('active'); document.getElementById('inputEditarNumero').value = ''; document.getElementById('inputEditarPassword').value = ''; }
+
+function mostrarGraficos() {
+    document.getElementById('modalGraficos').classList.add('active');
+    setTimeout(() => {
+        const contar = (campo) => Object.entries(libros.reduce((acc, l) => { if(l[campo]) acc[l[campo]] = (acc[l[campo]]||0)+1; return acc; }, {})).sort((a,b)=>b[1]-a[1]);
+        
+        const paises = contar('Pais').slice(0, 15);
+        Plotly.newPlot('graficoPaises', [{ x: paises.map(p=>p[0]), y: paises.map(p=>p[1]), type: 'bar', marker: {color: '#6366F1'} }], { title: 'Libros por País', margin: {b: 80}, height: 280 }, {responsive: true});
+
+        const idiomas = contar('Idioma').slice(0, 12);
+        Plotly.newPlot('graficoIdiomas', [{ labels: idiomas.map(i=>i[0]), values: idiomas.map(i=>i[1]), type: 'pie' }], { title: 'Libros por Idioma', height: 280 }, {responsive: true});
+
+        const decadas = Object.entries(libros.reduce((acc, l) => { if(l.Anio && l.Anio > 0) { const d = Math.floor(l.Anio/10)*10; acc[d] = (acc[d]||0)+1; } return acc; }, {})).sort((a,b)=>a[0]-b[0]);
+        Plotly.newPlot('graficoAnios', [{ x: decadas.map(d=>`${d[0]}s`), y: decadas.map(d=>d[1]), type: 'bar', marker: {color: '#10B981'} }], { title: 'Libros por Década', margin: {b: 60}, height: 280 }, {responsive: true});
+
+        const autores = contar('Autor').slice(0, 15);
+        Plotly.newPlot('graficoAutores', [{ x: autores.map(a=>a[0]), y: autores.map(a=>a[1]), type: 'bar', marker: {color: '#F59E0B'} }], { title: 'Autores más leídos', margin: {l: 100, b: 80}, height: 280 }, {responsive: true});
+    }, 300);
+}
+function cerrarGraficos() { document.getElementById('modalGraficos').classList.remove('active'); }
+
+function exportarCSV() {
+    const headers = ['Nº', 'Autor', 'Título', 'País', 'Año', 'Idioma original'];
+    const rows = libros.map(l => [l.N, `"${l.Autor}"`, `"${l.Titulo}"`, `"${l.Pais || ''}"`, l.Anio || '', `"${l.Idioma || ''}"`]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Libros_Leidos_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+}
+
+// Cerrar modales al hacer clic fuera
+['modalAgregar', 'modalGraficos', 'modalEliminar', 'modalEditar'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
+});
+
+window.addEventListener('load', () => {
+    new QRCode(document.getElementById("qrcode"), { text: "https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364", width: 90, height: 90, colorDark: "#1E3A8A", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+    cargarDatos();
+});
+</script>
+</body>
+</html>
