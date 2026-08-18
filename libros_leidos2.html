@@ -388,7 +388,6 @@
                 🗑️ Eliminar libro
             </button>
             
-            <!-- ELEMENTO AGREGADO: filtroActivo -->
             <span id="filtroActivo" class="text-[10px] text-slate-400 ml-2">Mostrando todos los libros</span>
         </div>
     </div>
@@ -571,7 +570,7 @@
 
 <script>
 // ============================================================
-// DATOS COMPLETOS (CORREGIDOS - SIN DUPLICADOS)
+// DATOS COMPLETOS - RENUMERADOS DEL 1 AL 373
 // ============================================================
 const librosData = [
     { N: 1, Autor: "A. I. Oparin", Titulo: "El origen de la vida", Pais: "Rusia", Anio: 1936, Idioma: "Ruso" },
@@ -601,368 +600,385 @@ const librosData = [
     { N: 25, Autor: "Anónimo", Titulo: "Cantar de Mio Cid", Pais: "España", Anio: 1200, Idioma: "Castellano" },
     { N: 26, Autor: "Anónimo", Titulo: "Ollantay", Pais: "Perú", Anio: 1400, Idioma: "Quechua" },
     { N: 27, Autor: "Anónimo", Titulo: "La canción de rolando", Pais: "Francia", Anio: 1100, Idioma: "Francés" },
-    { N: 28, Autor: "Anónimo", Titulo: "Las mil y una noches", Pais: "Persia", Anio: 800, Idioma: "Persa" },
-    { N: 29, Autor: "Antoine de Saint Exupery", Titulo: "El Principito", Pais: "Francia", Anio: 1943, Idioma: "Francés" },
-    { N: 30, Autor: "Antón Chejov", Titulo: "Antología de Cuentos", Pais: "Rusia", Anio: 1888, Idioma: "Ruso" },
-    { N: 31, Autor: "Antón Chéjov", Titulo: "La dama del perrito y otros cuentos", Pais: "Rusia", Anio: 1899, Idioma: "Ruso" },
-    { N: 32, Autor: "Arthur Conan Doyle", Titulo: "El regreso de Sherlock Holmes", Pais: "Inglaterra", Anio: 1903, Idioma: "Inglés" },
-    { N: 33, Autor: "Arturo D. Hernández", Titulo: "Sangama", Pais: "Perú", Anio: 1942, Idioma: "Español" },
-    { N: 34, Autor: "Benito Pérez Galdós", Titulo: "Marianela", Pais: "España", Anio: 1878, Idioma: "Español" },
-    { N: 35, Autor: "Bertolt Bretcht", Titulo: "Madre coraje y sus hijos", Pais: "Alemania", Anio: 1941, Idioma: "Alemán" },
-    { N: 36, Autor: "Betty Bertinetti M.", Titulo: "Inspiración", Pais: "Estados Unidos", Anio: 1985, Idioma: "Inglés" },
-    { N: 37, Autor: "Carlos Cuauhtémoc S.", Titulo: "Contraveneno", Pais: "México", Anio: 1990, Idioma: "Español" },
-    { N: 38, Autor: "Carlos Cuauhtémoc S.", Titulo: "La fuerza de Sheccid", Pais: "México", Anio: 1988, Idioma: "Español" },
-    { N: 39, Autor: "Carlos Cuauhtémoc S.", Titulo: "Volar sobre el pantano", Pais: "México", Anio: 1992, Idioma: "Español" },
-    { N: 40, Autor: "Carlos Cuauhtémoc S.", Titulo: "Dirigentes del mundo futuro", Pais: "México", Anio: 1995, Idioma: "Español" },
-    { N: 41, Autor: "Carlos Luis Fallas", Titulo: "Gentes y Gentecillas", Pais: "Costa Rica", Anio: 1947, Idioma: "Español" },
-    { N: 42, Autor: "César Blondet S.", Titulo: "Jesús de Nazaret", Pais: "Perú", Anio: 1980, Idioma: "Español" },
-    { N: 43, Autor: "César Vallejo", Titulo: "Tungsteno", Pais: "Perú", Anio: 1931, Idioma: "Español" },
-    { N: 44, Autor: "César Vallejo", Titulo: "Los heraldos negros", Pais: "Perú", Anio: 1919, Idioma: "Español" },
-    { N: 45, Autor: "César Vallejo", Titulo: "Fabla salvaje", Pais: "Perú", Anio: 1923, Idioma: "Español" },
-    { N: 46, Autor: "César Vallejo", Titulo: "Hacia el reino de los sciris", Pais: "Perú", Anio: 1928, Idioma: "Español" },
-    { N: 47, Autor: "César Vallejo", Titulo: "Trilce", Pais: "Perú", Anio: 1922, Idioma: "Español" },
-    { N: 48, Autor: "Charles Darwin", Titulo: "El origen de las Especies", Pais: "Inglaterra", Anio: 1859, Idioma: "Inglés" },
-    { N: 49, Autor: "Charles Darwin", Titulo: "El origen del hombre", Pais: "Inglaterra", Anio: 1871, Idioma: "Inglés" },
-    { N: 50, Autor: "Charles Dickens", Titulo: "Historia de dos ciudades", Pais: "Inglaterra", Anio: 1859, Idioma: "Inglés" },
-    { N: 51, Autor: "Charles Dickens", Titulo: "Fantasmas de Navidad", Pais: "Inglaterra", Anio: 1843, Idioma: "Inglés" },
-    { N: 52, Autor: "Charles Hoy Fort", Titulo: "El libro de los condenados", Pais: "Estados Unidos", Anio: 1919, Idioma: "Inglés" },
-    { N: 53, Autor: "Chinguiz Aitmátov", Titulo: "Dzhamilia", Pais: "Kirguistán", Anio: 1958, Idioma: "Ruso" },
-    { N: 54, Autor: "Chinguiz Aitmátov", Titulo: "Adiós, Gulsarí", Pais: "Kirguistán", Anio: 1966, Idioma: "Ruso" },
-    { N: 55, Autor: "Chinguiz Aitmátov", Titulo: "El primer maestro", Pais: "Kirguistán", Anio: 1962, Idioma: "Ruso" },
-    { N: 56, Autor: "Ciro Alegría", Titulo: "El mundo es ancho y ajeno", Pais: "Perú", Anio: 1941, Idioma: "Español" },
-    { N: 57, Autor: "Ciro Alegría", Titulo: "Los perros hambrientos", Pais: "Perú", Anio: 1939, Idioma: "Español" },
-    { N: 58, Autor: "Ciro Alegría", Titulo: "La serpiente de oro", Pais: "Perú", Anio: 1935, Idioma: "Español" },
-    { N: 59, Autor: "Ciro Alegría", Titulo: "Cuentos y leyendas americanos", Pais: "Perú", Anio: 1945, Idioma: "Español" },
-    { N: 60, Autor: "Clorinda Matto de Turner", Titulo: "Aves sin nido", Pais: "Perú", Anio: 1889, Idioma: "Español" },
-    { N: 61, Autor: "D. H. Lawrence", Titulo: "La serpiente emplumada", Pais: "Inglaterra", Anio: 1926, Idioma: "Inglés" },
-    { N: 62, Autor: "Dan Brown", Titulo: "El código Da Vinci", Pais: "Estados Unidos", Anio: 2003, Idioma: "Inglés" },
-    { N: 63, Autor: "Daniel Defoe", Titulo: "Robinson Crusoe", Pais: "Inglaterra", Anio: 1719, Idioma: "Inglés" },
-    { N: 64, Autor: "Dante Alighieri", Titulo: "La Divina Comedia", Pais: "Italia", Anio: 1321, Idioma: "Italiano" },
-    { N: 65, Autor: "Daphne du Maurier", Titulo: "Los Pájaros", Pais: "Inglaterra", Anio: 1952, Idioma: "Inglés" },
-    { N: 66, Autor: "Daphne du Maurier", Titulo: "Monte Veritá", Pais: "Inglaterra", Anio: 1957, Idioma: "Inglés" },
-    { N: 67, Autor: "David Fishman", Titulo: "El espejo del líder", Pais: "Estados Unidos", Anio: 1988, Idioma: "Inglés" },
-    { N: 68, Autor: "Donald F. Glut", Titulo: "El imperio contraataca", Pais: "Estados Unidos", Anio: 1980, Idioma: "Inglés" },
-    { N: 69, Autor: "Douglas Preston & Lincoln Child", Titulo: "Más allá del hielo", Pais: "Estados Unidos", Anio: 1999, Idioma: "Inglés" },
-    { N: 70, Autor: "Dr. Jímenez del Oso", Titulo: "Ufología - Todo sobre ovnis", Pais: "España", Anio: 1975, Idioma: "Español" },
-    { N: 71, Autor: "Edgar Allan Poe", Titulo: "Cuentos", Pais: "Estados Unidos", Anio: 1845, Idioma: "Inglés" },
-    { N: 72, Autor: "Edgar Allan Poe", Titulo: "El Barril de Amontillado", Pais: "Estados Unidos", Anio: 1846, Idioma: "Inglés" },
-    { N: 73, Autor: "Edgar Allan Poe", Titulo: "El Escarabajo de Oro", Pais: "Estados Unidos", Anio: 1843, Idioma: "Inglés" },
-    { N: 74, Autor: "Edgar Allan Poe", Titulo: "El Entierro Prematuro", Pais: "Estados Unidos", Anio: 1844, Idioma: "Inglés" },
-    { N: 75, Autor: "Edgar Allan Poe", Titulo: "El Hundimiento de la Casa Usher", Pais: "Estados Unidos", Anio: 1839, Idioma: "Inglés" },
-    { N: 76, Autor: "Edgar Allan Poe", Titulo: "El Pozo y el Pendulo", Pais: "Estados Unidos", Anio: 1842, Idioma: "Inglés" },
-    { N: 77, Autor: "Edgar Allan Poe", Titulo: "La Carta Robada", Pais: "Estados Unidos", Anio: 1844, Idioma: "Inglés" },
-    { N: 78, Autor: "Edgar Allan Poe", Titulo: "Los Crimenes de la Rue Morgue", Pais: "Estados Unidos", Anio: 1841, Idioma: "Inglés" },
-    { N: 79, Autor: "Edgar Rice Burroughs", Titulo: "Tarzán de los monos", Pais: "Estados Unidos", Anio: 1912, Idioma: "Inglés" },
-    { N: 80, Autor: "Edmundo de Amicis", Titulo: "Corazón", Pais: "Italia", Anio: 1886, Idioma: "Italiano" },
-    { N: 81, Autor: "Eduardo Punset", Titulo: "Adaptarse a la marea", Pais: "España", Anio: 2006, Idioma: "Español" },
-    { N: 82, Autor: "Emilio Salgari", Titulo: "El corsario negro", Pais: "Italia", Anio: 1898, Idioma: "Italiano" },
-    { N: 83, Autor: "Emilio Salgari", Titulo: "La montaña de luz", Pais: "Italia", Anio: 1902, Idioma: "Italiano" },
-    { N: 84, Autor: "Emilio Salgari", Titulo: "El continente misterioso", Pais: "Italia", Anio: 1894, Idioma: "Italiano" },
-    { N: 85, Autor: "Enrique Lopez Albujar", Titulo: "Matalaché", Pais: "Perú", Anio: 1928, Idioma: "Español" },
-    { N: 86, Autor: "Enrique Perez Escrich", Titulo: "El mártir del Gólgota II", Pais: "España", Anio: 1870, Idioma: "Español" },
-    { N: 87, Autor: "Erich von Daniken", Titulo: "Carrozas de los dioses", Pais: "Suiza", Anio: 1969, Idioma: "Alemán" },
-    { N: 88, Autor: "Ernest Hemingway", Titulo: "El viejo y el mar", Pais: "Estados Unidos", Anio: 1952, Idioma: "Inglés" },
-    { N: 89, Autor: "Ernesto Sabato", Titulo: "La resistencia", Pais: "Argentina", Anio: 2000, Idioma: "Español" },
-    { N: 90, Autor: "Ernesto Sábato", Titulo: "El túnel", Pais: "Argentina", Anio: 1948, Idioma: "Español" },
-    { N: 91, Autor: "Fedor Dostoiewski", Titulo: "El principe idiota", Pais: "Rusia", Anio: 1869, Idioma: "Ruso" },
-    { N: 92, Autor: "Fedor Dostoiewski", Titulo: "Crimen y Castigo", Pais: "Rusia", Anio: 1866, Idioma: "Ruso" },
-    { N: 93, Autor: "Fernando Ampuero", Titulo: "Caramelo verde", Pais: "Perú", Anio: 1989, Idioma: "Español" },
-    { N: 94, Autor: "Francoise Sagan", Titulo: "Dentro de un mes dentro de un año", Pais: "Francia", Anio: 1957, Idioma: "Francés" },
-    { N: 95, Autor: "Franz Kafka", Titulo: "La Metamorfosis", Pais: "Alemania", Anio: 1915, Idioma: "Alemán" },
-    { N: 96, Autor: "Gabriel Garcia Marquez", Titulo: "Cien Años de Soledad", Pais: "Colombia", Anio: 1967, Idioma: "Español" },
-    { N: 97, Autor: "Gabriel Garcia Marquez", Titulo: "La Hojarasca", Pais: "Colombia", Anio: 1955, Idioma: "Español" },
-    { N: 98, Autor: "Gabriel Garcia Marquez", Titulo: "Del amor y otros demonios", Pais: "Colombia", Anio: 1994, Idioma: "Español" },
-    { N: 99, Autor: "Gerald Dipego", Titulo: "Nacida Inocente I", Pais: "Estados Unidos", Anio: 1978, Idioma: "Inglés" },
-    { N: 100, Autor: "Gerald Dipego", Titulo: "Nacida Inocente II", Pais: "Estados Unidos", Anio: 1979, Idioma: "Inglés" },
-    { N: 101, Autor: "Gibran Khalil Gibran", Titulo: "El Profeta", Pais: "Líbano", Anio: 1923, Idioma: "Árabe" },
-    { N: 102, Autor: "Gibran Khalil Gibran", Titulo: "Jesús el hijo del hombre", Pais: "Líbano", Anio: 1928, Idioma: "Árabe" },
-    { N: 103, Autor: "Giovanni Guareschi", Titulo: "Don Camilo", Pais: "Italia", Anio: 1948, Idioma: "Italiano" },
-    { N: 104, Autor: "Gustave Flaubert", Titulo: "Madam Bovary", Pais: "Francia", Anio: 1856, Idioma: "Francés" },
-    { N: 105, Autor: "Gustavo Adolfo Bécquer", Titulo: "El monte de las animas", Pais: "España", Anio: 1861, Idioma: "Español" },
-    { N: 106, Autor: "Gustavo Adolfo Bécquer", Titulo: "Leyendas", Pais: "España", Anio: 1863, Idioma: "Español" },
-    { N: 107, Autor: "Gustavo Adolfo Bécquer", Titulo: "Rimas", Pais: "España", Anio: 1871, Idioma: "Español" },
-    { N: 108, Autor: "Gustavo Rodríguez", Titulo: "La furia de Aquiles", Pais: "Perú", Anio: 2008, Idioma: "Español" },
-    { N: 109, Autor: "H. P. Lovecraft", Titulo: "El horror de Dunwich", Pais: "Estados Unidos", Anio: 1929, Idioma: "Inglés" },
-    { N: 110, Autor: "Harriet Beecher Stowe", Titulo: "La cabaña del tio Tom", Pais: "Estados Unidos", Anio: 1852, Idioma: "Inglés" },
-    { N: 111, Autor: "Héctor Domecq", Titulo: "Albert Einstein", Pais: "España", Anio: 2005, Idioma: "Español" },
-    { N: 112, Autor: "Henry Rider Haggard", Titulo: "Las minas del rey Salomón", Pais: "Inglaterra", Anio: 1885, Idioma: "Inglés" },
-    { N: 113, Autor: "Henry Thomas", Titulo: "Tomás Alva Edison", Pais: "Estados Unidos", Anio: 1956, Idioma: "Inglés" },
-    { N: 114, Autor: "Herbert George Wells", Titulo: "La guerra de los mundos", Pais: "Inglaterra", Anio: 1898, Idioma: "Inglés" },
-    { N: 115, Autor: "Hermann Hesse", Titulo: "Siddarharta", Pais: "Alemania", Anio: 1922, Idioma: "Alemán" },
-    { N: 116, Autor: "Homero", Titulo: "La Iliada", Pais: "Grecia", Anio: -750, Idioma: "Griego" },
-    { N: 117, Autor: "Homero", Titulo: "La Odisea", Pais: "Grecia", Anio: -700, Idioma: "Griego" },
-    { N: 118, Autor: "Charles Bukowski", Titulo: "Pulp", Pais: "Estados Unidos", Anio: 1994, Idioma: "Inglés" },
-    { N: 119, Autor: "Mario Vargas Llosa", Titulo: "El paraíso en la otra esquina", Pais: "Perú", Anio: 2003, Idioma: "Español" },
-    { N: 120, Autor: "Ian Fleming", Titulo: "Desde Rusia con amor", Pais: "Inglaterra", Anio: 1957, Idioma: "Inglés" },
-    { N: 121, Autor: "Inca Garcilaso de La Vega", Titulo: "Comentarios Reales", Pais: "Perú", Anio: 1609, Idioma: "Español" },
-    { N: 122, Autor: "Ira Levin", Titulo: "Los niños del Brazil", Pais: "Estados Unidos", Anio: 1976, Idioma: "Inglés" },
-    { N: 123, Autor: "Isaac Felipe Montoro", Titulo: "El comandante Pintado", Pais: "Perú", Anio: 1985, Idioma: "Español" },
-    { N: 124, Autor: "J. K. Rowling", Titulo: "Harry Potter y la piedra filosofal", Pais: "Inglaterra", Anio: 1997, Idioma: "Inglés" },
-    { N: 125, Autor: "J. K. Rowling", Titulo: "Harry Potter y la cámara secreta", Pais: "Inglaterra", Anio: 1999, Idioma: "Inglés" },
-    { N: 126, Autor: "J. K. Rowling", Titulo: "Harry Potter y el prisionero de Azkaban", Pais: "Inglaterra", Anio: 2000, Idioma: "Inglés" },
-    { N: 127, Autor: "J. K. Rowling", Titulo: "Harry Potter y el cáliz de fuego", Pais: "Inglaterra", Anio: 2001, Idioma: "Inglés" },
-    { N: 128, Autor: "J.J. Benitez", Titulo: "Caballo de Troya", Pais: "España", Anio: 1984, Idioma: "Español" },
-    { N: 129, Autor: "J.R.R. Tolkien", Titulo: "El Señor de los Anillos , La Comunidad del Anillo", Pais: "Inglaterra", Anio: 1954, Idioma: "Inglés" },
-    { N: 130, Autor: "Jacob Bronowski", Titulo: "El ascenso del hombre", Pais: "Inglaterra", Anio: 1973, Idioma: "Inglés" },
-    { N: 131, Autor: "Jacques Bergier", Titulo: "El libro de lo inexplicable", Pais: "Francia", Anio: 1974, Idioma: "Francés" },
-    { N: 132, Autor: "Jaime bayly", Titulo: "No se lo digas a nadie", Pais: "Perú", Anio: 1994, Idioma: "Español" },
-    { N: 133, Autor: "Jaimes Joyce", Titulo: "Ulises", Pais: "Irlanda", Anio: 1922, Idioma: "Inglés" },
-    { N: 134, Autor: "Javier Gutierrez Puebla", Titulo: "La población mundial y sus problemas", Pais: "España", Anio: 1986, Idioma: "Español" },
-    { N: 135, Autor: "Jay Anson", Titulo: "El horror vuelve a Amityville", Pais: "Estados Unidos", Anio: 1979, Idioma: "Inglés" },
-    { N: 136, Autor: "Jean Charles de F.", Titulo: "Nostradamus: Historiador y Profeta", Pais: "Francia", Anio: 1980, Idioma: "Francés" },
-    { N: 137, Autor: "Jeremy Taylor Woots", Titulo: "Enigmas de la historia", Pais: "Inglaterra", Anio: 1983, Idioma: "Inglés" },
-    { N: 138, Autor: "Johann Goethe", Titulo: "Fausto", Pais: "Alemania", Anio: 1808, Idioma: "Alemán" },
-    { N: 139, Autor: "John Katzenbach", Titulo: "El Psicoanalista", Pais: "Estados Unidos", Anio: 2002, Idioma: "Inglés" },
-    { N: 140, Autor: "John Katzenbach", Titulo: "La historia del loco", Pais: "Estados Unidos", Anio: 2004, Idioma: "Inglés" },
-    { N: 141, Autor: "John Le Carre", Titulo: "El espía que surgió del frío", Pais: "Inglaterra", Anio: 1963, Idioma: "Inglés" },
-    { N: 142, Autor: "José María Arguedas", Titulo: "El Sexto", Pais: "Perú", Anio: 1961, Idioma: "Español" },
-    { N: 143, Autor: "José María Arguedas", Titulo: "Agua y todos los cuentos", Pais: "Perú", Anio: 1935, Idioma: "Español" },
-    { N: 144, Autor: "José María Arguedas", Titulo: "Yawar fiesta", Pais: "Perú", Anio: 1941, Idioma: "Español" },
-    { N: 145, Autor: "José María Arguedas", Titulo: "Los rios profundos", Pais: "Perú", Anio: 1958, Idioma: "Español" },
-    { N: 146, Autor: "Jose Mauro de Vasconcelos", Titulo: "Mi planta de naranja lima", Pais: "Brasil", Anio: 1968, Idioma: "Portugués" },
-    { N: 147, Autor: "Jose Mauro de Vasconcelos", Titulo: "Vamos a calentar el sol", Pais: "Brasil", Anio: 1974, Idioma: "Portugués" },
-    { N: 148, Autor: "José Saramago", Titulo: "Ensayo sobre la ceguera", Pais: "Portugal", Anio: 1995, Idioma: "Portugués" },
-    { N: 149, Autor: "José Saramago", Titulo: "El Evangelio según Jesucristo", Pais: "Portugal", Anio: 1991, Idioma: "Portugués" },
-    { N: 150, Autor: "Joseph Conrad", Titulo: "Lord Jim", Pais: "Inglaterra", Anio: 1900, Idioma: "Inglés" },
-    { N: 151, Autor: "Julio Peradejordi", Titulo: "56 cuentos para buscar a Dios", Pais: "España", Anio: 1982, Idioma: "Español" },
-    { N: 152, Autor: "Julio Ramón Ribeyro", Titulo: "La palabra del mudo", Pais: "Perú", Anio: 1973, Idioma: "Español" },
-    { N: 153, Autor: "Julio Verne", Titulo: "Miguel Strogoff", Pais: "Francia", Anio: 1876, Idioma: "Francés" },
-    { N: 154, Autor: "Julio Verne", Titulo: "Veinte mil leguas de viaje submarino", Pais: "Francia", Anio: 1870, Idioma: "Francés" },
-    { N: 155, Autor: "Julio Verne", Titulo: "Un capitan de quince años", Pais: "Francia", Anio: 1878, Idioma: "Francés" },
-    { N: 156, Autor: "Larousse", Titulo: "Los Grandes Enigmas de Larousse", Pais: "México", Anio: 1992, Idioma: "Español" },
-    { N: 157, Autor: "Louisa May Alcott", Titulo: "Hombrecitos", Pais: "Estados Unidos", Anio: 1871, Idioma: "Inglés" },
-    { N: 158, Autor: "Luis Alberto Sánchez", Titulo: "La Perricholi", Pais: "Perú", Anio: 1955, Idioma: "Español" },
-    { N: 159, Autor: "Luis Fernando Bamonde", Titulo: "El deseo Diferente", Pais: "Perú", Anio: 1978, Idioma: "Español" },
-    { N: 160, Autor: "Malba Tahan", Titulo: "El hombre que calculaba", Pais: "Brasil", Anio: 1938, Idioma: "Portugués" },
-    { N: 161, Autor: "Manuel Gonzales Prada", Titulo: "Horas de lucha", Pais: "Perú", Anio: 1908, Idioma: "Español" },
-    { N: 162, Autor: "Manuel Scorza", Titulo: "Redoble por Rancas", Pais: "Perú", Anio: 1970, Idioma: "Español" },
-    { N: 163, Autor: "Marguerite Yourcenar", Titulo: "Memorias de Adriano", Pais: "Francia", Anio: 1951, Idioma: "Francés" },
-    { N: 164, Autor: "Mario A. Puga", Titulo: "Así no más", Pais: "Perú", Anio: 1975, Idioma: "Español" },
-    { N: 165, Autor: "Mario Vargas Llosa", Titulo: "La ciudad y los perros", Pais: "Perú", Anio: 1963, Idioma: "Español" },
-    { N: 166, Autor: "Mario Vargas Llosa", Titulo: "La guerra del fin del mundo", Pais: "Perú", Anio: 1981, Idioma: "Español" },
-    { N: 167, Autor: "Mario Vargas Llosa", Titulo: "Los jefes", Pais: "Perú", Anio: 1959, Idioma: "Español" },
-    { N: 168, Autor: "Mario Vargas Llosa", Titulo: "Los cachorros", Pais: "Perú", Anio: 1967, Idioma: "Español" },
-    { N: 169, Autor: "Mario Vargas Llosa", Titulo: "Pantaleón y las visitadoras", Pais: "Perú", Anio: 1973, Idioma: "Español" },
-    { N: 170, Autor: "Mario Vargas Llosa", Titulo: "Elogio de la madrastra", Pais: "Perú", Anio: 1988, Idioma: "Español" },
-    { N: 171, Autor: "Mario Vargas Llosa", Titulo: "La fiesta del chivo", Pais: "Perú", Anio: 2000, Idioma: "Español" },
-    { N: 172, Autor: "Max Allan Collins", Titulo: "Salvando al soldado Ryan", Pais: "Estados Unidos", Anio: 1998, Idioma: "Inglés" },
-    { N: 173, Autor: "Máximo Gorki", Titulo: "La madre", Pais: "Rusia", Anio: 1906, Idioma: "Ruso" },
-    { N: 174, Autor: "Michael Crichton", Titulo: "El gran robo del tren", Pais: "Estados Unidos", Anio: 1975, Idioma: "Inglés" },
-    { N: 175, Autor: "Miguel Ángel Asturias", Titulo: "El Señor Presidente", Pais: "Guatemala", Anio: 1946, Idioma: "Español" },
-    { N: 176, Autor: "Miguel Angel Cornejo", Titulo: "Metáforas y pergaminos de la excelencia", Pais: "México", Anio: 1990, Idioma: "Español" },
-    { N: 177, Autor: "Miguel de Cervantes Saavedra", Titulo: "El ingenioso Hidalgo don Quijote de la Mancha", Pais: "España", Anio: 1605, Idioma: "Español" },
-    { N: 178, Autor: "Mika Waltari", Titulo: "Michael el renegado", Pais: "Finlandia", Anio: 1949, Idioma: "Finlandés" },
-    { N: 179, Autor: "Moliere", Titulo: "El avaro", Pais: "Francia", Anio: 1668, Idioma: "Francés" },
-    { N: 180, Autor: "Nicolas Maquiavelo", Titulo: "El Principe", Pais: "Italia", Anio: 1532, Idioma: "Italiano" },
-    { N: 181, Autor: "Nikolai Ostrovski", Titulo: "Asi se templó el acero", Pais: "Rusia", Anio: 1932, Idioma: "Ruso" },
-    { N: 182, Autor: "Og Mandino", Titulo: "El Milagro más Grande del Mundo", Pais: "Estados Unidos", Anio: 1968, Idioma: "Inglés" },
-    { N: 183, Autor: "P. Eduardo Arcusa Castella", Titulo: "Joven, tus problemas", Pais: "España", Anio: 1965, Idioma: "Español" },
-    { N: 184, Autor: "Paul Gallice", Titulo: "La aventura del Poseidón", Pais: "Estados Unidos", Anio: 1969, Idioma: "Inglés" },
-    { N: 185, Autor: "Paulo Coelho", Titulo: "El demomio y la señorita Prym", Pais: "Brasil", Anio: 2000, Idioma: "Portugués" },
-    { N: 186, Autor: "Paulo Coelho", Titulo: "El Alquimista", Pais: "Brasil", Anio: 1988, Idioma: "Portugués" },
-    { N: 187, Autor: "Paulo Coelho", Titulo: "El Peregrino de Compostela", Pais: "Brasil", Anio: 1987, Idioma: "Portugués" },
-    { N: 188, Autor: "Pedro Calderón de la Barca", Titulo: "La vida es sueño", Pais: "España", Anio: 1635, Idioma: "Español" },
-    { N: 189, Autor: "Pedro Suarez Vetiz", Titulo: "Yo Pedro", Pais: "Perú", Anio: 1975, Idioma: "Español" },
-    { N: 190, Autor: "Peter Kolosimo", Titulo: "El planeta incógnito", Pais: "Italia", Anio: 1957, Idioma: "Italiano" },
-    { N: 191, Autor: "Peter Kolosimo", Titulo: "Tierra sin tiempo", Pais: "Italia", Anio: 1964, Idioma: "Italiano" },
-    { N: 192, Autor: "Ricardo Palma", Titulo: "Tradiciones Peruanas", Pais: "Perú", Anio: 1872, Idioma: "Español" },
-    { N: 193, Autor: "Richard Bach", Titulo: "Juan Salvador Gaviota", Pais: "Estados Unidos", Anio: 1970, Idioma: "Inglés" },
-    { N: 194, Autor: "Roald Dahl", Titulo: "Historias extraordinarias", Pais: "Inglaterra", Anio: 1953, Idioma: "Inglés" },
-    { N: 195, Autor: "Roald Dahl", Titulo: "Relatos de lo inesperado", Pais: "Inglaterra", Anio: 1959, Idioma: "Inglés" },
-    { N: 196, Autor: "Robert Bloch", Titulo: "Psicosis", Pais: "Estados Unidos", Anio: 1959, Idioma: "Inglés" },
-    { N: 197, Autor: "Robert Bolt", Titulo: "La misión", Pais: "Inglaterra", Anio: 1986, Idioma: "Inglés" },
-    { N: 198, Autor: "Robert Fisher", Titulo: "El caballero de la armadura oxidada", Pais: "Estados Unidos", Anio: 1980, Idioma: "Inglés" },
-    { N: 199, Autor: "Robert L. Stevenson", Titulo: "La isla del tesoro", Pais: "Inglaterra", Anio: 1883, Idioma: "Inglés" },
-    { N: 200, Autor: "Saniel Lozano A.", Titulo: "La Tierra encantada I", Pais: "Perú", Anio: 1960, Idioma: "Español" },
-    { N: 201, Autor: "Saniel Lozano A.", Titulo: "La Tierra encantada II", Pais: "Perú", Anio: 1965, Idioma: "Español" },
-    { N: 202, Autor: "Silvina Ocampo", Titulo: "Cuentos completos II", Pais: "Argentina", Anio: 1988, Idioma: "Español" },
-    { N: 203, Autor: "Sofocles", Titulo: "Edipo Rey", Pais: "Grecia", Anio: -430, Idioma: "Griego" },
-    { N: 204, Autor: "Sofocles", Titulo: "Antigona", Pais: "Grecia", Anio: -441, Idioma: "Griego" },
-    { N: 205, Autor: "Stephen Hawking", Titulo: "Historia del tiempo", Pais: "Inglaterra", Anio: 1988, Idioma: "Inglés" },
-    { N: 206, Autor: "Michael White y John Gribbin", Titulo: "Stephen Hawking. Una vida para la ciencia", Pais: "Inglaterra", Anio: 1992, Idioma: "Inglés" },
-    { N: 207, Autor: "Stieg Larsson", Titulo: "La chica que soñaba con una cerilla y un bidón de gasolina", Pais: "Suecia", Anio: 2006, Idioma: "Sueco" },
-    { N: 208, Autor: "Teodoro Cáceres", Titulo: "La embestida del carnero y otros cuentos", Pais: "Perú", Anio: 1980, Idioma: "Español" },
-    { N: 209, Autor: "Tomás Doreste", Titulo: "Grandes temas de lo oculto y lo insólito I", Pais: "España", Anio: 1974, Idioma: "Español" },
-    { N: 210, Autor: "Tomás Doreste", Titulo: "Grandes temas de lo oculto y lo insólito II", Pais: "España", Anio: 1975, Idioma: "Español" },
-    { N: 211, Autor: "Tomás Doreste", Titulo: "Grandes temas de lo oculto y lo insólito III", Pais: "España", Anio: 1976, Idioma: "Español" },
-    { N: 212, Autor: "Tomás Doreste", Titulo: "Grandes temas de lo oculto y lo insólito IV", Pais: "España", Anio: 1977, Idioma: "Español" },
-    { N: 213, Autor: "V. Pekelis", Titulo: "Mezcla cibernética", Pais: "Rusia", Anio: 1965, Idioma: "Ruso" },
-    { N: 214, Autor: "Ventura García Calderón", Titulo: "La venganza del cóndor", Pais: "Perú", Anio: 1924, Idioma: "Español" },
-    { N: 215, Autor: "Victor Hugo", Titulo: "Los Miserables", Pais: "Francia", Anio: 1862, Idioma: "Francés" },
-    { N: 216, Autor: "Virgilio", Titulo: "La Eneida", Pais: "Roma", Anio: -19, Idioma: "Latín" },
-    { N: 217, Autor: "Walter Buehr", Titulo: "Un mundo bajo las olas", Pais: "Estados Unidos", Anio: 1954, Idioma: "Inglés" },
-    { N: 218, Autor: "Walter Tevis", Titulo: "El hombre que cayó a la Tierra", Pais: "Estados Unidos", Anio: 1963, Idioma: "Inglés" },
-    { N: 219, Autor: "Wayne W. Dyer", Titulo: "Tus zonas erróneas", Pais: "Estados Unidos", Anio: 1976, Idioma: "Inglés" },
-    { N: 220, Autor: "William P. Blatty", Titulo: "El exorcista", Pais: "Estados Unidos", Anio: 1971, Idioma: "Inglés" },
-    { N: 221, Autor: "William Shakespeare", Titulo: "Hamlet", Pais: "Inglaterra", Anio: 1601, Idioma: "Inglés" },
-    { N: 222, Autor: "William Shakespeare", Titulo: "Romeo y Julieta", Pais: "Inglaterra", Anio: 1597, Idioma: "Inglés" },
-    { N: 223, Autor: "William Shakespeare", Titulo: "Otelo", Pais: "Inglaterra", Anio: 1604, Idioma: "Inglés" },
-    { N: 224, Autor: "Winston S. Churchill", Titulo: "La Segunda Guerra Mundial", Pais: "Inglaterra", Anio: 1948, Idioma: "Inglés" },
-    { N: 225, Autor: "Wolfgrang Johan Goethe", Titulo: "Fausto", Pais: "Alemania", Anio: 1808, Idioma: "Alemán" },
-    { N: 226, Autor: "Alfredo Bryce Echenique", Titulo: "Un mundo para Julius", Pais: "Perú", Anio: 1970, Idioma: "Español" },
-    { N: 227, Autor: "Stieg Larsson", Titulo: "Los hombres que no amaban a las mujeres", Pais: "Suecia", Anio: 2005, Idioma: "Sueco" },
-    { N: 228, Autor: "Stieg Larsson", Titulo: "La reina en el palacio de las corrientes de aire", Pais: "Suecia", Anio: 2007, Idioma: "Sueco" },
-    { N: 229, Autor: "Truman Capote", Titulo: "Feretros tallados a mano", Pais: "Estados Unidos", Anio: 1965, Idioma: "Inglés" },
-    { N: 230, Autor: "Jean Ray", Titulo: "El camino de los dioses", Pais: "Bélgica", Anio: 1953, Idioma: "Francés" },
-    { N: 231, Autor: "Albert Camus", Titulo: "El primer hombre", Pais: "Francia", Anio: 1994, Idioma: "Francés" },
-    { N: 232, Autor: "Julio Verne", Titulo: "De la Tierra a la Luna", Pais: "Francia", Anio: 1865, Idioma: "Francés" },
-    { N: 233, Autor: "Blue Jeans", Titulo: "Canciones para Paula", Pais: "España", Anio: 2013, Idioma: "Español" },
-    { N: 234, Autor: "Julio Verne", Titulo: "La vuelta al mundo en 80 días", Pais: "Francia", Anio: 1872, Idioma: "Francés" },
-    { N: 235, Autor: "Edgar Rice Burroughs", Titulo: "Tarzán, señor de la jungla", Pais: "Estados Unidos", Anio: 1915, Idioma: "Inglés" },
-    { N: 236, Autor: "Hermann Hesse", Titulo: "Lobo estepario", Pais: "Alemania", Anio: 1927, Idioma: "Alemán" },
-    { N: 237, Autor: "Antony Beevor", Titulo: "La Segunda Guerra Mundial", Pais: "Inglaterra", Anio: 2012, Idioma: "Inglés" },
-    { N: 238, Autor: "Agatha Christie", Titulo: "Cianuro espumoso", Pais: "Inglaterra", Anio: 1945, Idioma: "Inglés" },
-    { N: 239, Autor: "Gary Zukav", Titulo: "La danza de los maestros", Pais: "Estados Unidos", Anio: 1979, Idioma: "Inglés" },
-    { N: 240, Autor: "Edgar Allan Poe", Titulo: "Manuscrito hallado en una botella", Pais: "Estados Unidos", Anio: 1833, Idioma: "Inglés" },
-    { N: 241, Autor: "Gregorio Doval", Titulo: "Fraudes, engaños y timos de la historia", Pais: "España", Anio: 2015, Idioma: "Español" },
-    { N: 242, Autor: "J. Douglas Kenyon", Titulo: "Ciencia prohibida", Pais: "Estados Unidos", Anio: 2005, Idioma: "Inglés" },
-    { N: 243, Autor: "Joaquín Sánchez Guillén", Titulo: "L. E. Boltzmann. El científico que se adelantó a su tiempo", Pais: "España", Anio: 2010, Idioma: "Español" },
-    { N: 244, Autor: "Rachel Carson", Titulo: "Primavera silenciosa", Pais: "Estados Unidos", Anio: 1962, Idioma: "Inglés" },
-    { N: 245, Autor: "Humberto Maturana R. y Francisco Varela G.", Titulo: "El árbol de conocimiento", Pais: "Chile", Anio: 1984, Idioma: "Español" },
-    { N: 246, Autor: "Blue Jeans", Titulo: "¿Sabes que te quiero?", Pais: "España", Anio: 2014, Idioma: "Español" },
-    { N: 247, Autor: "Universidad Autónoma de México", Titulo: "400 pequeñas dosis de ciencia", Pais: "México", Anio: 2015, Idioma: "Español" },
-    { N: 248, Autor: "Alejo Carpentier", Titulo: "El arpa y la sombra", Pais: "Cuba", Anio: 1979, Idioma: "Español" },
-    { N: 249, Autor: "Stephen Hawkin y Leonard Mlodinow", Titulo: "El gran diseño", Pais: "Inglaterra", Anio: 2010, Idioma: "Inglés" },
-    { N: 250, Autor: "Joé María Arguedas", Titulo: "Todas las sangres", Pais: "Perú", Anio: 1964, Idioma: "Español" },
-    { N: 251, Autor: "Juan Pablo Vizcardo y Guzmán", Titulo: "Carta a los españoles americanos", Pais: "Perú", Anio: 1791, Idioma: "Español" },
-    { N: 252, Autor: "I. V. Petriánov y D. N. Trífonov", Titulo: "La magna ley", Pais: "Rusia", Anio: 1978, Idioma: "Ruso" },
-    { N: 253, Autor: "Kara Rogers", Titulo: "The 100 Most Influential Scientists of All Time", Pais: "Estados Unidos", Anio: 2010, Idioma: "Inglés" },
-    { N: 254, Autor: "Tell me why N° 88", Titulo: "100 milestone in chemistry", Pais: "Estados Unidos", Anio: 2012, Idioma: "Inglés" },
-    { N: 255, Autor: "David Lagercrantz", Titulo: "Lo que no te mata te hace más fuerte", Pais: "Suecia", Anio: 2015, Idioma: "Sueco" },
-    { N: 256, Autor: "Tell me why N° 111", Titulo: "World of science", Pais: "Estados Unidos", Anio: 2013, Idioma: "Inglés" },
-    { N: 257, Autor: "Rudyard Kipling", Titulo: "Kim", Pais: "Inglaterra", Anio: 1901, Idioma: "Inglés" },
-    { N: 258, Autor: "Lope de Vega", Titulo: "El perro del hortelano", Pais: "España", Anio: 1618, Idioma: "Español" },
-    { N: 259, Autor: "Yuval Noah Harari", Titulo: "Sapiens: de animales a dioses", Pais: "Israel", Anio: 2011, Idioma: "Hebreo" },
-    { N: 260, Autor: "Amanda Doering Tourville", Titulo: "Albert Einstein brilliant scientist", Pais: "Estados Unidos", Anio: 2009, Idioma: "Inglés" },
-    { N: 261, Autor: "Crosbie W. Smith", Titulo: "William Thomson and the Creation of Thermodynamics", Pais: "Inglaterra", Anio: 1998, Idioma: "Inglés" },
-    { N: 262, Autor: "Alfred Bester", Titulo: "Los hombres que asesinaron a Mahoma", Pais: "Estados Unidos", Anio: 1958, Idioma: "Inglés" },
-    { N: 263, Autor: "Ray Hammond", Titulo: "El mundo en 2030", Pais: "Inglaterra", Anio: 2008, Idioma: "Inglés" },
-    { N: 264, Autor: "Desmond Morris", Titulo: "El mono desnudo", Pais: "Inglaterra", Anio: 1967, Idioma: "Inglés" },
-    { N: 265, Autor: "ONU", Titulo: "Nuestro futuro común", Pais: "Internacional", Anio: 1987, Idioma: "Inglés" },
-    { N: 266, Autor: "Mari Cielo Pajares", Titulo: "Memorias de una puta", Pais: "Perú", Anio: 2016, Idioma: "Español" },
-    { N: 267, Autor: "León Tolstói", Titulo: "Guerra y paz", Pais: "Rusia", Anio: 1869, Idioma: "Ruso" },
-    { N: 268, Autor: "José Antonio Acevedo-Díaz", Titulo: "Controversias en la historia de la ciencia y cultura científica", Pais: "España", Anio: 2018, Idioma: "Español" },
-    { N: 269, Autor: "David Lagercrantz", Titulo: "El hombre que perseguía su sombra", Pais: "Suecia", Anio: 2017, Idioma: "Sueco" },
-    { N: 270, Autor: "Santiago Aguilar", Titulo: "Balada de montonero", Pais: "Perú", Anio: 1985, Idioma: "Español" },
-    { N: 271, Autor: "Steven Heggings", Titulo: "50 rechazos que hicieron historia", Pais: "Inglaterra", Anio: 2014, Idioma: "Inglés" },
-    { N: 272, Autor: "Stefan Zweig", Titulo: "Momentos estelares de la humanidad", Pais: "Austria", Anio: 1927, Idioma: "Alemán" },
-    { N: 273, Autor: "Yuval Noah Harari", Titulo: "21 lecciones para el siglo XXI", Pais: "Israel", Anio: 2018, Idioma: "Hebreo" },
-    // N° 274 ELIMINADO (El Principito duplicado, ya existe en N° 29)
-    { N: 275, Autor: "David Lagercrantz", Titulo: "La chica que vivió dos veces", Pais: "Suecia", Anio: 2017, Idioma: "Sueco" }, // Año corregido: 2017
-    { N: 276, Autor: "Maurice Leblanc", Titulo: "El tapón de cristal", Pais: "Francia", Anio: 1912, Idioma: "Francés" },
-    { N: 277, Autor: "José Antonio Lozano Teruel", Titulo: "100 relatos científicos que debemos conocer", Pais: "España", Anio: 2020, Idioma: "Español" },
-    { N: 278, Autor: "Maurice Leblanc", Titulo: "Arsenio Lupin, caballero y ladrón", Pais: "Francia", Anio: 1907, Idioma: "Francés" },
-    { N: 279, Autor: "Cristina Morato", Titulo: "Reinas malditas", Pais: "España", Anio: 2014, Idioma: "Español" },
-    { N: 280, Autor: "Julie Maroh", Titulo: "Le bleu est une couleur chaude", Pais: "Francia", Anio: 2010, Idioma: "Francés" },
-    { N: 281, Autor: "Sonia Shah", Titulo: "Pandemia", Pais: "Estados Unidos", Anio: 2016, Idioma: "Inglés" },
-    { N: 282, Autor: "Andrés Oppenheimer", Titulo: "Basta de historias", Pais: "Argentina", Anio: 2010, Idioma: "Español" },
-    { N: 283, Autor: "Jorge Isaacs", Titulo: "María", Pais: "Colombia", Anio: 1867, Idioma: "Español" },
-    { N: 284, Autor: "J. M. Bielsa-Gibaja", Titulo: "Y si la historia nos miente", Pais: "España", Anio: 2021, Idioma: "Español" },
-    { N: 285, Autor: "Michael Connelly", Titulo: "La rubia del hormigón", Pais: "Estados Unidos", Anio: 1994, Idioma: "Inglés" },
-    { N: 286, Autor: "Robin Cook", Titulo: "Toxina", Pais: "Estados Unidos", Anio: 1998, Idioma: "Inglés" },
-    { N: 287, Autor: "Jorge Luis Borges", Titulo: "Cuentos argentinos", Pais: "Argentina", Anio: 1949, Idioma: "Español" },
-    { N: 288, Autor: "Gregorio Doval", Titulo: "Casualidades, coincidencias y serendipias de la historia", Pais: "España", Anio: 2020, Idioma: "Español" },
-    { N: 289, Autor: "Rómulo Gallegos", Titulo: "Cuentos completos", Pais: "Venezuela", Anio: 1950, Idioma: "Español" },
-    { N: 290, Autor: "Emilio Salgari", Titulo: "Los horrores de las Filipinas", Pais: "Italia", Anio: 1900, Idioma: "Italiano" },
-    { N: 291, Autor: "Yuval Noah Harari", Titulo: "Sapiens una historia gráfica: El nacimiento de la humanidad", Pais: "Israel", Anio: 2020, Idioma: "Hebreo" },
-    { N: 292, Autor: "José León Sánchez", Titulo: "La isla de los hombres solos", Pais: "Costa Rica", Anio: 1970, Idioma: "Español" },
-    { N: 293, Autor: "Manuel Scorza", Titulo: "Garabombo, el invisible", Pais: "Perú", Anio: 1972, Idioma: "Español" },
-    { N: 294, Autor: "Stefan Zweig", Titulo: "Novela de ajedrez", Pais: "Austria", Anio: 1942, Idioma: "Alemán" },
-    { N: 295, Autor: "Stefan Zweig", Titulo: "Carta de una desconocida", Pais: "Austria", Anio: 1922, Idioma: "Alemán" },
-    { N: 296, Autor: "José Supo", Titulo: "Cómo validar un instrumento", Pais: "Perú", Anio: 2015, Idioma: "Español" },
-    { N: 297, Autor: "Stefan Zweig", Titulo: "El mundo de ayer", Pais: "Austria", Anio: 1942, Idioma: "Alemán" },
-    { N: 298, Autor: "Umberto Eco", Titulo: "El cementerio de Praga", Pais: "Italia", Anio: 2010, Idioma: "Italiano" },
-    { N: 299, Autor: "Manuel Scorza", Titulo: "El jinete insomne", Pais: "Perú", Anio: 1977, Idioma: "Español" },
-    { N: 300, Autor: "Isaac Asimov", Titulo: "Preludio a la Fundación", Pais: "Estados Unidos", Anio: 1988, Idioma: "Inglés" },
-    { N: 301, Autor: "David Attenborough", Titulo: "Una vida en nuestro planeta", Pais: "Inglaterra", Anio: 2020, Idioma: "Inglés" },
-    { N: 302, Autor: "Jordi Agustí et al.", Titulo: "El precio de la inteligencia", Pais: "España", Anio: 2010, Idioma: "Español" },
-    { N: 303, Autor: "León Tolstói", Titulo: "Anna Karenina", Pais: "Rusia", Anio: 1878, Idioma: "Ruso" },
-    { N: 304, Autor: "Vittorio Silvestrini", Titulo: "Qué es la Entropía", Pais: "Italia", Anio: 2015, Idioma: "Italiano" },
-    { N: 305, Autor: "Andrés Oppenheimer", Titulo: "Ojos vendados", Pais: "Argentina", Anio: 2021, Idioma: "Español" },
-    { N: 306, Autor: "Isaac Asimov", Titulo: "Hacia la Fundación", Pais: "Estados Unidos", Anio: 1993, Idioma: "Inglés" },
-    { N: 307, Autor: "Miguel de Cervantes", Titulo: "La gitanilla", Pais: "España", Anio: 1613, Idioma: "Español" },
-    { N: 308, Autor: "J. M. G. Le Clezio", Titulo: "El africano", Pais: "Francia", Anio: 2004, Idioma: "Francés" },
-    { N: 309, Autor: "Solzenytszyn", Titulo: "Archipielago gulag", Pais: "Rusia", Anio: 1973, Idioma: "Ruso" },
-    { N: 310, Autor: "Deborah Garcia Bello", Titulo: "Todo es cuestión de Química", Pais: "España", Anio: 2017, Idioma: "Español" },
-    { N: 311, Autor: "Vaclav Smil", Titulo: "Energía y civilización. Una historia", Pais: "Canadá", Anio: 2017, Idioma: "Inglés" },
-    { N: 312, Autor: "Stefan Zweig", Titulo: "Maria Antonieta", Pais: "Austria", Anio: 1932, Idioma: "Alemán" },
-    { N: 313, Autor: "Desmond Morris", Titulo: "El mundo de los animales", Pais: "Inglaterra", Anio: 1990, Idioma: "Inglés" },
-    { N: 314, Autor: "Carlos morales Paredes", Titulo: "Guía para redactar artículos científicos", Pais: "Perú", Anio: 2018, Idioma: "Español" },
-    { N: 315, Autor: "Luis de la Peña", Titulo: "Cómo es un átomo", Pais: "México", Anio: 1990, Idioma: "Español" },
-    { N: 316, Autor: "Carl Sagan", Titulo: "Murmullos de la Tierra", Pais: "Estados Unidos", Anio: 1978, Idioma: "Inglés" },
-    { N: 317, Autor: "Charles Bukowski", Titulo: "La máquina de follar", Pais: "Estados Unidos", Anio: 1971, Idioma: "Inglés" },
-    { N: 318, Autor: "Ray Bradbury", Titulo: "Crónicas marcianas", Pais: "Estados Unidos", Anio: 1950, Idioma: "Inglés" },
-    { N: 319, Autor: "Anne Rooney", Titulo: "1001 shocking science facts", Pais: "Inglaterra", Anio: 2015, Idioma: "Inglés" },
-    { N: 320, Autor: "Daniel Cassany", Titulo: "La cocina de la escritura", Pais: "España", Anio: 1995, Idioma: "Español" },
-    { N: 321, Autor: "Albert Camus", Titulo: "La peste", Pais: "Francia", Anio: 1947, Idioma: "Francés" },
-    { N: 322, Autor: "Carlo Collodi", Titulo: "Las aventuras de Pinocho", Pais: "Italia", Anio: 1883, Idioma: "Italiano" },
-    { N: 323, Autor: "Salman Rushdie", Titulo: "Los Versos Satánicos", Pais: "India", Anio: 1988, Idioma: "Inglés" },
-    { N: 324, Autor: "AA. VV.", Titulo: "Más allá. De la Ciencia y de la Fantasía. N° 1", Pais: "España", Anio: 1975, Idioma: "Español" },
-    { N: 325, Autor: "Kai Bird", Titulo: "American Prometheus", Pais: "Estados Unidos", Anio: 2005, Idioma: "Inglés" },
-    { N: 326, Autor: "Milan Kundera", Titulo: "La insoportable levedad del ser", Pais: "República Checa", Anio: 1984, Idioma: "Checo" },
-    { N: 327, Autor: "Irene Vallejo", Titulo: "El infinito en un junco", Pais: "España", Anio: 2019, Idioma: "Español" },
-    { N: 328, Autor: "Ciro Alegria", Titulo: "Cuentos y leyendas americanos", Pais: "Perú", Anio: 1945, Idioma: "Español" },
-    { N: 329, Autor: "Juan Rulfo", Titulo: "Pedro Páramo", Pais: "México", Anio: 1955, Idioma: "Español" },
-    { N: 330, Autor: "Alexander Aginagalde Nafarrete et al.", Titulo: "Mujeres en la ciencia", Pais: "España", Anio: 2018, Idioma: "Español" },
-    { N: 331, Autor: "Mark Haddon", Titulo: "El curioso incidente del perro a medianoche", Pais: "Inglaterra", Anio: 2003, Idioma: "Inglés" },
-    { N: 332, Autor: "Haruki Murakami", Titulo: "Tokio Blues", Pais: "Japón", Anio: 1987, Idioma: "Japonés" },
-    { N: 333, Autor: "Isaac Asimov", Titulo: "Cien preguntas básicas sobre la Ciencia", Pais: "Estados Unidos", Anio: 1983, Idioma: "Inglés" },
-    { N: 334, Autor: "K. C. Nicolaou & T. Montagnon", Titulo: "Molecules that changed the world", Pais: "Estados Unidos", Anio: 2008, Idioma: "Inglés" },
-    { N: 335, Autor: "Ray Bradbury", Titulo: "Fahrenheit 451", Pais: "Estados Unidos", Anio: 1953, Idioma: "Inglés" },
-    { N: 336, Autor: "José Babini", Titulo: "Las revoluciones industriales", Pais: "Argentina", Anio: 1965, Idioma: "Español" },
-    { N: 337, Autor: "Andrew Tomas", Titulo: "No somos los primeros", Pais: "Australia", Anio: 1971, Idioma: "Inglés" },
-    { N: 338, Autor: "Javier Rada", Titulo: "Al borde de la extinción", Pais: "España", Anio: 2010, Idioma: "Español" },
-    { N: 339, Autor: "David Christian", Titulo: "La gran historia de todo", Pais: "Australia", Anio: 2018, Idioma: "Inglés" },
-    { N: 340, Autor: "Ève Curie", Titulo: "La vida heroica de Marie Curie", Pais: "Francia", Anio: 1937, Idioma: "Francés" },
-    { N: 341, Autor: "Haruki Murakami", Titulo: "1Q84", Pais: "Japón", Anio: 2009, Idioma: "Japonés" },
-    { N: 342, Autor: "Gabriel Garcia Marquez", Titulo: "Memorias de mis putas tristes", Pais: "Colombia", Anio: 2004, Idioma: "Español" },
-    { N: 343, Autor: "Kelltom McIntire", Titulo: "El espectro de Farmoor", Pais: "Estados Unidos", Anio: 1979, Idioma: "Inglés" },
-    { N: 344, Autor: "Kelltom McIntire", Titulo: "La rebelión de los espectros", Pais: "Estados Unidos", Anio: 1980, Idioma: "Inglés" },
-    { N: 345, Autor: "George Orwell", Titulo: "1984", Pais: "Inglaterra", Anio: 1949, Idioma: "Inglés" },
-    { N: 346, Autor: "Carl Sagan", Titulo: "Miles de millones", Pais: "Estados Unidos", Anio: 1997, Idioma: "Inglés" },
-    { N: 347, Autor: "Lara Ríos", Titulo: "Pantalones cortos", Pais: "Perú", Anio: 2010, Idioma: "Español" },
-    { N: 348, Autor: "Alejandro Dumas", Titulo: "Crímenes célebres. Los Medicis", Pais: "Francia", Anio: 1840, Idioma: "Francés" },
-    { N: 349, Autor: "Roald Dahl", Titulo: "Las brujas", Pais: "Inglaterra", Anio: 1983, Idioma: "Inglés" },
-    // N° 350 ELIMINADO (Pinocho duplicado, ya existe en N° 322)
-    { N: 351, Autor: "EPA", Titulo: "Understanding Oil Spills And Oil Spill Response", Pais: "Estados Unidos", Anio: 1999, Idioma: "Inglés" },
-    { N: 352, Autor: "Agustina Bazterrica", Titulo: "Cadaver exquisito", Pais: "Argentina", Anio: 2017, Idioma: "Español" },
-    { N: 353, Autor: "Paul Strathern", Titulo: "Einstein y la relatividad", Pais: "Inglaterra", Anio: 1996, Idioma: "Inglés" },
-    { N: 354, Autor: "Arturo Pérez-Reverte", Titulo: "El club Dumas", Pais: "España", Anio: 1993, Idioma: "Español" },
-    { N: 355, Autor: "Julio Cortázar", Titulo: "Rayuela", Pais: "Argentina", Anio: 1963, Idioma: "Español" },
-    { N: 356, Autor: "Benjamín Labatut", Titulo: "Un verdor terrible", Pais: "Chile", Anio: 2020, Idioma: "Español" },
-    { N: 357, Autor: "Erwin Schrödinger", Titulo: "¿Qué es la vida?", Pais: "Austria", Anio: 1944, Idioma: "Alemán" },
-    { N: 358, Autor: "Alessandro Gatti y Pierdomenico Baccalario", Titulo: "Sherlock, Lupin y yo: El trío de la Dama Negra", Pais: "Italia", Anio: 2010, Idioma: "Italiano" },
-    { N: 359, Autor: "Emily Brontë", Titulo: "Cumbres borrascosas", Pais: "Inglaterra", Anio: 1847, Idioma: "Inglés" },
-    { N: 360, Autor: "Manuel Scorza", Titulo: "Cantar de Agapito Robles", Pais: "Perú", Anio: 1977, Idioma: "Español" },
-    { N: 361, Autor: "Isaac Asimov", Titulo: "Segunda Fundación (3 Fundación)", Pais: "Estados Unidos", Anio: 1953, Idioma: "Inglés" },
-    { N: 362, Autor: "José Saramago", Titulo: "Caín", Pais: "Portugal", Anio: 2009, Idioma: "Portugués" },
-    { N: 363, Autor: "Robert Louis Stevenson", Titulo: "La isla del tesoro", Pais: "Reino Unido", Anio: 1883, Idioma: "Inglés" },
-    { N: 364, Autor: "Ernest Hemingway", Titulo: "Por quién doblan las campanas", Pais: "Estados Unidos", Anio: 1940, Idioma: "Inglés" },
-    { N: 365, Autor: "Fernando Ampuero", Titulo: "Más allá del amor a los perros", Pais: "Perú", Anio: 1983, Idioma: "Español" },
-    { N: 366, Autor: "Fiódor Dostoyevski", Titulo: "Noches blancas", Pais: "Rusia", Anio: 1848, Idioma: "Ruso" },
-    { N: 367, Autor: "Alessandro Gatti y Pierdomenico Baccalario", Titulo: "Sherlock, Lupin y yo_2 Último acto en el teatro de la ópera", Pais: "Italia", Anio: 2012, Idioma: "Italiano" },
-    { N: 368, Autor: "Mary Shelley", Titulo: "Frankenstein o El moderno Prometeo", Pais: "Reino Unido", Anio: 1818, Idioma: "Inglés" },
-    { N: 369, Autor: "Maggie O'Farrell", Titulo: "Hamnet", Pais: "Reino Unido", Anio: 2020, Idioma: "Inglés" },
-    { N: 370, Autor: "Joan Parra", Titulo: "Stefan Zweig La verdad nunca es vana", Pais: "España", Anio: 2021, Idioma: "Español" },
-    { N: 371, Autor: "Julio Verne", Titulo: "Escuela de Robinsones", Pais: "Francia", Anio: 1882, Idioma: "Francés" },
-    { N: 372, Autor: "Julio Verne", Titulo: "Viaje al centro de la tierra", Pais: "Francia", Anio: 1864, Idioma: "Francés" },
-    { N: 373, Autor: "Franz Kafka", Titulo: "El proceso", Pais: "Alemania", Anio: 1925, Idioma: "Alemán" },
-    { N: 374, Autor: "Jorge Ureta", Titulo: "Un hombre que podía reventar cosas con la cabeza", Pais: "Perú", Anio: 2005, Idioma: "Español" },
-    { N: 375, Autor: "Horacio Quiroga", Titulo: "Anaconda", Pais: "Uruguay", Anio: 1921, Idioma: "Español" },
-    { N: 376, Autor: "Roberto Drummond", Titulo: "Hilda huracán", Pais: "Brasil", Anio: 1970, Idioma: "Portugués" }
-
-
+    { N: 28, Autor: "Antoine de Saint Exupery", Titulo: "El Principito", Pais: "Francia", Anio: 1943, Idioma: "Francés" },
+    { N: 29, Autor: "Antón Chejov", Titulo: "Antología de Cuentos", Pais: "Rusia", Anio: 1888, Idioma: "Ruso" },
+    { N: 30, Autor: "Antón Chéjov", Titulo: "La dama del perrito y otros cuentos", Pais: "Rusia", Anio: 1899, Idioma: "Ruso" },
+    { N: 31, Autor: "Arthur Conan Doyle", Titulo: "El regreso de Sherlock Holmes", Pais: "Inglaterra", Anio: 1903, Idioma: "Inglés" },
+    { N: 32, Autor: "Arturo D. Hernández", Titulo: "Sangama", Pais: "Perú", Anio: 1942, Idioma: "Español" },
+    { N: 33, Autor: "Benito Pérez Galdós", Titulo: "Marianela", Pais: "España", Anio: 1878, Idioma: "Español" },
+    { N: 34, Autor: "Bertolt Bretcht", Titulo: "Madre coraje y sus hijos", Pais: "Alemania", Anio: 1941, Idioma: "Alemán" },
+    { N: 35, Autor: "Betty Bertinetti M.", Titulo: "Inspiración", Pais: "Estados Unidos", Anio: 1985, Idioma: "Inglés" },
+    { N: 36, Autor: "Carlos Cuauhtémoc S.", Titulo: "Contraveneno", Pais: "México", Anio: 1990, Idioma: "Español" },
+    { N: 37, Autor: "Carlos Cuauhtémoc S.", Titulo: "La fuerza de Sheccid", Pais: "México", Anio: 1988, Idioma: "Español" },
+    { N: 38, Autor: "Carlos Cuauhtémoc S.", Titulo: "Volar sobre el pantano", Pais: "México", Anio: 1992, Idioma: "Español" },
+    { N: 39, Autor: "Carlos Cuauhtémoc S.", Titulo: "Dirigentes del mundo futuro", Pais: "México", Anio: 1995, Idioma: "Español" },
+    { N: 40, Autor: "Carlos Luis Fallas", Titulo: "Gentes y Gentecillas", Pais: "Costa Rica", Anio: 1947, Idioma: "Español" },
+    { N: 41, Autor: "César Blondet S.", Titulo: "Jesús de Nazaret", Pais: "Perú", Anio: 1980, Idioma: "Español" },
+    { N: 42, Autor: "César Vallejo", Titulo: "Tungsteno", Pais: "Perú", Anio: 1931, Idioma: "Español" },
+    { N: 43, Autor: "César Vallejo", Titulo: "Los heraldos negros", Pais: "Perú", Anio: 1919, Idioma: "Español" },
+    { N: 44, Autor: "César Vallejo", Titulo: "Fabla salvaje", Pais: "Perú", Anio: 1923, Idioma: "Español" },
+    { N: 45, Autor: "César Vallejo", Titulo: "Hacia el reino de los sciris", Pais: "Perú", Anio: 1928, Idioma: "Español" },
+    { N: 46, Autor: "César Vallejo", Titulo: "Trilce", Pais: "Perú", Anio: 1922, Idioma: "Español" },
+    { N: 47, Autor: "Charles Darwin", Titulo: "El origen de las Especies", Pais: "Inglaterra", Anio: 1859, Idioma: "Inglés" },
+    { N: 48, Autor: "Charles Darwin", Titulo: "El origen del hombre", Pais: "Inglaterra", Anio: 1871, Idioma: "Inglés" },
+    { N: 49, Autor: "Charles Dickens", Titulo: "Historia de dos ciudades", Pais: "Inglaterra", Anio: 1859, Idioma: "Inglés" },
+    { N: 50, Autor: "Charles Dickens", Titulo: "Fantasmas de Navidad", Pais: "Inglaterra", Anio: 1843, Idioma: "Inglés" },
+    { N: 51, Autor: "Charles Hoy Fort", Titulo: "El libro de los condenados", Pais: "Estados Unidos", Anio: 1919, Idioma: "Inglés" },
+    { N: 52, Autor: "Chinguiz Aitmátov", Titulo: "Dzhamilia", Pais: "Kirguistán", Anio: 1958, Idioma: "Ruso" },
+    { N: 53, Autor: "Chinguiz Aitmátov", Titulo: "Adiós, Gulsarí", Pais: "Kirguistán", Anio: 1966, Idioma: "Ruso" },
+    { N: 54, Autor: "Chinguiz Aitmátov", Titulo: "El primer maestro", Pais: "Kirguistán", Anio: 1962, Idioma: "Ruso" },
+    { N: 55, Autor: "Ciro Alegría", Titulo: "El mundo es ancho y ajeno", Pais: "Perú", Anio: 1941, Idioma: "Español" },
+    { N: 56, Autor: "Ciro Alegría", Titulo: "Los perros hambrientos", Pais: "Perú", Anio: 1939, Idioma: "Español" },
+    { N: 57, Autor: "Ciro Alegría", Titulo: "La serpiente de oro", Pais: "Perú", Anio: 1935, Idioma: "Español" },
+    { N: 58, Autor: "Ciro Alegría", Titulo: "Cuentos y leyendas americanos", Pais: "Perú", Anio: 1945, Idioma: "Español" },
+    { N: 59, Autor: "Clorinda Matto de Turner", Titulo: "Aves sin nido", Pais: "Perú", Anio: 1889, Idioma: "Español" },
+    { N: 60, Autor: "D. H. Lawrence", Titulo: "La serpiente emplumada", Pais: "Inglaterra", Anio: 1926, Idioma: "Inglés" },
+    { N: 61, Autor: "Dan Brown", Titulo: "El código Da Vinci", Pais: "Estados Unidos", Anio: 2003, Idioma: "Inglés" },
+    { N: 62, Autor: "Daniel Defoe", Titulo: "Robinson Crusoe", Pais: "Inglaterra", Anio: 1719, Idioma: "Inglés" },
+    { N: 63, Autor: "Dante Alighieri", Titulo: "La Divina Comedia", Pais: "Italia", Anio: 1321, Idioma: "Italiano" },
+    { N: 64, Autor: "Daphne du Maurier", Titulo: "Los Pájaros", Pais: "Inglaterra", Anio: 1952, Idioma: "Inglés" },
+    { N: 65, Autor: "Daphne du Maurier", Titulo: "Monte Veritá", Pais: "Inglaterra", Anio: 1957, Idioma: "Inglés" },
+    { N: 66, Autor: "David Fishman", Titulo: "El espejo del líder", Pais: "Estados Unidos", Anio: 1988, Idioma: "Inglés" },
+    { N: 67, Autor: "Donald F. Glut", Titulo: "El imperio contraataca", Pais: "Estados Unidos", Anio: 1980, Idioma: "Inglés" },
+    { N: 68, Autor: "Douglas Preston & Lincoln Child", Titulo: "Más allá del hielo", Pais: "Estados Unidos", Anio: 1999, Idioma: "Inglés" },
+    { N: 69, Autor: "Dr. Jímenez del Oso", Titulo: "Ufología - Todo sobre ovnis", Pais: "España", Anio: 1975, Idioma: "Español" },
+    { N: 70, Autor: "Edgar Allan Poe", Titulo: "Cuentos", Pais: "Estados Unidos", Anio: 1845, Idioma: "Inglés" },
+    { N: 71, Autor: "Edgar Allan Poe", Titulo: "El Barril de Amontillado", Pais: "Estados Unidos", Anio: 1846, Idioma: "Inglés" },
+    { N: 72, Autor: "Edgar Allan Poe", Titulo: "El Escarabajo de Oro", Pais: "Estados Unidos", Anio: 1843, Idioma: "Inglés" },
+    { N: 73, Autor: "Edgar Allan Poe", Titulo: "El Entierro Prematuro", Pais: "Estados Unidos", Anio: 1844, Idioma: "Inglés" },
+    { N: 74, Autor: "Edgar Allan Poe", Titulo: "El Hundimiento de la Casa Usher", Pais: "Estados Unidos", Anio: 1839, Idioma: "Inglés" },
+    { N: 75, Autor: "Edgar Allan Poe", Titulo: "El Pozo y el Pendulo", Pais: "Estados Unidos", Anio: 1842, Idioma: "Inglés" },
+    { N: 76, Autor: "Edgar Allan Poe", Titulo: "La Carta Robada", Pais: "Estados Unidos", Anio: 1844, Idioma: "Inglés" },
+    { N: 77, Autor: "Edgar Allan Poe", Titulo: "Los Crimenes de la Rue Morgue", Pais: "Estados Unidos", Anio: 1841, Idioma: "Inglés" },
+    { N: 78, Autor: "Edgar Rice Burroughs", Titulo: "Tarzán de los monos", Pais: "Estados Unidos", Anio: 1912, Idioma: "Inglés" },
+    { N: 79, Autor: "Edmundo de Amicis", Titulo: "Corazón", Pais: "Italia", Anio: 1886, Idioma: "Italiano" },
+    { N: 80, Autor: "Eduardo Punset", Titulo: "Adaptarse a la marea", Pais: "España", Anio: 2006, Idioma: "Español" },
+    { N: 81, Autor: "Emilio Salgari", Titulo: "El corsario negro", Pais: "Italia", Anio: 1898, Idioma: "Italiano" },
+    { N: 82, Autor: "Emilio Salgari", Titulo: "La montaña de luz", Pais: "Italia", Anio: 1902, Idioma: "Italiano" },
+    { N: 83, Autor: "Emilio Salgari", Titulo: "El continente misterioso", Pais: "Italia", Anio: 1894, Idioma: "Italiano" },
+    { N: 84, Autor: "Enrique Lopez Albujar", Titulo: "Matalaché", Pais: "Perú", Anio: 1928, Idioma: "Español" },
+    { N: 85, Autor: "Enrique Perez Escrich", Titulo: "El mártir del Gólgota II", Pais: "España", Anio: 1870, Idioma: "Español" },
+    { N: 86, Autor: "Erich von Daniken", Titulo: "Carrozas de los dioses", Pais: "Suiza", Anio: 1969, Idioma: "Alemán" },
+    { N: 87, Autor: "Ernest Hemingway", Titulo: "El viejo y el mar", Pais: "Estados Unidos", Anio: 1952, Idioma: "Inglés" },
+    { N: 88, Autor: "Ernesto Sabato", Titulo: "La resistencia", Pais: "Argentina", Anio: 2000, Idioma: "Español" },
+    { N: 89, Autor: "Ernesto Sábato", Titulo: "El túnel", Pais: "Argentina", Anio: 1948, Idioma: "Español" },
+    { N: 90, Autor: "Fedor Dostoiewski", Titulo: "El principe idiota", Pais: "Rusia", Anio: 1869, Idioma: "Ruso" },
+    { N: 91, Autor: "Fedor Dostoiewski", Titulo: "Crimen y Castigo", Pais: "Rusia", Anio: 1866, Idioma: "Ruso" },
+    { N: 92, Autor: "Fernando Ampuero", Titulo: "Caramelo verde", Pais: "Perú", Anio: 1989, Idioma: "Español" },
+    { N: 93, Autor: "Francoise Sagan", Titulo: "Dentro de un mes dentro de un año", Pais: "Francia", Anio: 1957, Idioma: "Francés" },
+    { N: 94, Autor: "Franz Kafka", Titulo: "La Metamorfosis", Pais: "Alemania", Anio: 1915, Idioma: "Alemán" },
+    { N: 95, Autor: "Gabriel Garcia Marquez", Titulo: "Cien Años de Soledad", Pais: "Colombia", Anio: 1967, Idioma: "Español" },
+    { N: 96, Autor: "Gabriel Garcia Marquez", Titulo: "La Hojarasca", Pais: "Colombia", Anio: 1955, Idioma: "Español" },
+    { N: 97, Autor: "Gabriel Garcia Marquez", Titulo: "Del amor y otros demonios", Pais: "Colombia", Anio: 1994, Idioma: "Español" },
+    { N: 98, Autor: "Gerald Dipego", Titulo: "Nacida Inocente I", Pais: "Estados Unidos", Anio: 1978, Idioma: "Inglés" },
+    { N: 99, Autor: "Gerald Dipego", Titulo: "Nacida Inocente II", Pais: "Estados Unidos", Anio: 1979, Idioma: "Inglés" },
+    { N: 100, Autor: "Gibran Khalil Gibran", Titulo: "El Profeta", Pais: "Líbano", Anio: 1923, Idioma: "Árabe" },
+    { N: 101, Autor: "Gibran Khalil Gibran", Titulo: "Jesús el hijo del hombre", Pais: "Líbano", Anio: 1928, Idioma: "Árabe" },
+    { N: 102, Autor: "Giovanni Guareschi", Titulo: "Don Camilo", Pais: "Italia", Anio: 1948, Idioma: "Italiano" },
+    { N: 103, Autor: "Gustave Flaubert", Titulo: "Madam Bovary", Pais: "Francia", Anio: 1856, Idioma: "Francés" },
+    { N: 104, Autor: "Gustavo Adolfo Bécquer", Titulo: "El monte de las animas", Pais: "España", Anio: 1861, Idioma: "Español" },
+    { N: 105, Autor: "Gustavo Adolfo Bécquer", Titulo: "Leyendas", Pais: "España", Anio: 1863, Idioma: "Español" },
+    { N: 106, Autor: "Gustavo Adolfo Bécquer", Titulo: "Rimas", Pais: "España", Anio: 1871, Idioma: "Español" },
+    { N: 107, Autor: "Gustavo Rodríguez", Titulo: "La furia de Aquiles", Pais: "Perú", Anio: 2008, Idioma: "Español" },
+    { N: 108, Autor: "H. P. Lovecraft", Titulo: "El horror de Dunwich", Pais: "Estados Unidos", Anio: 1929, Idioma: "Inglés" },
+    { N: 109, Autor: "Harriet Beecher Stowe", Titulo: "La cabaña del tio Tom", Pais: "Estados Unidos", Anio: 1852, Idioma: "Inglés" },
+    { N: 110, Autor: "Héctor Domecq", Titulo: "Albert Einstein", Pais: "España", Anio: 2005, Idioma: "Español" },
+    { N: 111, Autor: "Henry Rider Haggard", Titulo: "Las minas del rey Salomón", Pais: "Inglaterra", Anio: 1885, Idioma: "Inglés" },
+    { N: 112, Autor: "Henry Thomas", Titulo: "Tomás Alva Edison", Pais: "Estados Unidos", Anio: 1956, Idioma: "Inglés" },
+    { N: 113, Autor: "Herbert George Wells", Titulo: "La guerra de los mundos", Pais: "Inglaterra", Anio: 1898, Idioma: "Inglés" },
+    { N: 114, Autor: "Hermann Hesse", Titulo: "Siddarharta", Pais: "Alemania", Anio: 1922, Idioma: "Alemán" },
+    { N: 115, Autor: "Homero", Titulo: "La Iliada", Pais: "Grecia", Anio: -750, Idioma: "Griego" },
+    { N: 116, Autor: "Homero", Titulo: "La Odisea", Pais: "Grecia", Anio: -700, Idioma: "Griego" },
+    { N: 117, Autor: "Charles Bukowski", Titulo: "Pulp", Pais: "Estados Unidos", Anio: 1994, Idioma: "Inglés" },
+    { N: 118, Autor: "Mario Vargas Llosa", Titulo: "El paraíso en la otra esquina", Pais: "Perú", Anio: 2003, Idioma: "Español" },
+    { N: 119, Autor: "Ian Fleming", Titulo: "Desde Rusia con amor", Pais: "Inglaterra", Anio: 1957, Idioma: "Inglés" },
+    { N: 120, Autor: "Inca Garcilaso de La Vega", Titulo: "Comentarios Reales", Pais: "Perú", Anio: 1609, Idioma: "Español" },
+    { N: 121, Autor: "Ira Levin", Titulo: "Los niños del Brazil", Pais: "Estados Unidos", Anio: 1976, Idioma: "Inglés" },
+    { N: 122, Autor: "Isaac Felipe Montoro", Titulo: "El comandante Pintado", Pais: "Perú", Anio: 1985, Idioma: "Español" },
+    { N: 123, Autor: "J. K. Rowling", Titulo: "Harry Potter y la piedra filosofal", Pais: "Inglaterra", Anio: 1997, Idioma: "Inglés" },
+    { N: 124, Autor: "J. K. Rowling", Titulo: "Harry Potter y la cámara secreta", Pais: "Inglaterra", Anio: 1999, Idioma: "Inglés" },
+    { N: 125, Autor: "J. K. Rowling", Titulo: "Harry Potter y el prisionero de Azkaban", Pais: "Inglaterra", Anio: 2000, Idioma: "Inglés" },
+    { N: 126, Autor: "J. K. Rowling", Titulo: "Harry Potter y el cáliz de fuego", Pais: "Inglaterra", Anio: 2001, Idioma: "Inglés" },
+    { N: 127, Autor: "J.J. Benitez", Titulo: "Caballo de Troya", Pais: "España", Anio: 1984, Idioma: "Español" },
+    { N: 128, Autor: "J.R.R. Tolkien", Titulo: "El Señor de los Anillos , La Comunidad del Anillo", Pais: "Inglaterra", Anio: 1954, Idioma: "Inglés" },
+    { N: 129, Autor: "Jacob Bronowski", Titulo: "El ascenso del hombre", Pais: "Inglaterra", Anio: 1973, Idioma: "Inglés" },
+    { N: 130, Autor: "Jacques Bergier", Titulo: "El libro de lo inexplicable", Pais: "Francia", Anio: 1974, Idioma: "Francés" },
+    { N: 131, Autor: "Jaime bayly", Titulo: "No se lo digas a nadie", Pais: "Perú", Anio: 1994, Idioma: "Español" },
+    { N: 132, Autor: "Jaimes Joyce", Titulo: "Ulises", Pais: "Irlanda", Anio: 1922, Idioma: "Inglés" },
+    { N: 133, Autor: "Javier Gutierrez Puebla", Titulo: "La población mundial y sus problemas", Pais: "España", Anio: 1986, Idioma: "Español" },
+    { N: 134, Autor: "Jay Anson", Titulo: "El horror vuelve a Amityville", Pais: "Estados Unidos", Anio: 1979, Idioma: "Inglés" },
+    { N: 135, Autor: "Jean Charles de F.", Titulo: "Nostradamus: Historiador y Profeta", Pais: "Francia", Anio: 1980, Idioma: "Francés" },
+    { N: 136, Autor: "Jeremy Taylor Woots", Titulo: "Enigmas de la historia", Pais: "Inglaterra", Anio: 1983, Idioma: "Inglés" },
+    { N: 137, Autor: "Johann Goethe", Titulo: "Fausto", Pais: "Alemania", Anio: 1808, Idioma: "Alemán" },
+    { N: 138, Autor: "John Katzenbach", Titulo: "El Psicoanalista", Pais: "Estados Unidos", Anio: 2002, Idioma: "Inglés" },
+    { N: 139, Autor: "John Katzenbach", Titulo: "La historia del loco", Pais: "Estados Unidos", Anio: 2004, Idioma: "Inglés" },
+    { N: 140, Autor: "John Le Carre", Titulo: "El espía que surgió del frío", Pais: "Inglaterra", Anio: 1963, Idioma: "Inglés" },
+    { N: 141, Autor: "José María Arguedas", Titulo: "El Sexto", Pais: "Perú", Anio: 1961, Idioma: "Español" },
+    { N: 142, Autor: "José María Arguedas", Titulo: "Agua y todos los cuentos", Pais: "Perú", Anio: 1935, Idioma: "Español" },
+    { N: 143, Autor: "José María Arguedas", Titulo: "Yawar fiesta", Pais: "Perú", Anio: 1941, Idioma: "Español" },
+    { N: 144, Autor: "José María Arguedas", Titulo: "Los rios profundos", Pais: "Perú", Anio: 1958, Idioma: "Español" },
+    { N: 145, Autor: "Jose Mauro de Vasconcelos", Titulo: "Mi planta de naranja lima", Pais: "Brasil", Anio: 1968, Idioma: "Portugués" },
+    { N: 146, Autor: "Jose Mauro de Vasconcelos", Titulo: "Vamos a calentar el sol", Pais: "Brasil", Anio: 1974, Idioma: "Portugués" },
+    { N: 147, Autor: "José Saramago", Titulo: "Ensayo sobre la ceguera", Pais: "Portugal", Anio: 1995, Idioma: "Portugués" },
+    { N: 148, Autor: "José Saramago", Titulo: "El Evangelio según Jesucristo", Pais: "Portugal", Anio: 1991, Idioma: "Portugués" },
+    { N: 149, Autor: "Joseph Conrad", Titulo: "Lord Jim", Pais: "Inglaterra", Anio: 1900, Idioma: "Inglés" },
+    { N: 150, Autor: "Julio Peradejordi", Titulo: "56 cuentos para buscar a Dios", Pais: "España", Anio: 1982, Idioma: "Español" },
+    { N: 151, Autor: "Julio Ramón Ribeyro", Titulo: "La palabra del mudo", Pais: "Perú", Anio: 1973, Idioma: "Español" },
+    { N: 152, Autor: "Julio Verne", Titulo: "Miguel Strogoff", Pais: "Francia", Anio: 1876, Idioma: "Francés" },
+    { N: 153, Autor: "Julio Verne", Titulo: "Veinte mil leguas de viaje submarino", Pais: "Francia", Anio: 1870, Idioma: "Francés" },
+    { N: 154, Autor: "Julio Verne", Titulo: "Un capitan de quince años", Pais: "Francia", Anio: 1878, Idioma: "Francés" },
+    { N: 155, Autor: "Larousse", Titulo: "Los Grandes Enigmas de Larousse", Pais: "México", Anio: 1992, Idioma: "Español" },
+    { N: 156, Autor: "Louisa May Alcott", Titulo: "Hombrecitos", Pais: "Estados Unidos", Anio: 1871, Idioma: "Inglés" },
+    { N: 157, Autor: "Luis Alberto Sánchez", Titulo: "La Perricholi", Pais: "Perú", Anio: 1955, Idioma: "Español" },
+    { N: 158, Autor: "Luis Fernando Bamonde", Titulo: "El deseo Diferente", Pais: "Perú", Anio: 1978, Idioma: "Español" },
+    { N: 159, Autor: "Malba Tahan", Titulo: "El hombre que calculaba", Pais: "Brasil", Anio: 1938, Idioma: "Portugués" },
+    { N: 160, Autor: "Manuel Gonzales Prada", Titulo: "Horas de lucha", Pais: "Perú", Anio: 1908, Idioma: "Español" },
+    { N: 161, Autor: "Manuel Scorza", Titulo: "Redoble por Rancas", Pais: "Perú", Anio: 1970, Idioma: "Español" },
+    { N: 162, Autor: "Marguerite Yourcenar", Titulo: "Memorias de Adriano", Pais: "Francia", Anio: 1951, Idioma: "Francés" },
+    { N: 163, Autor: "Mario A. Puga", Titulo: "Así no más", Pais: "Perú", Anio: 1975, Idioma: "Español" },
+    { N: 164, Autor: "Mario Vargas Llosa", Titulo: "La ciudad y los perros", Pais: "Perú", Anio: 1963, Idioma: "Español" },
+    { N: 165, Autor: "Mario Vargas Llosa", Titulo: "La guerra del fin del mundo", Pais: "Perú", Anio: 1981, Idioma: "Español" },
+    { N: 166, Autor: "Mario Vargas Llosa", Titulo: "Los jefes", Pais: "Perú", Anio: 1959, Idioma: "Español" },
+    { N: 167, Autor: "Mario Vargas Llosa", Titulo: "Los cachorros", Pais: "Perú", Anio: 1967, Idioma: "Español" },
+    { N: 168, Autor: "Mario Vargas Llosa", Titulo: "Pantaleón y las visitadoras", Pais: "Perú", Anio: 1973, Idioma: "Español" },
+    { N: 169, Autor: "Mario Vargas Llosa", Titulo: "Elogio de la madrastra", Pais: "Perú", Anio: 1988, Idioma: "Español" },
+    { N: 170, Autor: "Mario Vargas Llosa", Titulo: "La fiesta del chivo", Pais: "Perú", Anio: 2000, Idioma: "Español" },
+    { N: 171, Autor: "Max Allan Collins", Titulo: "Salvando al soldado Ryan", Pais: "Estados Unidos", Anio: 1998, Idioma: "Inglés" },
+    { N: 172, Autor: "Máximo Gorki", Titulo: "La madre", Pais: "Rusia", Anio: 1906, Idioma: "Ruso" },
+    { N: 173, Autor: "Michael Crichton", Titulo: "El gran robo del tren", Pais: "Estados Unidos", Anio: 1975, Idioma: "Inglés" },
+    { N: 174, Autor: "Miguel Ángel Asturias", Titulo: "El Señor Presidente", Pais: "Guatemala", Anio: 1946, Idioma: "Español" },
+    { N: 175, Autor: "Miguel Angel Cornejo", Titulo: "Metáforas y pergaminos de la excelencia", Pais: "México", Anio: 1990, Idioma: "Español" },
+    { N: 176, Autor: "Miguel de Cervantes Saavedra", Titulo: "El ingenioso Hidalgo don Quijote de la Mancha", Pais: "España", Anio: 1605, Idioma: "Español" },
+    { N: 177, Autor: "Mika Waltari", Titulo: "Michael el renegado", Pais: "Finlandia", Anio: 1949, Idioma: "Finlandés" },
+    { N: 178, Autor: "Moliere", Titulo: "El avaro", Pais: "Francia", Anio: 1668, Idioma: "Francés" },
+    { N: 179, Autor: "Nicolas Maquiavelo", Titulo: "El Principe", Pais: "Italia", Anio: 1532, Idioma: "Italiano" },
+    { N: 180, Autor: "Nikolai Ostrovski", Titulo: "Asi se templó el acero", Pais: "Rusia", Anio: 1932, Idioma: "Ruso" },
+    { N: 181, Autor: "Og Mandino", Titulo: "El Milagro más Grande del Mundo", Pais: "Estados Unidos", Anio: 1968, Idioma: "Inglés" },
+    { N: 182, Autor: "P. Eduardo Arcusa Castella", Titulo: "Joven, tus problemas", Pais: "España", Anio: 1965, Idioma: "Español" },
+    { N: 183, Autor: "Paul Gallice", Titulo: "La aventura del Poseidón", Pais: "Estados Unidos", Anio: 1969, Idioma: "Inglés" },
+    { N: 184, Autor: "Paulo Coelho", Titulo: "El demomio y la señorita Prym", Pais: "Brasil", Anio: 2000, Idioma: "Portugués" },
+    { N: 185, Autor: "Paulo Coelho", Titulo: "El Alquimista", Pais: "Brasil", Anio: 1988, Idioma: "Portugués" },
+    { N: 186, Autor: "Paulo Coelho", Titulo: "El Peregrino de Compostela", Pais: "Brasil", Anio: 1987, Idioma: "Portugués" },
+    { N: 187, Autor: "Pedro Calderón de la Barca", Titulo: "La vida es sueño", Pais: "España", Anio: 1635, Idioma: "Español" },
+    { N: 188, Autor: "Pedro Suarez Vetiz", Titulo: "Yo Pedro", Pais: "Perú", Anio: 1975, Idioma: "Español" },
+    { N: 189, Autor: "Peter Kolosimo", Titulo: "El planeta incógnito", Pais: "Italia", Anio: 1957, Idioma: "Italiano" },
+    { N: 190, Autor: "Peter Kolosimo", Titulo: "Tierra sin tiempo", Pais: "Italia", Anio: 1964, Idioma: "Italiano" },
+    { N: 191, Autor: "Ricardo Palma", Titulo: "Tradiciones Peruanas", Pais: "Perú", Anio: 1872, Idioma: "Español" },
+    { N: 192, Autor: "Richard Bach", Titulo: "Juan Salvador Gaviota", Pais: "Estados Unidos", Anio: 1970, Idioma: "Inglés" },
+    { N: 193, Autor: "Roald Dahl", Titulo: "Historias extraordinarias", Pais: "Inglaterra", Anio: 1953, Idioma: "Inglés" },
+    { N: 194, Autor: "Roald Dahl", Titulo: "Relatos de lo inesperado", Pais: "Inglaterra", Anio: 1959, Idioma: "Inglés" },
+    { N: 195, Autor: "Robert Bloch", Titulo: "Psicosis", Pais: "Estados Unidos", Anio: 1959, Idioma: "Inglés" },
+    { N: 196, Autor: "Robert Bolt", Titulo: "La misión", Pais: "Inglaterra", Anio: 1986, Idioma: "Inglés" },
+    { N: 197, Autor: "Robert Fisher", Titulo: "El caballero de la armadura oxidada", Pais: "Estados Unidos", Anio: 1980, Idioma: "Inglés" },
+    { N: 198, Autor: "Robert L. Stevenson", Titulo: "La isla del tesoro", Pais: "Inglaterra", Anio: 1883, Idioma: "Inglés" },
+    { N: 199, Autor: "Saniel Lozano A.", Titulo: "La Tierra encantada I", Pais: "Perú", Anio: 1960, Idioma: "Español" },
+    { N: 200, Autor: "Saniel Lozano A.", Titulo: "La Tierra encantada II", Pais: "Perú", Anio: 1965, Idioma: "Español" },
+    { N: 201, Autor: "Silvina Ocampo", Titulo: "Cuentos completos II", Pais: "Argentina", Anio: 1988, Idioma: "Español" },
+    { N: 202, Autor: "Sofocles", Titulo: "Edipo Rey", Pais: "Grecia", Anio: -430, Idioma: "Griego" },
+    { N: 203, Autor: "Sofocles", Titulo: "Antigona", Pais: "Grecia", Anio: -441, Idioma: "Griego" },
+    { N: 204, Autor: "Stephen Hawking", Titulo: "Historia del tiempo", Pais: "Inglaterra", Anio: 1988, Idioma: "Inglés" },
+    { N: 205, Autor: "Michael White y John Gribbin", Titulo: "Stephen Hawking. Una vida para la ciencia", Pais: "Inglaterra", Anio: 1992, Idioma: "Inglés" },
+    { N: 206, Autor: "Stieg Larsson", Titulo: "La chica que soñaba con una cerilla y un bidón de gasolina", Pais: "Suecia", Anio: 2006, Idioma: "Sueco" },
+    { N: 207, Autor: "Teodoro Cáceres", Titulo: "La embestida del carnero y otros cuentos", Pais: "Perú", Anio: 1980, Idioma: "Español" },
+    { N: 208, Autor: "Tomás Doreste", Titulo: "Grandes temas de lo oculto y lo insólito I", Pais: "España", Anio: 1974, Idioma: "Español" },
+    { N: 209, Autor: "Tomás Doreste", Titulo: "Grandes temas de lo oculto y lo insólito II", Pais: "España", Anio: 1975, Idioma: "Español" },
+    { N: 210, Autor: "Tomás Doreste", Titulo: "Grandes temas de lo oculto y lo insólito III", Pais: "España", Anio: 1976, Idioma: "Español" },
+    { N: 211, Autor: "Tomás Doreste", Titulo: "Grandes temas de lo oculto y lo insólito IV", Pais: "España", Anio: 1977, Idioma: "Español" },
+    { N: 212, Autor: "V. Pekelis", Titulo: "Mezcla cibernética", Pais: "Rusia", Anio: 1965, Idioma: "Ruso" },
+    { N: 213, Autor: "Ventura García Calderón", Titulo: "La venganza del cóndor", Pais: "Perú", Anio: 1924, Idioma: "Español" },
+    { N: 214, Autor: "Victor Hugo", Titulo: "Los Miserables", Pais: "Francia", Anio: 1862, Idioma: "Francés" },
+    { N: 215, Autor: "Virgilio", Titulo: "La Eneida", Pais: "Roma", Anio: -19, Idioma: "Latín" },
+    { N: 216, Autor: "Walter Buehr", Titulo: "Un mundo bajo las olas", Pais: "Estados Unidos", Anio: 1954, Idioma: "Inglés" },
+    { N: 217, Autor: "Walter Tevis", Titulo: "El hombre que cayó a la Tierra", Pais: "Estados Unidos", Anio: 1963, Idioma: "Inglés" },
+    { N: 218, Autor: "Wayne W. Dyer", Titulo: "Tus zonas erróneas", Pais: "Estados Unidos", Anio: 1976, Idioma: "Inglés" },
+    { N: 219, Autor: "William P. Blatty", Titulo: "El exorcista", Pais: "Estados Unidos", Anio: 1971, Idioma: "Inglés" },
+    { N: 220, Autor: "William Shakespeare", Titulo: "Hamlet", Pais: "Inglaterra", Anio: 1601, Idioma: "Inglés" },
+    { N: 221, Autor: "William Shakespeare", Titulo: "Romeo y Julieta", Pais: "Inglaterra", Anio: 1597, Idioma: "Inglés" },
+    { N: 222, Autor: "William Shakespeare", Titulo: "Otelo", Pais: "Inglaterra", Anio: 1604, Idioma: "Inglés" },
+    { N: 223, Autor: "Winston S. Churchill", Titulo: "La Segunda Guerra Mundial", Pais: "Inglaterra", Anio: 1948, Idioma: "Inglés" },
+    { N: 224, Autor: "Wolfgrang Johan Goethe", Titulo: "Fausto", Pais: "Alemania", Anio: 1808, Idioma: "Alemán" },
+    { N: 225, Autor: "Alfredo Bryce Echenique", Titulo: "Un mundo para Julius", Pais: "Perú", Anio: 1970, Idioma: "Español" },
+    { N: 226, Autor: "Stieg Larsson", Titulo: "Los hombres que no amaban a las mujeres", Pais: "Suecia", Anio: 2005, Idioma: "Sueco" },
+    { N: 227, Autor: "Stieg Larsson", Titulo: "La reina en el palacio de las corrientes de aire", Pais: "Suecia", Anio: 2007, Idioma: "Sueco" },
+    { N: 228, Autor: "Truman Capote", Titulo: "Feretros tallados a mano", Pais: "Estados Unidos", Anio: 1965, Idioma: "Inglés" },
+    { N: 229, Autor: "Jean Ray", Titulo: "El camino de los dioses", Pais: "Bélgica", Anio: 1953, Idioma: "Francés" },
+    { N: 230, Autor: "Albert Camus", Titulo: "El primer hombre", Pais: "Francia", Anio: 1994, Idioma: "Francés" },
+    { N: 231, Autor: "Julio Verne", Titulo: "De la Tierra a la Luna", Pais: "Francia", Anio: 1865, Idioma: "Francés" },
+    { N: 232, Autor: "Blue Jeans", Titulo: "Canciones para Paula", Pais: "España", Anio: 2013, Idioma: "Español" },
+    { N: 233, Autor: "Julio Verne", Titulo: "La vuelta al mundo en 80 días", Pais: "Francia", Anio: 1872, Idioma: "Francés" },
+    { N: 234, Autor: "Edgar Rice Burroughs", Titulo: "Tarzán, señor de la jungla", Pais: "Estados Unidos", Anio: 1915, Idioma: "Inglés" },
+    { N: 235, Autor: "Hermann Hesse", Titulo: "Lobo estepario", Pais: "Alemania", Anio: 1927, Idioma: "Alemán" },
+    { N: 236, Autor: "Antony Beevor", Titulo: "La Segunda Guerra Mundial", Pais: "Inglaterra", Anio: 2012, Idioma: "Inglés" },
+    { N: 237, Autor: "Agatha Christie", Titulo: "Cianuro espumoso", Pais: "Inglaterra", Anio: 1945, Idioma: "Inglés" },
+    { N: 238, Autor: "Gary Zukav", Titulo: "La danza de los maestros", Pais: "Estados Unidos", Anio: 1979, Idioma: "Inglés" },
+    { N: 239, Autor: "Edgar Allan Poe", Titulo: "Manuscrito hallado en una botella", Pais: "Estados Unidos", Anio: 1833, Idioma: "Inglés" },
+    { N: 240, Autor: "Gregorio Doval", Titulo: "Fraudes, engaños y timos de la historia", Pais: "España", Anio: 2015, Idioma: "Español" },
+    { N: 241, Autor: "J. Douglas Kenyon", Titulo: "Ciencia prohibida", Pais: "Estados Unidos", Anio: 2005, Idioma: "Inglés" },
+    { N: 242, Autor: "Joaquín Sánchez Guillén", Titulo: "L. E. Boltzmann. El científico que se adelantó a su tiempo", Pais: "España", Anio: 2010, Idioma: "Español" },
+    { N: 243, Autor: "Rachel Carson", Titulo: "Primavera silenciosa", Pais: "Estados Unidos", Anio: 1962, Idioma: "Inglés" },
+    { N: 244, Autor: "Humberto Maturana R. y Francisco Varela G.", Titulo: "El árbol de conocimiento", Pais: "Chile", Anio: 1984, Idioma: "Español" },
+    { N: 245, Autor: "Blue Jeans", Titulo: "¿Sabes que te quiero?", Pais: "España", Anio: 2014, Idioma: "Español" },
+    { N: 246, Autor: "Universidad Autónoma de México", Titulo: "400 pequeñas dosis de ciencia", Pais: "México", Anio: 2015, Idioma: "Español" },
+    { N: 247, Autor: "Alejo Carpentier", Titulo: "El arpa y la sombra", Pais: "Cuba", Anio: 1979, Idioma: "Español" },
+    { N: 248, Autor: "Stephen Hawkin y Leonard Mlodinow", Titulo: "El gran diseño", Pais: "Inglaterra", Anio: 2010, Idioma: "Inglés" },
+    { N: 249, Autor: "Joé María Arguedas", Titulo: "Todas las sangres", Pais: "Perú", Anio: 1964, Idioma: "Español" },
+    { N: 250, Autor: "Juan Pablo Vizcardo y Guzmán", Titulo: "Carta a los españoles americanos", Pais: "Perú", Anio: 1791, Idioma: "Español" },
+    { N: 251, Autor: "I. V. Petriánov y D. N. Trífonov", Titulo: "La magna ley", Pais: "Rusia", Anio: 1978, Idioma: "Ruso" },
+    { N: 252, Autor: "Kara Rogers", Titulo: "The 100 Most Influential Scientists of All Time", Pais: "Estados Unidos", Anio: 2010, Idioma: "Inglés" },
+    { N: 253, Autor: "Tell me why N° 88", Titulo: "100 milestone in chemistry", Pais: "Estados Unidos", Anio: 2012, Idioma: "Inglés" },
+    { N: 254, Autor: "David Lagercrantz", Titulo: "Lo que no te mata te hace más fuerte", Pais: "Suecia", Anio: 2015, Idioma: "Sueco" },
+    { N: 255, Autor: "Tell me why N° 111", Titulo: "World of science", Pais: "Estados Unidos", Anio: 2013, Idioma: "Inglés" },
+    { N: 256, Autor: "Rudyard Kipling", Titulo: "Kim", Pais: "Inglaterra", Anio: 1901, Idioma: "Inglés" },
+    { N: 257, Autor: "Lope de Vega", Titulo: "El perro del hortelano", Pais: "España", Anio: 1618, Idioma: "Español" },
+    { N: 258, Autor: "Yuval Noah Harari", Titulo: "Sapiens: de animales a dioses", Pais: "Israel", Anio: 2011, Idioma: "Hebreo" },
+    { N: 259, Autor: "Amanda Doering Tourville", Titulo: "Albert Einstein brilliant scientist", Pais: "Estados Unidos", Anio: 2009, Idioma: "Inglés" },
+    { N: 260, Autor: "Crosbie W. Smith", Titulo: "William Thomson and the Creation of Thermodynamics", Pais: "Inglaterra", Anio: 1998, Idioma: "Inglés" },
+    { N: 261, Autor: "Alfred Bester", Titulo: "Los hombres que asesinaron a Mahoma", Pais: "Estados Unidos", Anio: 1958, Idioma: "Inglés" },
+    { N: 262, Autor: "Ray Hammond", Titulo: "El mundo en 2030", Pais: "Inglaterra", Anio: 2008, Idioma: "Inglés" },
+    { N: 263, Autor: "Desmond Morris", Titulo: "El mono desnudo", Pais: "Inglaterra", Anio: 1967, Idioma: "Inglés" },
+    { N: 264, Autor: "ONU", Titulo: "Nuestro futuro común", Pais: "Internacional", Anio: 1987, Idioma: "Inglés" },
+    { N: 265, Autor: "Mari Cielo Pajares", Titulo: "Memorias de una puta", Pais: "Perú", Anio: 2016, Idioma: "Español" },
+    { N: 266, Autor: "León Tolstói", Titulo: "Guerra y paz", Pais: "Rusia", Anio: 1869, Idioma: "Ruso" },
+    { N: 267, Autor: "José Antonio Acevedo-Díaz", Titulo: "Controversias en la historia de la ciencia y cultura científica", Pais: "España", Anio: 2018, Idioma: "Español" },
+    { N: 268, Autor: "David Lagercrantz", Titulo: "El hombre que perseguía su sombra", Pais: "Suecia", Anio: 2017, Idioma: "Sueco" },
+    { N: 269, Autor: "Santiago Aguilar", Titulo: "Balada de montonero", Pais: "Perú", Anio: 1985, Idioma: "Español" },
+    { N: 270, Autor: "Steven Heggings", Titulo: "50 rechazos que hicieron historia", Pais: "Inglaterra", Anio: 2014, Idioma: "Inglés" },
+    { N: 271, Autor: "Stefan Zweig", Titulo: "Momentos estelares de la humanidad", Pais: "Austria", Anio: 1927, Idioma: "Alemán" },
+    { N: 272, Autor: "Yuval Noah Harari", Titulo: "21 lecciones para el siglo XXI", Pais: "Israel", Anio: 2018, Idioma: "Hebreo" },
+    { N: 273, Autor: "David Lagercrantz", Titulo: "La chica que vivió dos veces", Pais: "Suecia", Anio: 2017, Idioma: "Sueco" },
+    { N: 274, Autor: "Maurice Leblanc", Titulo: "El tapón de cristal", Pais: "Francia", Anio: 1912, Idioma: "Francés" },
+    { N: 275, Autor: "José Antonio Lozano Teruel", Titulo: "100 relatos científicos que debemos conocer", Pais: "España", Anio: 2020, Idioma: "Español" },
+    { N: 276, Autor: "Maurice Leblanc", Titulo: "Arsenio Lupin, caballero y ladrón", Pais: "Francia", Anio: 1907, Idioma: "Francés" },
+    { N: 277, Autor: "Cristina Morato", Titulo: "Reinas malditas", Pais: "España", Anio: 2014, Idioma: "Español" },
+    { N: 278, Autor: "Julie Maroh", Titulo: "Le bleu est une couleur chaude", Pais: "Francia", Anio: 2010, Idioma: "Francés" },
+    { N: 279, Autor: "Sonia Shah", Titulo: "Pandemia", Pais: "Estados Unidos", Anio: 2016, Idioma: "Inglés" },
+    { N: 280, Autor: "Andrés Oppenheimer", Titulo: "Basta de historias", Pais: "Argentina", Anio: 2010, Idioma: "Español" },
+    { N: 281, Autor: "Jorge Isaacs", Titulo: "María", Pais: "Colombia", Anio: 1867, Idioma: "Español" },
+    { N: 282, Autor: "J. M. Bielsa-Gibaja", Titulo: "Y si la historia nos miente", Pais: "España", Anio: 2021, Idioma: "Español" },
+    { N: 283, Autor: "Michael Connelly", Titulo: "La rubia del hormigón", Pais: "Estados Unidos", Anio: 1994, Idioma: "Inglés" },
+    { N: 284, Autor: "Robin Cook", Titulo: "Toxina", Pais: "Estados Unidos", Anio: 1998, Idioma: "Inglés" },
+    { N: 285, Autor: "Jorge Luis Borges", Titulo: "Cuentos argentinos", Pais: "Argentina", Anio: 1949, Idioma: "Español" },
+    { N: 286, Autor: "Gregorio Doval", Titulo: "Casualidades, coincidencias y serendipias de la historia", Pais: "España", Anio: 2020, Idioma: "Español" },
+    { N: 287, Autor: "Rómulo Gallegos", Titulo: "Cuentos completos", Pais: "Venezuela", Anio: 1950, Idioma: "Español" },
+    { N: 288, Autor: "Emilio Salgari", Titulo: "Los horrores de las Filipinas", Pais: "Italia", Anio: 1900, Idioma: "Italiano" },
+    { N: 289, Autor: "Yuval Noah Harari", Titulo: "Sapiens una historia gráfica: El nacimiento de la humanidad", Pais: "Israel", Anio: 2020, Idioma: "Hebreo" },
+    { N: 290, Autor: "José León Sánchez", Titulo: "La isla de los hombres solos", Pais: "Costa Rica", Anio: 1970, Idioma: "Español" },
+    { N: 291, Autor: "Manuel Scorza", Titulo: "Garabombo, el invisible", Pais: "Perú", Anio: 1972, Idioma: "Español" },
+    { N: 292, Autor: "Stefan Zweig", Titulo: "Novela de ajedrez", Pais: "Austria", Anio: 1942, Idioma: "Alemán" },
+    { N: 293, Autor: "Stefan Zweig", Titulo: "Carta de una desconocida", Pais: "Austria", Anio: 1922, Idioma: "Alemán" },
+    { N: 294, Autor: "José Supo", Titulo: "Cómo validar un instrumento", Pais: "Perú", Anio: 2015, Idioma: "Español" },
+    { N: 295, Autor: "Stefan Zweig", Titulo: "El mundo de ayer", Pais: "Austria", Anio: 1942, Idioma: "Alemán" },
+    { N: 296, Autor: "Umberto Eco", Titulo: "El cementerio de Praga", Pais: "Italia", Anio: 2010, Idioma: "Italiano" },
+    { N: 297, Autor: "Manuel Scorza", Titulo: "El jinete insomne", Pais: "Perú", Anio: 1977, Idioma: "Español" },
+    { N: 298, Autor: "Isaac Asimov", Titulo: "Preludio a la Fundación", Pais: "Estados Unidos", Anio: 1988, Idioma: "Inglés" },
+    { N: 299, Autor: "David Attenborough", Titulo: "Una vida en nuestro planeta", Pais: "Inglaterra", Anio: 2020, Idioma: "Inglés" },
+    { N: 300, Autor: "Jordi Agustí et al.", Titulo: "El precio de la inteligencia", Pais: "España", Anio: 2010, Idioma: "Español" },
+    { N: 301, Autor: "León Tolstói", Titulo: "Anna Karenina", Pais: "Rusia", Anio: 1878, Idioma: "Ruso" },
+    { N: 302, Autor: "Vittorio Silvestrini", Titulo: "Qué es la Entropía", Pais: "Italia", Anio: 2015, Idioma: "Italiano" },
+    { N: 303, Autor: "Andrés Oppenheimer", Titulo: "Ojos vendados", Pais: "Argentina", Anio: 2021, Idioma: "Español" },
+    { N: 304, Autor: "Isaac Asimov", Titulo: "Hacia la Fundación", Pais: "Estados Unidos", Anio: 1993, Idioma: "Inglés" },
+    { N: 305, Autor: "Miguel de Cervantes", Titulo: "La gitanilla", Pais: "España", Anio: 1613, Idioma: "Español" },
+    { N: 306, Autor: "J. M. G. Le Clezio", Titulo: "El africano", Pais: "Francia", Anio: 2004, Idioma: "Francés" },
+    { N: 307, Autor: "Solzenytszyn", Titulo: "Archipielago gulag", Pais: "Rusia", Anio: 1973, Idioma: "Ruso" },
+    { N: 308, Autor: "Deborah Garcia Bello", Titulo: "Todo es cuestión de Química", Pais: "España", Anio: 2017, Idioma: "Español" },
+    { N: 309, Autor: "Vaclav Smil", Titulo: "Energía y civilización. Una historia", Pais: "Canadá", Anio: 2017, Idioma: "Inglés" },
+    { N: 310, Autor: "Stefan Zweig", Titulo: "Maria Antonieta", Pais: "Austria", Anio: 1932, Idioma: "Alemán" },
+    { N: 311, Autor: "Desmond Morris", Titulo: "El mundo de los animales", Pais: "Inglaterra", Anio: 1990, Idioma: "Inglés" },
+    { N: 312, Autor: "Carlos morales Paredes", Titulo: "Guía para redactar artículos científicos", Pais: "Perú", Anio: 2018, Idioma: "Español" },
+    { N: 313, Autor: "Luis de la Peña", Titulo: "Cómo es un átomo", Pais: "México", Anio: 1990, Idioma: "Español" },
+    { N: 314, Autor: "Carl Sagan", Titulo: "Murmullos de la Tierra", Pais: "Estados Unidos", Anio: 1978, Idioma: "Inglés" },
+    { N: 315, Autor: "Charles Bukowski", Titulo: "La máquina de follar", Pais: "Estados Unidos", Anio: 1971, Idioma: "Inglés" },
+    { N: 316, Autor: "Ray Bradbury", Titulo: "Crónicas marcianas", Pais: "Estados Unidos", Anio: 1950, Idioma: "Inglés" },
+    { N: 317, Autor: "Anne Rooney", Titulo: "1001 shocking science facts", Pais: "Inglaterra", Anio: 2015, Idioma: "Inglés" },
+    { N: 318, Autor: "Daniel Cassany", Titulo: "La cocina de la escritura", Pais: "España", Anio: 1995, Idioma: "Español" },
+    { N: 319, Autor: "Albert Camus", Titulo: "La peste", Pais: "Francia", Anio: 1947, Idioma: "Francés" },
+    { N: 320, Autor: "Carlo Collodi", Titulo: "Las aventuras de Pinocho", Pais: "Italia", Anio: 1883, Idioma: "Italiano" },
+    { N: 321, Autor: "Salman Rushdie", Titulo: "Los Versos Satánicos", Pais: "India", Anio: 1988, Idioma: "Inglés" },
+    { N: 322, Autor: "AA. VV.", Titulo: "Más allá. De la Ciencia y de la Fantasía. N° 1", Pais: "España", Anio: 1975, Idioma: "Español" },
+    { N: 323, Autor: "Kai Bird", Titulo: "American Prometheus", Pais: "Estados Unidos", Anio: 2005, Idioma: "Inglés" },
+    { N: 324, Autor: "Milan Kundera", Titulo: "La insoportable levedad del ser", Pais: "República Checa", Anio: 1984, Idioma: "Checo" },
+    { N: 325, Autor: "Irene Vallejo", Titulo: "El infinito en un junco", Pais: "España", Anio: 2019, Idioma: "Español" },
+    { N: 326, Autor: "Juan Rulfo", Titulo: "Pedro Páramo", Pais: "México", Anio: 1955, Idioma: "Español" },
+    { N: 327, Autor: "Alexander Aginagalde Nafarrete et al.", Titulo: "Mujeres en la ciencia", Pais: "España", Anio: 2018, Idioma: "Español" },
+    { N: 328, Autor: "Mark Haddon", Titulo: "El curioso incidente del perro a medianoche", Pais: "Inglaterra", Anio: 2003, Idioma: "Inglés" },
+    { N: 329, Autor: "Haruki Murakami", Titulo: "Tokio Blues", Pais: "Japón", Anio: 1987, Idioma: "Japonés" },
+    { N: 330, Autor: "Isaac Asimov", Titulo: "Cien preguntas básicas sobre la Ciencia", Pais: "Estados Unidos", Anio: 1983, Idioma: "Inglés" },
+    { N: 331, Autor: "K. C. Nicolaou & T. Montagnon", Titulo: "Molecules that changed the world", Pais: "Estados Unidos", Anio: 2008, Idioma: "Inglés" },
+    { N: 332, Autor: "Ray Bradbury", Titulo: "Fahrenheit 451", Pais: "Estados Unidos", Anio: 1953, Idioma: "Inglés" },
+    { N: 333, Autor: "José Babini", Titulo: "Las revoluciones industriales", Pais: "Argentina", Anio: 1965, Idioma: "Español" },
+    { N: 334, Autor: "Andrew Tomas", Titulo: "No somos los primeros", Pais: "Australia", Anio: 1971, Idioma: "Inglés" },
+    { N: 335, Autor: "Javier Rada", Titulo: "Al borde de la extinción", Pais: "España", Anio: 2010, Idioma: "Español" },
+    { N: 336, Autor: "David Christian", Titulo: "La gran historia de todo", Pais: "Australia", Anio: 2018, Idioma: "Inglés" },
+    { N: 337, Autor: "Ève Curie", Titulo: "La vida heroica de Marie Curie", Pais: "Francia", Anio: 1937, Idioma: "Francés" },
+    { N: 338, Autor: "Haruki Murakami", Titulo: "1Q84", Pais: "Japón", Anio: 2009, Idioma: "Japonés" },
+    { N: 339, Autor: "Gabriel Garcia Marquez", Titulo: "Memorias de mis putas tristes", Pais: "Colombia", Anio: 2004, Idioma: "Español" },
+    { N: 340, Autor: "Kelltom McIntire", Titulo: "El espectro de Farmoor", Pais: "Estados Unidos", Anio: 1979, Idioma: "Inglés" },
+    { N: 341, Autor: "Kelltom McIntire", Titulo: "La rebelión de los espectros", Pais: "Estados Unidos", Anio: 1980, Idioma: "Inglés" },
+    { N: 342, Autor: "George Orwell", Titulo: "1984", Pais: "Inglaterra", Anio: 1949, Idioma: "Inglés" },
+    { N: 343, Autor: "Carl Sagan", Titulo: "Miles de millones", Pais: "Estados Unidos", Anio: 1997, Idioma: "Inglés" },
+    { N: 344, Autor: "Lara Ríos", Titulo: "Pantalones cortos", Pais: "Perú", Anio: 2010, Idioma: "Español" },
+    { N: 345, Autor: "Alejandro Dumas", Titulo: "Crímenes célebres. Los Medicis", Pais: "Francia", Anio: 1840, Idioma: "Francés" },
+    { N: 346, Autor: "Roald Dahl", Titulo: "Las brujas", Pais: "Inglaterra", Anio: 1983, Idioma: "Inglés" },
+    { N: 347, Autor: "EPA", Titulo: "Understanding Oil Spills And Oil Spill Response", Pais: "Estados Unidos", Anio: 1999, Idioma: "Inglés" },
+    { N: 348, Autor: "Agustina Bazterrica", Titulo: "Cadaver exquisito", Pais: "Argentina", Anio: 2017, Idioma: "Español" },
+    { N: 349, Autor: "Paul Strathern", Titulo: "Einstein y la relatividad", Pais: "Inglaterra", Anio: 1996, Idioma: "Inglés" },
+    { N: 350, Autor: "Arturo Pérez-Reverte", Titulo: "El club Dumas", Pais: "España", Anio: 1993, Idioma: "Español" },
+    { N: 351, Autor: "Julio Cortázar", Titulo: "Rayuela", Pais: "Argentina", Anio: 1963, Idioma: "Español" },
+    { N: 352, Autor: "Benjamín Labatut", Titulo: "Un verdor terrible", Pais: "Chile", Anio: 2020, Idioma: "Español" },
+    { N: 353, Autor: "Erwin Schrödinger", Titulo: "¿Qué es la vida?", Pais: "Austria", Anio: 1944, Idioma: "Alemán" },
+    { N: 354, Autor: "Alessandro Gatti y Pierdomenico Baccalario", Titulo: "Sherlock, Lupin y yo: El trío de la Dama Negra", Pais: "Italia", Anio: 2010, Idioma: "Italiano" },
+    { N: 355, Autor: "Emily Brontë", Titulo: "Cumbres borrascosas", Pais: "Inglaterra", Anio: 1847, Idioma: "Inglés" },
+    { N: 356, Autor: "Manuel Scorza", Titulo: "Cantar de Agapito Robles", Pais: "Perú", Anio: 1977, Idioma: "Español" },
+    { N: 357, Autor: "Isaac Asimov", Titulo: "Segunda Fundación (3 Fundación)", Pais: "Estados Unidos", Anio: 1953, Idioma: "Inglés" },
+    { N: 358, Autor: "José Saramago", Titulo: "Caín", Pais: "Portugal", Anio: 2009, Idioma: "Portugués" },
+    { N: 359, Autor: "Ernest Hemingway", Titulo: "Por quién doblan las campanas", Pais: "Estados Unidos", Anio: 1940, Idioma: "Inglés" },
+    { N: 360, Autor: "Fernando Ampuero", Titulo: "Más allá del amor a los perros", Pais: "Perú", Anio: 1983, Idioma: "Español" },
+    { N: 361, Autor: "Fiódor Dostoyevski", Titulo: "Noches blancas", Pais: "Rusia", Anio: 1848, Idioma: "Ruso" },
+    { N: 362, Autor: "Alessandro Gatti y Pierdomenico Baccalario", Titulo: "Sherlock, Lupin y yo_2 Último acto en el teatro de la ópera", Pais: "Italia", Anio: 2012, Idioma: "Italiano" },
+    { N: 363, Autor: "Mary Shelley", Titulo: "Frankenstein o El moderno Prometeo", Pais: "Reino Unido", Anio: 1818, Idioma: "Inglés" },
+    { N: 364, Autor: "Maggie O'Farrell", Titulo: "Hamnet", Pais: "Reino Unido", Anio: 2020, Idioma: "Inglés" },
+    { N: 365, Autor: "Joan Parra", Titulo: "Stefan Zweig La verdad nunca es vana", Pais: "España", Anio: 2021, Idioma: "Español" },
+    { N: 366, Autor: "Julio Verne", Titulo: "Escuela de Robinsones", Pais: "Francia", Anio: 1882, Idioma: "Francés" },
+    { N: 367, Autor: "Julio Verne", Titulo: "Viaje al centro de la tierra", Pais: "Francia", Anio: 1864, Idioma: "Francés" },
+    { N: 368, Autor: "Franz Kafka", Titulo: "El proceso", Pais: "Alemania", Anio: 1925, Idioma: "Alemán" },
+    { N: 369, Autor: "Jorge Ureta", Titulo: "Un hombre que podía reventar cosas con la cabeza", Pais: "Perú", Anio: 2005, Idioma: "Español" },
+    { N: 370, Autor: "Horacio Quiroga", Titulo: "Anaconda", Pais: "Uruguay", Anio: 1921, Idioma: "Español" },
+    { N: 371, Autor: "Roberto Drummond", Titulo: "Hilda huracán", Pais: "Brasil", Anio: 1970, Idioma: "Portugués" }
 ];
 
 // ============================================================
 // FUNCIONES PRINCIPALES
 // ============================================================
 
-let libros = JSON.parse(localStorage.getItem('misLibros')) || librosData;
-let nextId = libros.length > 0 ? Math.max(...libros.map(l => l.N)) + 1 : 1;
+// ✅ PEGA ESTE BLOQUE NUEVO EN SU LUGAR:
+
+let libros = [];
+let nextId = 1;
 let ordenActual = 'N';
 let ordenAsc = true;
 const PASSWORD = 'ferd23';
+
+// 👇 PEGA AQUÍ LA URL LARGA QUE OBTUVISTE DE GOOGLE APPS SCRIPT 👇
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvcnyl2A_9wKhArpuen6-1gErFBcWn_UAmK1tRVNXi5t1fF-_PYBMnSIP9efLOLTjE/exec'; 
+
+// Función para cargar los datos desde Google Sheets al iniciar la página
+async function cargarDatos() {
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const data = await response.json();
+        libros = data;
+        nextId = libros.length > 0 ? Math.max(...libros.map(l => l.N)) + 1 : 1;
+        actualizarEstadisticas();
+        renderizarTabla();
+    } catch (error) {
+        console.error("Error cargando datos desde la nube:", error);
+        // Si falla internet, usa la lista original como respaldo
+        libros = JSON.parse(JSON.stringify(librosData)); 
+        nextId = libros.length > 0 ? Math.max(...libros.map(l => l.N)) + 1 : 1;
+        actualizarEstadisticas();
+        renderizarTabla();
+    }
+}
 
 function guardarLocalStorage() {
     localStorage.setItem('misLibros', JSON.stringify(libros));
@@ -1071,7 +1087,6 @@ function filtrarTabla() {
     if (filtro) texto = `🔍 Buscando: "${filtro}"`;
     if (pais) texto += ` · País: ${pais}`;
     
-    // ELEMENTO CORREGIDO: Verificar que exista antes de usarlo
     let filtroActivo = document.getElementById('filtroActivo');
     if (filtroActivo) {
         filtroActivo.textContent = texto;
@@ -1126,40 +1141,75 @@ function cerrarModal() {
     document.getElementById('inputNumero').disabled = false;
 }
 
-function guardarLibro(e) {
+// ✅ PEGUE ESTA NUEVA VERSIÓN DE LA FUNCIÓN:
+
+async function guardarLibro(e) {
     e.preventDefault();
+    
+    // Capturar datos del formulario
     const autor = document.getElementById('inputAutor').value.trim();
     const titulo = document.getElementById('inputTitulo').value.trim();
     const pais = document.getElementById('inputPais').value.trim() || 'Desconocido';
     const anio = parseInt(document.getElementById('inputAnio').value) || null;
     const idioma = document.getElementById('inputIdioma').value.trim() || 'Desconocido';
-    const numero = parseInt(document.getElementById('inputNumero').value);
     const editIndex = parseInt(document.getElementById('editIndex').value);
 
+    // Validación básica
     if (!autor || !titulo) {
         alert('Autor y Título son obligatorios');
         return;
     }
 
+    // Si está en modo edición, redirigir a Google Sheets
     if (editIndex > 0) {
-        const idx = libros.findIndex(l => l.N === editIndex);
-        if (idx !== -1) {
-            libros[idx] = { N: editIndex, Autor: autor, Titulo: titulo, Pais: pais, Anio: anio, Idioma: idioma };
-        }
-    } else {
-        if (libros.some(l => l.N === numero)) {
-            if (!confirm(`El número ${numero} ya está en uso. ¿Usar el siguiente disponible (${nextId})?`)) return;
-            libros.push({ N: nextId, Autor: autor, Titulo: titulo, Pais: pais, Anio: anio, Idioma: idioma });
-            nextId++;
-        } else {
-            libros.push({ N: numero, Autor: autor, Titulo: titulo, Pais: pais, Anio: anio, Idioma: idioma });
-            nextId = Math.max(nextId, numero) + 1;
-        }
+        alert('Para editar un libro existente, por favor modifíquelo directamente en la Hoja de Cálculo de Google.');
+        return;
     }
 
-    guardarLocalStorage();
-    renderizarTabla();
-    cerrarModal();
+    // Mostrar indicador de carga en el botón
+    const btnGuardar = e.target.querySelector('button[type="submit"]');
+    const textoOriginal = btnGuardar.innerHTML;
+    btnGuardar.innerHTML = '💾 Guardando en la nube...';
+    btnGuardar.disabled = true;
+
+    // Crear objeto del nuevo libro
+    const nuevoLibro = { 
+        N: nextId, 
+        Autor: autor, 
+        Titulo: titulo, 
+        Pais: pais, 
+        Anio: anio, 
+        Idioma: idioma 
+    };
+
+    try {
+        // 🚀 ENVIAR A GOOGLE SHEETS (esto lo hace permanente)
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(nuevoLibro)
+        });
+        
+        // Actualizar la lista local inmediatamente para que se vea en pantalla
+        libros.push(nuevoLibro);
+        nextId++;
+        
+        // También guardar en localStorage como caché de respaldo
+        localStorage.setItem('misLibros', JSON.stringify(libros));
+        
+        // Actualizar estadísticas y tabla
+        actualizarEstadisticas();
+        renderizarTabla();
+        cerrarModal();
+        
+        alert('✅ Libro guardado permanentemente en la base de datos.');
+    } catch (error) {
+        console.error('Error al guardar:', error);
+        alert('❌ Error al guardar. Verifique su conexión a internet e intente nuevamente.');
+    } finally {
+        // Restaurar el botón a su estado original
+        btnGuardar.innerHTML = textoOriginal;
+        btnGuardar.disabled = false;
+    }
 }
 
 // ========== ELIMINAR ==========
@@ -1359,7 +1409,10 @@ document.getElementById('modalEditar').addEventListener('click', function(e) {
 // ============================================================
 // INICIALIZAR QR Y DATOS
 // ============================================================
+// ✅ PEGUE ESTA NUEVA VERSIÓN DEL BLOQUE DE INICIALIZACIÓN:
+
 window.addEventListener('load', () => {
+    // 1. Generar el código QR del CTI Vitae
     const qrContainer = document.getElementById("qrcode");
     if (qrContainer) {
         new QRCode(qrContainer, {
@@ -1368,19 +1421,22 @@ window.addEventListener('load', () => {
             correctLevel: QRCode.CorrectLevel.H
         });
     }
+    
+    // 2. Configurar el ordenamiento inicial visual
     ordenActual = 'N';
     ordenAsc = true;
     document.querySelectorAll('.orden-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('[data-orden="N"]').classList.add('active');
     document.getElementById('ordenAscDesc').textContent = '⬆ Ascendente';
-    actualizarEstadisticas();
-    renderizarTabla();
     
-    // Mostrar mensaje inicial en filtroActivo
+    // 3. Configurar el mensaje inicial del filtro
     let filtroActivo = document.getElementById('filtroActivo');
     if (filtroActivo) {
         filtroActivo.textContent = 'Mostrando todos los libros';
     }
+    
+    // 4. 🚀 CARGAR LOS DATOS DESDE GOOGLE SHEETS (en lugar de solo localStorage)
+    cargarDatos();
 });
 </script>
 
