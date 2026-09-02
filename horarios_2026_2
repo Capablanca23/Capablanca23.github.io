@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios Universitarios · Malla Completa</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #f4f7fc;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 1.5rem 1rem;
+            color: #1b3b4f;
+        }
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            padding: 1.5rem;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+            gap: 1rem;
+        }
+        h1 { font-size: 1.5rem; font-weight: 700; color: #0b2b3f; }
+        .subtitle {
+            color: #5a7b8e;
+            border-left: 3px solid #2a7f6e;
+            padding-left: 0.75rem;
+            font-size: 0.85rem;
+            margin-top: 0.2rem;
+        }
+        .week-badge {
+            background: #0b2b3f;
+            color: white;
+            padding: 0.3rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem 1rem;
+            background: #f0f4f8;
+            padding: 1rem;
+            border-radius: 16px;
+            margin-bottom: 1.2rem;
+            align-items: center;
+            border: 1px solid #e1e8f0;
+        }
+        .filter-group { display: flex; align-items: center; gap: 0.4rem; }
+        .filter-group label {
+            font-weight: 600;
+            color: #2c4e63;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filter-group select, .filter-group input {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid #bccddb;
+            background: white;
+            font-size: 0.8rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .filter-group select:focus, .filter-group input:focus {
+            border-color: #2a7f6e;
+            box-shadow: 0 0 0 2px rgba(42, 127, 110, 0.2);
+        }
+        .clear-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: auto;
+            font-size: 0.78rem;
+        }
+        .clear-btn:hover { background: #cbd5e1; color: #1e293b; }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            max-height: 650px;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.78rem; text-align: left; }
+        th {
+            background: #1e293b;
+            color: #f8fafc;
+            font-weight: 600;
+            padding: 0.75rem 0.6rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        td { padding: 0.6rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        tr:hover td { background: #f8fafc; }
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-presencial { background: #dcfce7; color: #15803d; }
+        .badge-virtual { background: #dbeafe; color: #1d4ed8; }
+        .badge-semipresencial { background: #fef3c7; color: #b45309; }
+        .badge-teorico { background: #e2e8f0; color: #334155; }
+        .badge-practica { background: #ccfbf1; color: #0f766e; }
+
+        .teacher-view-container { display: flex; flex-direction: column; gap: 1.5rem; }
+        .teacher-card {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 1.2rem;
+        }
+        .teacher-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .day-box { background: white; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+        .day-title {
+            background: #2a7f6e;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+            text-align: center;
+        }
+        .class-item { padding: 0.6rem; border-bottom: 1px solid #f1f5f9; font-size: 0.75rem; }
+        .class-item:last-child { border-bottom: none; }
+        .class-time { font-weight: 700; color: #1e293b; }
+        .class-name { font-weight: 600; color: #0b2b3f; margin: 0.2rem 0; }
+        .class-meta { color: #64748b; font-size: 0.7rem; }
+        .footer { margin-top: 1.5rem; text-align: right; color: #94a3b8; font-size: 0.72rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+    <div>
+        <h1>📘 Horarios Completos · Programación Académica</h1>
+        <div class="subtitle">Base de Datos Actualizada (Ing. Ambiental - Ing. Industrial)</div>
+        <!-- LÍNEA AÑADIDA A CONTINUACIÓN -->
+        <div style="font-size: 0.85rem; color: #2a7f6e; font-weight: 600; margin-top: 0.4rem;">
+            👤 Autor: Dr. Ronald F. Rodriguez Espinoza
+        </div>
+    </div>
+    <div class="week-badge">Malla Actualizada</div>
+</div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>🎓 Carrera</label>
+                <select id="filterCareer">
+                    <option value="all">Todas</option>
+                    <option value="INGENIERÍA AMBIENTAL">Ingeniería Ambiental</option>
+                    <option value="INGENIERÍA INDUSTRIAL">Ingeniería Industrial</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📅 Día</label>
+                <select id="filterDay">
+                    <option value="all">Todos</option>
+                    <option value="Lunes">Lunes</option>
+                    <option value="Martes">Martes</option>
+                    <option value="Miércoles">Miércoles</option>
+                    <option value="Jueves">Jueves</option>
+                    <option value="Viernes">Viernes</option>
+                    <option value="Sábado">Sábado</option>
+                    <option value="Domingo">Domingo</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>🌅 Turno</label>
+                <select id="filterShift">
+                    <option value="all">Todos</option>
+                    <option value="MAÑANA">Mañana</option>
+                    <option value="TARDE">Tarde</option>
+                    <option value="NOCHE">Noche</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>💻 Modalidad</label>
+                <select id="filterModality">
+                    <option value="all">Todas</option>
+                    <option value="Presencial">Presencial</option>
+                    <option value="Virtual">Virtual</option>
+                    <option value="SemiPresencial">SemiPresencial</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📖 Tipo</label>
+                <select id="filterType">
+                    <option value="all">Todos</option>
+                    <option value="TEÓRICO">Teórico</option>
+                    <option value="PRÁCTICA">Práctica</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>👨‍🏫 Docente</label>
+                <input type="text" id="filterTeacher" placeholder="Buscar docente..." list="teacherList">
+                <datalist id="teacherList"></datalist>
+            </div>
+            <button class="clear-btn" id="clearFilters">✕ Limpiar filtros</button>
+        </div>
+
+        <div class="stats">
+            <span id="resultCount">Cargando base de datos...</span>
+            <span id="viewMode">Vista General</span>
+        </div>
+
+        <div class="table-wrapper" id="tableView">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Carrera</th>
+                        <th>Ciclo</th>
+                        <th>Día</th>
+                        <th>Horario</th>
+                        <th>Turno</th>
+                        <th>Curso</th>
+                        <th>Grupo</th>
+                        <th>Tipo</th>
+                        <th>Docente</th>
+                        <th>Ambiente</th>
+                        <th>Modalidad</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleBody"></tbody>
+            </table>
+        </div>
+
+        <div id="teacherView" class="teacher-view-container" style="display: none;"></div>
+        <div class="footer">Sistema de Horarios Académicos · Actualizado desde CSV</div>
+    </div>
+
+    <script>
+        const rawCSV = `INGENIERÍA AMBIENTAL,1,QUÍMICA INORGÁNICA,23,23T1-G1,TARDE,6. Sábado,14:45:00,16:15:00,PRÁCTICA,CARDENAS GAUDRY MARIA MAGDALENA,I-113 (LABORATORIO DE QUÍMICA INDUSTRIAL),Presencial
+INGENIERÍA AMBIENTAL,1,QUÍMICA INORGÁNICA,7,7T1,TARDE,6. Sábado,17:00:00,19:15:00,TEÓRICO,CARDENAS GAUDRY MARIA MAGDALENA,Aula I-307,Presencial
+INGENIERÍA AMBIENTAL,1,QUÍMICA INORGÁNICA,7,7T1-G1,NOCHE,6. Sábado,19:15:00,20:45:00,PRÁCTICA,CARDENAS GAUDRY MARIA MAGDALENA,I-113 (LABORATORIO DE QUÍMICA INDUSTRIAL),Presencial
+INGENIERÍA AMBIENTAL,1,QUÍMICA INORGÁNICA,7,7T1-G2,NOCHE,6. Sábado,20:45:00,22:15:00,PRÁCTICA,ATAUCUSI VARGAS NIEVES YULISA,I-113 (LABORATORIO DE QUÍMICA INDUSTRIAL),Presencial
+INGENIERÍA AMBIENTAL,1,QUÍMICA INORGÁNICA,8,8T1,TARDE,6. Sábado,14:00:00,16:15:00,TEÓRICO,TORRES UGAZ JORGE LUIS,Aula I-307,Presencial
+INGENIERÍA AMBIENTAL,1,QUÍMICA INORGÁNICA,8,8T1-G1,TARDE,6. Sábado,16:15:00,17:45:00,PRÁCTICA,ATAUCUSI VARGAS NIEVES YULISA,I-113 (LABORATORIO DE QUÍMICA INDUSTRIAL),Presencial
+INGENIERÍA AMBIENTAL,1,QUÍMICA INORGÁNICA,8,8T1-G2,TARDE,6. Sábado,17:45:00,19:15:00,PRÁCTICA,ATAUCUSI VARGAS NIEVES YULISA,I-113 (LABORATORIO DE QUÍMICA INDUSTRIAL),Presencial
+INGENIERÍA AMBIENTAL,2,ANÁLISIS DIFERENCIAL EN 2D,36,36T1,MAÑANA,5. Viernes,08:00:00,09:30:00,TEÓRICO,ORTIZ ROJAS LUIS ANIBAL,J-213 (Laboratorio de Cómputo),Presencial
+INGENIERÍA AMBIENTAL,2,ANÁLISIS DIFERENCIAL EN 2D,36,36T1,MAÑANA,6. Sábado,08:00:00,10:15:00,TEÓRICO,ORTIZ ROJAS LUIS ANIBAL,Aula E-203,Presencial
+INGENIERÍA AMBIENTAL,2,BIOLOGÍA CELULAR,1,1T1,MAÑANA,5. Viernes,08:00:00,11:00:00,TEÓRICO,ROSALES MEZA RONALD HUGO,Aula E-202,Presencial
+INGENIERÍA AMBIENTAL,2,BIOLOGÍA CELULAR,1,1T1-G1,MAÑANA,5. Viernes,11:00:00,12:30:00,PRÁCTICA,ROSALES MEZA RONALD HUGO,I-112 (Laboratorio de Biologia celular y Microbiologia 2),Presencial
+INGENIERÍA AMBIENTAL,2,QUÍMICA ORGÁNICA,1,1T1-G1,TARDE,6. Sábado,17:00:00,18:30:00,PRÁCTICA,GOMEZ GUERRERO LUIS EDUARDO,I-102 (Laboratorio Integrado de Ciencias 2),Presencial
+INGENIERÍA AMBIENTAL,2,QUÍMICA ORGÁNICA,37,37T1-G2,MAÑANA,2. Martes,08:00:00,09:30:00,PRÁCTICA,ATAUCUSI VARGAS NIEVES YULISA,I-101 (Laboratorio Integrado de Ciencias 1),Presencial
+INGENIERÍA AMBIENTAL,4,CARTOGRAFÍA Y SISTEMAS DE INFORMACIÓN GEOGRÁFICA,1,1T1,MAÑANA,3. Miércoles,10:15:00,12:30:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,B-203 (Laboratorio de Cómputo),Presencial
+INGENIERÍA AMBIENTAL,4,CARTOGRAFÍA Y SISTEMAS DE INFORMACIÓN GEOGRÁFICA,1,1T1,MAÑANA,4. Jueves,07:15:00,08:45:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,B-303 (Laboratorio de Cómputo),Presencial
+INGENIERÍA AMBIENTAL,4,ECOLOGÍA Y RECURSOS NATURALES,1,1T1,MAÑANA,4. Jueves,08:45:00,11:00:00,TEÓRICO,RODRIGUEZ ESPINOZA RONALD FERNANDO,Aula E-201,Presencial
+INGENIERÍA AMBIENTAL,4,ECOLOGÍA Y RECURSOS NATURALES,1,1T1,MAÑANA,5. Viernes,10:15:00,11:45:00,TEÓRICO,RODRIGUEZ ESPINOZA RONALD FERNANDO,Aula E-201,Presencial
+INGENIERÍA AMBIENTAL,4,LABORATORIO DE MICROBIOLOGÍA AMBIENTAL,19,19T1,MAÑANA,2. Martes,07:15:00,10:15:00,TEÓRICO,ROSALES MEZA RONALD HUGO,I-112 (Laboratorio de Biologia celular y Microbiologia 2),Presencial
+INGENIERÍA AMBIENTAL,4,MATEMÁTICA COMPUTACIONAL,21,21T1,MAÑANA,1. Lunes,09:30:00,11:00:00,TEÓRICO,RODRIGUEZ ESPINOZA RONALD FERNANDO,B-403 (Laboratorio de Cómputo),Presencial
+INGENIERÍA AMBIENTAL,4,MATEMÁTICA COMPUTACIONAL,21,21T1,MAÑANA,2. Martes,10:15:00,12:30:00,TEÓRICO,RODRIGUEZ ESPINOZA RONALD FERNANDO,J-211 (Laboratorio de Cómputo),Presencial
+INGENIERÍA AMBIENTAL,4,MICROBIOLOGÍA AMBIENTAL,19,19T1,MAÑANA,5. Viernes,08:00:00,10:15:00,TEÓRICO,LAYZA CANDELA PEDRO ANTONIO,Aula E-406,Presencial
+INGENIERÍA AMBIENTAL,6,FENÓMENOS DE TRANSPORTE,1,1T1-G1-SP,NOCHE,6. Sábado,18:00:00,19:30:00,PRÁCTICA,TORRES UGAZ JORGE LUIS,K-101 (Lab. Mecanica de fluidos e Hidraulica),Presencial
+INGENIERÍA AMBIENTAL,6,FENÓMENOS DE TRANSPORTE,1,1T1-SP,NOCHE,1. Lunes,19:00:00,22:00:00,TEÓRICO,RODRIGUEZ ESPINOZA RONALD FERNANDO,Aula E-501,Presencial
+INGENIERÍA AMBIENTAL,6,GESTIÓN DE RESIDUOS SÓLIDOS,1,1T1-SP,TARDE,6. Sábado,14:00:00,17:45:00,TEÓRICO,ORTIZ ROJAS LUIS ANIBAL,Aula E-501,SemiPresencial
+INGENIERÍA AMBIENTAL,6,HIDROGRAFÍA E HIDROLOGÍA,1,1T1-SP,NOCHE,4. Jueves,19:00:00,21:15:00,TEÓRICO,CARDENAS GAUDRY MARIA MAGDALENA,Aula A-201,Virtual
+INGENIERÍA AMBIENTAL,6,LABORATORIO DE HIDROGRAFÍA E HIDROLOGÍA,1,1T1-SP,NOCHE,6. Sábado,21:00:00,22:30:00,TEÓRICO,CARDENAS GAUDRY MARIA MAGDALENA,K-201 (Lab. Topografía y Geología),Presencial
+INGENIERÍA AMBIENTAL,6,LABORATORIO DE HIDROGRAFÍA E HIDROLOGÍA,2,2T1,NOCHE,1. Lunes,18:00:00,19:30:00,TEÓRICO,ATAUCUSI VARGAS NIEVES YULISA,K-201 (Lab. Topografía y Geología),Presencial
+INGENIERÍA AMBIENTAL,6,LEGISLACIÓN AMBIENTAL,1,1T1-SP,NOCHE,2. Martes,19:00:00,22:00:00,TEÓRICO,GUTIERREZ CANALES EDWARD MAGNO,Zoom,Virtual
+INGENIERÍA AMBIENTAL,7,BALANCE DE MATERIA Y ENERGÍA,1,1T1,NOCHE,1. Lunes,20:15:00,21:45:00,TEÓRICO,TORRES UGAZ JORGE LUIS,Aula E-205,Presencial
+INGENIERÍA AMBIENTAL,7,BALANCE DE MATERIA Y ENERGÍA,1,1T1,NOCHE,4. Jueves,18:00:00,20:15:00,TEÓRICO,TORRES UGAZ JORGE LUIS,Aula E-205,Presencial
+INGENIERÍA AMBIENTAL,8,DESARROLLO DE INVESTIGACIÓN,1,1T1,NOCHE,2. Martes,18:00:00,21:45:00,TEÓRICO,LAYZA CANDELA PEDRO ANTONIO,Zoom,Virtual
+INGENIERÍA AMBIENTAL,8,FUNDAMENTOS ECONÓMICOS Y SOSTENIBILIDAD,1,1T1,NOCHE,1. Lunes,19:30:00,21:00:00,TEÓRICO,LAYZA CANDELA PEDRO ANTONIO,Aula E-408,SemiPresencial
+INGENIERÍA AMBIENTAL,8,FUNDAMENTOS ECONÓMICOS Y SOSTENIBILIDAD,1,1T1,NOCHE,5. Viernes,20:15:00,22:30:00,TEÓRICO,LAYZA CANDELA PEDRO ANTONIO,Zoom,SemiPresencial
+INGENIERÍA AMBIENTAL,8,LABORATORIO DE TRATAMIENTO DE LA CONTAMINACIÓN DEL AGUA,1,1T1,NOCHE,3. Miércoles,20:15:00,21:45:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,I-103 (Laboratorio de Analisis ambiental),Presencial
+INGENIERÍA AMBIENTAL,8,SISTEMAS DE GESTIÓN Y AUDITORÍA AMBIENTAL,1,1T1,NOCHE,1. Lunes,18:00:00,19:30:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,Aula E-408,SemiPresencial
+INGENIERÍA AMBIENTAL,8,SISTEMAS DE GESTIÓN Y AUDITORÍA AMBIENTAL,1,1T1,NOCHE,6. Sábado,18:00:00,20:15:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,Zoom,SemiPresencial
+INGENIERÍA AMBIENTAL,8,TRATAMIENTO DE CONTAMINACIÓN DEL AGUA,1,1T1,NOCHE,3. Miércoles,18:00:00,20:15:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,Aula E-408,Presencial
+INGENIERÍA AMBIENTAL,9,IMPACTO AMBIENTAL Y EVALUACIÓN DE RIESGOS,1,1T1,NOCHE,4. Jueves,18:00:00,21:45:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,Aula E-502,Presencial
+INGENIERÍA AMBIENTAL,9,PLANIFICACIÓN TERRITORIAL CON INTELIGENCIA ARTIFICIAL,1,1T1,NOCHE,5. Viernes,20:15:00,22:30:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,Aula E-501,SemiPresencial
+INGENIERÍA AMBIENTAL,9,PLANIFICACIÓN TERRITORIAL CON INTELIGENCIA ARTIFICIAL,1,1T1,NOCHE,6. Sábado,21:00:00,22:30:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,Zoom,SemiPresencial
+INGENIERÍA AMBIENTAL,9,PRÁCTICAS PREPROFESIONALES,1,1T1,NOCHE,2. Martes,19:30:00,22:30:00,TEÓRICO,TORRES UGAZ JORGE LUIS,Aula E-501,Presencial
+INGENIERÍA AMBIENTAL,9,PRÁCTICAS PREPROFESIONALES,1,1T1,NOCHE,3. Miércoles,19:30:00,22:30:00,TEÓRICO,TORRES UGAZ JORGE LUIS,Aula E-501,Presencial
+INGENIERÍA AMBIENTAL,9,PROCESAMIENTO Y ANÁLISIS DE DATOS,1,1T1,TARDE,6. Sábado,17:15:00,21:00:00,TEÓRICO,LAYZA CANDELA PEDRO ANTONIO,Zoom,Virtual
+INGENIERÍA AMBIENTAL,9,TRATAMIENTO DE CONTAMINACIÓN DE AIRE Y SUELOS,1,1T1,NOCHE,5. Viernes,18:00:00,20:15:00,TEÓRICO,GOMEZ GUERRERO LUIS EDUARDO,Aula E-501,Presencial
+INGENIERÍA AMBIENTAL,9,TRATAMIENTO DE CONTAMINACIÓN DE AIRE Y SUELOS,1,1T1-G2,NOCHE,1. Lunes,19:30:00,21:00:00,PRÁCTICA,GOMEZ GUERRERO LUIS EDUARDO,I-103 (Laboratorio de Analisis ambiental),Presencial
+INGENIERÍA INDUSTRIAL,1,QUÍMICA INORGÁNICA,16,16T1,MAÑANA,3. Miércoles,08:00:00,10:15:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,Aula I-302,Presencial
+INGENIERÍA INDUSTRIAL,3,ANÁLISIS INTEGRAL EN 3D (INGENIERÍA INDUSTRIAL),10,10T1,TARDE,6. Sábado,14:00:00,17:00:00,TEÓRICO,APOLAYA RUIZ WILLIAM ALEXANDER,Zoom,Virtual
+INGENIERÍA INDUSTRIAL,1,QUÍMICA INORGÁNICA (INGENIERÍA INDUSTRIAL),16,16T1-G1,MAÑANA,4. Jueves,08:00:00,09:30:00,PRÁCTICA,ATAUCUSI VARGAS NIEVES YULISA,I-113 (LABORATORIO DE QUÍMICA INDUSTRIAL),Presencial
+INGENIERÍA INDUSTRIAL,1,QUÍMICA INORGÁNICA (INGENIERÍA INDUSTRIAL),16,16T1-G2,MAÑANA,4. Jueves,09:30:00,11:00:00,PRÁCTICA,ATAUCUSI VARGAS NIEVES YULISA,I-113 (LABORATORIO DE QUÍMICA INDUSTRIAL),Presencial
+INGENIERÍA INDUSTRIAL,1,QUÍMICA INORGÁNICA (INGENIERÍA INDUSTRIAL),8,8T1-G1,MAÑANA,4. Jueves,18:00:00,19:30:00,PRÁCTICA,ATAUCUSI VARGAS NIEVES YULISA,I-113 (LABORATORIO DE QUÍMICA INDUSTRIAL),Presencial
+INGENIERÍA INDUSTRIAL,1,QUÍMICA INORGÁNICA (INGENIERÍA INDUSTRIAL),8,8T1-G2,MAÑANA,4. Jueves,19:30:00,21:00:00,PRÁCTICA,ATAUCUSI VARGAS NIEVES YULISA,I-113 (LABORATORIO DE QUÍMICA INDUSTRIAL),Presencial
+INGENIERÍA INDUSTRIAL,1,QUÍMICA INORGÁNICA (INGENIERÍA INDUSTRIAL),25,25T1,MAÑANA,1. Lunes,08:00:00,10:15:00,TEÓRICO,LAYZA CANDELA PEDRO ANTONIO,I-409,Presencial
+INGENIERÍA INDUSTRIAL,1,QUÍMICA INORGÁNICA (INGENIERÍA INDUSTRIAL),8,8T1,TARDE,3. Miércoles,18:00:00,20:15:00,TEÓRICO,LAYZA CANDELA PEDRO ANTONIO,I-303,Presencial`;
+
+        const norm = (str) => (str || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+        function cleanDay(dayRaw) {
+            return (dayRaw || "").replace(/^[0-9]+\.\s*/, "").trim();
+        }
+
+        function getModalityBadgeClass(modality) {
+            if (modality === 'Virtual') return 'badge-virtual';
+            if (modality === 'SemiPresencial') return 'badge-semipresencial';
+            return 'badge-presencial';
+        }
+
+        const schedule = rawCSV.split('\n').filter(Boolean).map(line => {
+            const cols = line.split(',');
+            return {
+                carrera: cols[0],
+                ciclo: cols[1],
+                curso: cols[2],
+                seccion: cols[3],
+                grupo: cols[4],
+                turno: cols[5],
+                dia: cleanDay(cols[6]),
+                horaInicio: cols[7],
+                horaFin: cols[8],
+                tipo: cols[9],
+                docente: cols[10],
+                aula: cols[11],
+                modalidadCurso: cols[12]
+            };
+        });
+
+        const tbody = document.getElementById('scheduleBody');
+        const filterCareer = document.getElementById('filterCareer');
+        const filterDay = document.getElementById('filterDay');
+        const filterShift = document.getElementById('filterShift');
+        const filterModality = document.getElementById('filterModality');
+        const filterType = document.getElementById('filterType');
+        const filterTeacher = document.getElementById('filterTeacher');
+        const clearBtn = document.getElementById('clearFilters');
+        const resultSpan = document.getElementById('resultCount');
+        const viewMode = document.getElementById('viewMode');
+        const tableView = document.getElementById('tableView');
+        const teacherView = document.getElementById('teacherView');
+        const teacherList = document.getElementById('teacherList');
+
+        const uniqueTeachers = [...new Set(schedule.map(s => s.docente).filter(Boolean))].sort();
+        uniqueTeachers.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            teacherList.appendChild(opt);
+        });
+
+        function render() {
+            const careerVal = filterCareer.value;
+            const dayVal = filterDay.value;
+            const shiftVal = filterShift.value;
+            const modalityVal = filterModality.value;
+            const typeVal = filterType.value;
+            const teacherVal = filterTeacher.value.trim();
+
+            let filtered = schedule.filter(item => {
+                if (careerVal !== 'all' && item.carrera.toUpperCase() !== careerVal.toUpperCase()) return false;
+                if (dayVal !== 'all' && item.dia !== dayVal) return false;
+                if (shiftVal !== 'all' && item.turno.toUpperCase() !== shiftVal) return false;
+                if (modalityVal !== 'all' && item.modalidadCurso !== modalityVal) return false;
+                if (typeVal !== 'all' && !item.tipo.toUpperCase().includes(typeVal)) return false;
+                if (teacherVal && !norm(item.docente).includes(norm(teacherVal))) return false;
+                return true;
+            });
+
+            resultSpan.textContent = `${filtered.length} clases encontradas`;
+
+            if (teacherVal !== "") {
+                renderTeacherSchedule(filtered);
+            } else {
+                renderGeneralTable(filtered);
+            }
+        }
+
+        function renderGeneralTable(data) {
+            tableView.style.display = 'block';
+            teacherView.style.display = 'none';
+            viewMode.textContent = "Vista General (Tabla)";
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:2rem;">No se encontraron resultados para los filtros seleccionados.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td style="font-size:0.72rem; color:#64748b;">${item.carrera}</td>
+                    <td>${item.ciclo}</td>
+                    <td><strong>${item.dia}</strong></td>
+                    <td>${item.horaInicio.slice(0,5)} - ${item.horaFin.slice(0,5)}</td>
+                    <td>${item.turno}</td>
+                    <td style="font-weight:600;">${item.curso}</td>
+                    <td>${item.grupo}</td>
+                    <td><span class="badge ${item.tipo.includes('PRÁCTICA') ? 'badge-practica' : 'badge-teorico'}">${item.tipo}</span></td>
+                    <td>${item.docente}</td>
+                    <td>${item.aula}</td>
+                    <td><span class="badge ${getModalityBadgeClass(item.modalidadCurso)}">${item.modalidadCurso}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderTeacherSchedule(data) {
+            tableView.style.display = 'none';
+            teacherView.style.display = 'flex';
+            viewMode.textContent = "Horario Semanal Completo del Docente";
+
+            const teachersGroup = {};
+            data.forEach(item => {
+                if (!teachersGroup[item.docente]) teachersGroup[item.docente] = [];
+                teachersGroup[item.docente].push(item);
+            });
+
+            const daysOrder = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+            teacherView.innerHTML = Object.keys(teachersGroup).sort().map(teacherName => {
+                const classes = teachersGroup[teacherName];
+                const daysHtml = daysOrder.map(day => {
+                    const dayClasses = classes
+                        .filter(c => c.dia === day)
+                        .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
+
+                    if (dayClasses.length === 0) return '';
+
+                    const classCards = dayClasses.map(c => `
+                        <div class="class-item">
+                            <div class="class-time">🕒 ${c.horaInicio.slice(0,5)} - ${c.horaFin.slice(0,5)}</div>
+                            <div class="class-name">${c.curso}</div>
+                            <div class="class-meta">📍 ${c.aula} | Grupo: ${c.grupo} | Turno: ${c.turno}</div>
+                            <div class="class-meta">🎓 ${c.carrera} | Ciclo ${c.ciclo}</div>
+                            <div class="class-meta" style="margin-top:0.2rem;"><span class="badge ${c.tipo.includes('PRÁCTICA') ? 'badge-practica' : 'badge-teorico'}">${c.tipo}</span> <span class="badge ${getModalityBadgeClass(c.modalidadCurso)}">${c.modalidadCurso}</span></div>
+                        </div>
+                    `).join('');
+
+                    return `<div class="day-box"><div class="day-title">${day}</div>${classCards}</div>`;
+                }).join('');
+
+                return `
+                    <div class="teacher-card">
+                        <div class="teacher-header">👨‍🏫 Horario Semanal Completo: ${teacherName}</div>
+                        <div class="schedule-grid">${daysHtml || '<p style="font-size:0.8rem; color:#64748b;">No hay clases asignadas para los filtros seleccionados.</p>'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        filterCareer.addEventListener('change', render);
+        filterTeacher.addEventListener('input', render);
+        filterDay.addEventListener('change', render);
+        filterShift.addEventListener('change', render);
+        filterModality.addEventListener('change', render);
+        filterType.addEventListener('change', render);
+
+        clearBtn.addEventListener('click', () => {
+            filterCareer.value = 'all';
+            filterDay.value = 'all';
+            filterShift.value = 'all';
+            filterModality.value = 'all';
+            filterType.value = 'all';
+            filterTeacher.value = '';
+            render();
+        });
+
+        render();
+    </script>
+</body>
+</html>
