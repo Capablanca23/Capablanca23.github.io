@@ -318,9 +318,8 @@ let nextId = 1;
 let ordenActual = 'N';
 let ordenAsc = true;
 let isAdmin = false;
-
-const ADMIN_PASSWORD = 'ferd23'; // ⚠️ ver nota de seguridad al final de la respuesta
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyC8b2nrVyCr-w7TvxWNbfxM8WjDpaLG4T5PXzLDIcRr7WrD2Z4W2cTIKv6rLMj_QbR/exec';
+let sessionPassword = ''; // NUEVO: solo vive en memoria durante esta sesión; nunca queda escrita en el código
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyC8b2nrVyCr-w7TvxWNbfxM8WjDpaLG4T5PXzLDIcRr7WrD2Z4W2cTlKv6rLMj_QbR/exec';
 
 // ============================================================
 // NUEVO: TOASTS (reemplaza alert())
@@ -364,9 +363,26 @@ function estrellasHTML(rating) {
 // ============================================================
 // FUNCIONES DE ADMINISTRADOR
 // ============================================================
-function toggleAdmin() {
+// NUEVO: le pregunta al servidor si la contraseña es correcta, sin guardar
+// ni comparar la clave real en ningún lugar del código del navegador.
+async function verificarPassword(pass) {
+    try {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'verify', password: pass })
+        });
+        const result = await response.json();
+        return result.success === true;
+    } catch (error) {
+        toast('Error de conexión al verificar la contraseña', 'error');
+        return false;
+    }
+}
+
+async function toggleAdmin() {
     if (isAdmin) {
         isAdmin = false;
+        sessionPassword = '';
         document.getElementById('adminControls').style.display = 'none';
         document.getElementById('btnAdmin').innerHTML = '🔒 Modo Admin';
         document.getElementById('btnAdmin').classList.remove('bg-green-100', 'text-green-700', 'border-green-300');
@@ -375,15 +391,22 @@ function toggleAdmin() {
 
     const pass = prompt('🔒 Ingrese contraseña de administrador:');
     if (pass === null) return;
-    // Nota: la validación real y definitiva ocurre en el servidor (Apps Script)
-    // en cada operación de guardar/editar/eliminar. Esto solo controla la UI.
-    if (pass === ADMIN_PASSWORD) {
+
+    const btn = document.getElementById('btnAdmin');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Verificando...';
+    const ok = await verificarPassword(pass);
+    btn.disabled = false;
+
+    if (ok) {
         isAdmin = true;
+        sessionPassword = pass; // se guarda solo en memoria, para esta sesión, no en el código fuente
         document.getElementById('adminControls').style.display = 'flex';
-        document.getElementById('btnAdmin').innerHTML = '🔓 Salir de Admin';
-        document.getElementById('btnAdmin').classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-300');
+        btn.innerHTML = '🔓 Salir de Admin';
+        btn.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-300');
         toast('Modo administrador activado', 'success');
     } else {
+        btn.innerHTML = '🔒 Modo Admin';
         toast('Contraseña incorrecta', 'error');
     }
 }
@@ -444,7 +467,7 @@ async function guardarLibro(e) {
     const action = editIndex > 0 ? 'edit' : 'add';
     const libroData = {
         action: action,
-        password: ADMIN_PASSWORD,
+        password: sessionPassword,
         N: editIndex > 0 ? editIndex : nextId,
         Autor: autor, Titulo: titulo, Pais: pais, Anio: anio, Idioma: idioma, Rating: rating
     };
@@ -481,7 +504,6 @@ async function eliminarLibroConfirm(e) {
     const numero = parseInt(document.getElementById('inputEliminarNumero').value);
     const password = document.getElementById('inputEliminarPassword').value;
 
-    if (password !== ADMIN_PASSWORD) { toast('Contraseña incorrecta', 'error'); return; }
     if (!confirm(`¿Eliminar permanentemente el libro #${numero} de la base de datos?`)) return;
 
     const btn = e.target.querySelector('button[type="submit"]');
@@ -490,9 +512,10 @@ async function eliminarLibroConfirm(e) {
     btn.disabled = true;
 
     try {
+        // La contraseña se envía tal cual la escribió el usuario; el servidor decide si es correcta.
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ action: 'delete', password: ADMIN_PASSWORD, N: numero })
+            body: JSON.stringify({ action: 'delete', password: password, N: numero })
         });
         const result = await response.json();
 
@@ -514,18 +537,27 @@ async function eliminarLibroConfirm(e) {
     }
 }
 
-function editarLibroConfirm(e) {
+async function editarLibroConfirm(e) {
     e.preventDefault();
     if (!isAdmin) { toast('Acceso denegado. Activa el modo administrador primero.', 'error'); return; }
 
     const numero = parseInt(document.getElementById('inputEditarNumero').value);
     const password = document.getElementById('inputEditarPassword').value;
 
-    if (password !== ADMIN_PASSWORD) { toast('Contraseña incorrecta', 'error'); return; }
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Verificando...';
+    btn.disabled = true;
+    const ok = await verificarPassword(password);
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+
+    if (!ok) { toast('Contraseña incorrecta', 'error'); return; }
 
     const libro = libros.find(l => l.N === numero);
     if (!libro) { toast(`No se encontró el libro #${numero}`, 'error'); return; }
 
+    sessionPassword = password; // asegura que el guardado posterior use esta clave ya validada
     cerrarModalEditar();
     abrirModal(libro);
 }
