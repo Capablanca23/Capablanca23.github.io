@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Visualizador Molecular 2D/3D | Química Computacional</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primario: '#0F2B6D',
+                        secundario: '#1E3A8A',
+                        terciario: '#3B82F6',
+                        exito: '#10B981',
+                        advertencia: '#F59E0B',
+                        error: '#EF4444',
+                        fondo: '#F8FAFC',
+                        texto: '#0F172A'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- RDKit.js -->
+    <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+    <!-- 3Dmol.js -->
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #F8FAFC; }
+        .header-blue { background: linear-gradient(135deg, #0F2B6D 0%, #1E3A8A 100%); }
+        .animate-fade-in-up { animation: fadeInUp 0.4s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        .chip { transition: all 0.15s ease; }
+        .chip:active { transform: scale(0.96); }
+        .style-btn.active-style { background-color: #0F2B6D; color: white; border-color: #0F2B6D; }
+        #visor3d { width: 100%; height: 100%; position: relative; }
+        .spinner { border: 3px solid #E2E8F0; border-top-color: #1E40AF; border-radius: 50%; width: 28px; height: 28px; animation: girar 0.7s linear infinite; }
+        @keyframes girar { to { transform: rotate(360deg); } }
+        input[type=text]:focus { outline: none; box-shadow: 0 0 0 3px rgba(30,64,175,0.25); border-color: #1E40AF; }
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+
+        /* ---- Leyenda de átomos ---- */
+        .swatch {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, 0.25);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+            font-size: 11px;
+            font-weight: 800;
+            color: rgba(0,0,0,0.7);
+            text-shadow: 0 0 2px rgba(255,255,255,0.7);
+        }
+        .swatch.desconocido {
+            background-image: repeating-linear-gradient(45deg, #cbd5e1, #cbd5e1 3px, #ffffff 3px, #ffffff 6px);
+        }
+    </style>
+</head>
+<body class="text-texto p-3 sm:p-6 md:p-8">
+
+    <!-- Header con QR y Autor -->
+    <div class="max-w-6xl mx-auto header-blue rounded-2xl shadow-xl p-5 sm:p-6 mb-6 flex flex-col md:flex-row items-center gap-6 md:gap-8 text-white">
+        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" class="flex-shrink-0 group">
+            <div class="p-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl group-hover:bg-white/20 transition">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364"
+                     alt="QR Investigador" class="w-24 h-24 sm:w-28 sm:h-28 transform group-hover:scale-105 transition rounded-lg">
+            </div>
+            <p class="text-[10px] text-center text-blue-200 mt-2 font-bold uppercase">Perfil Científico</p>
+        </a>
+        <div class="flex-1 text-center md:text-left">
+            <h1 class="text-2xl sm:text-3xl font-black mb-2">VISUALIZADOR MOLECULAR 2D / 3D</h1>
+            <p class="text-lg sm:text-xl font-medium text-blue-100 mb-1">Dr. Ronald F. Rodriguez Espinoza</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-2">
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">SMILES → Estructura 2D</span>
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Modelo 3D interactivo</span>
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Química Computacional</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+        <div class="p-5 sm:p-8 md:p-10">
+
+            <!-- Estado del motor químico -->
+            <div id="estado-motor" class="flex items-center gap-3 bg-blue-50 border border-blue-100 text-blue-800 text-sm px-4 py-3 rounded-xl mb-6">
+                <div class="spinner"></div>
+                <span>Cargando el motor de química (RDKit)…</span>
+            </div>
+
+            <!-- Alertas -->
+            <div id="alerta-error" class="hidden bg-red-50 border-l-4 border-error text-error p-4 rounded-md mb-6">
+                <span class="font-bold">Error:</span> <span id="texto-error"></span>
+            </div>
+            <div id="alerta-advertencia" class="hidden bg-amber-50 border-l-4 border-advertencia text-amber-800 p-4 rounded-md mb-6">
+                <span id="texto-advertencia"></span>
+            </div>
+
+            <!-- Entrada de SMILES -->
+            <form id="form-smiles" class="mb-4">
+                <label class="block text-xs font-black text-slate-500 uppercase mb-2">Código SMILES de la molécula</label>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="input-smiles" value="CN1C=NC2=C1C(=O)N(C(=O)N2C)C" autocomplete="off" spellcheck="false"
+                        placeholder="Ej: CC(=O)OC1=CC=CC=C1C(=O)O"
+                        class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-base sm:text-lg">
+                    <button type="submit" id="btn-calcular" disabled
+                        class="px-6 py-3 bg-primario text-white font-black text-base rounded-xl shadow-lg hover:bg-blue-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>Visualizar</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Ejemplos -->
+            <div class="mb-8">
+                <p class="text-xs font-black text-slate-500 uppercase mb-2">O prueba con un ejemplo:</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2" id="lista-ejemplos"></div>
+            </div>
+
+            <!-- Resultados -->
+            <div id="resultados-container" class="hidden space-y-8 animate-fade-in-up">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Estructura 2D -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                        <h3 class="text-sm font-black uppercase mb-4 flex items-center text-primario"><span class="p-2 bg-blue-100 rounded-lg mr-3">🧪</span> Estructura 2D</h3>
+                        <div id="contenedor-2d" class="w-full bg-white rounded-xl border border-slate-200 flex items-center justify-center overflow-hidden" style="min-height:320px;"></div>
+                    </div>
+
+                    <!-- Estructura 3D -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                            <h3 class="text-sm font-black uppercase flex items-center text-primario"><span class="p-2 bg-blue-100 rounded-lg mr-3">🔬</span> Estructura 3D (interactiva)</h3>
+                            <div class="flex gap-1" id="controles-estilo3d">
+                                <button data-estilo="bolas" class="style-btn active-style text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">Bolas y varillas</button>
+                                <button data-estilo="varillas" class="style-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">Varillas</button>
+                                <button data-estilo="esferas" class="style-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">Esferas</button>
+                            </div>
+                        </div>
+                        <div class="relative w-full bg-white rounded-xl border border-slate-200 overflow-hidden" style="height:320px;">
+                            <div id="visor3d"></div>
+                            <div id="estado-3d" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/90 text-sm text-slate-500">
+                                <div class="spinner"></div>
+                                <span id="texto-estado-3d">Generando modelo 3D…</span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-2 text-center">Arrastra para rotar · rueda del mouse o pellizca para hacer zoom</p>
+                    </div>
+                </div>
+
+                <!-- Información + Leyenda -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Información molecular (solo masa) -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <h3 class="text-sm font-black uppercase mb-4 text-primario">📋 Información molecular</h3>
+                        <dl id="info-molecular" class="grid grid-cols-2 gap-y-3 gap-x-3 text-sm"></dl>
+                        <div class="mt-4 pt-4 border-t border-slate-100">
+                            <a id="link-pubchem" href="#" target="_blank" class="inline-block text-xs font-semibold text-terciario hover:underline">Buscar esta molécula en PubChem ↗</a>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <h3 class="text-sm font-black uppercase mb-1 text-primario">🎨 Leyenda de átomos</h3>
+                        <p class="text-[11px] text-slate-400 mb-4">Colores usados en el modelo 3D (esquema Jmol/CPK estándar)</p>
+                        <div id="leyenda-atomos" class="flex flex-wrap gap-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="max-w-6xl mx-auto text-center text-[11px] text-slate-400 mt-6 px-4">
+        Estructuras 2D generadas con RDKit.js · Modelo 3D generado mediante el servicio NCI Cactus / PubChem y renderizado con 3Dmol.js
+    </p>
+
+    <script>
+        // ================== DATOS: EJEMPLOS Y COLORES ==================
+        const ejemplos = [
+            { nombre: "💧 Agua", smiles: "O" },
+            { nombre: "⛽ Metano", smiles: "C" },
+            { nombre: "🍺 Etanol", smiles: "CCO" },
+            { nombre: "⬡ Benceno", smiles: "c1ccccc1" },
+            { nombre: "☕ Cafeína", smiles: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C" },
+            { nombre: "💊 Aspirina", smiles: "CC(=O)OC1=CC=CC=C1C(=O)O" },
+            { nombre: "🤕 Paracetamol", smiles: "CC(=O)NC1=CC=C(C=C1)O" },
+            { nombre: "🦴 Ibuprofeno", smiles: "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O" },
+            { nombre: "🍬 Glucosa", smiles: "OC[C@H]1OC(O)[C@H](O)[C@@H](O)[C@@H]1O" },
+            { nombre: "🌿 Mentol", smiles: "CC(C)C1CCC(C)CC1O" },
+            { nombre: "🍫 Teobromina", smiles: "CN1C=NC2=C1C(=O)NC(=O)N2C" },
+            { nombre: "🧴 Vainillina", smiles: "COC1=CC(=CC=C1O)C=O" }
+        ];
+
+        // Colores estándar Jmol/CPK
+        const coloresAtomicos = {
+            H: '#FFFFFF', C: '#909090', N: '#3050F8', O: '#FF0D0D',
+            F: '#90E050', Cl: '#1FF01F', Br: '#A62929', I: '#940094',
+            S: '#FFFF30', P: '#FF8000', B: '#FFB5B5', Si: '#F0C8A0',
+            Na: '#AB5CF2', K: '#8F40D4', Ca: '#3DFF00', Fe: '#E06633',
+            Mg: '#8AFF00', Zn: '#7D80B0'
+        };
+
+        const ordenPreferido = ['C', 'H'];
+
+        // ================== ELEMENTOS DEL DOM ==================
+        const inputSmiles = document.getElementById('input-smiles');
+        const formSmiles = document.getElementById('form-smiles');
+        const btnCalcular = document.getElementById('btn-calcular');
+        const estadoMotor = document.getElementById('estado-motor');
+        const listaEjemplos = document.getElementById('lista-ejemplos');
+
+        function mostrarError(m) {
+            document.getElementById('texto-error').innerText = m;
+            document.getElementById('alerta-error').classList.remove('hidden');
+            document.getElementById('resultados-container').classList.add('hidden');
+        }
+        function ocultarAlertas() {
+            document.getElementById('alerta-error').classList.add('hidden');
+            document.getElementById('alerta-advertencia').classList.add('hidden');
+        }
+        function mostrarAdvertencia(m) {
+            document.getElementById('texto-advertencia').innerText = m;
+            document.getElementById('alerta-advertencia').classList.remove('hidden');
+        }
+
+        ejemplos.forEach(ej => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'chip text-xs sm:text-sm font-semibold text-left px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-200 text-slate-600';
+            btn.innerText = ej.nombre;
+            btn.onclick = () => { inputSmiles.value = ej.smiles; formSmiles.requestSubmit(); };
+            listaEjemplos.appendChild(btn);
+        });
+
+        // ================== INICIALIZAR RDKIT ==================
+        let RDKit = null;
+        window.initRDKitModule().then(mod => {
+            RDKit = mod;
+            estadoMotor.classList.add('hidden');
+            btnCalcular.disabled = false;
+        }).catch(() => {
+            estadoMotor.innerHTML = '<span class="text-error font-semibold">⚠️ No se pudo cargar el motor de química. Verifica tu conexión a internet y recarga la página.</span>';
+        });
+
+        // ================== INICIALIZAR VISOR 3D ==================
+        let viewer3d = null;
+        let estiloActual = 'bolas';
+        function crearVisor() {
+            if (!viewer3d && window.$3Dmol) {
+                viewer3d = $3Dmol.createViewer(document.getElementById('visor3d'), { backgroundColor: 'white' });
+            }
+        }
+        crearVisor();
+
+        function aplicarEstilo3d() {
+            if (!viewer3d) return;
+            if (estiloActual === 'bolas') {
+                viewer3d.setStyle({}, {
+                    stick: { radius: 0.14, colorscheme: 'Jmol' },
+                    sphere: { scale: 0.28, colorscheme: 'Jmol' }
+                });
+            } else if (estiloActual === 'varillas') {
+                viewer3d.setStyle({}, { stick: { radius: 0.18, colorscheme: 'Jmol' } });
+            } else if (estiloActual === 'esferas') {
+                viewer3d.setStyle({}, { sphere: { scale: 0.9, colorscheme: 'Jmol' } });
+            }
+            viewer3d.render();
+        }
+
+        document.getElementById('controles-estilo3d').addEventListener('click', (e) => {
+            const btn = e.target.closest('.style-btn');
+            if (!btn) return;
+            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active-style'));
+            btn.classList.add('active-style');
+            estiloActual = btn.dataset.estilo;
+            aplicarEstilo3d();
+        });
+
+        // ================== CONTEO DE ÁTOMOS ROBUSTO ==================
+        // Parsea una fórmula molecular tipo "C6H12O6" -> {C:6, H:12, O:6}
+        function parsearFormulaMolecular(formula) {
+            if (!formula || typeof formula !== 'string') return {};
+            const conteo = {};
+            const regex = /([A-Z][a-z]?)(\d*)/g;
+            let m;
+            while ((m = regex.exec(formula)) !== null) {
+                const el = m[1];
+                const num = m[2] ? parseInt(m[2], 10) : 1;
+                if (el) conteo[el] = (conteo[el] || 0) + num;
+            }
+            return conteo;
+        }
+
+        function contarAtomos(mol, molConH, descriptores) {
+            // Estrategia 1: usar descriptores de RDKit (fórmula molecular más fiable)
+            // RDKit.js expone get_descriptors() pero la fórmula suele estar en "formula"
+            // o podemos obtenerla desde el molblock con H añadidos.
+            try {
+                const objetivo = molConH || mol;
+                // get_molblock de RDKit incluye en la primera línea (o cerca) la fórmula
+                const molblock = objetivo.get_molblock();
+                const lineas = molblock.split('\n');
+                // Buscamos cualquier línea que parezca una fórmula molecular
+                for (const linea of lineas) {
+                    const limpia = linea.trim();
+                    // Fórmula típica: C, H, N, O, etc. con números
+                    if (/^([A-Z][a-z]?\d*)+$/.test(limpia) && limpia.length < 120 && /[A-Z]/.test(limpia)) {
+                        const parsed = parsearFormulaMolecular(limpia);
+                        // Verificar que tenga al menos C o H y sea coherente
+                        if (Object.keys(parsed).length > 0 && (parsed.C || parsed.H)) {
+                            return parsed;
+                        }
+                    }
+                }
+            } catch (e) { /* continuar */ }
+
+            // Estrategia 2: parsear el molblock V2000 manualmente (átomos explícitos)
+            try {
+                const objetivo = molConH || mol;
+                const molblock = objetivo.get_molblock();
+                const lineas = molblock.split('\n');
+                if (lineas.length > 4) {
+                    const nAtoms = parseInt(lineas[3].substring(0, 3).trim(), 10) || 0;
+                    const conteo = {};
+                    for (let i = 0; i < nAtoms; i++) {
+                        const linea = lineas[4 + i] || '';
+                        // V2000: el símbolo está en las columnas 31-33 (índice 31-34)
+                        let simbolo = linea.substring(31, 34).trim();
+                        // Respaldo: tokenizar
+                        if (!simbolo || simbolo === '0' || !isNaN(simbolo)) {
+                            const partes = linea.trim().split(/\s+/);
+                            simbolo = partes[3] || '';
+                        }
+                        simbolo = simbolo.replace(/[^A-Za-z]/g, '');
+                        if (simbolo && /^[A-Z][a-z]?$/.test(simbolo)) {
+                            conteo[simbolo] = (conteo[simbolo] || 0) + 1;
+                        }
+                    }
+                    if (Object.keys(conteo).length > 0) return conteo;
+                }
+            } catch (e) { /* continuar */ }
+
+            // Estrategia 3: usar los descriptores como último recurso
+            // NumHeavyAtoms nos da el total de átomos pesados, pero no el desglose.
+            // Si no podemos desglosar, mostramos al menos los átomos pesados genéricos.
+            if (descriptores && descriptores.NumHeavyAtoms) {
+                // Intentamos inferir: si hay fórmula en descriptores, usarla
+                if (descriptores.formula) {
+                    const parsed = parsearFormulaMolecular(descriptores.formula);
+                    if (Object.keys(parsed).length > 0) return parsed;
+                }
+            }
+
+            return {};
+        }
+
+        function colorRespaldo(simbolo) {
+            let hash = 0;
+            for (let i = 0; i < simbolo.length; i++) hash = simbolo.charCodeAt(i) + ((hash << 5) - hash);
+            const h = Math.abs(hash) % 360;
+            return `hsl(${h}, 60%, 65%)`;
+        }
+
+        function ordenarElementos(claves) {
+            const preferidas = ordenPreferido.filter(el => claves.includes(el));
+            const resto = claves.filter(el => !ordenPreferido.includes(el)).sort();
+            return [...preferidas, ...resto];
+        }
+
+        // ================== RENDERIZADO DE LEYENDA ==================
+        function renderLeyenda(conteo) {
+            const cont = document.getElementById('leyenda-atomos');
+            cont.innerHTML = '';
+
+            const claves = Object.keys(conteo);
+            if (!claves.length) {
+                cont.innerHTML = '<p class="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200 w-full">⚠️ No se pudo determinar la composición atómica. Verifica el SMILES.</p>';
+                return;
+            }
+
+            ordenarElementos(claves).forEach(el => {
+                const conocido = Object.prototype.hasOwnProperty.call(coloresAtomicos, el);
+                const color = conocido ? coloresAtomicos[el] : colorRespaldo(el);
+
+                const item = document.createElement('div');
+                item.className = 'flex items-center gap-2.5 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200 shadow-sm';
+                item.title = `Elemento: ${el} | Color: ${color}`;
+
+                const swatch = document.createElement('span');
+                swatch.className = 'swatch' + (conocido ? '' : ' desconocido');
+                swatch.style.backgroundColor = color;
+                swatch.innerText = el; // Símbolo dentro del círculo
+
+                const etiqueta = document.createElement('div');
+                etiqueta.className = 'flex flex-col leading-tight';
+                etiqueta.innerHTML = `
+                    <span class="font-black text-slate-700 text-sm">${el}</span>
+                    <span class="text-[10px] text-slate-500 font-semibold">×${conteo[el]}</span>
+                `;
+
+                item.appendChild(swatch);
+                item.appendChild(etiqueta);
+                cont.appendChild(item);
+            });
+        }
+
+        // ================== OBTENER SDF 3D ==================
+        async function obtenerSdf3D(smiles) {
+            const urlCactus = `https://cactus.nci.nih.gov/chemical/structure/${encodeURIComponent(smiles)}/file?format=sdf&get3d=true`;
+            try {
+                const r = await fetch(urlCactus);
+                if (r.ok) {
+                    const texto = await r.text();
+                    if (texto && texto.includes('V2000')) return texto;
+                }
+            } catch (e) { /* continuar con respaldo */ }
+
+            const urlPubchem = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/${encodeURIComponent(smiles)}/record/SDF/?record_type=3d`;
+            try {
+                const r2 = await fetch(urlPubchem);
+                if (r2.ok) {
+                    const texto2 = await r2.text();
+                    if (texto2 && texto2.includes('V2000')) return texto2;
+                }
+            } catch (e) { /* sin respaldo disponible */ }
+
+            return null;
+        }
+
+        // ================== FLUJO PRINCIPAL ==================
+        formSmiles.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!RDKit) return;
+            ocultarAlertas();
+            const smiles = inputSmiles.value.trim();
+            if (!smiles) { mostrarError('Ingresa un código SMILES.'); return; }
+
+            let mol;
+            try { mol = RDKit.get_mol(smiles); } catch (err) { mol = null; }
+            
+            if (!mol || !mol.is_valid()) {
+                mostrarError('El SMILES ingresado no es válido. Verifica la sintaxis.');
+                if (mol) mol.delete();
+                return;
+            }
+
+            // ---- Estructura 2D ----
+            let svg;
+            try { svg = mol.get_svg(380, 320); } catch (e) { svg = null; }
+            document.getElementById('contenedor-2d').innerHTML = svg || '<p class="text-sm text-slate-400 p-6">No se pudo generar la estructura 2D.</p>';
+
+            // ---- Descriptores ----
+            let descriptores = {};
+            try { descriptores = JSON.parse(mol.get_descriptors()); } catch (e) { descriptores = {}; }
+
+            const smilesCanonico = mol.get_smiles();
+            document.getElementById('link-pubchem').href = `https://pubchem.ncbi.nlm.nih.gov/#query=${encodeURIComponent(smilesCanonico)}`;
+
+            // ---- Conteo de átomos ----
+            // Intentamos con H añadidos para que aparezcan en la leyenda
+            let molConH = null;
+            try { molConH = mol.add_hs(); } catch (e) { molConH = null; }
+            let conteoAtomos = contarAtomos(mol, molConH, descriptores);
+
+            // Respaldo adicional: si aún está vacío, intentar sin H
+            if (Object.keys(conteoAtomos).length === 0) {
+                conteoAtomos = contarAtomos(mol, null, descriptores);
+            }
+
+            // ---- Información molecular (solo masa) ----
+            const info = document.getElementById('info-molecular');
+            info.innerHTML = `
+                <dt class="text-slate-400 font-semibold">Masa molecular</dt>
+                <dd class="font-bold">${descriptores.amw ? descriptores.amw.toFixed(2) + ' g/mol' : '—'}</dd>
+            `;
+
+            renderLeyenda(conteoAtomos);
+            document.getElementById('resultados-container').classList.remove('hidden');
+
+            // ---- Estructura 3D ----
+            const estado3d = document.getElementById('estado-3d');
+            const textoEstado3d = document.getElementById('texto-estado-3d');
+            estado3d.classList.remove('hidden');
+            estado3d.classList.add('flex');
+            textoEstado3d.innerText = 'Generando modelo 3D…';
+
+            crearVisor();
+            if (viewer3d) { viewer3d.clear(); }
+
+            const sdf = await obtenerSdf3D(smilesCanonico);
+            if (sdf && viewer3d) {
+                viewer3d.addModel(sdf, 'sdf');
+                aplicarEstilo3d();
+                viewer3d.zoomTo();
+                viewer3d.render();
+                estado3d.classList.add('hidden');
+                estado3d.classList.remove('flex');
+            } else {
+                textoEstado3d.innerHTML = '⚠️ No se pudo generar el modelo 3D.<br>Verifica tu conexión e inténtalo de nuevo.';
+            }
+
+            mol.delete();
+            if (molConH) molConH.delete();
+        });
+
+        window.addEventListener('resize', () => { if (viewer3d) viewer3d.resize(); });
+    </script>
+</body>
+</html>
