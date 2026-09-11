@@ -45,7 +45,6 @@
         ::-webkit-scrollbar { height: 6px; width: 6px; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
 
-        /* ---- Leyenda de átomos ---- */
         .swatch {
             display: inline-flex;
             align-items: center;
@@ -64,10 +63,12 @@
         .swatch.desconocido {
             background-image: repeating-linear-gradient(45deg, #cbd5e1, #cbd5e1 3px, #ffffff 3px, #ffffff 6px);
         }
-        /* Swatch especial para H (fondo blanco necesita borde más visible) */
         .swatch.hidrogeno {
             border: 2px solid #94a3b8;
         }
+
+        .btn-descarga { transition: all 0.15s ease; }
+        .btn-descarga:active { transform: scale(0.96); }
     </style>
 </head>
 <body class="text-texto p-3 sm:p-6 md:p-8">
@@ -96,13 +97,11 @@
     <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
         <div class="p-5 sm:p-8 md:p-10">
 
-            <!-- Estado del motor químico -->
             <div id="estado-motor" class="flex items-center gap-3 bg-blue-50 border border-blue-100 text-blue-800 text-sm px-4 py-3 rounded-xl mb-6">
                 <div class="spinner"></div>
                 <span>Cargando el motor de química (RDKit)…</span>
             </div>
 
-            <!-- Alertas -->
             <div id="alerta-error" class="hidden bg-red-50 border-l-4 border-error text-error p-4 rounded-md mb-6">
                 <span class="font-bold">Error:</span> <span id="texto-error"></span>
             </div>
@@ -110,7 +109,6 @@
                 <span id="texto-advertencia"></span>
             </div>
 
-            <!-- Entrada de SMILES -->
             <form id="form-smiles" class="mb-4">
                 <label class="block text-xs font-black text-slate-500 uppercase mb-2">Código SMILES de la molécula</label>
                 <div class="flex flex-col sm:flex-row gap-3">
@@ -124,8 +122,7 @@
                             <span>Visualizar</span>
                         </button>
                         <button type="button" id="btn-limpiar"
-                            class="px-4 py-3 bg-white text-slate-600 font-bold text-base rounded-xl border border-slate-300 shadow-sm hover:bg-red-50 hover:text-red-600 hover:border-red-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                            title="Limpiar el código SMILES y los resultados">
+                            class="px-4 py-3 bg-white text-slate-600 font-bold text-base rounded-xl border border-slate-300 shadow-sm hover:bg-red-50 hover:text-red-600 hover:border-red-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -135,30 +132,48 @@
                 </div>
             </form>
 
-            <!-- Ejemplos -->
             <div class="mb-8">
                 <p class="text-xs font-black text-slate-500 uppercase mb-2">O prueba con un ejemplo:</p>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2" id="lista-ejemplos"></div>
             </div>
 
-            <!-- Resultados -->
             <div id="resultados-container" class="hidden space-y-8 animate-fade-in-up">
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Estructura 2D -->
                     <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                        <h3 class="text-sm font-black uppercase mb-4 flex items-center text-primario"><span class="p-2 bg-blue-100 rounded-lg mr-3">🧪</span> Estructura 2D</h3>
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                            <h3 class="text-sm font-black uppercase flex items-center text-primario"><span class="p-2 bg-blue-100 rounded-lg mr-3">🧪</span> Estructura 2D</h3>
+                            <div class="flex gap-1">
+                                <button id="btn-descargar-2d-svg" class="btn-descarga text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 flex items-center gap-1.5" title="Descargar estructura 2D como SVG (vectorial)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    <span>SVG</span>
+                                </button>
+                                <button id="btn-descargar-2d-png" class="btn-descarga text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 flex items-center gap-1.5" title="Descargar estructura 2D como PNG (imagen)">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    <span>PNG</span>
+                                </button>
+                            </div>
+                        </div>
                         <div id="contenedor-2d" class="w-full bg-white rounded-xl border border-slate-200 flex items-center justify-center overflow-hidden" style="min-height:320px;"></div>
                     </div>
 
-                    <!-- Estructura 3D -->
                     <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
                         <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                             <h3 class="text-sm font-black uppercase flex items-center text-primario"><span class="p-2 bg-blue-100 rounded-lg mr-3">🔬</span> Estructura 3D (interactiva)</h3>
-                            <div class="flex gap-1" id="controles-estilo3d">
+                            <div class="flex gap-1 items-center" id="controles-estilo3d">
                                 <button data-estilo="bolas" class="style-btn active-style text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">Bolas y varillas</button>
                                 <button data-estilo="varillas" class="style-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">Varillas</button>
                                 <button data-estilo="esferas" class="style-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">Esferas</button>
+                                <button id="btn-descargar-3d" class="btn-descarga text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 flex items-center gap-1.5" title="Descargar captura 3D como PNG">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    <span>PNG</span>
+                                </button>
                             </div>
                         </div>
                         <div class="relative w-full bg-white rounded-xl border border-slate-200 overflow-hidden" style="height:320px;">
@@ -172,9 +187,7 @@
                     </div>
                 </div>
 
-                <!-- Información + Leyenda -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Información molecular (solo masa) -->
                     <div class="bg-white p-5 rounded-2xl border border-slate-200">
                         <h3 class="text-sm font-black uppercase mb-4 text-primario">📋 Información molecular</h3>
                         <dl id="info-molecular" class="grid grid-cols-2 gap-y-3 gap-x-3 text-sm"></dl>
@@ -198,7 +211,6 @@
     </p>
 
     <script>
-        // ================== DATOS: EJEMPLOS Y COLORES ==================
         const ejemplos = [
             { nombre: "💧 Agua", smiles: "O" },
             { nombre: "⛽ Metano", smiles: "C" },
@@ -214,7 +226,6 @@
             { nombre: "🧴 Vainillina", smiles: "COC1=CC(=CC=C1O)C=O" }
         ];
 
-        // Colores estándar Jmol/CPK
         const coloresAtomicos = {
             H: '#FFFFFF', C: '#909090', N: '#3050F8', O: '#FF0D0D',
             F: '#90E050', Cl: '#1FF01F', Br: '#A62929', I: '#940094',
@@ -225,13 +236,15 @@
 
         const ordenPreferido = ['C', 'H'];
 
-        // ================== ELEMENTOS DEL DOM ==================
         const inputSmiles = document.getElementById('input-smiles');
         const formSmiles = document.getElementById('form-smiles');
         const btnCalcular = document.getElementById('btn-calcular');
         const btnLimpiar = document.getElementById('btn-limpiar');
         const estadoMotor = document.getElementById('estado-motor');
         const listaEjemplos = document.getElementById('lista-ejemplos');
+        const btnDescargar2DSVG = document.getElementById('btn-descargar-2d-svg');
+        const btnDescargar2DPNG = document.getElementById('btn-descargar-2d-png');
+        const btnDescargar3D = document.getElementById('btn-descargar-3d');
 
         function mostrarError(m) {
             document.getElementById('texto-error').innerText = m;
@@ -256,23 +269,14 @@
             listaEjemplos.appendChild(btn);
         });
 
-        // ================== BOTÓN LIMPIAR ==================
         btnLimpiar.addEventListener('click', () => {
-            // Limpiar input
             inputSmiles.value = '';
-            // Ocultar alertas
             ocultarAlertas();
-            // Ocultar resultados
             document.getElementById('resultados-container').classList.add('hidden');
-            // Limpiar contenedor 2D
             document.getElementById('contenedor-2d').innerHTML = '';
-            // Limpiar leyenda
             document.getElementById('leyenda-atomos').innerHTML = '';
-            // Limpiar info molecular
             document.getElementById('info-molecular').innerHTML = '';
-            // Resetear link de PubChem
             document.getElementById('link-pubchem').href = '#';
-            // Limpiar visor 3D y mostrar estado
             if (viewer3d) {
                 viewer3d.clear();
                 viewer3d.render();
@@ -281,11 +285,9 @@
             estado3d.classList.remove('hidden');
             estado3d.classList.add('flex');
             document.getElementById('texto-estado-3d').innerText = 'Generando modelo 3D…';
-            // Devolver foco al input
             inputSmiles.focus();
         });
 
-        // ================== INICIALIZAR RDKIT ==================
         let RDKit = null;
         window.initRDKitModule().then(mod => {
             RDKit = mod;
@@ -295,7 +297,6 @@
             estadoMotor.innerHTML = '<span class="text-error font-semibold">⚠️ No se pudo cargar el motor de química. Verifica tu conexión a internet y recarga la página.</span>';
         });
 
-        // ================== INICIALIZAR VISOR 3D ==================
         let viewer3d = null;
         let estiloActual = 'bolas';
         function crearVisor() {
@@ -329,8 +330,188 @@
             aplicarEstilo3d();
         });
 
+        // ================== UTILIDADES DE DESCARGA ==================
+
+        /**
+         * Prepara el SVG de la estructura 2D respetando su viewBox original.
+         * Añade un padding interno mínimo para que los átomos no queden pegados al borde.
+         * @param {number} escalaFactor - Factor de escala (para PNG en alta resolución).
+         * @returns {object|null} { svgString, width, height }
+         */
+        function prepararSvg2D(escalaFactor = 1) {
+            const contenedor = document.getElementById('contenedor-2d');
+            const svg = contenedor.querySelector('svg');
+            if (!svg) return null;
+
+            // --- Obtener viewBox original (RDKit lo ajusta a la molécula) ---
+            let vb = svg.getAttribute('viewBox');
+            if (!vb) {
+                // Si no hay viewBox, usamos width/height como respaldo
+                const w = parseFloat(svg.getAttribute('width')) || 380;
+                const h = parseFloat(svg.getAttribute('height')) || 320;
+                vb = `0 0 ${w} ${h}`;
+            }
+            const [vbX, vbY, vbW, vbH] = vb.split(/[\s,]+/).map(parseFloat);
+
+            // --- Añadir un pequeño padding alrededor (en unidades del viewBox) ---
+            // para que los átomos no queden cortados en los bordes.
+            const PADDING = 8;
+            const nuevoVbX = vbX - PADDING;
+            const nuevoVbY = vbY - PADDING;
+            const nuevoVbW = vbW + PADDING * 2;
+            const nuevoVbH = vbH + PADDING * 2;
+
+            // --- Dimensiones finales (aplicando escala) ---
+            const anchoFinal = Math.round(nuevoVbW * escalaFactor);
+            const altoFinal = Math.round(nuevoVbH * escalaFactor);
+
+            // --- Clonar y ajustar el SVG ---
+            const clon = svg.cloneNode(true);
+            if (!clon.getAttribute('xmlns')) {
+                clon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            }
+            clon.setAttribute('viewBox', `${nuevoVbX} ${nuevoVbY} ${nuevoVbW} ${nuevoVbH}`);
+            clon.setAttribute('width', anchoFinal);
+            clon.setAttribute('height', altoFinal);
+            clon.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+            // --- Fondo blanco del mismo tamaño que el viewBox ---
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', nuevoVbX);
+            rect.setAttribute('y', nuevoVbY);
+            rect.setAttribute('width', nuevoVbW);
+            rect.setAttribute('height', nuevoVbH);
+            rect.setAttribute('fill', 'white');
+            clon.insertBefore(rect, clon.firstChild);
+
+            const serializer = new XMLSerializer();
+            let svgString = serializer.serializeToString(clon);
+            if (!svgString.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+                svgString = svgString.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+            }
+
+            return { svgString, width: anchoFinal, height: altoFinal };
+        }
+
+        // Descargar SVG (vectorial, tamaño natural con padding)
+        btnDescargar2DSVG.addEventListener('click', () => {
+            const datos = prepararSvg2D(1); // escala 1x para SVG (vectorial)
+            if (!datos) {
+                alert('No hay estructura 2D para descargar.');
+                return;
+            }
+            const blob = new Blob([datos.svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'estructura_2d.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // Descargar PNG (rasterizado a 4x para alta calidad, ajustado a la figura)
+        btnDescargar2DPNG.addEventListener('click', () => {
+            const ESCALA = 4; // 4x para muy buena resolución
+            const datos = prepararSvg2D(ESCALA);
+            if (!datos) {
+                alert('No hay estructura 2D para descargar.');
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = datos.width;
+            canvas.height = datos.height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const img = new Image();
+            const svgBlob = new Blob([datos.svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = () => {
+                try {
+                    // El SVG ya tiene el tamaño final, así que dibujamos a tamaño natural
+                    ctx.drawImage(img, 0, 0, datos.width, datos.height);
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            alert('No se pudo generar la imagen PNG. Inténtalo de nuevo.');
+                            URL.revokeObjectURL(url);
+                            return;
+                        }
+                        const pngUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = pngUrl;
+                        a.download = 'estructura_2d.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(pngUrl);
+                        URL.revokeObjectURL(url);
+                    }, 'image/png');
+                } catch (err) {
+                    console.error('Error al dibujar el SVG en canvas:', err);
+                    alert('No se pudo generar la imagen PNG. Inténtalo de nuevo.');
+                    URL.revokeObjectURL(url);
+                }
+            };
+            img.onerror = () => {
+                console.error('Error al cargar el SVG como imagen.');
+                alert('No se pudo procesar el SVG para generar PNG.');
+                URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        });
+
+        // Descargar captura 3D como PNG (recortado al contenido, sin bordes extra)
+        btnDescargar3D.addEventListener('click', () => {
+            if (!viewer3d) {
+                alert('El visor 3D no está listo.');
+                return;
+            }
+            const canvasOriginal = document.querySelector('#visor3d canvas');
+            if (!canvasOriginal) {
+                alert('No hay modelo 3D para descargar.');
+                return;
+            }
+            try {
+                viewer3d.render();
+
+                // Pedir a 3Dmol la imagen PNG directamente (ya recorta al viewport)
+                const dataUrl = viewer3d.pngURI();
+                if (dataUrl) {
+                    const a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = 'estructura_3d.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    return;
+                }
+                // Respaldo: usar el canvas directamente con fondo blanco
+                const canvasFinal = document.createElement('canvas');
+                canvasFinal.width = canvasOriginal.width;
+                canvasFinal.height = canvasOriginal.height;
+                const ctxFinal = canvasFinal.getContext('2d');
+                ctxFinal.fillStyle = '#FFFFFF';
+                ctxFinal.fillRect(0, 0, canvasFinal.width, canvasFinal.height);
+                ctxFinal.drawImage(canvasOriginal, 0, 0);
+                const fallbackUrl = canvasFinal.toDataURL('image/png');
+                const a2 = document.createElement('a');
+                a2.href = fallbackUrl;
+                a2.download = 'estructura_3d.png';
+                document.body.appendChild(a2);
+                a2.click();
+                document.body.removeChild(a2);
+            } catch (err) {
+                console.error('Error al exportar PNG:', err);
+                alert('No se pudo generar la imagen PNG. Inténtalo de nuevo.');
+            }
+        });
+
         // ================== CONTEO DE ÁTOMOS ROBUSTO ==================
-        // Parsea una fórmula molecular tipo "C6H12O6" -> {C:6, H:12, O:6}
         function parsearFormulaMolecular(formula) {
             if (!formula || typeof formula !== 'string') return {};
             const conteo = {};
@@ -345,18 +526,12 @@
         }
 
         function contarAtomos(mol, molConH, descriptores) {
-            // Estrategia 1: obtener la fórmula molecular desde RDKit.
-            // RDKit.js NO expone directamente get_formula() en todas las versiones,
-            // pero el molblock de get_molblock() incluye la fórmula en la línea 1
-            // como comentario (nombre), y con add_hs() los H quedan explícitos.
             try {
                 const objetivo = molConH || mol;
                 const molblock = objetivo.get_molblock();
                 const lineas = molblock.split('\n');
-                // Línea 0 suele ser el nombre; en RDKit suele contener la fórmula molecular
                 if (lineas.length > 0) {
                     const nombreLinea = lineas[0].trim();
-                    // Fórmula típica: C, H, N, O, etc. con números
                     if (/^([A-Z][a-z]?\d*)+$/.test(nombreLinea) && nombreLinea.length < 120 && /[A-Z]/.test(nombreLinea)) {
                         const parsed = parsearFormulaMolecular(nombreLinea);
                         if (Object.keys(parsed).length > 0 && (parsed.C || parsed.H)) {
@@ -366,8 +541,6 @@
                 }
             } catch (e) { /* continuar */ }
 
-            // Estrategia 2: parsear el molblock V2000 manualmente.
-            // Si usamos molConH (con add_hs), los H aparecen como átomos explícitos.
             try {
                 const objetivo = molConH || mol;
                 const molblock = objetivo.get_molblock();
@@ -377,9 +550,7 @@
                     const conteo = {};
                     for (let i = 0; i < nAtoms; i++) {
                         const linea = lineas[4 + i] || '';
-                        // V2000: el símbolo está en las columnas 31-33 (índice 31-34)
                         let simbolo = linea.substring(31, 34).trim();
-                        // Respaldo: tokenizar
                         if (!simbolo || simbolo === '0' || !isNaN(simbolo)) {
                             const partes = linea.trim().split(/\s+/);
                             simbolo = partes[3] || '';
@@ -393,15 +564,11 @@
                 }
             } catch (e) { /* continuar */ }
 
-            // Estrategia 3: usar los descriptores.
-            // amw (masa) no da desglose, pero algunos builds exponen "formula".
             if (descriptores && descriptores.formula) {
                 const parsed = parsearFormulaMolecular(descriptores.formula);
                 if (Object.keys(parsed).length > 0) return parsed;
             }
 
-            // Estrategia 4 (último recurso): contar átomos pesados del molblock sin H
-            // y advertir que no se pudieron contar los H.
             try {
                 const molblock = mol.get_molblock();
                 const lineas = molblock.split('\n');
@@ -420,7 +587,6 @@
                             conteo[simbolo] = (conteo[simbolo] || 0) + 1;
                         }
                     }
-                    // Intentar deducir H desde la masa molecular y los átomos pesados
                     if (Object.keys(conteo).length > 0 && descriptores && descriptores.amw) {
                         const masas = { C: 12.011, H: 1.008, N: 14.007, O: 15.999, S: 32.06, P: 30.974, F: 18.998, Cl: 35.45, Br: 79.904, I: 126.904 };
                         let masaPesada = 0;
@@ -455,7 +621,6 @@
             return [...preferidas, ...resto];
         }
 
-        // ================== RENDERIZADO DE LEYENDA ==================
         function renderLeyenda(conteo) {
             const cont = document.getElementById('leyenda-atomos');
             cont.innerHTML = '';
@@ -476,11 +641,9 @@
 
                 const swatch = document.createElement('span');
                 swatch.className = 'swatch' + (conocido ? '' : ' desconocido');
-                // Clase especial para H: fondo blanco, necesita borde visible
                 if (el === 'H') swatch.classList.add('hidrogeno');
                 swatch.style.backgroundColor = color;
-                swatch.innerText = el; // Símbolo dentro del círculo
-                // Para H, texto oscuro para que se lea sobre blanco
+                swatch.innerText = el;
                 if (el === 'H') swatch.style.color = '#334155';
 
                 const etiqueta = document.createElement('div');
@@ -496,7 +659,6 @@
             });
         }
 
-        // ================== OBTENER SDF 3D ==================
         async function obtenerSdf3D(smiles) {
             const urlCactus = `https://cactus.nci.nih.gov/chemical/structure/${encodeURIComponent(smiles)}/file?format=sdf&get3d=true`;
             try {
@@ -505,7 +667,7 @@
                     const texto = await r.text();
                     if (texto && texto.includes('V2000')) return texto;
                 }
-            } catch (e) { /* continuar con respaldo */ }
+            } catch (e) { /* continuar */ }
 
             const urlPubchem = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/${encodeURIComponent(smiles)}/record/SDF/?record_type=3d`;
             try {
@@ -514,12 +676,11 @@
                     const texto2 = await r2.text();
                     if (texto2 && texto2.includes('V2000')) return texto2;
                 }
-            } catch (e) { /* sin respaldo disponible */ }
+            } catch (e) { /* continuar */ }
 
             return null;
         }
 
-        // ================== FLUJO PRINCIPAL ==================
         formSmiles.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!RDKit) return;
@@ -536,30 +697,24 @@
                 return;
             }
 
-            // ---- Estructura 2D ----
             let svg;
             try { svg = mol.get_svg(380, 320); } catch (e) { svg = null; }
             document.getElementById('contenedor-2d').innerHTML = svg || '<p class="text-sm text-slate-400 p-6">No se pudo generar la estructura 2D.</p>';
 
-            // ---- Descriptores ----
             let descriptores = {};
             try { descriptores = JSON.parse(mol.get_descriptors()); } catch (e) { descriptores = {}; }
 
             const smilesCanonico = mol.get_smiles();
             document.getElementById('link-pubchem').href = `https://pubchem.ncbi.nlm.nih.gov/#query=${encodeURIComponent(smilesCanonico)}`;
 
-            // ---- Conteo de átomos ----
-            // Intentamos con H añadidos para que aparezcan en la leyenda
             let molConH = null;
             try { molConH = mol.add_hs(); } catch (e) { molConH = null; }
             let conteoAtomos = contarAtomos(mol, molConH, descriptores);
 
-            // Respaldo adicional: si aún está vacío, intentar sin H
             if (Object.keys(conteoAtomos).length === 0) {
                 conteoAtomos = contarAtomos(mol, null, descriptores);
             }
 
-            // ---- Información molecular (solo masa) ----
             const info = document.getElementById('info-molecular');
             info.innerHTML = `
                 <dt class="text-slate-400 font-semibold">Masa molecular</dt>
@@ -569,7 +724,6 @@
             renderLeyenda(conteoAtomos);
             document.getElementById('resultados-container').classList.remove('hidden');
 
-            // ---- Estructura 3D ----
             const estado3d = document.getElementById('estado-3d');
             const textoEstado3d = document.getElementById('texto-estado-3d');
             estado3d.classList.remove('hidden');
