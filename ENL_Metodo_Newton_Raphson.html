@@ -464,33 +464,25 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-/* ---------- capacidad de descargas ---------- */
-let downloadsCap = null;
-(async function initDownloads(){
-    try{
-        if(window.claude && typeof window.claude.use === 'function'){
-            downloadsCap = await window.claude.use('downloads');
-        }
-    }catch(e){ downloadsCap = null; }
-    if(!downloadsCap){
-        ['btnExcel','btnPng','btnSvg'].forEach(id=>{
-            const b = document.getElementById(id);
-            if(b){ b.disabled = true; b.title = 'La descarga de archivos no está disponible en esta vista.'; }
-        });
-    }
-})();
-
+/* ---------- descarga nativa (funciona en cualquier navegador) ---------- */
 async function guardarArchivo(filename, data){
-    if(!downloadsCap){
-        mostrarAlerta('La descarga de archivos no está disponible en esta vista.', 'bad');
-        return;
-    }
     try{
-        await downloadsCap.save({ filename, data });
+        let blob;
+        if(data instanceof Blob){
+            blob = data;
+        }else{
+            blob = new Blob([data], { type:'application/octet-stream' });
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
     }catch(err){
-        const code = err && err.code ? err.code : 'unavailable';
-        if(code === 'declined'){ return; }
-        mostrarAlerta('No se pudo guardar el archivo (' + code + ').', 'bad');
+        mostrarAlerta('No se pudo guardar el archivo: ' + err.message, 'bad');
     }
 }
 
@@ -714,14 +706,14 @@ function dibujarGraficaCompleta(){
     /* -------- Datasets -------- */
     const datasets = [];
 
-    // 1. Curva f(x)
+    // 1. Curva f(x) — más gruesa y visible que las tangentes
     datasets.push({
         label:'f(x)',
         data: curve,
         type:'line',
         borderColor: '#0891b2',
         backgroundColor: 'rgba(8,145,178,0.05)',
-        borderWidth: 2.8,
+        borderWidth: 3.6,
         pointRadius:0,
         fill:false,
         tension:.10,
@@ -744,8 +736,8 @@ function dibujarGraficaCompleta(){
     // 3. Por cada iteración: tangente, 2 verticales, 2 puntos
     iterData.forEach((d, k) => {
         const esUltima = (k === iterData.length - 1);
-        const colorTang = esUltima ? '#d97706' : 'rgba(217,119,6,0.55)';
-        const anchoTang = esUltima ? 3 : 1.6;
+        const colorTang = esUltima ? '#d97706' : 'rgba(217,119,6,0.45)';
+        const anchoTang = esUltima ? 1.8 : 1.0;
 
         // Tangente extendida a los bordes del rango visible
         const yTanStart = d.fxn + d.dfxn * (xStart - d.xn);
@@ -939,8 +931,8 @@ function construirSVG(){
         const esUltima = (k === iterData.length - 1);
         const yTStart = d.fxn + d.dfxn * (xStart - d.xn);
         const yTEnd   = d.fxn + d.dfxn * (xEnd   - d.xn);
-        const colorTang = esUltima ? '#d97706' : 'rgba(217,119,6,0.55)';
-        const anchoTang = esUltima ? 3 : 1.6;
+        const colorTang = esUltima ? '#d97706' : 'rgba(217,119,6,0.45)';
+        const anchoTang = esUltima ? 1.8 : 1.0;
         capas += `<line x1="${px(xStart).toFixed(2)}" y1="${py(yTStart).toFixed(2)}" x2="${px(xEnd).toFixed(2)}" y2="${py(yTEnd).toFixed(2)}" stroke="${colorTang}" stroke-width="${anchoTang}"/>`;
 
         let fxn1 = evaluarF(d.xn1) ?? 0;
@@ -957,7 +949,7 @@ function construirSVG(){
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="monospace">
 <rect x="0" y="0" width="${W}" height="${H}" fill="#ffffff"/>
 <line x1="${M.l}" y1="${py(0).toFixed(2)}" x2="${W-M.r}" y2="${py(0).toFixed(2)}" stroke="#8b93b5" stroke-width="1" stroke-dasharray="5,4"/>
-<path d="${pathD}" fill="none" stroke="#0891b2" stroke-width="2.8"/>
+<path d="${pathD}" fill="none" stroke="#0891b2" stroke-width="3.6"/>
 ${capas}
 <text x="${M.l}" y="${H-20}" fill="#5a6488" font-size="12">x</text>
 <text x="20" y="${M.t+6}" fill="#5a6488" font-size="12">f(x)</text>
