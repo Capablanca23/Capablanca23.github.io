@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Método de Newton-Raphson · Dr. Rodriguez Espinoza</title>
+
+<!-- KaTeX para la fórmula matemática -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<!-- math.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
+<!-- SheetJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    :root{
+        color-scheme: light;
+        --bg:            #f7f9fd;
+        --card:          #ffffff;
+        --card-2:        #f4f7ff;
+        --ink:           #1c2540;
+        --ink-soft:      #5a6488;
+        --ink-faint:     #8b93b5;
+        --line:          #e2e7f5;
+        --line-soft:     #eef2fb;
+        --curve:         #0891b2;
+        --tangent:       #d97706;
+        --point:         #6366f1;
+        --root-mark:     #dc2626;
+        --vertical:      #7c3aed;
+        --initial:       #10b981;
+        --accent-1:      #4f46e5;
+        --accent-2:      #0891b2;
+        --good:          #0f766e;
+        --good-bg:       #ecfdf5;
+        --good-line:     #b8e9d5;
+        --bad:           #b91c1c;
+        --bad-bg:        #fef2f2;
+        --bad-line:      #f6c6ce;
+        --amber:         #b45309;
+        --amber-bg:      #fffbeb;
+        --amber-line:    #f6d78a;
+        --radius-lg:     20px;
+        --radius-sm:     12px;
+        --shadow:        0 2px 6px rgba(20,25,60,.04), 0 16px 32px -16px rgba(20,25,60,.14);
+        --font-serif:    'Fraunces', serif;
+        --font-sans:     'Inter', sans-serif;
+        --font-mono:     'JetBrains Mono', monospace;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+        margin:0;
+        min-height:100%;
+        font-family: var(--font-sans);
+        color: var(--ink);
+        background:
+            radial-gradient(900px 460px at 12% -8%, #dbe4ff 0%, transparent 60%),
+            radial-gradient(700px 420px at 100% 10%, #d6f5f2 0%, transparent 55%),
+            var(--bg);
+        -webkit-font-smoothing:antialiased;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .wrap{ max-width: 920px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    /* ---------- AUTOR ---------- */
+    .author-card{
+        background: linear-gradient(135deg, #ffffff, #eef3ff);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        border:1px solid var(--line);
+        overflow:hidden;
+        margin-bottom: 22px;
+        transition: box-shadow .2s;
+    }
+    .author-card:hover{ box-shadow: 0 10px 26px -12px rgba(79,70,229,.25); }
+    .author-inner{ display:flex; align-items:center; gap:18px; padding: 22px 24px; flex-wrap:wrap; }
+    .qr-box{
+        background:#fff; border-radius: 12px; padding:8px; flex: 0 0 auto;
+        box-shadow: 0 6px 16px rgba(20,25,60,.08); border:1px solid var(--line);
+        transition: transform .2s ease;
+    }
+    .qr-box:hover{ transform: scale(1.04); }
+    .qr-box img{ width:80px; height:80px; display:block; border-radius:6px; }
+    .author-text{ color: var(--ink); min-width:180px; }
+    .author-text .role{
+        color: var(--accent-1); font-family: var(--font-mono);
+        font-size:.7rem; font-weight:600; letter-spacing:.04em;
+        text-transform:uppercase; margin:0 0 6px;
+    }
+    .author-text h1{
+        font-family: var(--font-serif); font-weight:600;
+        font-size:1.3rem; line-height:1.25; margin:0 0 7px; color: var(--ink);
+    }
+    .author-text a{
+        color: var(--accent-1); font-size:.82rem; font-weight:500;
+        text-decoration:none; border-bottom:1px solid rgba(79,70,229,.3);
+    }
+    .author-text a:hover{ border-color: var(--accent-1); }
+
+    /* ---------- HERO ---------- */
+    .hero{ margin: 6px 4px 22px; }
+    .hero .eyebrow{
+        font-family: var(--font-mono); font-size:.72rem; font-weight:600;
+        color: var(--accent-2); margin:0 0 8px; letter-spacing:.03em;
+    }
+    .hero h2{
+        font-family: var(--font-serif); font-weight:600;
+        font-size: clamp(1.6rem, 5vw, 2.3rem); line-height:1.15;
+        margin:0 0 10px; color: var(--ink);
+    }
+    .hero p{
+        color: var(--ink-soft); font-size: .96rem; line-height:1.6;
+        max-width: 62ch; margin:0;
+    }
+
+    /* ---------- FÓRMULA con KaTeX ---------- */
+    .formula-card{
+        display:inline-flex;
+        align-items:center;
+        gap: 18px;
+        margin-top: 18px;
+        padding: 14px 24px;
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        border: 1.5px solid #f0d8a8;
+        border-radius: 14px;
+        box-shadow: 0 6px 18px -10px rgba(180,120,20,.3);
+        flex-wrap: wrap;
+    }
+    .formula-card .tag{
+        font-family: var(--font-sans);
+        font-size:.62rem;
+        font-weight:800;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        color:#fff;
+        background: linear-gradient(135deg,#d97706,#b45309);
+        padding: 6px 13px;
+        border-radius: 20px;
+        line-height: 1;
+        flex: 0 0 auto;
+    }
+    .formula-card .katex{
+        font-size: 1.35rem;
+        color: #78350f;
+    }
+    @media (max-width:520px){
+        .formula-card{ padding: 12px 16px; gap: 12px; }
+        .formula-card .katex{ font-size: 1.1rem; }
+    }
+
+    /* ---------- CARDS ---------- */
+    .card{
+        background: var(--card); border-radius: var(--radius-lg);
+        box-shadow: var(--shadow); border:1px solid var(--line);
+        padding: 26px 24px; margin-bottom: 20px;
+    }
+    .card h3{
+        font-family: var(--font-serif); font-weight:600;
+        font-size:1.3rem; margin: 0 0 4px; color: var(--ink);
+    }
+    .card .sub{
+        color: var(--ink-soft); font-size: .9rem; margin: 0 0 20px; line-height:1.55;
+    }
+    .card .sub code{
+        font-family: var(--font-mono); background: var(--line-soft);
+        padding: 1px 6px; border-radius: 5px; color: var(--accent-2); font-size:.85em;
+    }
+
+    /* ---------- FORM ---------- */
+    .field{ margin-bottom: 16px; }
+    .field label{
+        display:block; font-size:.78rem; font-weight:600;
+        color: var(--ink-soft); margin-bottom:6px;
+    }
+    .field .hint{ font-size:.72rem; color: var(--ink-faint); margin-top:5px; }
+    input[type=text], input[type=number]{
+        width:100%; padding: 12px 14px; border-radius: var(--radius-sm);
+        border: 1.5px solid var(--line); font-size: 1rem;
+        font-family: var(--font-mono); color: var(--ink); background:#fbfcff;
+        transition: border-color .15s ease, box-shadow .15s ease, background .15s;
+    }
+    input::placeholder{ color: var(--ink-faint); }
+    input:focus{
+        outline:none; border-color: var(--accent-1);
+        box-shadow: 0 0 0 4px rgba(79,70,229,.12); background:#fff;
+    }
+    .row2{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width:520px){ .row2{ grid-template-columns: 1fr; } }
+
+    .btn{
+        appearance:none; border:none; cursor:pointer;
+        font-family: var(--font-sans); font-weight:700; font-size: .93rem;
+        border-radius: var(--radius-sm); padding: 13px 20px;
+        transition: transform .08s ease, filter .15s ease, opacity .15s ease, box-shadow .15s ease;
+    }
+    .btn:active{ transform: scale(0.97); }
+    .btn:disabled{ opacity:.45; cursor:not-allowed; }
+    .btn-primary{
+        width:100%; color:#fff;
+        background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+        box-shadow: 0 10px 22px -10px rgba(79,70,229,.55);
+    }
+    .btn-primary:hover{ filter:brightness(1.05); box-shadow: 0 12px 26px -10px rgba(79,70,229,.65); }
+    .btn-outline{
+        background:#fff; color: var(--accent-1); border: 1.5px solid #d4d9f5;
+    }
+    .btn-outline:hover{ background:#eef1ff; border-color: var(--accent-1); }
+
+    .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px; }
+    .btn-row .btn{ flex:1 1 150px; }
+
+    .quick-row{ margin-top:-4px; margin-bottom:18px; }
+    .chip{
+        display:inline-block; font-family: var(--font-mono); font-size:.74rem;
+        color: var(--ink-soft); background: var(--line-soft);
+        border:1px solid var(--line); padding: 6px 11px;
+        border-radius: 999px; cursor:pointer; margin: 3px 6px 3px 0;
+        transition: border-color .15s ease, color .15s ease, background .15s;
+    }
+    .chip:hover{ border-color: var(--accent-1); color: var(--accent-1); background:#eef1ff; }
+
+    /* ---------- ALERTS ---------- */
+    .alert{
+        border-radius: var(--radius-sm); padding: 14px 16px;
+        font-size: .89rem; line-height:1.5; margin-bottom: 16px;
+        border-left-width: 4px; border-left-style: solid;
+    }
+    .alert-bad{ background: var(--bad-bg); color: var(--bad); border:1px solid var(--bad-line); border-left-color: var(--bad); }
+    .alert-good{ background: var(--good-bg); color: var(--good); border:1px solid var(--good-line); border-left-color: var(--good); }
+    .alert-amber{ background: var(--amber-bg); color: var(--amber); border:1px solid var(--amber-line); border-left-color: var(--amber); }
+
+    /* ---------- SUMMARY ---------- */
+    .summary-grid{
+        display:grid; grid-template-columns: repeat(3, 1fr);
+        gap: 12px; margin-bottom: 22px;
+    }
+    @media (max-width:640px){ .summary-grid{ grid-template-columns: 1fr 1fr; } }
+    .stat{
+        background: #f9fbfe; border:1px solid var(--line);
+        border-radius: var(--radius-sm); padding: 14px 14px; transition: background .15s;
+    }
+    .stat:hover{ background:#f0f5ff; }
+    .stat .label{
+        font-family: var(--font-mono); font-size:.64rem; font-weight:600;
+        letter-spacing:.03em; color: var(--ink-faint); margin-bottom:5px;
+        text-transform:uppercase;
+    }
+    .stat .value{
+        font-family: var(--font-mono); font-size:1.02rem; font-weight:700;
+        color: var(--accent-2); word-break: break-word;
+    }
+    .stat.hl .value{ color: var(--accent-1); font-size:1.15rem; }
+
+    /* ---------- TABLE ---------- */
+    .table-scroll{
+        overflow-x:auto; border:1px solid var(--line);
+        border-radius: var(--radius-sm); -webkit-overflow-scrolling: touch;
+    }
+    table{
+        border-collapse: collapse; width:100%; min-width: 640px;
+        font-family: var(--font-mono); font-size: .81rem;
+    }
+    thead th{
+        background: #eef2ff; color: var(--accent-1);
+        font-family: var(--font-sans); font-weight:700; font-size:.7rem;
+        letter-spacing:.03em; text-align:right; padding: 12px 12px;
+        position: sticky; top:0; border-bottom:2px solid #d4d9f5;
+    }
+    thead th:first-child{ text-align:center; }
+    tbody td{
+        padding: 9px 12px; text-align:right;
+        border-top: 1px solid var(--line); color: var(--ink);
+    }
+    tbody td:first-child{ text-align:center; color: var(--ink-faint); font-weight:600; }
+    tbody tr:nth-child(even){ background: #fafcff; }
+    tbody tr.final-row{ background: var(--good-bg); font-weight:700; }
+    tbody tr.final-row td{ color: var(--good); }
+
+    /* ---------- CONTENEDOR DEL CANVAS CON ALTURA FIJA (CLAVE) ---------- */
+    .chart-wrapper{
+        position: relative;
+        width: 100%;
+        height: 460px;
+        margin: 6px 0 4px;
+    }
+    .chart-wrapper canvas{
+        display:block;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    @media (max-width:640px){
+        .chart-wrapper{ height: 360px; }
+    }
+
+    .chart-legend{
+        display:flex; gap:18px; flex-wrap:wrap;
+        font-family: var(--font-mono); font-size:.72rem;
+        color: var(--ink-faint); margin: 14px 0 4px;
+    }
+    .chart-legend span.dot{
+        display:inline-block; width:9px; height:9px; border-radius:50%;
+        margin-right:6px; vertical-align:middle;
+    }
+    .chart-legend span.line-prev{
+        display:inline-block; width:16px; height:2px;
+        background: var(--tangent); margin-right:6px; vertical-align:middle;
+    }
+    .chart-legend span.line-dash{
+        display:inline-block; width:16px; height:0;
+        border-top:2px dashed var(--vertical);
+        margin-right:6px; vertical-align:middle;
+    }
+
+    footer{
+        text-align:center; color: var(--ink-faint); font-size:.75rem;
+        margin-top: 28px; padding-top: 16px; border-top:1px solid var(--line);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+        * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+    <!-- ===== AUTOR ===== -->
+    <div class="author-card">
+        <div class="author-inner">
+            <div class="qr-box">
+                <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fctivitae.concytec.gob.pe%2FappDirectorioCTI%2FVerDatosInvestigador.do%3Fid_investigador%3D0015364" alt="QR CTI Vitae">
+                </a>
+            </div>
+            <div class="author-text">
+                <p class="role">CTI Vitae · CONCYTEC</p>
+                <h1>Dr. Ronald F. Rodriguez Espinoza</h1>
+                <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener">Ver perfil completo →</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== HERO ===== -->
+    <div class="hero">
+        <p class="eyebrow">Análisis numérico · Raíces de ecuaciones</p>
+        <h2>Método de Newton-Raphson</h2>
+        <p>Encuentra la raíz de f(x) = 0 siguiendo la recta tangente en cada iteración. A partir de un valor inicial x₀, el método calcula automáticamente f'(x) y avanza hasta que el error cae por debajo de la tolerancia.</p>
+
+        <div class="formula-card">
+            <span class="tag">Algoritmo</span>
+            <span id="formulaKatex"></span>
+        </div>
+    </div>
+
+    <!-- ===== ENTRADA ===== -->
+    <div class="card">
+        <h3>Datos del problema</h3>
+        <p class="sub">Ingrese f(x), el valor inicial x₀ y la tolerancia. La derivada f'(x) se calcula automáticamente de forma simbólica. Sintaxis: <code>x^2</code>, <code>sin(x)</code>, <code>exp(x)</code>, <code>sqrt(x)</code>, <code>log(x)</code>, <code>pi</code>, <code>e</code>.</p>
+
+        <div class="field">
+            <label for="fx">f(x) = 0</label>
+            <input type="text" id="fx" placeholder="Ej: x^3 - x - 2" value="x^3 - x - 2">
+        </div>
+
+        <div class="row2">
+            <div class="field">
+                <label for="x0Val">Valor inicial x₀</label>
+                <input type="number" id="x0Val" step="any" placeholder="Ej: 1.5" value="1.5">
+            </div>
+            <div class="field">
+                <label for="tolVal">Tolerancia (error máximo permitido)</label>
+                <input type="number" id="tolVal" step="any" placeholder="Ej: 0.0001" value="0.0001">
+            </div>
+        </div>
+        <p class="hint" style="margin:-8px 0 16px;">El método se detiene cuando |x<sub>n+1</sub> − x<sub>n</sub>| es menor que la tolerancia, o al llegar a 100 iteraciones.</p>
+
+        <div class="quick-row">
+            <span class="chip" onclick="cargarEjemplo('x^3 - x - 2','1.5','0.0001')">x³ − x − 2, x₀=1.5</span>
+            <span class="chip" onclick="cargarEjemplo('cos(x) - x','1','0.00001')">cos(x) − x, x₀=1</span>
+            <span class="chip" onclick="cargarEjemplo('exp(-x) - x','0','0.0001')">e^(−x) − x, x₀=0</span>
+        </div>
+
+        <button class="btn btn-primary" onclick="resolver()">Resolver ecuación</button>
+
+        <div id="alertBox"></div>
+    </div>
+
+    <!-- ===== RESULTADOS ===== -->
+    <div class="card" id="resultsCard" style="display:none;">
+        <h3>Resultados</h3>
+        <p class="sub">Resumen del proceso iterativo: en cada paso se evalúa f(x), se calcula f'(x) y se avanza con la recta tangente.</p>
+
+        <div class="summary-grid" id="summaryGrid"></div>
+
+        <div class="table-scroll">
+            <table id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>n</th>
+                        <th>x_n</th>
+                        <th>f(x_n)</th>
+                        <th>f'(x_n)</th>
+                        <th>x_(n+1)</th>
+                        <th>Error</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+            </table>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-outline" id="btnExcel" onclick="descargarExcel()">⬇ Descargar tabla (.xlsx)</button>
+        </div>
+    </div>
+
+    <!-- ===== GRÁFICA ESTÁTICA ===== -->
+    <div class="card" id="chartCard" style="display:none;">
+        <h3>Proceso iterativo completo</h3>
+        <p class="sub">Gráfica <strong>estática</strong> con todas las iteraciones superpuestas: valor inicial x₀ (verde), vertical punteada desde x<sub>n</sub> hasta la curva, tangente en (x<sub>n</sub>, f(x<sub>n</sub>)), y nuevo valor x<sub>n+1</sub> (ámbar) sobre el eje x. La raíz final se marca en rojo.</p>
+
+        <div class="chart-wrapper">
+            <canvas id="chartCanvas"></canvas>
+        </div>
+
+        <div class="chart-legend">
+            <span><span class="dot" style="background:var(--curve)"></span>f(x)</span>
+            <span><span class="line-dash"></span>Vertical x_n → f(x_n)</span>
+            <span><span class="dot" style="background:var(--point)"></span>Punto (x_n, f(x_n))</span>
+            <span><span class="line-prev"></span>Tangentes</span>
+            <span><span class="dot" style="background:var(--tangent)"></span>Nuevos x_(n+1)</span>
+            <span><span class="dot" style="background:var(--initial)"></span>x₀ inicial</span>
+            <span><span class="dot" style="background:var(--root-mark)"></span>Raíz final</span>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-outline" id="btnPng" onclick="descargarPNG()">⬇ Gráfica (.png)</button>
+            <button class="btn btn-outline" id="btnSvg" onclick="descargarSVG()">⬇ Gráfica (.svg)</button>
+        </div>
+    </div>
+
+    <footer>Calculadora de raíces · Método de Newton-Raphson con derivación simbólica automática</footer>
+</div>
+
+<script>
+/* ---------- Renderizar la fórmula con KaTeX ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+    if(window.katex){
+        katex.render(
+            "x_{n+1} \\;=\\; x_{n} \\;-\\; \\dfrac{f(x_{n})}{f'(x_{n})}",
+            document.getElementById('formulaKatex'),
+            { throwOnError: false, displayMode: false }
+        );
+    }
+});
+
+/* ---------- capacidad de descargas ---------- */
+let downloadsCap = null;
+(async function initDownloads(){
+    try{
+        if(window.claude && typeof window.claude.use === 'function'){
+            downloadsCap = await window.claude.use('downloads');
+        }
+    }catch(e){ downloadsCap = null; }
+    if(!downloadsCap){
+        ['btnExcel','btnPng','btnSvg'].forEach(id=>{
+            const b = document.getElementById(id);
+            if(b){ b.disabled = true; b.title = 'La descarga de archivos no está disponible en esta vista.'; }
+        });
+    }
+})();
+
+async function guardarArchivo(filename, data){
+    if(!downloadsCap){
+        mostrarAlerta('La descarga de archivos no está disponible en esta vista.', 'bad');
+        return;
+    }
+    try{
+        await downloadsCap.save({ filename, data });
+    }catch(err){
+        const code = err && err.code ? err.code : 'unavailable';
+        if(code === 'declined'){ return; }
+        mostrarAlerta('No se pudo guardar el archivo (' + code + ').', 'bad');
+    }
+}
+
+/* ---------- estado global ---------- */
+let myChart = null;
+let iterData = [];
+let fxGlobal = '';
+let fCompiledGlobal = null;
+let x0Global = null;
+let rangoGlobal = { xStart:0, xEnd:1, minY:0, maxY:1 };
+
+function mostrarAlerta(msg, tipo){
+    const box = document.getElementById('alertBox');
+    box.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+}
+function limpiarAlerta(){ document.getElementById('alertBox').innerHTML = ''; }
+
+function cargarEjemplo(fx, x0, tol){
+    document.getElementById('fx').value = fx;
+    document.getElementById('x0Val').value = x0;
+    document.getElementById('tolVal').value = tol;
+}
+
+/* ---------- resolución ---------- */
+function resolver(){
+    limpiarAlerta();
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('chartCard').style.display = 'none';
+
+    const fxStr = document.getElementById('fx').value.trim();
+    const x0 = parseFloat(document.getElementById('x0Val').value);
+    const tol = parseFloat(document.getElementById('tolVal').value);
+
+    if(!fxStr){ mostrarAlerta('Ingrese la función f(x) que desea resolver.', 'bad'); return; }
+    if(isNaN(x0)){ mostrarAlerta('Ingrese un valor numérico válido para x₀.', 'bad'); return; }
+    if(isNaN(tol) || tol <= 0){ mostrarAlerta('La tolerancia es obligatoria y debe ser un número mayor que 0.', 'bad'); return; }
+
+    let fNode, fCompiled, dfNode;
+    try{
+        fNode = math.parse(fxStr);
+        fCompiled = fNode.compile();
+    }catch(e){
+        mostrarAlerta('No se pudo interpretar f(x). Revise la sintaxis. Detalle: ' + e.message, 'bad');
+        return;
+    }
+    try{
+        dfNode = math.derivative(fNode, 'x');
+    }catch(e){
+        mostrarAlerta('No se pudo derivar f(x) automáticamente. Detalle: ' + e.message, 'bad');
+        return;
+    }
+
+    let f0;
+    try{ f0 = fCompiled.evaluate({x:x0}); }catch(e){
+        mostrarAlerta('No se pudo evaluar f(x) en x₀. Detalle: ' + e.message, 'bad');
+        return;
+    }
+    if(!isFinite(f0)){ mostrarAlerta('f(x) no está definida en x₀.', 'bad'); return; }
+    if(f0 === 0){ mostrarRaizExacta(x0, fCompiled, fxStr); return; }
+
+    const MAX_ITER = 100;
+    let xn = x0;
+    iterData = [];
+    let convergio = false;
+    let n = 1;
+
+    while(n <= MAX_ITER){
+        let fxn, dfxn;
+        try{ fxn = fCompiled.evaluate({x:xn}); }catch(e){
+            mostrarAlerta('No se pudo evaluar f(x) en la iteración ' + n + '.', 'bad'); return;
+        }
+        try{ dfxn = dfNode.evaluate({x:xn}); }catch(e){
+            mostrarAlerta('No se pudo evaluar f\'(x) en la iteración ' + n + '.', 'bad'); return;
+        }
+        if(!isFinite(fxn) || !isFinite(dfxn)){
+            mostrarAlerta('La sucesión diverge o f(x) no está definida en la iteración ' + n + '.', 'bad'); return;
+        }
+        if(Math.abs(dfxn) < 1e-14){
+            mostrarAlerta('f\'(x_n) ≈ 0 en la iteración ' + n + ' (tangente horizontal). Pruebe con otro x₀.', 'bad');
+            return;
+        }
+
+        const xn1 = xn - fxn/dfxn;
+        if(!isFinite(xn1)){
+            mostrarAlerta('La sucesión diverge a partir de la iteración ' + n + '. Pruebe con otro x₀.', 'bad'); return;
+        }
+        const error = Math.abs(xn1 - xn);
+
+        iterData.push({ n, xn, fxn, dfxn, xn1, error });
+
+        if(error < tol){ convergio = true; break; }
+        xn = xn1;
+        n++;
+    }
+
+    fxGlobal = fxStr;
+    fCompiledGlobal = fCompiled;
+    x0Global = x0;
+
+    renderResumen(iterData, fCompiled, convergio, MAX_ITER);
+    renderTabla(iterData);
+
+    document.getElementById('resultsCard').style.display = 'block';
+    document.getElementById('chartCard').style.display = 'block';
+
+    if(!convergio){
+        mostrarAlerta('Se alcanzó el número máximo de iteraciones (' + MAX_ITER + ') sin llegar a la tolerancia solicitada.', 'amber');
+    }else{
+        mostrarAlerta('Convergencia alcanzada en ' + iterData.length + ' iteración(es), dentro de la tolerancia establecida.', 'good');
+    }
+
+    // Pequeño delay para asegurar que el canvas ya tiene dimensiones
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => dibujarGraficaCompleta());
+    });
+}
+
+function mostrarRaizExacta(x, fCompiled, fxStr){
+    document.getElementById('resultsCard').style.display = 'block';
+    document.getElementById('chartCard').style.display = 'none';
+    iterData = [];
+    document.getElementById('resultsBody').innerHTML = '';
+    document.getElementById('summaryGrid').innerHTML =
+        `<div class="stat hl"><div class="label">RAÍZ EXACTA</div><div class="value">x = ${x}</div></div>
+         <div class="stat"><div class="label">f(x)</div><div class="value">0</div></div>`;
+    mostrarAlerta('El valor ingresado x₀ es exactamente una raíz de f(x).', 'good');
+}
+
+function renderResumen(data, fCompiled, convergio, MAX_ITER){
+    const ultima = data[data.length - 1];
+    const fRaiz = fCompiled.evaluate({x: ultima.xn1});
+    const grid = document.getElementById('summaryGrid');
+    grid.innerHTML = `
+        <div class="stat hl">
+            <div class="label">RAÍZ APROXIMADA</div>
+            <div class="value">${ultima.xn1.toFixed(6)}</div>
+        </div>
+        <div class="stat">
+            <div class="label">f(raíz)</div>
+            <div class="value">${fRaiz.toExponential(4)}</div>
+        </div>
+        <div class="stat">
+            <div class="label">ERROR FINAL</div>
+            <div class="value">${ultima.error.toExponential(4)}</div>
+        </div>
+        <div class="stat">
+            <div class="label">ITERACIONES REALIZADAS</div>
+            <div class="value">${data.length}</div>
+        </div>
+        <div class="stat">
+            <div class="label">CONVERGENCIA</div>
+            <div class="value">${convergio ? 'Sí' : 'No (máx. ' + MAX_ITER + ')'}</div>
+        </div>
+        <div class="stat">
+            <div class="label">f'(x) simbólica</div>
+            <div class="value" style="font-size:.78rem;">${math.parse(fxGlobal).toString()}</div>
+        </div>
+    `;
+}
+
+function renderTabla(data){
+    const body = document.getElementById('resultsBody');
+    body.innerHTML = '';
+    data.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        if(idx === data.length - 1) tr.classList.add('final-row');
+        tr.innerHTML = `
+            <td>${row.n}</td>
+            <td>${row.xn.toFixed(6)}</td>
+            <td>${row.fxn.toExponential(4)}</td>
+            <td>${row.dfxn.toExponential(4)}</td>
+            <td>${row.xn1.toFixed(6)}</td>
+            <td>${row.error.toExponential(4)}</td>
+        `;
+        body.appendChild(tr);
+    });
+}
+
+/* ---------- gráfica estática ---------- */
+function evaluarF(x){
+    try{
+        const y = fCompiledGlobal.evaluate({x});
+        return (isFinite(y)) ? y : null;
+    }catch(e){ return null; }
+}
+
+function dibujarGraficaCompleta(){
+    if(!fCompiledGlobal || iterData.length === 0) return;
+
+    /* -------- Rango global: cubre x0, todas las x_{n+1} y la raíz -------- */
+    const xs = [x0Global, ...iterData.map(d => d.xn1)];
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const spanX = Math.max(maxX - minX, Math.abs(x0Global) * 0.3, 0.8);
+    const xStart = minX - spanX * 0.30;
+    const xEnd   = maxX + spanX * 0.30;
+
+    /* -------- Rango Y: muestreando la curva en el rango visible -------- */
+    const yValues = [0];
+    iterData.forEach(d => yValues.push(d.fxn));
+    for(let i = 0; i <= 200; i++){
+        const xv = xStart + (i * (xEnd - xStart)) / 200;
+        const yv = evaluarF(xv);
+        if(yv !== null) yValues.push(yv);
+    }
+    let minY = Math.min(...yValues);
+    let maxY = Math.max(...yValues);
+    const spanY = Math.max(maxY - minY, 0.5);
+    minY -= spanY * 0.15;
+    maxY += spanY * 0.15;
+
+    rangoGlobal = { xStart, xEnd, minY, maxY };
+
+    /* -------- Curva f(x): puntos densos en el rango visible -------- */
+    const curve = [];
+    for(let i = 0; i <= 500; i++){
+        const xv = xStart + (i * (xEnd - xStart)) / 500;
+        const yv = evaluarF(xv);
+        curve.push({ x: xv, y: yv });
+    }
+
+    /* -------- Datasets -------- */
+    const datasets = [];
+
+    // 1. Curva f(x)
+    datasets.push({
+        label:'f(x)',
+        data: curve,
+        type:'line',
+        borderColor: '#0891b2',
+        backgroundColor: 'rgba(8,145,178,0.05)',
+        borderWidth: 2.8,
+        pointRadius:0,
+        fill:false,
+        tension:.10,
+        order: 100,
+        spanGaps:false
+    });
+
+    // 2. Eje x
+    datasets.push({
+        label:'Eje x',
+        data:[{x:xStart, y:0},{x:xEnd, y:0}],
+        type:'line',
+        borderColor:'rgba(139,147,181,0.55)',
+        borderWidth:1.2,
+        borderDash:[6,4],
+        pointRadius:0,
+        order: 110
+    });
+
+    // 3. Por cada iteración: tangente, 2 verticales, 2 puntos
+    iterData.forEach((d, k) => {
+        const esUltima = (k === iterData.length - 1);
+        const colorTang = esUltima ? '#d97706' : 'rgba(217,119,6,0.55)';
+        const anchoTang = esUltima ? 3 : 1.6;
+
+        // Tangente extendida a los bordes del rango visible
+        const yTanStart = d.fxn + d.dfxn * (xStart - d.xn);
+        const yTanEnd   = d.fxn + d.dfxn * (xEnd   - d.xn);
+        datasets.push({
+            label: esUltima ? 'Tangente final' : '',
+            data: [{x: xStart, y: yTanStart}, {x: xEnd, y: yTanEnd}],
+            type:'line',
+            borderColor: colorTang,
+            borderWidth: anchoTang,
+            pointRadius: 0,
+            order: 50 - k
+        });
+
+        // Vertical desde (x_n, 0) hasta (x_n, f(x_n))
+        datasets.push({
+            label:'',
+            data: [{x: d.xn, y: 0}, {x: d.xn, y: d.fxn}],
+            type:'line',
+            borderColor: esUltima ? '#7c3aed' : 'rgba(124,58,237,0.40)',
+            borderWidth: esUltima ? 2.5 : 1.4,
+            borderDash:[4,3],
+            pointRadius: 0,
+            order: 40 - k
+        });
+
+        // Vertical desde (x_{n+1}, 0) hasta (x_{n+1}, f(x_{n+1}))
+        let fxn1 = 0;
+        try{ fxn1 = fCompiledGlobal.evaluate({x: d.xn1}); }catch(e){ fxn1 = 0; }
+        if(!isFinite(fxn1)) fxn1 = 0;
+        datasets.push({
+            label:'',
+            data: [{x: d.xn1, y: 0}, {x: d.xn1, y: fxn1}],
+            type:'line',
+            borderColor: esUltima ? 'rgba(99,102,241,0.9)' : 'rgba(99,102,241,0.35)',
+            borderWidth: esUltima ? 2.5 : 1.4,
+            borderDash:[4,3],
+            pointRadius: 0,
+            order: 40 - k
+        });
+
+        // Punto (x_n, f(x_n))
+        datasets.push({
+            label: k === 0 ? 'Puntos (x_n, f(x_n))' : '',
+            data: [{x: d.xn, y: d.fxn}],
+            type:'scatter',
+            backgroundColor: esUltima ? '#6366f1' : 'rgba(99,102,241,0.55)',
+            pointRadius: esUltima ? 9 : 5,
+            pointStyle:'circle',
+            pointBorderColor:'#fff',
+            pointBorderWidth: esUltima ? 2.5 : 1.5,
+            order: 20 - k
+        });
+
+        // Punto (x_{n+1}, 0)
+        datasets.push({
+            label: k === 0 ? 'Nuevos x_(n+1)' : '',
+            data: [{x: d.xn1, y: 0}],
+            type:'scatter',
+            backgroundColor: esUltima ? '#d97706' : 'rgba(217,119,6,0.75)',
+            pointRadius: esUltima ? 11 : 6,
+            pointStyle:'circle',
+            pointBorderColor:'#fff',
+            pointBorderWidth: esUltima ? 3 : 2,
+            order: 15 - k
+        });
+    });
+
+    // 4. x₀ inicial sobre el eje (verde)
+    datasets.push({
+        label:'x₀ inicial',
+        data: [{x: x0Global, y: 0}],
+        type:'scatter',
+        backgroundColor: '#10b981',
+        pointRadius: 11,
+        pointStyle:'circle',
+        pointBorderColor:'#fff',
+        pointBorderWidth: 3,
+        order: 5
+    });
+
+    // 5. Raíz final (círculo rojo)
+    const raiz = iterData[iterData.length - 1];
+    datasets.push({
+        label:'Raíz final',
+        data: [{x: raiz.xn1, y: 0}],
+        type:'scatter',
+        backgroundColor: '#dc2626',
+        pointRadius: 8,
+        pointStyle:'circle',
+        pointBorderColor:'#fff',
+        pointBorderWidth: 2.5,
+        order: 4
+    });
+
+    /* -------- Render -------- */
+    const ctx = document.getElementById('chartCanvas').getContext('2d');
+    if(myChart) myChart.destroy();
+    myChart = new Chart(ctx, {
+        type:'scatter',
+        data:{ datasets },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            animation:false,
+            plugins:{
+                legend:{ display:false },
+                tooltip:{
+                    callbacks:{
+                        label:(c)=>{
+                            const lbl = c.dataset.label;
+                            if(!lbl) return '';
+                            if(c.parsed.y === null) return '';
+                            return `${lbl}: (${c.parsed.x.toFixed(6)}, ${c.parsed.y.toFixed(6)})`;
+                        }
+                    }
+                }
+            },
+            scales:{
+                x:{
+                    type:'linear',
+                    min: xStart,
+                    max: xEnd,
+                    title:{ display:true, text:'x', color:'#5a6488', font:{weight:'600'} },
+                    ticks:{
+                        color:'#8b93b5',
+                        callback: (v)=> Number(v).toFixed(4)
+                    },
+                    grid:{ color:'rgba(139,147,181,0.10)' }
+                },
+                y:{
+                    min: minY,
+                    max: maxY,
+                    title:{ display:true, text:'f(x)', color:'#5a6488', font:{weight:'600'} },
+                    ticks:{
+                        color:'#8b93b5',
+                        callback: (v)=> Number(v).toFixed(4)
+                    },
+                    grid:{ color:'rgba(139,147,181,0.10)' }
+                }
+            }
+        }
+    });
+}
+
+/* ---------- exportaciones ---------- */
+async function descargarExcel(){
+    if(iterData.length === 0) return;
+    const rows = [['n','x_n','f(x_n)','f\'(x_n)','x_(n+1)','Error']];
+    iterData.forEach(d=> rows.push([d.n, d.xn, d.fxn, d.dfxn, d.xn1, d.error]));
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{wch:5},{wch:16},{wch:16},{wch:16},{wch:16},{wch:16}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Newton-Raphson');
+    const wbout = XLSX.write(wb, { bookType:'xlsx', type:'array' });
+    const blob = new Blob([wbout], { type:'application/octet-stream' });
+    await guardarArchivo('tabla_newton_raphson.xlsx', blob);
+}
+
+async function descargarPNG(){
+    if(!myChart) return;
+    const dataUrl = myChart.toBase64Image('image/png', 1);
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    await guardarArchivo('grafica_newton_raphson.png', blob);
+}
+
+async function descargarSVG(){
+    if(iterData.length === 0) return;
+    const svg = construirSVG();
+    await guardarArchivo('grafica_newton_raphson.svg', svg);
+}
+
+function construirSVG(){
+    const { xStart, xEnd, minY, maxY } = rangoGlobal;
+    const W = 900, H = 560, M = { l:70, r:40, t:30, b:60 };
+
+    const px = (x)=> M.l + (x-xStart)/(xEnd-xStart) * (W-M.l-M.r);
+    const py = (y)=> H-M.b - (y-minY)/(maxY-minY) * (H-M.t-M.b);
+
+    let pathD = '';
+    for(let i = 0; i <= 300; i++){
+        const xv = xStart + (i*(xEnd-xStart))/300;
+        const yv = evaluarF(xv);
+        if(yv === null) continue;
+        pathD += (pathD === '' ? 'M' : 'L') + px(xv).toFixed(2) + ',' + py(yv).toFixed(2) + ' ';
+    }
+
+    let capas = '';
+    iterData.forEach((d, k) => {
+        const esUltima = (k === iterData.length - 1);
+        const yTStart = d.fxn + d.dfxn * (xStart - d.xn);
+        const yTEnd   = d.fxn + d.dfxn * (xEnd   - d.xn);
+        const colorTang = esUltima ? '#d97706' : 'rgba(217,119,6,0.55)';
+        const anchoTang = esUltima ? 3 : 1.6;
+        capas += `<line x1="${px(xStart).toFixed(2)}" y1="${py(yTStart).toFixed(2)}" x2="${px(xEnd).toFixed(2)}" y2="${py(yTEnd).toFixed(2)}" stroke="${colorTang}" stroke-width="${anchoTang}"/>`;
+
+        let fxn1 = evaluarF(d.xn1) ?? 0;
+        capas += `<line x1="${px(d.xn).toFixed(2)}" y1="${py(0).toFixed(2)}" x2="${px(d.xn).toFixed(2)}" y2="${py(d.fxn).toFixed(2)}" stroke="${esUltima?'#7c3aed':'rgba(124,58,237,0.40)'}" stroke-width="${esUltima?2.5:1.4}" stroke-dasharray="4,3"/>`;
+        capas += `<line x1="${px(d.xn1).toFixed(2)}" y1="${py(0).toFixed(2)}" x2="${px(d.xn1).toFixed(2)}" y2="${py(fxn1).toFixed(2)}" stroke="${esUltima?'rgba(99,102,241,0.9)':'rgba(99,102,241,0.35)'}" stroke-width="${esUltima?2.5:1.4}" stroke-dasharray="4,3"/>`;
+        capas += `<circle cx="${px(d.xn).toFixed(2)}" cy="${py(d.fxn).toFixed(2)}" r="${esUltima?9:5}" fill="${esUltima?'#6366f1':'rgba(99,102,241,0.55)'}" stroke="#fff" stroke-width="${esUltima?2.5:1.5}"/>`;
+        capas += `<circle cx="${px(d.xn1).toFixed(2)}" cy="${py(0).toFixed(2)}" r="${esUltima?11:6}" fill="${esUltima?'#d97706':'rgba(217,119,6,0.75)'}" stroke="#fff" stroke-width="${esUltima?3:2}"/>`;
+    });
+
+    capas += `<circle cx="${px(x0Global).toFixed(2)}" cy="${py(0).toFixed(2)}" r="11" fill="#10b981" stroke="#fff" stroke-width="3"/>`;
+    const raiz = iterData[iterData.length - 1];
+    capas += `<circle cx="${px(raiz.xn1).toFixed(2)}" cy="${py(0).toFixed(2)}" r="8" fill="#dc2626" stroke="#fff" stroke-width="2.5"/>`;
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="monospace">
+<rect x="0" y="0" width="${W}" height="${H}" fill="#ffffff"/>
+<line x1="${M.l}" y1="${py(0).toFixed(2)}" x2="${W-M.r}" y2="${py(0).toFixed(2)}" stroke="#8b93b5" stroke-width="1" stroke-dasharray="5,4"/>
+<path d="${pathD}" fill="none" stroke="#0891b2" stroke-width="2.8"/>
+${capas}
+<text x="${M.l}" y="${H-20}" fill="#5a6488" font-size="12">x</text>
+<text x="20" y="${M.t+6}" fill="#5a6488" font-size="12">f(x)</text>
+<text x="${M.l}" y="20" fill="#1c2540" font-size="14">f(x) = ${escaparTexto(fxGlobal)} · raíz ≈ ${raiz.xn1.toFixed(6)} · ${iterData.length} iteraciones</text>
+</svg>`;
+}
+
+function escaparTexto(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+
+</body>
+</html>
