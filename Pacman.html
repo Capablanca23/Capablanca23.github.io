@@ -48,23 +48,60 @@
             border-radius: 8px;
         }
 
+        /* ===== CABECERA CON MARCA + BOTÓN START ===== */
+        .top-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            align-items: stretch;
+        }
+
         .brand-container {
             background: #111;
             padding: 4px;
-            margin-bottom: 8px;
             border-radius: 3px;
             text-align: center;
             border: 1px solid #666;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .brand {
             color: #ccc;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             letter-spacing: 1px;
             text-shadow: 1px 1px 2px black;
         }
 
+        .btn-start {
+            width: 110px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(180deg, #ff4444, #a10000);
+            box-shadow: 0 4px 10px rgba(0,0,0,.5);
+            transition: .15s;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,.5);
+            flex-shrink: 0;
+        }
+
+        .btn-start:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-start:active {
+            transform: translateY(2px) scale(.98);
+            box-shadow: 0 2px 6px rgba(0,0,0,.7);
+        }
+
+        /* ===== PANTALLA LCD ===== */
         .lcd-screen {
             background: linear-gradient(180deg, #b7d0a5, #8fa384);
             border: 5px solid #111;
@@ -128,15 +165,33 @@
             text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
         }
 
+        /* ===== ÁREA DE CONTROLES ===== */
         .controls-area {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
             padding: 10px 0 5px 0;
-            margin-top: 8px;
+            margin-top: 10px;
         }
 
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            width: 100%;
+            padding: 0 5px;
+        }
+
+        .side-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== KEYPAD DIRECCIONAL ===== */
         .keypad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -147,13 +202,13 @@
         }
 
         .key {
-            width: 80px;
-            height: 80px;
+            width: 72px;
+            height: 72px;
             border: none;
-            border-radius: 20px;
+            border-radius: 18px;
             background: linear-gradient(145deg, #575d63, #222);
             color: white;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             box-shadow:
                 0 10px 25px rgba(0,0,0,.6),
@@ -181,7 +236,7 @@
             content: "";
             position: absolute;
             inset: 0;
-            border-radius: 20px;
+            border-radius: 18px;
             box-shadow: 0 0 15px rgba(255,255,255,.15);
             pointer-events: none;
         }
@@ -191,34 +246,44 @@
         .key-down { grid-column: 2; grid-row: 2; }
         .key-right { grid-column: 3; grid-row: 2; }
 
-        .start-container {
-            width: 100%;
-            padding: 0 10px;
-        }
-
-        .btn-start {
-            width: 100%;
-            height: 60px;
+        /* ===== BOTONES LATERALES ===== */
+        .btn-side {
+            width: 40px;
+            height: 40px;
             border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
+            border-radius: 10px;
             color: white;
-            background: linear-gradient(180deg, #ff4444, #a10000);
-            box-shadow: 0 8px 20px rgba(0,0,0,.5);
-            transition: .15s;
+            font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            letter-spacing: 1px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .15s;
+            box-shadow: 0 4px 10px rgba(0,0,0,.5);
+            user-select: none;
+            padding: 0;
         }
 
-        .btn-start:hover {
-            filter: brightness(1.1);
+        .btn-side:active {
+            transform: scale(.90);
+            box-shadow: 0 2px 5px rgba(0,0,0,.7);
         }
 
-        .btn-start:active {
-            transform: translateY(4px) scale(.98);
-            box-shadow: 0 3px 8px rgba(0,0,0,.7);
+        .btn-side:hover {
+            filter: brightness(1.2);
+        }
+
+        .btn-pause {
+            background: linear-gradient(180deg, #f0a000, #a06a00);
+        }
+
+        .btn-sound {
+            background: linear-gradient(180deg, #44cc44, #008800);
+        }
+
+        .btn-sound.muted {
+            background: linear-gradient(180deg, #888, #444);
         }
 
         .overlay {
@@ -245,34 +310,46 @@
             50% { filter: brightness(1.5); }
         }
 
+        /* ===== MEDIA QUERIES ===== */
         @media (max-height: 750px) {
-            .key { width: 68px; height: 68px; font-size: 26px; border-radius: 16px; }
+            .key { width: 62px; height: 62px; font-size: 24px; border-radius: 16px; }
             .key::after { border-radius: 16px; }
             #gameCanvas { max-height: 40vh; }
-            .brand { font-size: 11px; }
-            .btn-start { height: 52px; font-size: 16px; }
+            .brand { font-size: 10px; }
+            .btn-start { width: 95px; font-size: 11px; }
+            .btn-side { width: 36px; height: 36px; font-size: 14px; }
+            .controls-row { gap: 18px; }
         }
 
         @media (max-height: 620px) {
-            .key { width: 56px; height: 56px; font-size: 20px; border-radius: 14px; }
-            .key::after { border-radius: 14px; }
+            .key { width: 52px; height: 52px; font-size: 20px; border-radius: 13px; }
+            .key::after { border-radius: 13px; }
             #gameCanvas { max-height: 34vh; }
-            .btn-start { height: 46px; font-size: 14px; }
+            .btn-start { width: 85px; font-size: 10px; }
+            .btn-side { width: 32px; height: 32px; font-size: 13px; border-radius: 8px; }
+            .controls-row { gap: 14px; }
         }
 
         @media (max-height: 520px) {
-            .key { width: 48px; height: 48px; font-size: 16px; border-radius: 12px; }
-            .key::after { border-radius: 12px; }
+            .key { width: 44px; height: 44px; font-size: 16px; border-radius: 11px; }
+            .key::after { border-radius: 11px; }
             #gameCanvas { max-height: 30vh; }
-            .btn-start { height: 40px; font-size: 13px; }
+            .btn-start { width: 75px; font-size: 9px; }
+            .btn-side { width: 28px; height: 28px; font-size: 11px; border-radius: 7px; }
+            .controls-row { gap: 10px; }
         }
     </style>
 </head>
 <body>
 
     <div class="calc-body">
-        <div class="brand-container">
-            <div class="brand">Dr. Ronald Rodriguez Espinoza</div>
+
+        <!-- ===== BARRA SUPERIOR: Marca + Botón START ===== -->
+        <div class="top-bar">
+            <div class="brand-container">
+                <div class="brand">Dr. Ronald Rodriguez Espinoza</div>
+            </div>
+            <button class="btn-start" id="startBtn">ON / START</button>
         </div>
 
         <div class="lcd-screen">
@@ -296,15 +373,26 @@
         </div>
 
         <div class="controls-area">
-            <div class="keypad">
-                <button class="key key-up" id="upBtn" aria-label="Arriba">▲</button>
-                <button class="key key-left" id="leftBtn" aria-label="Izquierda">◀</button>
-                <button class="key key-down" id="downBtn" aria-label="Abajo">▼</button>
-                <button class="key key-right" id="rightBtn" aria-label="Derecha">▶</button>
-            </div>
+            <div class="controls-row">
 
-            <div class="start-container">
-                <button class="btn-start" id="startBtn">ON / START</button>
+                <!-- Botón lateral IZQUIERDO: PAUSA -->
+                <div class="side-buttons">
+                    <button class="btn-side btn-pause" id="pauseBtn" aria-label="Pausa">⏸</button>
+                </div>
+
+                <!-- Keypad direccional -->
+                <div class="keypad">
+                    <button class="key key-up" id="upBtn" aria-label="Arriba">▲</button>
+                    <button class="key key-left" id="leftBtn" aria-label="Izquierda">◀</button>
+                    <button class="key key-down" id="downBtn" aria-label="Abajo">▼</button>
+                    <button class="key key-right" id="rightBtn" aria-label="Derecha">▶</button>
+                </div>
+
+                <!-- Botón lateral DERECHO: SONIDO -->
+                <div class="side-buttons">
+                    <button class="btn-side btn-sound" id="soundBtn" aria-label="Sonido">🔊</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -312,6 +400,8 @@
     <script>
         // --- MOTOR DE AUDIO RETRO ---
         let audioCtx = null;
+        let soundEnabled = true;
+
         function initAudio() {
             if (!audioCtx) {
                 try {
@@ -322,7 +412,7 @@
         }
 
         function playTone(freq, dur, type = 'square') {
-            if (!audioCtx) return;
+            if (!audioCtx || !soundEnabled) return;
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -380,11 +470,6 @@
         let ghostSpeed = 220;
         let gameLoopTimer = null;
 
-        // ===== MAPA CON LOS TRES CAMBIOS APLICADOS =====
-        // - Fila 6: casa de fantasmas con accesos laterales
-        // - Fila 7: casa conectada al pasillo principal
-        // - Fila 12: puerta de salida central
-        // - Filas 9 y 11: túneles laterales
         const originalMap = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
@@ -505,7 +590,6 @@
                 pacman.x += pacman.dir.x;
                 pacman.y += pacman.dir.y;
 
-                // ===== TELETRANSPORTE LATERAL PACMAN =====
                 if (pacman.x < 0) pacman.x = COLS - 1;
                 if (pacman.x >= COLS) pacman.x = 0;
 
@@ -532,7 +616,6 @@
                 g.x += g.dir.x;
                 g.y += g.dir.y;
 
-                // ===== TELETRANSPORTE LATERAL FANTASMAS =====
                 if (g.x < 0) g.x = COLS - 1;
                 if (g.x >= COLS) g.x = 0;
 
@@ -614,6 +697,7 @@
             maze = JSON.parse(JSON.stringify(originalMap));
             pacman = { x: 1, y: 1, dir: {x:0, y:0}, nextDir: {x:0, y:0} };
             paused = false;
+            updatePauseIcon();
 
             ghosts = [];
             let ghostCount = Math.min(2 + level, 6);
@@ -675,10 +759,47 @@
         bindButton('leftBtn', -1, 0);
         bindButton('rightBtn', 1, 0);
 
+        // ===== BOTÓN START =====
         const startBtn = document.getElementById('startBtn');
         startBtn.addEventListener('click', (e) => { e.preventDefault(); startGame(); });
         startBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); }, { passive: false });
 
+        // ===== BOTÓN PAUSA =====
+        const pauseBtn = document.getElementById('pauseBtn');
+        function updatePauseIcon() {
+            pauseBtn.innerText = paused ? '▶' : '⏸';
+            pauseBtn.style.background = paused
+                ? 'linear-gradient(180deg, #44cc44, #008800)'
+                : 'linear-gradient(180deg, #f0a000, #a06a00)';
+        }
+        function togglePause() {
+            if (!gameActive) return;
+            paused = !paused;
+            updatePauseIcon();
+            statusLabel.innerText = paused ? "PAUSA" : "JUGANDO";
+            if (!paused) update();
+        }
+        pauseBtn.addEventListener('click', (e) => { e.preventDefault(); togglePause(); });
+        pauseBtn.addEventListener('touchstart', (e) => { e.preventDefault(); togglePause(); }, { passive: false });
+
+        // ===== BOTÓN SONIDO =====
+        const soundBtn = document.getElementById('soundBtn');
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            if (soundEnabled) {
+                soundBtn.classList.remove('muted');
+                soundBtn.innerText = '🔊';
+                initAudio();
+                if (gameActive) playTone(880, 0.08, 'square');
+            } else {
+                soundBtn.classList.add('muted');
+                soundBtn.innerText = '🔇';
+            }
+        }
+        soundBtn.addEventListener('click', (e) => { e.preventDefault(); toggleSound(); });
+        soundBtn.addEventListener('touchstart', (e) => { e.preventDefault(); toggleSound(); }, { passive: false });
+
+        // ===== TECLADO =====
         window.addEventListener('keydown', e => {
             if (e.key.includes('Arrow')) e.preventDefault();
             if (e.key === 'ArrowUp') setDir(0, -1);
@@ -686,11 +807,8 @@
             if (e.key === 'ArrowLeft') setDir(-1, 0);
             if (e.key === 'ArrowRight') setDir(1, 0);
 
-            if (e.key === "p" || e.key === "P") {
-                if (!gameActive) return;
-                paused = !paused;
-                statusLabel.innerText = paused ? "PAUSA" : "JUGANDO";
-            }
+            if (e.key === "p" || e.key === "P") togglePause();
+            if (e.key === "m" || e.key === "M") toggleSound();
         });
 
         init();
