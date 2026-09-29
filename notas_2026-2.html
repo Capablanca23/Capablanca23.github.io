@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistema de Notas · Ronald F. Rodriguez Espinoza</title>
+<style>
+:root{
+  --bg:#f4f7fc; --card:#fff; --ink:#1b3b4f; --ink2:#0b2b3f;
+  --muted:#5a7b8e; --accent:#2a7f6e; --accent-d:#226a5c;
+  --line:#e1e8f0; --field:#bccddb; --ok:#15803d; --bad:#b91c1c;
+  --okbg:#dcfce7; --badbg:#fee2e2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg); font-family:'Segoe UI',Roboto,system-ui,sans-serif;
+  padding:1.5rem 1rem; color:var(--ink);
+  padding-top:calc(1.5rem + env(safe-area-inset-top,0px));
+  padding-bottom:calc(1.5rem + env(safe-area-inset-bottom,0px));
+}
+.container{max-width:1400px;margin:0 auto;background:var(--card);border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.06);padding:1.5rem}
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem;gap:1rem}
+h1{font-size:1.4rem;font-weight:700;color:var(--ink2)}
+.subtitle{color:var(--muted);border-left:3px solid var(--accent);padding-left:.75rem;font-size:.85rem;margin-top:.3rem}
+.author{font-size:.85rem;color:var(--accent);font-weight:600;margin-top:.4rem}
+.week-badge{background:var(--ink2);color:#fff;padding:.3rem .9rem;border-radius:20px;font-size:.75rem;font-weight:600}
+.form-card,.filters,.charts-card{background:#f0f4f8;border:1px solid var(--line);border-radius:16px;padding:1.2rem;margin-bottom:1.2rem}
+.form-title{font-size:1rem;font-weight:700;color:var(--ink2);margin-bottom:.9rem}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem}
+.field-group{display:flex;flex-direction:column;gap:.35rem}
+.field-group label{font-weight:600;color:#2c4e63;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+select,input{padding:.5rem .8rem;border-radius:8px;border:1px solid var(--field);background:#fff;
+  font-size:.82rem;outline:none;transition:.2s;font-family:inherit;color:var(--ink);width:100%}
+select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(42,127,110,.2)}
+.btn-row{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1rem}
+.btn{border:none;padding:.55rem 1.2rem;border-radius:8px;font-weight:600;font-size:.82rem;cursor:pointer;transition:.2s;font-family:inherit}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-d)}
+.btn-secondary{background:#e2e8f0;color:#475569}.btn-secondary:hover{background:#cbd5e1;color:#1e293b}
+.btn-danger{background:var(--badbg);color:var(--bad)}.btn-danger:hover{background:#fecaca}
+.msg{padding:.7rem 1rem;border-radius:8px;margin-top:.9rem;font-size:.85rem;font-weight:500}
+.msg-ok{background:var(--okbg);color:var(--ok);border:1px solid #86efac}
+.msg-err{background:var(--badbg);color:var(--bad);border:1px solid #fecaca}
+.msg-info{background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd}
+.filters{display:flex;flex-wrap:wrap;gap:.8rem 1rem;align-items:center}
+.filter-group{display:flex;flex-direction:column;gap:.3rem;min-width:150px}
+.filter-group label{font-weight:600;color:#2c4e63;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+.clear-btn{background:#e2e8f0;border:none;padding:.5rem 1rem;border-radius:8px;font-weight:600;color:#475569;cursor:pointer;margin-left:auto;font-size:.78rem}
+.clear-btn:hover{background:#cbd5e1;color:#1e293b}
+.stats{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;font-size:.8rem;color:#64748b;flex-wrap:wrap;gap:.5rem}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:1rem;text-align:center}
+.stat-label{font-size:.7rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.stat-value{font-size:1.5rem;font-weight:700;color:var(--ink2);margin-top:.35rem}
+.stat-value.ok{color:var(--ok)}.stat-value.bad{color:var(--bad)}.stat-value.accent{color:var(--accent)}
+.progress-bar{height:8px;background:#e2e8f0;border-radius:8px;overflow:hidden;margin-top:.5rem}
+.progress-bar>div{height:100%;background:var(--accent);transition:width .5s}
+.table-wrapper{overflow-x:auto;border-radius:12px;border:1px solid #e2e8f0;max-height:600px}
+table{width:100%;border-collapse:collapse;font-size:.78rem;text-align:left}
+th{background:#1e293b;color:#f8fafc;font-weight:600;padding:.75rem .6rem;position:sticky;top:0;z-index:10;
+  white-space:nowrap;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px}
+td{padding:.6rem;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:hover td{background:#f8fafc}
+.badge{display:inline-block;padding:.2rem .5rem;border-radius:6px;font-size:.68rem;font-weight:600;white-space:nowrap}
+.badge-si{background:var(--okbg);color:var(--ok)}.badge-no{background:var(--badbg);color:var(--bad)}
+.badge-aprobado{background:var(--okbg);color:var(--ok)}.badge-desaprobado{background:var(--badbg);color:var(--bad)}
+.row-actions{display:flex;gap:.4rem}
+.icon-btn{padding:.3rem .55rem;font-size:.72rem}
+canvas{width:100%}
+#chart1{max-height:none !important}
+.footer{margin-top:1.5rem;text-align:right;color:#94a3b8;font-size:.72rem}
+.empty-msg{text-align:center;padding:2rem;color:#94a3b8;font-size:.85rem}
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.9);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;font-size:1.1rem;font-weight:600;color:var(--accent);display:none;}
+.spinner{width:40px;height:40px;border:4px solid #f3f3f3;border-top:4px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:1rem;}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@media (max-width:520px){.header{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <span id="loadingText">⏳ Conectando con Google Sheets...</span>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>📊 Sistema de Notas · Programación Académica</h1>
+      <div class="subtitle">Registro de calificaciones — Fenómenos de Transporte · Ecología y Recursos Naturales · Matemática Computacional</div>
+      <div class="author">👤 Docente: Dr. Ronald F. Rodriguez Espinoza</div>
+    </div>
+    <div class="week-badge">Notas 2026-2 (Sincronizado)</div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-title">📝 Registrar / Actualizar Nota</div>
+    <div class="form-grid">
+      <div class="field-group"><label>Curso</label>
+        <select id="curso" onchange="onCursoChange()"></select>
+      </div>
+      <div class="field-group"><label>¿Lleva Laboratorio?</label>
+        <select id="laboratorio" onchange="onLabChange()">
+          <option value="NO">NO</option><option value="SI">SI</option>
+        </select>
+      </div>
+      <div class="field-group"><label>Alumno</label>
+        <input id="alumno" list="listaAlumnos" placeholder="Selecciona o escribe el nombre">
+        <datalist id="listaAlumnos"></datalist>
+      </div>
+      <div class="field-group"><label>EC · Evaluación Continua</label>
+        <input id="ec" type="number" step="0.01" min="0" max="20" placeholder="0 - 20">
+      </div>
+      <div class="field-group"><label>EP · Evaluación Parcial</label>
+        <input id="ep" type="number" step="0.01" min="0" max="20" placeholder="0 - 20">
+      </div>
+      <div class="field-group"><label>EF1 · Evaluación Final</label>
+        <input id="ef1" type="number" step="0.01" min="0" max="20" placeholder="0 - 20">
+      </div>
+      <div class="field-group" id="wrapEL" style="display:none">
+        <label>EL · Evaluación de Laboratorio</label>
+        <input id="el" type="number" step="0.01" min="0" max="20" placeholder="0 - 20">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnGuardar">💾 Guardar en Google Sheets</button>
+      <button class="btn btn-secondary" id="btnLimpiar">🧹 Limpiar</button>
+      <button class="btn btn-secondary" id="btnCSV">⬇️ Exportar CSV Local</button>
+    </div>
+    <div id="mensaje"></div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group"><label>📚 Curso</label>
+      <select id="fCurso" onchange="onFiltroCursoChange()"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group"><label>👤 Alumno</label>
+      <select id="fAlumno" onchange="render()"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group"><label>✅ Estado</label>
+      <select id="fEstado" onchange="render()">
+        <option value="">Todos</option><option>Aprobado</option><option>Desaprobado</option>
+      </select>
+    </div>
+    <button class="clear-btn" id="clearFilters">✕ Limpiar filtros</button>
+  </div>
+
+  <div class="stats">
+    <span id="resultCount">0 registros</span>
+    <span>Nota mínima aprobatoria: <b>10.5</b></span>
+  </div>
+  <div class="stat-grid" id="stats"></div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead><tr>
+        <th>Curso</th><th>Lab</th><th>Alumno</th><th>EC</th><th>EP</th><th>EF1</th>
+        <th>EL</th><th>EF</th><th>NF</th><th>Estado</th><th>Acción</th>
+      </tr></thead>
+      <tbody id="tablaBody"></tbody>
+    </table>
+  </div>
+
+  <div class="charts-card">
+    <h3 style="margin-bottom:.8rem;">📈 Nota Final por Alumno (ordenado de mayor a menor)</h3>
+    <div style="max-height:600px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:.5rem;background:#fff;">
+      <canvas id="chart1"></canvas>
+    </div>
+  </div>
+  <div class="charts-card">
+    <h3 style="margin-bottom:.8rem;">📊 Promedio NF por Curso</h3>
+    <canvas id="chart2" height="220"></canvas>
+  </div>
+
+  <div class="footer">Sistema de Notas Académicas · Sincronizado en tiempo real con Google Sheets</div>
+</div>
+
+<script>
+// ⚠️ PEGA AQUÍ LA URL DE TU APPS SCRIPT (Termina en /exec)
+const API_URL = "https://script.google.com/macros/s/AKfycbzcMOVBNdpK65Y-RmaariMSoGW6ha9ICTlYYW77a8fD_Z-XZO_k1Cvm5y7_YsI7uC0__g/exec";
+
+const CURSOS = ["Fenómenos de Transporte","Ecología y Recursos Naturales","Matemática Computacional"];
+
+// 📋 LISTA REAL DE ALUMNOS EXTRAÍDA DE TU GOOGLE SHEET
+const ALUMNOS_POR_CURSO = {
+  "Fenómenos de Transporte": [
+    "AVILA VALENTE, JEFFREY JOSE",
+    "CCAPIRA CHILON, LUIS ALBERTO",
+    "CERRON CARDENAS, HEIDY KIARA",
+    "COLACHAGUA TOLEDO, JONATHAN GIANCARLO",
+    "CRUZ TAMAYO, FABIAN ANDRE",
+    "CURI TORRES, JHACKILYN CINTHIA",
+    "GUDIEL BARRANTES, DANIEL SEBASTIAN",
+    "HUAMANI ARIAS, MARIELA",
+    "LAURA ROJAS, LUZ ROSARIO",
+    "LEIVA QUISPE, TREYSI HELEN",
+    "MALCA MITMA, LEANDRO MOISES",
+    "MENACHO ZAPATA, CLEMENTINA DEL PILAR",
+    "MEZONES CHUMPITAZ, AREANA MAYLEE",
+    "MORENO CARHUAMACA, MARINO",
+    "POMA VILLEGAS, FRANCO FACUNDO",
+    "SILES VIERA, MANUEL ALEJANDRO",
+    "SORIA SALAZAR, MARITZA JUDITH",
+    "TURPO TIPO, CRISTINA",
+    "VARGAS MATEO, KORALY ANTHONELA",
+    "VIAL PARDO FIGUEROA, MERCEDES MILAGROS"
+  ],
+  "Ecología y Recursos Naturales": [
+    "AGUIRRE HUAMAN, CLENY MAYLI",
+    "BULEJE VELASQUEZ, ESTHER BRIGGITTE",
+    "CAYETANO RODRIGUEZ, BRISA NICOLLE",
+    "GUTIERREZ ENCISO, ANAHI XIMENA",
+    "GUTIERREZ ZEVALLOS, BRENDA",
+    "HUACHO QUISPE, MARICARMEN VIANNY",
+    "LEIVA CUADROS, JIMENA ASTRID",
+    "MUÑOZ GOMEZ, EVELYN MIRELLA",
+    "ORDOÑEZ CARRION, MAIALEN",
+    "ROBLEDO MERINO, ANA YUDITH",
+    "YAICATE LLAJA, SEBASTIAN"
+  ],
+  "Matemática Computacional": [
+    "ARIAS INGARUCA, HENRY PAULO",
+    "ARIMUYA ACOSTA, KENYI",
+    "ARTICA AROSEMENA, ADRIAN MATIAS",
+    "BARRANTES ARRIBASPLATA, RODRIGO ALEXANDER",
+    "BARRIENTOS ANGIOSO, JOSE ALESSANDRO",
+    "CARAZA ALLCCA, LUCAS ESTEFANO",
+    "CASAS LLAMOCCA, KENNETH SEBASTIAN",
+    "CCASANI TICUÑA, ANGEL DANIEL",
+    "CHUMPITAZ ORIHUELA, JUAN FABRICIO",
+    "CONTRERAS GARAMENDI, APRIL BETSY",
+    "CORDERO HUANACO, SAMIR ABEL",
+    "COTRINA GUERRERO, JOSSET",
+    "COTRINA LUNA, OSCAR FABRIZIO",
+    "DE LA CRUZ ALARCON, JERICO ELIOT",
+    "FLORES MAMANI, MARCOS EDU",
+    "HERRERA BRAVO, NICOLL",
+    "HUALLANCA PUCHURI, ANDRES ALONSO CESAR",
+    "HUALLPA BAEZ, JEAN CARLOS RUFFO",
+    "LUYO HUAMAN, MICHAEL SAID",
+    "MANTILLA CHAVEZ, DIE CRISTOPHER",
+    "MEDINA ENCISO, ALDAIR BRACZELL ZANDRO",
+    "MEDINA PASCUAL, JEANPOOL JESUS",
+    "MIO VILLARREAL, SEBASTIAN AGUSTIN",
+    "OLAYA VASQUEZ, SERGIO ADRIAN",
+    "ORTIZ RIVERA, FRANK EDUARDO",
+    "PANAIJO TAPULLIMA, ANGEL JESUS",
+    "PARDO URIOL, ANDRES",
+    "PELAEZ AVALOS, KRSNA JAIR",
+    "QUIJAITE GALVAN, MARCOS ANDRE",
+    "QUISPE CORDOVA, SEBASTIAN ISMAEL",
+    "QUISPE REPOLLEDO, RODRIGO",
+    "RAMIREZ CARDENAS, ANGELY VALERIA",
+    "RAMON RONDON, MARCO KEYSE",
+    "RAMOS FERNANDEZ, JOSUE MIGUEL",
+    "ROSALES ARCE, YARETSI ARLET",
+    "SALOME VILLAR, JEAN PIERRE RODOLFO",
+    "SIERRA SEMINARIO, XIMENA YAMILETH",
+    "VELASQUEZ DE LA CRUZ, MARYORIE",
+    "VERA JIMENEZ, BRENDA GERALDINE"
+  ]
+};
+
+const $ = id => document.getElementById(id);
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const r2 = n => Math.round(n*100)/100;
+
+let state = { records: [], labs: {} };
+
+function showLoading(show, text = "⏳ Conectando con Google Sheets...") {
+  $("loading").style.display = show ? "flex" : "none";
+  $("loadingText").textContent = text;
+  $("btnGuardar").disabled = show;
+  $("btnGuardar").textContent = show ? "⏳ Guardando..." : "💾 Guardar en Google Sheets";
+}
+
+async function loadFromSheet() {
+  if (API_URL.includes("PEGAR_AQUI")) {
+    initFromLocalList();
+    return;
+  }
+  showLoading(true);
+  try {
+    const response = await fetch(API_URL);
+    const data = await response.json();
+    
+    if (Array.isArray(data) && data.length > 0) {
+      state.records = data.map(row => ({
+        curso: String(row.Curso || row.curso || "").trim(),
+        alumno: String(row.Alumno || row.alumno || "").trim(),
+        laboratorio: String(row.Laboratorio || row.laboratorio || "NO").trim().toUpperCase(),
+        ec: num(row.EC || row.ec),
+        ep: num(row.EP || row.ep),
+        ef1: num(row.EF1 || row.ef1),
+        el: num(row.EL || row.el),
+        EF: num(row.EF || row.ef),
+        NF: num(row.NF || row.nf),
+        estado: String(row.Estado || row.estado || "Desaprobado").trim()
+      })).filter(r => r.curso && r.alumno);
+      
+      state.records.forEach(r => { if(r.curso) state.labs[r.curso] = r.laboratorio; });
+    }
+    
+    mergeWithPredefinedList();
+    initSelects();
+    mostrarMensaje(`✅ Sistema listo. ${state.records.length} alumnos cargados.`, "ok");
+  } catch (error) {
+    console.error(error);
+    mergeWithPredefinedList();
+    initSelects();
+    mostrarMensaje("⚠️ No se pudo conectar con Google Sheets. Usando lista local.", "info");
+  } finally {
+    showLoading(false);
+  }
+}
+
+function initFromLocalList() {
+  mergeWithPredefinedList();
+  initSelects();
+  mostrarMensaje(`✅ Sistema listo en modo local. ${state.records.length} alumnos cargados. Configura API_URL para sincronizar con Google Sheets.`, "info");
+}
+
+function mergeWithPredefinedList() {
+  Object.entries(ALUMNOS_POR_CURSO).forEach(([curso, alumnos]) => {
+    if (!(curso in state.labs)) {
+      state.labs[curso] = curso === "Fenómenos de Transporte" ? "SI" : "NO";
+    }
+    alumnos.forEach(alumno => {
+      const exists = state.records.some(r => 
+        r.curso.toLowerCase() === curso.toLowerCase() && 
+        r.alumno.toLowerCase() === alumno.toLowerCase()
+      );
+      if (!exists) {
+        state.records.push({
+          curso,
+          alumno,
+          laboratorio: state.labs[curso],
+          ec: 0, ep: 0, ef1: 0, el: 0,
+          EF: 0, NF: 0,
+          estado: "Desaprobado"
+        });
+      }
+    });
+  });
+}
+
+function initSelects(){
+  $("curso").innerHTML = CURSOS.map(c=>`<option>${c}</option>`).join("");
+  $("fCurso").innerHTML = '<option value="">Todos</option>' + CURSOS.map(c=>`<option>${c}</option>`).join("");
+  onCursoChange();
+  onFiltroCursoChange();
+  render();
+}
+
+function onCursoChange(){
+  const curso = $("curso").value;
+  $("laboratorio").value = state.labs[curso] || "NO";
+  onLabChange();
+  updateDatalist(curso);
+}
+
+function onLabChange(){
+  $("wrapEL").style.display = $("laboratorio").value === "SI" ? "flex" : "none";
+}
+
+function updateDatalist(curso){
+  const nombres = [...new Set(state.records.filter(r=>r.curso===curso).map(r=>r.alumno))].sort();
+  $("listaAlumnos").innerHTML = nombres.map(n=>`<option value="${n}">`).join("");
+}
+
+function calcFila(ec, ep, ef1, el, lab){
+  const EF = lab === "SI" ? (ef1 + el) / 2 : ef1;
+  const NF = ec*0.10 + ep*0.40 + EF*0.50;
+  const estado = NF >= 10.5 ? "Aprobado" : "Desaprobado";
+  return { EF: r2(EF), NF: r2(NF), estado };
+}
+
+$("btnGuardar").addEventListener("click", async ()=>{
+  const curso = $("curso").value;
+  const alumno = $("alumno").value.trim();
+  const lab = $("laboratorio").value;
+  const ec = num($("ec").value), ep = num($("ep").value), ef1 = num($("ef1").value);
+  const el = lab === "SI" ? num($("el").value) : 0;
+
+  if(!curso || !alumno){ mostrarMensaje("Selecciona curso e indica el nombre del alumno.", "err"); return; }
+  const rangos = [["EC",ec],["EP",ep],["EF1",ef1]]; if(lab==="SI") rangos.push(["EL",el]);
+  for(const [n,v] of rangos){ if(v<0||v>20){ mostrarMensaje(`${n} debe estar entre 0 y 20.`, "err"); return; } }
+
+  const calc = calcFila(ec, ep, ef1, el, lab);
+  const rec = { curso, laboratorio: lab, alumno, ec, ep, ef1, el, ...calc };
+
+  const idx = state.records.findIndex(r => r.curso.toLowerCase()===curso.toLowerCase() && r.alumno.toLowerCase()===alumno.toLowerCase());
+  if(idx >= 0) state.records[idx] = rec; else state.records.push(rec);
+  state.labs[curso] = lab;
+  render();
+  refrescarFiltrosYDatalist();
+
+  if (!API_URL.includes("PEGAR_AQUI")) {
+    showLoading(true, "⏳ Guardando en Google Sheets...");
+    
+    try {
+      await new Promise((resolve, reject) => {
+        let iframe = document.getElementById("gsheet_iframe");
+        if (!iframe) {
+          iframe = document.createElement("iframe");
+          iframe.id = "gsheet_iframe";
+          iframe.name = "gsheet_iframe";
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
+        }
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = API_URL;
+        form.target = "gsheet_iframe";
+        form.style.display = "none";
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "data";
+        input.value = JSON.stringify(rec);
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        
+        const timeout = setTimeout(() => {
+          document.body.removeChild(form);
+          reject(new Error("Timeout"));
+        }, 15000);
+
+        iframe.onload = () => {
+          clearTimeout(timeout);
+          document.body.removeChild(form);
+          resolve();
+        };
+
+        form.submit();
+      });
+
+      mostrarMensaje(`✅ Guardado en Google Sheets: ${alumno} (NF ${calc.NF})`, "ok");
+    } catch (error) {
+      console.error(error);
+      mostrarMensaje(`⚠️ Guardado localmente, pero no se pudo conectar con Sheets: ${error.message}`, "err");
+    } finally {
+      showLoading(false);
+    }
+  } else {
+    mostrarMensaje(`✅ Guardado localmente: ${alumno} (NF ${calc.NF}). Configura API_URL para sincronizar.`, "ok");
+  }
+  
+  limpiarCampos(false);
+});
+
+// ✅ CORRECCIÓN BOTÓN LIMPIAR
+$("btnLimpiar").addEventListener("click", ()=>{ 
+  limpiarCampos(true);
+  $("mensaje").innerHTML = "";   // Forzar limpieza del mensaje
+  $("alumno").focus();           // Devolver foco al campo alumno
+});
+
+function limpiarCampos(msg){
+  $("ec").value=""; $("ep").value=""; $("ef1").value=""; $("el").value=""; $("alumno").value="";
+  if(msg) $("mensaje").innerHTML = "";
+}
+
+$("btnCSV").addEventListener("click", ()=>{
+  const rows = [["Curso","Laboratorio","Alumno","EC","EP","EF1","EL","EF","NF","Estado"]]
+    .concat(state.records.map(r=>[r.curso,r.laboratorio,r.alumno,r.ec,r.ep,r.ef1,r.laboratorio==="SI"?r.el:"",r.EF,r.NF,r.estado]));
+  const csv = rows.map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "notas.csv"; a.click();
+});
+
+$("clearFilters").addEventListener("click", ()=>{
+  $("fCurso").value=""; onFiltroCursoChange(); $("fEstado").value=""; render();
+});
+
+function onFiltroCursoChange(){
+  const curso = $("fCurso").value;
+  const nombres = [...new Set(state.records.filter(r=>!curso||r.curso.toLowerCase()===curso.toLowerCase()).map(r=>r.alumno))].sort();
+  $("fAlumno").innerHTML = '<option value="">Todos</option>' + nombres.map(a=>`<option>${a}</option>`).join("");
+  render();
+}
+
+function refrescarFiltrosYDatalist(){
+  const curFCurso = $("fCurso").value;
+  onFiltroCursoChange(); $("fCurso").value = curFCurso; onFiltroCursoChange();
+  updateDatalist($("curso").value);
+}
+
+function editar(curso, alumno){
+  const r = state.records.find(x=>x.curso.toLowerCase()===curso.toLowerCase() && x.alumno.toLowerCase()===alumno.toLowerCase());
+  if(!r) return;
+  $("curso").value = r.curso; onCursoChange();
+  $("laboratorio").value = r.laboratorio; onLabChange();
+  $("alumno").value = r.alumno; $("ec").value=r.ec; $("ep").value=r.ep; $("ef1").value=r.ef1; $("el").value=r.el;
+  window.scrollTo({top:0, behavior:"smooth"});
+  mostrarMensaje(`✏️ Editando a ${alumno}. Modifica los valores y presiona Guardar.`, "info");
+}
+
+function eliminar(curso, alumno){
+  if(!confirm(`¿Eliminar a ${alumno} de ${curso}?`)) return;
+  state.records = state.records.filter(r=>!(r.curso.toLowerCase()===curso.toLowerCase() && r.alumno.toLowerCase()===alumno.toLowerCase()));
+  refrescarFiltrosYDatalist(); render();
+  mostrarMensaje("🗑️ Registro eliminado localmente.", "ok");
+}
+
+function filtrados(){
+  return state.records.filter(r =>
+    (!$("fCurso").value || r.curso.toLowerCase()===$("fCurso").value.toLowerCase()) &&
+    (!$("fAlumno").value || r.alumno.toLowerCase()===$("fAlumno").value.toLowerCase()) &&
+    (!$("fEstado").value || r.estado===$("fEstado").value)
+  );
+}
+
+function render(){
+  const filas = filtrados();
+  $("resultCount").textContent = `${filas.length} registro(s) encontrado(s) de ${state.records.length} total`;
+  const tbody = $("tablaBody");
+  if(!filas.length){
+    tbody.innerHTML = `<tr><td colspan="11" class="empty-msg">No hay registros para los filtros seleccionados.</td></tr>`;
+    renderStats([]); renderCharts([]); return;
+  }
+  tbody.innerHTML = filas.map(d=>{
+    const cls = d.estado==="Aprobado" ? "badge-aprobado" : "badge-desaprobado";
+    return `<tr>
+      <td style="font-weight:600">${d.curso}</td>
+      <td>${d.laboratorio==="SI"?'<span class="badge badge-si">SÍ</span>':'<span class="badge badge-no">NO</span>'}</td>
+      <td>${d.alumno}</td>
+      <td>${d.ec}</td><td>${d.ep}</td><td>${d.ef1}</td>
+      <td>${d.laboratorio==="SI" ? d.el : "—"}</td>
+      <td>${d.EF}</td><td><b>${d.NF}</b></td>
+      <td><span class="badge ${cls}">${d.estado}</span></td>
+      <td><div class="row-actions">
+        <button class="btn btn-secondary icon-btn" onclick="editar('${esc(d.curso)}','${esc(d.alumno)}')">✏️</button>
+        <button class="btn btn-danger icon-btn" onclick="eliminar('${esc(d.curso)}','${esc(d.alumno)}')">✕</button>
+      </div></td>
+    </tr>`;
+  }).join("");
+  renderStats(filas); renderCharts(filas);
+}
+function esc(s){ return String(s).replace(/'/g,"\\'"); }
+
+function renderStats(f){
+  const box = $("stats");
+  if(!f.length){ box.innerHTML = ""; return; }
+  const nfs = f.map(d=>d.NF);
+  const max = Math.max(...nfs), min = Math.min(...nfs);
+  const prom = nfs.reduce((a,b)=>a+b,0)/nfs.length;
+  const aprob = f.filter(d=>d.estado==="Aprobado").length;
+  const desap = f.length - aprob;
+  const pct = (aprob/f.length*100).toFixed(1);
+  box.innerHTML = `
+    <div class="stat-card"><div class="stat-label">Registros</div><div class="stat-value accent">${f.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Nota Máxima</div><div class="stat-value">${r2(max)}</div></div>
+    <div class="stat-card"><div class="stat-label">Nota Mínima</div><div class="stat-value">${r2(min)}</div></div>
+    <div class="stat-card"><div class="stat-label">Promedio NF</div><div class="stat-value accent">${r2(prom)}</div></div>
+    <div class="stat-card"><div class="stat-label">Aprobados</div><div class="stat-value ok">${aprob}</div></div>
+    <div class="stat-card"><div class="stat-label">Desaprobados</div><div class="stat-value bad">${desap}</div></div>
+    <div class="stat-card"><div class="stat-label">% Aprobación</div><div class="stat-value accent">${pct}%</div>
+      <div class="progress-bar"><div style="width:${pct}%"></div></div></div>
+    <div class="stat-card"><div class="stat-label">Nota Aprobar</div><div class="stat-value">10.5</div></div>`;
+}
+
+function renderCharts(f){
+  drawHorizontalBars($("chart1"), f.map(d=>d.alumno), f.map(d=>d.NF));
+  const cursos = [...new Set(f.map(d=>d.curso))];
+  const proms = cursos.map(c=>{
+    const arr = f.filter(d=>d.curso.toLowerCase()===c.toLowerCase()).map(d=>d.NF);
+    return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+  });
+  drawBars($("chart2"), cursos, proms);
+}
+
+/* 📈 NUEVO: Gráfico de barras HORIZONTALES para Nota Final por Alumno */
+function drawHorizontalBars(canvas, labels, values){
+  if(!values.length){
+    canvas.width = 300; canvas.height = 100;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0,300,100);
+    ctx.fillStyle="#94a3b8"; ctx.font="13px system-ui";
+    ctx.fillText("Sin datos", 20, 40);
+    return;
+  }
+  
+  // Ordenar de mayor a menor NF
+  const pairs = labels.map((l,i)=>({label:l, value:values[i]}))
+                      .sort((a,b)=>b.value - a.value);
+  
+  const dpr = window.devicePixelRatio || 1;
+  const rowH = 30;
+  const padL = 230;
+  const padR = 70;
+  const padT = 30, padB = 35;
+  const w = canvas.parentElement.clientWidth - 20 || 700;
+  const h = padT + pairs.length * rowH + padB;
+  
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+  
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,w,h);
+  
+  const chartW = w - padL - padR;
+  const maxV = 20;
+  
+  // Línea vertical de aprobado (10.5)
+  const xApr = padL + (10.5/maxV)*chartW;
+  ctx.strokeStyle = "#b45309";
+  ctx.setLineDash([5,4]);
+  ctx.beginPath();
+  ctx.moveTo(xApr, padT);
+  ctx.lineTo(xApr, padT + pairs.length*rowH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  ctx.fillStyle = "#b45309";
+  ctx.font = "10px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("10.5", xApr, padT - 8);
+  
+  // Dibujar cada barra
+  pairs.forEach((p, i) => {
+    const y = padT + i*rowH;
+    const barH = rowH * 0.62;
+    const barY = y + (rowH - barH)/2;
+    const barW = (p.value / maxV) * chartW;
+    
+    // Pista de fondo
+    ctx.fillStyle = "#f1f5f9";
+    ctx.fillRect(padL, barY, chartW, barH);
+    
+    // Barra de valor
+    ctx.fillStyle = p.value >= 10.5 ? "#2a7f6e" : "#b91c1c";
+    ctx.fillRect(padL, barY, barW, barH);
+    
+    // Nombre del alumno
+    ctx.fillStyle = "#0b2b3f";
+    ctx.font = "11px system-ui";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillText(String(p.label).slice(0, 32), padL - 8, y + rowH/2);
+    
+    // Valor numérico
+    ctx.fillStyle = "#0b2b3f";
+    ctx.font = "bold 11px system-ui";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(p.value.toFixed(1), padL + barW + 6, y + rowH/2);
+  });
+  
+  // Eje X
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT + pairs.length*rowH);
+  ctx.lineTo(padL + chartW, padT + pairs.length*rowH);
+  ctx.stroke();
+  
+  ctx.fillStyle = "#64748b";
+  ctx.font = "10px system-ui";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  for(let v = 0; v <= 20; v += 5){
+    const x = padL + (v/maxV)*chartW;
+    ctx.fillText(v, x, padT + pairs.length*rowH + 6);
+  }
+}
+
+/* 📊 Gráfico de barras VERTICALES para Promedio por Curso */
+function drawBars(canvas, labels, values){
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth || 300, h = 240;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+  const ctx = canvas.getContext("2d"); ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,w,h);
+  if(!values.length){ ctx.fillStyle="#94a3b8"; ctx.font="13px system-ui"; ctx.fillText("Sin datos", 20, 40); return; }
+  const padL=40, padB=70, padT=20, padR=15;
+  const cw=w-padL-padR, ch=h-padT-padB;
+  const maxV = Math.max(20, ...values);
+  const bw = Math.max(6, cw/values.length*0.7), gap = cw/values.length;
+  ctx.strokeStyle="#cbd5e1"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,padT+ch); ctx.lineTo(padL+cw,padT+ch); ctx.stroke();
+  ctx.fillStyle="#64748b"; ctx.font="10px system-ui";
+  for(let v=0; v<=maxV; v+=maxV/4){
+    const y = padT+ch-(v/maxV)*ch;
+    ctx.fillText(v.toFixed(0), 8, y+3);
+    ctx.strokeStyle="#e2e8f0"; ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+cw,y); ctx.stroke();
+  }
+  const yApr = padT+ch-(10.5/maxV)*ch;
+  ctx.strokeStyle="#b45309"; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(padL,yApr); ctx.lineTo(padL+cw,yApr); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle="#b45309"; ctx.font="10px system-ui"; ctx.fillText("10.5 aprobado", padL+5, yApr-4);
+  values.forEach((v,i)=>{
+    const x = padL+i*gap+(gap-bw)/2, bh=(v/maxV)*ch, y=padT+ch-bh;
+    ctx.fillStyle = v>=10.5 ? "#2a7f6e" : "#b91c1c";
+    ctx.fillRect(x,y,bw,bh);
+    ctx.fillStyle="#0b2b3f"; ctx.font="bold 11px system-ui"; ctx.textAlign="center";
+    ctx.fillText(v.toFixed(1), x+bw/2, y-4);
+    ctx.save(); ctx.translate(x+bw/2, padT+ch+8); ctx.rotate(-Math.PI/5);
+    ctx.textAlign="right"; ctx.fillStyle="#64748b"; ctx.font="10px system-ui";
+    ctx.fillText(String(labels[i]).slice(0,22), 0, 0); ctx.restore();
+  });
+}
+
+function mostrarMensaje(txt, tipo){
+  const cls = tipo==="ok" ? "msg-ok" : tipo==="err" ? "msg-err" : "msg-info";
+  $("mensaje").innerHTML = `<div class="msg ${cls}">${txt}</div>`;
+  if(tipo==="ok") setTimeout(()=>{ $("mensaje").innerHTML=""; }, 4000);
+}
+
+window.editar = editar; window.eliminar = eliminar;
+window.addEventListener("resize", () => {
+  clearTimeout(window._resizeTimer);
+  window._resizeTimer = setTimeout(render, 200);
+});
+
+// Iniciar
+loadFromSheet();
+</script>
+</body>
+</html>
