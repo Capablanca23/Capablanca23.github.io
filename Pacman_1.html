@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HP-48 Pacman Pro</title>
+<style>
+:root{--page:#d5d8d0;--fg:#0c1308;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0a0c0e}}
+:root[data-theme="dark"]{--page:#0a0c0e}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{margin:0;background:var(--page);display:flex;justify-content:center;padding:8px;font-family:'Courier New',Courier,monospace;user-select:none;-webkit-user-select:none}
+.calc{background:#23272a;width:100%;max-width:400px;padding:10px;border:2px solid #555;border-radius:8px;box-shadow:inset 0 0 10px #0008}
+.top{display:flex;gap:6px;margin-bottom:8px}
+.brand{flex:1;background:#111;border:1px solid #666;border-radius:3px;color:#ccc;font:bold 11px/1 'Courier New',monospace;letter-spacing:1px;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px}
+.start{width:110px;border:0;border-radius:8px;font:bold 12px 'Courier New',monospace;color:#fff;background:linear-gradient(#f44,#a10000);box-shadow:0 4px 10px #0008;padding:10px 0}
+.start:active{transform:translateY(2px)}
+.lcd{position:relative;background:linear-gradient(#b7d0a5,#8fa384);border:5px solid #111;border-radius:10px;padding:4px;box-shadow:inset 0 0 20px #ffffff40,inset 0 0 30px #0004}
+.hdr{display:flex;justify-content:space-between;font-size:10px;font-weight:bold;color:var(--fg);border-bottom:1px solid var(--fg);margin-bottom:4px;padding-bottom:2px;gap:2px}
+.hdr span{white-space:nowrap}
+#cv{display:block;margin:0 auto;width:100%;height:auto;max-height:45vh;object-fit:contain;image-rendering:pixelated;touch-action:none}
+.score{border-top:1px solid var(--fg);margin-top:4px;padding:4px;display:flex;justify-content:center;gap:10px;align-items:center;color:var(--fg)}
+.score b{font-size:20px;letter-spacing:2px}
+#msg{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);background:#9fcc7c;border:2px solid var(--fg);padding:10px;text-align:center;font-weight:bold;width:80%;font-size:14px;color:var(--fg);display:block}
+.ctl{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:12px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.key{width:66px;height:66px;border:0;border-radius:18px;background:linear-gradient(145deg,#575d63,#222);color:#fff;font-size:26px;box-shadow:0 10px 25px #0009,inset 0 2px 3px #fff3;display:flex;align-items:center;justify-content:center;padding:0}
+.key:active{transform:scale(.9)}
+#bU{grid-column:2;grid-row:1}#bL{grid-column:1;grid-row:2}#bD{grid-column:2;grid-row:2}#bR{grid-column:3;grid-row:2}
+.side{width:42px;height:42px;border:0;border-radius:10px;color:#fff;font-size:16px;box-shadow:0 4px 10px #0008;padding:0}
+.side:active{transform:scale(.9)}
+#bP{background:linear-gradient(#f0a000,#a06a00)}#bS{background:linear-gradient(#4c4,#080)}#bS.off{background:linear-gradient(#888,#444)}
+.flash{animation:fl .5s 4}@keyframes fl{50%{filter:brightness(1.5)}}
+@media(max-height:700px){.key{width:54px;height:54px;font-size:21px}}
+@media(prefers-reduced-motion:reduce){.flash{animation:none}}
+</style>
+</head>
+<body>
+<div class="calc">
+  <div class="top"><div class="brand">Dr. Ronald Rodriguez Espinoza</div><button class="start" id="bStart">ON / START</button></div>
+  <div class="lcd" id="lcd">
+    <div class="hdr"><span id="hLv">NIVEL: 1</span><span id="hLi">VIDAS: 3</span><span id="hSt">LISTO</span><span id="hHi">HI: 0000</span></div>
+    <canvas id="cv" width="400" height="440"></canvas>
+    <div class="score"><span>PUNTOS:</span><b id="hSc">0000</b></div>
+    <div id="msg">PRESIONA START</div>
+  </div>
+  <div class="ctl">
+    <button class="side" id="bP" aria-label="Pausa">⏸</button>
+    <div class="pad">
+      <button class="key" id="bU" aria-label="Arriba">▲</button><button class="key" id="bL" aria-label="Izquierda">◀</button>
+      <button class="key" id="bD" aria-label="Abajo">▼</button><button class="key" id="bR" aria-label="Derecha">▶</button>
+    </div>
+    <button class="side" id="bS" aria-label="Sonido">🔊</button>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id), cv=$('cv'), ctx=cv.getContext('2d');
+ctx.scale(2,2);
+const COLS=20, ROWS=22, T=10, FG='#0c1308', BG='#9fcc7c';
+const DIRS=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+// 0 punto, 1 pared, 2 casa fantasmas, 3 píldora, 4 vacío
+const MAP=[
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+[1,0,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1],
+[1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+[1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+[1,0,1,1,0,1,1,0,2,2,2,2,0,1,1,0,1,1,0,1],
+[1,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,1],
+[1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[1,1,0,1,1,0,1,1,1,0,0,1,1,1,0,1,1,0,1,1],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[1,0,1,1,0,1,1,1,1,0,0,1,1,1,1,0,1,1,0,1],
+[1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1],
+[1,0,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,0,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+[1,1,1,0,1,1,1,0,1,0,0,1,0,1,1,1,0,1,1,1],
+[1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1],
+[1,0,1,1,0,1,1,1,0,0,0,0,1,1,1,0,1,1,0,1],
+[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+[1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
+const HOUSE=[[9,7],[10,7],[9,6],[10,6],[8,6],[11,6]];
+// ---------- Audio ----------
+let ac=null, snd=true;
+function initAudio(){if(!ac){try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==='suspended')ac.resume()}
+function tone(f,d,t='square'){if(!ac||!snd)return;try{const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(.08,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+const seq=(a,d,t,gap)=>a.forEach((f,i)=>setTimeout(()=>tone(f,d,t),i*gap));
+const sfx={dot:()=>tone(1200,.03),start:()=>seq([440,660,880,1320],.08,'square',90),die:()=>seq([500,400,300,200,100],.12,'triangle',100),
+ level:()=>seq([800,1000,1200,1500,1800],.08,'square',60),pill:()=>seq([300,500],.1,'sawtooth',70),ghost:()=>seq([600,900,1300],.07,'square',50)};
+// ---------- Estado ----------
+let S='MENU', level=1, score=0, lives=3, nextLife=5000, maze, pac, ghosts=[], fruit=null;
+let dots=0, eaten=0, stepMs=200, acc=0, last=0, invul=0, fright=0, combo=0, stateT=0, tickN=0;
+let hi=0; try{hi=+localStorage.getItem('hp48_pac_hi')||0}catch(e){}
+const pad=n=>String(n).padStart(4,'0');
+function msg(t){const m=$('msg');if(t){m.textContent=t;m.style.display='block'}else m.style.display='none'}
+function hud(){
+  $('hLv').textContent='NIVEL: '+level;$('hLi').textContent='VIDAS: '+Math.max(0,lives);
+  $('hSc').textContent=pad(score);$('hHi').textContent='HI: '+pad(hi);
+  $('hSt').textContent={MENU:'LISTO',PLAY:'JUGANDO',PAUSE:'PAUSA',LEVEL:'NIVEL OK',DYING:'OUCH',OVER:'FIN'}[S];
+}
+function addScore(n){
+  score+=n;
+  if(score>hi){hi=score;try{localStorage.setItem('hp48_pac_hi',hi)}catch(e){}}
+  if(score>=nextLife){lives++;nextLife+=5000;sfx.level()}
+  hud();
+}
+// ---------- Mapa ----------
+const wrap=x=>(x+COLS)%COLS;
+const isWall=(x,y)=>y<0||y>=ROWS||maze[y][wrap(x)]===1;
+function buildMaze(){
+  maze=MAP.map(r=>r.slice());
+  if(level%2===0)[[6,15],[13,15],[4,5],[15,5]].forEach(([x,y])=>maze[y][x]=1); // variante en niveles pares
+  [[1,3],[18,3],[1,19],[18,19]].forEach(([x,y])=>maze[y][x]=3);
+  dots=maze.flat().filter(c=>c===0||c===3).length;
+}
+function placeGhosts(wait){
+  const n=Math.min(2+level,6);
+  ghosts=[];
+  for(let i=0;i<n;i++)ghosts.push({x:HOUSE[i][0],y:HOUSE[i][1],px:HOUSE[i][0],py:HOUSE[i][1],dir:{x:1,y:0},type:i%4,mode:'normal',fright:false,wait:i*wait});
+}
+function placePac(){pac={x:1,y:1,px:1,py:1,dir:{x:0,y:0},next:{x:0,y:0}}}
+function newLevel(){
+  buildMaze();placePac();placeGhosts(7);
+  stepMs=Math.max(90,200-level*12);
+  fruit=null;eaten=0;fright=0;invul=1000;acc=0;S='PLAY';msg();hud();
+}
+function respawn(){placePac();placeGhosts(5);fright=0;invul=2000;acc=0;S='PLAY';msg();hud()}
+function startGame(){
+  initAudio();level=1;score=0;lives=3;nextLife=5000;sfx.start();newLevel();
+}
+// ---------- IA ----------
+function bfs(a,b){
+  if(a.x===b.x&&a.y===b.y)return null;
+  const seen=new Set([a.y*COLS+a.x]), q=[];
+  for(const d of DIRS)if(!isWall(a.x+d.x,a.y+d.y)){const x=wrap(a.x+d.x),y=a.y+d.y;seen.add(y*COLS+x);q.push({x,y,d})}
+  for(let i=0;i<q.length;i++){
+    const n=q[i];if(n.x===b.x&&n.y===b.y)return n.d;
+    for(const d of DIRS){const x=wrap(n.x+d.x),y=n.y+d.y;
+      if(y<0||y>=ROWS||maze[y][x]===1||seen.has(y*COLS+x))continue;
+      seen.add(y*COLS+x);q.push({x,y,d:n.d})}
+  }
+  return null;
+}
+function greedy(g,opts,t){
+  let best=opts[0],bd=1e9;
+  for(const d of opts){const dd=(g.x+d.x-t.x)**2+(g.y+d.y-t.y)**2;if(dd<bd){bd=dd;best=d}}
+  return best;
+}
+function moveGhost(g){
+  g.px=g.x;g.py=g.y;
+  if(g.wait>0){g.wait--;return}
+  let d=null;
+  if(g.mode==='eyes'){
+    if(g.x===10&&g.y===6){g.mode='normal';g.wait=3;return}
+    d=bfs(g,{x:10,y:6});
+  }else{
+    if(g.fright&&(tickN&1))return; // asustados: más lentos
+    if(maze[g.y][g.x]===2)d=bfs(g,{x:10,y:5}); // salir de la casa
+    else{
+      let o=DIRS.filter(v=>!isWall(g.x+v.x,g.y+v.y)&&!(v.x===-g.dir.x&&v.y===-g.dir.y));
+      if(!o.length)o=DIRS.filter(v=>!isWall(g.x+v.x,g.y+v.y));
+      const rnd=()=>o[Math.floor(Math.random()*o.length)];
+      if(g.fright)d=rnd();
+      else if(g.type===0)d=bfs(g,pac);                                   // perseguidor
+      else if(g.type===1)d=greedy(g,o,{x:pac.x+pac.dir.x*4,y:pac.y+pac.dir.y*4}); // emboscada
+      else if(g.type===2)d=(Math.abs(g.x-pac.x)+Math.abs(g.y-pac.y)>8)?greedy(g,o,pac):greedy(g,o,{x:1,y:20}); // patrulla
+      else d=Math.random()<.7?rnd():greedy(g,o,pac);                     // errático
+    }
+  }
+  if(d){g.dir=d;g.x=wrap(g.x+d.x);g.y+=d.y}
+}
+// ---------- Lógica ----------
+function eat(){
+  const c=maze[pac.y][pac.x];
+  if(c===0||c===3){
+    maze[pac.y][pac.x]=4;dots--;eaten++;
+    if(c===0){addScore(10*level);sfx.dot()}
+    else{addScore(50);sfx.pill();fright=Math.max(3000,7000-level*500);combo=0;
+      ghosts.forEach(g=>{if(g.mode!=='eyes'){g.fright=true;g.dir={x:-g.dir.x,y:-g.dir.y}}})}
+    if(eaten===30||eaten===70)fruit={x:9,y:15,t:10000};
+    if(dots===0){S='LEVEL';stateT=2200;sfx.level();msg('¡NIVEL '+(level+1)+'!');$('lcd').classList.add('flash');hud()}
+  }
+  if(fruit&&fruit.x===pac.x&&fruit.y===pac.y){addScore(500);fruit=null;tone(1400,.1,'sine')}
+}
+// Colisión: misma casilla O cruce frontal. Una sola muerte por tick.
+function collide(pp,moved){
+  let killed=false;
+  for(const g of ghosts){
+    if(g.mode==='eyes')continue;
+    const same=g.x===pac.x&&g.y===pac.y;
+    const swap=moved&&g.x===pp.x&&g.y===pp.y&&g.px===pac.x&&g.py===pac.y;
+    if(!same&&!swap)continue;
+    if(g.fright){g.mode='eyes';g.fright=false;addScore(200<<Math.min(combo++,2));sfx.ghost()}
+    else killed=true;
+  }
+  if(killed&&invul<=0){die();return true}
+  return false;
+}
+function die(){
+  lives--;sfx.die();if(navigator.vibrate)try{navigator.vibrate(200)}catch(e){}
+  if(lives<=0){S='OVER';msg('GAME OVER');$('lcd').classList.remove('flash')}
+  else{S='DYING';stateT=900}
+  hud();
+}
+function tick(){
+  tickN++;
+  const pp={x:pac.x,y:pac.y};
+  pac.px=pac.x;pac.py=pac.y;
+  const n=pac.next;
+  if((n.x||n.y)&&!isWall(pac.x+n.x,pac.y+n.y))pac.dir=n;
+  let moved=false;
+  if(!isWall(pac.x+pac.dir.x,pac.y+pac.dir.y)&&(pac.dir.x||pac.dir.y)){pac.x=wrap(pac.x+pac.dir.x);pac.y+=pac.dir.y;moved=true}
+  eat();if(S!=='PLAY')return;
+  if(collide(pp,false))return;      // Pacman entra en la casilla de un fantasma
+  ghosts.forEach(moveGhost);
+  collide(pp,moved);                // misma casilla o cruce frontal tras mover
+}
+function frame(t){
+  const dt=Math.min(100,t-(last||t));last=t;
+  if(S==='PLAY'){
+    acc+=dt;
+    while(acc>=stepMs&&S==='PLAY'){acc-=stepMs;tick()}
+    invul=Math.max(0,invul-dt);
+    if(fright>0){fright-=dt;if(fright<=0)ghosts.forEach(g=>g.fright=false)}
+    if(fruit){fruit.t-=dt;if(fruit.t<=0)fruit=null}
+  }else if(S==='LEVEL'||S==='DYING'){
+    stateT-=dt;
+    if(stateT<=0){if(S==='LEVEL'){$('lcd').classList.remove('flash');level++;newLevel()}else respawn()}
+  }
+  draw(S==='PLAY'?Math.min(1,acc/stepMs):1,t);
+  requestAnimationFrame(frame);
+}
+// ---------- Dibujo ----------
+const lp=(a,b,k)=>Math.abs(b-a)>1?b:a+(b-a)*k;
+function draw(k,now){
+  ctx.clearRect(0,0,COLS*T,ROWS*T);
+  const blink=Math.floor(now/250)%2;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const v=maze[r][c],x=c*T,y=r*T;
+    if(v===1){ctx.fillStyle=FG;ctx.fillRect(x,y,T,T);ctx.strokeStyle=BG;ctx.lineWidth=.5;ctx.strokeRect(x,y,T,T)}
+    else if(v===0){ctx.fillStyle=FG;ctx.beginPath();ctx.arc(x+5,y+5,1.3,0,7);ctx.fill()}
+    else if(v===3&&blink){ctx.fillStyle=FG;ctx.beginPath();ctx.arc(x+5,y+5,3.4,0,7);ctx.fill()}
+  }
+  if(fruit){const x=fruit.x*T+5,y=fruit.y*T+6;ctx.strokeStyle=FG;ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(x-2,y+1,2.4,0,7);ctx.arc(x+2.5,y+1,2.4,0,7);ctx.moveTo(x-2,y-1);ctx.lineTo(x,y-4);ctx.lineTo(x+2.5,y-1);ctx.stroke()}
+  // Pacman (parpadea si es invulnerable, se encoge al morir)
+  if(!(invul>0&&S==='PLAY'&&Math.floor(now/100)%2)){
+    const px=lp(pac.px,pac.x,k)*T+5,py=lp(pac.py,pac.y,k)*T+5;
+    let rot=0;if(pac.dir.x<0)rot=Math.PI;else if(pac.dir.y>0)rot=Math.PI/2;else if(pac.dir.y<0)rot=-Math.PI/2;
+    const r=S==='DYING'?4.5*Math.max(0,stateT/900):4.5, o=(Math.sin(now/80)*.5+.5)*.7+.1;
+    if(r>0){ctx.fillStyle=FG;ctx.beginPath();ctx.moveTo(px,py);ctx.arc(px,py,r,rot+o,rot+Math.PI*2-o);ctx.fill()}
+  }
+  if(S==='DYING')return;
+  ghosts.forEach(g=>{
+    const gx=lp(g.px,g.x,k)*T,gy=lp(g.py,g.y,k)*T;
+    if(g.mode==='eyes'){ctx.fillStyle=FG;ctx.fillRect(gx+2,gy+4,2,2);ctx.fillRect(gx+6,gy+4,2,2);return}
+    ctx.beginPath();ctx.arc(gx+5,gy+5,4.5,Math.PI,0);ctx.lineTo(gx+9.5,gy+9.5);ctx.lineTo(gx+.5,gy+9.5);ctx.closePath();
+    if(g.fright){
+      ctx.strokeStyle=FG;ctx.lineWidth=1;ctx.stroke();
+      if(fright<1500&&blink){ctx.fillStyle=FG;ctx.fill()}
+      ctx.fillStyle=FG;ctx.fillRect(gx+3,gy+3,1.5,1.5);ctx.fillRect(gx+6,gy+3,1.5,1.5);
+    }else{
+      ctx.fillStyle=FG;ctx.fill();ctx.fillStyle=BG;ctx.fillRect(gx+2,gy+3,2,2);ctx.fillRect(gx+6,gy+3,2,2);
+    }
+  });
+}
+// ---------- Controles ----------
+function setDir(x,y){initAudio();if(S==='PLAY')pac.next={x,y}; else if(S==='MENU'||S==='OVER')return; }
+function togglePause(){
+  if(S==='PLAY'){S='PAUSE';msg('PAUSA')}
+  else if(S==='PAUSE'){S='PLAY';msg();last=0}
+  hud();
+}
+function toggleSound(){snd=!snd;$('bS').classList.toggle('off',!snd);$('bS').textContent=snd?'🔊':'🔇';if(snd){initAudio();tone(880,.08)}}
+function bind(id,fn){$(id).addEventListener('pointerdown',e=>{e.preventDefault();fn()})}
+bind('bU',()=>setDir(0,-1));bind('bD',()=>setDir(0,1));bind('bL',()=>setDir(-1,0));bind('bR',()=>setDir(1,0));
+bind('bStart',startGame);bind('bP',togglePause);bind('bS',toggleSound);
+addEventListener('keydown',e=>{
+  const k=e.key,m={ArrowUp:[0,-1],w:[0,-1],W:[0,-1],ArrowDown:[0,1],s:[0,1],S:[0,1],ArrowLeft:[-1,0],a:[-1,0],A:[-1,0],ArrowRight:[1,0],d:[1,0],D:[1,0]}[k];
+  if(m){e.preventDefault();setDir(m[0],m[1])}
+  else if(k==='p'||k==='P')togglePause();
+  else if(k==='m'||k==='M')toggleSound();
+  else if(k==='Enter'||k===' '){e.preventDefault();if(S==='MENU'||S==='OVER')startGame()}
+});
+// Deslizar sobre la pantalla
+let sw=null;
+cv.addEventListener('pointerdown',e=>{sw={x:e.clientX,y:e.clientY}});
+cv.addEventListener('pointerup',e=>{
+  if(!sw)return;const dx=e.clientX-sw.x,dy=e.clientY-sw.y;sw=null;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<20){if(S==='MENU'||S==='OVER')startGame();return}
+  if(Math.abs(dx)>Math.abs(dy))setDir(dx>0?1:-1,0);else setDir(0,dy>0?1:-1);
+});
+// ---------- Inicio ----------
+buildMaze();placePac();hud();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
