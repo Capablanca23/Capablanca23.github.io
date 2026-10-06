@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla Periódica Interactiva IUPAC | Dr. Ronald F. Rodriguez Espinoza</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Fraunces', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#095180',
+                            900: '#0c2e4e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Grid de 19 columnas: 1 para los Números de Periodo + 18 para los Grupos */
+        .periodic-grid {
+            display: grid;
+            grid-template-columns: 32px repeat(18, minmax(56px, 1fr));
+            gap: 4px;
+        }
+
+        /* Grid idéntico para lantánidos/actínidos */
+        .inner-transition-grid {
+            display: grid;
+            grid-template-columns: 32px repeat(18, minmax(56px, 1fr));
+            gap: 4px;
+        }
+
+        .element-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .element-card:hover {
+            transform: scale(1.12);
+            z-index: 20;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Contenedor relativo para poder posicionar la etiqueta absoluta */
+        .inner-row-wrapper {
+            position: relative;
+        }
+
+        /* Etiqueta absoluta, anclada al inicio del grupo 4 (donde empiezan los elementos) */
+        .row-tag-float {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            /* La columna del número de periodo (32px) + grupos 1, 2 y 3 
+               (3 columnas * 56px min + gaps) — se aproxima al borde derecho del grupo 3 */
+            right: calc(100% - 32px - 3 * (56px + 4px) - 4px);
+            white-space: nowrap;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            line-height: 1.2;
+            pointer-events: none;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-100 antialiased">
+
+    <!-- Header / Barra Superior -->
+    <header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-brand-600 rounded-lg text-white shadow-inner">
+                    <i class="fa-solid fa-flask text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold tracking-tight font-serif">Tabla Periódica de los Elementos</h1>
+                    <p class="text-xs text-slate-400">Estándar Internacional IUPAC - 2022</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 text-xs">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span> IUPAC 2022
+                </span>
+                <button onclick="document.getElementById('authorCard').scrollIntoView({behavior:'smooth'})" class="hover:bg-slate-800 px-3 py-1.5 rounded-md text-slate-300 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-graduate"></i> Dr. Ronald Rodriguez E.
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-[1400px] w-full mx-auto px-2 sm:px-4 lg:px-6 py-6 space-y-6">
+
+        <!-- Tarjeta del Autor / Docente Investigador -->
+        <section id="authorCard" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all">
+            <div class="p-4 md:p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+                    <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                        <div class="relative">
+                            <div class="w-16 h-16 rounded-full bg-brand-600 border-2 border-white/20 flex items-center justify-center text-xl font-bold font-serif text-white shadow-lg overflow-hidden">
+                                <i class="fa-solid fa-user-tie text-2xl"></i>
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-slate-900 rounded-full" title="CTI Vitae CONCYTEC"></span>
+                        </div>
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full mb-1 border border-brand-500/20">
+                                <i class="fa-solid fa-award text-amber-400"></i> Docente Investigador
+                            </div>
+                            <h2 class="text-lg font-bold font-serif">Dr. Ronald F. Rodriguez Espinoza</h2>
+                            <p class="text-xs text-slate-300">Química Computacional</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5"><i class="fa-solid fa-building-columns mr-1"></i> CONCYTEC CTI Vitae</p>
+                        </div>
+                    </div>
+
+                    <!-- QR Interactivo -->
+                    <div class="flex items-center gap-3 bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/60">
+                        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           title="Clic para abrir perfil CTI Vitae CONCYTEC"
+                           class="group relative bg-white p-1.5 rounded-lg shadow transition-transform duration-300 hover:scale-105">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                                 alt="QR CTI Vitae" 
+                                 class="w-14 h-14 object-contain">
+                            <div class="absolute inset-0 bg-brand-600/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-slate-900 text-xs"></i>
+                            </div>
+                        </a>
+                        <div class="text-left space-y-0.5">
+                            <p class="text-xs font-semibold text-slate-200"><i class="fa-solid fa-qrcode text-brand-400 mr-1"></i> Escanea o Haz Clic</p>
+                            <p class="text-[10px] text-slate-300 max-w-[120px] leading-tight">Consulta la trayectoria científica oficial.</p>
+                            <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                               target="_blank" 
+                               class="inline-block text-[10px] font-semibold text-brand-400 hover:underline">
+                                Ver Perfil CTI Vitae &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Leyenda de Categorías de Elementos -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
+                <i class="fa-solid fa-palette text-brand-600"></i> Leyenda de Clasificación de Elementos
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-10 gap-2 text-[11px] font-medium">
+                <div class="flex items-center gap-1.5 p-1 rounded bg-sky-100 border border-sky-300 text-sky-900"><span class="w-3 h-3 rounded bg-sky-400 border"></span>No metales</div>
+                <div class="flex items-center gap-1.5 p-1 rounded bg-purple-100 border border-purple-300 text-purple-900"><span class="w-3 h-3 rounded bg-purple-400 border"></span>Gases nobles</div>
+                <div class="flex items-center gap-1.5 p-1 rounded bg-red-100 border border-red-300 text-red-900"><span class="w-3 h-3 rounded bg-red-400 border"></span>Alcalinos</div>
+                <div class="flex items-center gap-1.5 p-1 rounded bg-orange-100 border border-orange-300 text-orange-900"><span class="w-3 h-3 rounded bg-orange-400 border"></span>Alcalinotérreos</div>
+                <div class="flex items-center gap-1.5 p-1 rounded bg-teal-100 border border-teal-300 text-teal-900"><span class="w-3 h-3 rounded bg-teal-400 border"></span>Metaloides</div>
+                <div class="flex items-center gap-1.5 p-1 rounded bg-indigo-100 border border-indigo-300 text-indigo-900"><span class="w-3 h-3 rounded bg-indigo-400 border"></span>Halógenos</div>
+                <div class="flex items-center gap-1.5 p-1 rounded bg-emerald-100 border border-emerald-300 text-emerald-900"><span class="w-3 h-3 rounded bg-emerald-400 border"></span>Otros metales</div>
+                <div class="flex items-center gap-1.5 p-1 rounded bg-yellow-100 border border-yellow-300 text-yellow-900"><span class="w-3 h-3 rounded bg-yellow-400 border"></span>Transición</div>
+                <div class="flex items-center gap-1.5 p-1 rounded bg-amber-100 border border-amber-300 text-amber-900"><span class="w-3 h-3 rounded bg-amber-400 border"></span>Lantánidos</div>
+                <div class="flex items-center gap-1.5 p-1 rounded bg-rose-100 border border-rose-300 text-rose-900"><span class="w-3 h-3 rounded bg-rose-400 border"></span>Actínidos</div>
+            </div>
+        </section>
+
+        <!-- Contenedor Principal de la Tabla Periódica -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 overflow-hidden">
+            <div class="overflow-x-auto custom-scrollbar pb-4">
+                <div class="min-w-[1100px] space-y-3">
+                    
+                    <!-- Matriz de la Tabla Periódica -->
+                    <div id="periodicGrid" class="periodic-grid text-center font-mono">
+                        <!-- El script JS generará las casillas de grupos, periodos y elementos -->
+                    </div>
+
+                    <!-- Bloque Inferior: Lantánidos y Actínidos -->
+                    <div class="pt-3 mt-2 space-y-2">
+
+                        <!-- Fila Lantánidos (con etiqueta flotante) -->
+                        <div class="inner-row-wrapper">
+                            <div id="lanthanidesRow" class="inner-transition-grid"></div>
+                            <span id="lanthTag" class="row-tag-float bg-amber-200 border border-amber-400 text-amber-900">Lantánidos</span>
+                        </div>
+
+                        <!-- Fila Actínidos (con etiqueta flotante) -->
+                        <div class="inner-row-wrapper">
+                            <div id="actinidesRow" class="inner-transition-grid"></div>
+                            <span id="actTag" class="row-tag-float bg-rose-200 border border-rose-400 text-rose-900">Actínidos</span>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Emergente con Detalles del Elemento -->
+    <div id="elementModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full overflow-hidden transition-all transform scale-95 opacity-0" id="modalCard">
+            <!-- Modal Header -->
+            <div id="modalHeader" class="p-6 text-white relative flex justify-between items-start">
+                <div>
+                    <span id="modalNumber" class="text-sm font-mono opacity-80 font-bold">#1</span>
+                    <h2 id="modalSymbol" class="text-5xl font-black font-mono tracking-tight my-1">H</h2>
+                    <h3 id="modalName" class="text-xl font-bold font-serif">Hidrógeno</h3>
+                </div>
+                <button onclick="closeModal()" class="text-white/80 hover:text-white bg-black/20 hover:bg-black/40 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div class="p-6 space-y-4 text-sm">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <span class="text-xs text-slate-500 block">Masa Atómica</span>
+                        <span id="modalMass" class="text-base font-bold text-slate-800 font-mono">1.008 u</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <span class="text-xs text-slate-500 block">Categoría</span>
+                        <span id="modalCategory" class="text-sm font-semibold text-slate-800">No metal</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <span class="text-xs text-slate-500 block">Configuración Electrónica</span>
+                    <span id="modalConfig" class="text-sm font-bold text-brand-700 font-mono">1s¹</span>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <span class="text-xs text-slate-500 block">Resumen</span>
+                    <p id="modalDesc" class="text-xs text-slate-600 mt-1 leading-relaxed">
+                        Elemento químico básico y el más abundante del universo.
+                    </p>
+                </div>
+            </div>
+            <!-- Modal Footer -->
+            <div class="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-5 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-1">
+            <p>© 2026 <span class="font-semibold text-slate-200">Dr. Ronald F. Rodriguez Espinoza</span> — Ciencias Químicas</p>
+            <p class="text-slate-500">IUPAC Periodic Table Standards — Actualizado para uso académico e investigativo.</p>
+        </div>
+    </footer>
+
+    <!-- Script de Datos e Interactividad -->
+    <script>
+        // Base de Datos Completa de los 118 Elementos Químicos
+        const elementsData = [
+            { Z: 1, s: "H", n: "Hidrógeno", m: "1.008", g: 1, p: 1, c: "nometal", cfg: "1s¹", d: "El elemento más ligero e abundante en el universo." },
+            { Z: 2, s: "He", n: "Helio", m: "4.0026", g: 18, p: 1, c: "noble", cfg: "1s²", d: "Gas noble inerte, el segundo elemento más abundante." },
+            { Z: 3, s: "Li", n: "Litio", m: "6.94", g: 1, p: 2, c: "alcalino", cfg: "[He] 2s¹", d: "Metal alcalino blando y reactivo, clave en baterías." },
+            { Z: 4, s: "Be", n: "Berilio", m: "9.0122", g: 2, p: 2, c: "alcalinoterreo", cfg: "[He] 2s²", d: "Metal de alta rigidez y ligereza usado en aeroespacial." },
+            { Z: 5, s: "B", n: "Boro", m: "10.81", g: 13, p: 2, c: "metaloide", cfg: "[He] 2s² 2p¹", d: "Metaloide semiconductor utilizado en vidrios de borosilicato." },
+            { Z: 6, s: "C", n: "Carbono", m: "12.011", g: 14, p: 2, c: "nometal", cfg: "[He] 2s² 2p²", d: "Base fundamental de toda la química orgánica y la vida conocida." },
+            { Z: 7, s: "N", n: "Nitrógeno", m: "14.007", g: 15, p: 2, c: "nometal", cfg: "[He] 2s² 2p³", d: "Constituye aproximadamente el 78% del aire atmosférico." },
+            { Z: 8, s: "O", n: "Oxígeno", m: "15.999", g: 16, p: 2, c: "nometal", cfg: "[He] 2s² 2p⁴", d: "Esencial para la respiración aeróbica y procesos de combustión." },
+            { Z: 9, s: "F", n: "Flúor", m: "18.998", g: 17, p: 2, c: "halógeno", cfg: "[He] 2s² 2p⁵", d: "El halógeno y elemento más electronegativo del sistema periódico." },
+            { Z: 10, s: "Ne", n: "Neón", m: "20.180", g: 18, p: 2, c: "noble", cfg: "[He] 2s² 2p⁶", d: "Gas noble famoso por su brillo rojizo en tubos de descarga." },
+            { Z: 11, s: "Na", n: "Sodio", m: "22.990", g: 1, p: 3, c: "alcalino", cfg: "[Ne] 3s¹", d: "Metal alcalino altamente reactivo, vital en la función celular." },
+            { Z: 12, s: "Mg", n: "Magnesio", m: "24.305", g: 2, p: 3, c: "alcalinoterreo", cfg: "[Ne] 3s²", d: "Metal ligero esencial para la clorofila y procesos biológicos." },
+            { Z: 13, s: "Al", n: "Aluminio", m: "26.982", g: 13, p: 3, c: "metal", cfg: "[Ne] 3s² 3p¹", d: "Metal abundante, de baja densidad y alta resistencia a la corrosión." },
+            { Z: 14, s: "Si", n: "Silicio", m: "28.085", g: 14, p: 3, c: "metaloide", cfg: "[Ne] 3s² 3p²", d: "Base de la industria electrónica y microchips semiconductores." },
+            { Z: 15, s: "P", n: "Fósforo", m: "30.974", g: 15, p: 3, c: "nometal", cfg: "[Ne] 3s² 3p³", d: "Elemento clave en moléculas energéticas como el ATP y ADN." },
+            { Z: 16, s: "S", n: "Azufre", m: "32.06", g: 16, p: 3, c: "nometal", cfg: "[Ne] 3s² 3p⁴", d: "Elemento no metálico característico por sus cristales amarillos." },
+            { Z: 17, s: "Cl", n: "Cloro", m: "35.45", g: 17, p: 3, c: "halógeno", cfg: "[Ne] 3s² 3p⁵", d: "Halógeno reactivo purificador de agua y desinfectante clave." },
+            { Z: 18, s: "Ar", n: "Argón", m: "39.948", g: 18, p: 3, c: "noble", cfg: "[Ne] 3s² 3p⁶", d: "Tercer gas más abundante en la atmósfera terrestre." },
+            { Z: 19, s: "K", n: "Potasio", m: "39.098", g: 1, p: 4, c: "alcalino", cfg: "[Ar] 4s¹", d: "Mineral reactivo crítico para los impulsos nerviosos musculares." },
+            { Z: 20, s: "Ca", n: "Calcio", m: "40.078", g: 2, p: 4, c: "alcalinoterreo", cfg: "[Ar] 4s²", d: "Componente estructural básico de huesos y dientes." },
+            { Z: 21, s: "Sc", n: "Escandio", m: "44.956", g: 3, p: 4, c: "transicion", cfg: "[Ar] 3d¹ 4s²", d: "Metal de transición usado en aleaciones ligeras deportivas." },
+            { Z: 22, s: "Ti", n: "Titanio", m: "47.867", g: 4, p: 4, c: "transicion", cfg: "[Ar] 3d² 4s²", d: "Metal ultrarresistente a la corrosión y con gran biocompatibilidad." },
+            { Z: 23, s: "V", n: "Vanadio", m: "50.942", g: 5, p: 4, c: "transicion", cfg: "[Ar] 3d³ 4s²", d: "Utilizado en la fabricación de aceros de alta resistencia." },
+            { Z: 24, s: "Cr", n: "Cromo", m: "51.996", g: 6, p: 4, c: "transicion", cfg: "[Ar] 3d⁵ 4s¹", d: "Conocido por su acabado brillante y protección contra el óxido." },
+            { Z: 25, s: "Mn", n: "Manganeso", m: "54.938", g: 7, p: 4, c: "transicion", cfg: "[Ar] 3d⁵ 4s²", d: "Fundamental en la siderurgia para la producción de acero." },
+            { Z: 26, s: "Fe", n: "Hierro", m: "55.845", g: 8, p: 4, c: "transicion", cfg: "[Ar] 3d⁶ 4s²", d: "El metal más utilizado por la humanidad, núcleo del planeta." },
+            { Z: 27, s: "Co", n: "Cobalto", m: "58.933", g: 9, p: 4, c: "transicion", cfg: "[Ar] 3d⁷ 4s²", d: "Usado en superaleaciones magnéticas y baterías avanzadas." },
+            { Z: 28, s: "Ni", n: "Níquel", m: "58.693", g: 10, p: 4, c: "transicion", cfg: "[Ar] 3d⁸ 4s²", d: "Metal dúctil resistente a la oxidación en monedas y aleaciones." },
+            { Z: 29, s: "Cu", n: "Cobre", m: "63.546", g: 11, p: 4, c: "transicion", cfg: "[Ar] 3d¹⁰ 4s¹", d: "Excelente conductor eléctrico y térmico de color rojizo." },
+            { Z: 30, s: "Zn", n: "Zinc", m: "65.38", g: 12, p: 4, c: "transicion", cfg: "[Ar] 3d¹⁰ 4s²", d: "Metal anticorrosivo empleado en la galvanización de metales." },
+            { Z: 31, s: "Ga", n: "Galio", m: "69.723", g: 13, p: 4, c: "metal", cfg: "[Ar] 3d¹⁰ 4s² 4p¹", d: "Metal que se derrite con el calor de la mano humana." },
+            { Z: 32, s: "Ge", n: "Germanio", m: "72.630", g: 14, p: 4, c: "metaloide", cfg: "[Ar] 3d¹⁰ 4s² 4p²", d: "Metaloide semiconductor clave en fibra óptica y visión nocturna." },
+            { Z: 33, s: "As", n: "Arsénico", m: "74.922", g: 15, p: 4, c: "metaloide", cfg: "[Ar] 3d¹⁰ 4s² 4p³", d: "Metaloide tóxico utilizado históricamente en pesticidas." },
+            { Z: 34, s: "Se", n: "Selenio", m: "78.971", g: 16, p: 4, c: "nometal", cfg: "[Ar] 3d¹⁰ 4s² 4p⁴", d: "Fotoconductor clave utilizado en fotocopiadoras e industria solar." },
+            { Z: 35, s: "Br", n: "Bromo", m: "79.904", g: 17, p: 4, c: "halógeno", cfg: "[Ar] 3d¹⁰ 4s² 4p⁵", d: "Único no metal que se encuentra en estado líquido a T ambient." },
+            { Z: 36, s: "Kr", n: "Kriptón", m: "83.798", g: 18, p: 4, c: "noble", cfg: "[Ar] 3d¹⁰ 4s² 4p⁶", d: "Gas noble utilizado en iluminación fotográfica de alta velocidad." },
+            { Z: 37, s: "Rb", n: "Rubidio", m: "85.468", g: 1, p: 5, c: "alcalino", cfg: "[Kr] 5s¹", d: "Metal altamente reactivo usado en relojes atómicos de precisión." },
+            { Z: 38, s: "Sr", n: "Estroncio", m: "87.62", g: 2, p: 5, c: "alcalinoterreo", cfg: "[Kr] 5s²", d: "Proporciona el brillante color rojo intenso en pirotecnia." },
+            { Z: 39, s: "Y", n: "Itrio", m: "88.906", g: 3, p: 5, c: "transicion", cfg: "[Kr] 4d¹ 5s²", d: "Metal de transición usado en LEDs y láseres de itrio-aluminio." },
+            { Z: 40, s: "Zr", n: "Circonio", m: "91.224", g: 4, p: 5, c: "transicion", cfg: "[Kr] 4d² 5s²", d: "Altamente resistente a la corrosión, usado en reactores nucleares." },
+            { Z: 41, s: "Nb", n: "Niobio", m: "92.906", g: 5, p: 5, c: "transicion", cfg: "[Kr] 4d⁴ 5s¹", d: "Superconductor empleado en imanes de resonancia magnética." },
+            { Z: 42, s: "Mo", n: "Molibdeno", m: "95.95", g: 6, p: 5, c: "transicion", cfg: "[Kr] 4d⁵ 5s¹", d: "Soporta temperaturas extremas en aleaciones industriales." },
+            { Z: 43, s: "Tc", n: "Tecnecio", m: "[97]", g: 7, p: 5, c: "transicion", cfg: "[Kr] 4d⁵ 5s²", d: "El elemento radiactivo sintético más ligero, usado en medicina." },
+            { Z: 44, s: "Ru", n: "Rutenio", m: "101.07", g: 8, p: 5, c: "transicion", cfg: "[Kr] 4d⁷ 5s¹", d: "Metal raro del grupo del platino usado en contactos eléctricos." },
+            { Z: 45, s: "Rh", n: "Rodio", m: "102.91", g: 9, p: 5, c: "transicion", cfg: "[Kr] 4d⁸ 5s¹", d: "Metal precioso extremadamente noble usado como catalizador." },
+            { Z: 46, s: "Pd", n: "Paladio", m: "106.42", g: 10, p: 5, c: "transicion", cfg: "[Kr] 4d¹⁰", d: "Metal que absorbe cantidades enormes de hidrógeno gaseoso." },
+            { Z: 47, s: "Ag", n: "Plata", m: "107.87", g: 11, p: 5, c: "transicion", cfg: "[Kr] 4d¹⁰ 5s¹", d: "El elemento con la mayor conductividad eléctrica y térmica." },
+            { Z: 48, s: "Cd", n: "Cadmio", m: "112.41", g: 12, p: 5, c: "transicion", cfg: "[Kr] 4d¹⁰ 5s²", d: "Metal tóxico utilizado en baterías de níquel-cadmio." },
+            { Z: 49, s: "In", n: "Indio", m: "114.82", g: 13, p: 5, c: "metal", cfg: "[Kr] 4d¹⁰ 5s² 5p¹", d: "Esencial en las pantallas táctiles mediante óxido de indio y estaño." },
+            { Z: 50, s: "Sn", n: "Estaño", m: "118.71", g: 14, p: 5, c: "metal", cfg: "[Kr] 4d¹⁰ 5s² 5p²", d: "Metal blanco usado para soldaduras y aleaciones como el bronce." },
+            { Z: 51, s: "Sb", n: "Antimonio", m: "121.76", g: 15, p: 5, c: "metaloide", cfg: "[Kr] 4d¹⁰ 5s² 5p³", d: "Usado como retardante de llama y en semiconductores." },
+            { Z: 52, s: "Te", n: "Telurio", m: "127.60", g: 16, p: 5, c: "metaloide", cfg: "[Kr] 4d¹⁰ 5s² 5p⁴", d: "Metaloide raro usado en discos CD/DVD y paneles solares." },
+            { Z: 53, s: "I", n: "Yodo", m: "126.90", g: 17, p: 5, c: "halógeno", cfg: "[Kr] 4d¹⁰ 5s² 5p⁵", d: "Halógeno sólido esencial para el funcionamiento de la tiroides." },
+            { Z: 54, s: "Xe", n: "Xenón", m: "131.29", g: 18, p: 5, c: "noble", cfg: "[Kr] 4d¹⁰ 5s² 5p⁶", d: "Gas noble pesado usado en lámparas quirúrgicas y propulsión espacial." },
+            { Z: 55, s: "Cs", n: "Cesio", m: "132.91", g: 1, p: 6, c: "alcalino", cfg: "[Xe] 6s¹", d: "Define la unidad del segundo en el Sistema Internacional de Unidades." },
+            { Z: 56, s: "Ba", n: "Bario", m: "137.33", g: 2, p: 6, c: "alcalinoterreo", cfg: "[Xe] 6s²", d: "Usado como agente de contraste en diagnósticos médicos por rayos X." },
+            // Lantánidos (57 al 71)
+            { Z: 57, s: "La", n: "Lantano", m: "138.91", g: 4, p: 6, c: "lantanido", cfg: "[Xe] 5d¹ 6s²", d: "Iniciador de la serie de los lantánidos, usado en lentes ópticas." },
+            { Z: 58, s: "Ce", n: "Cerio", m: "140.12", g: 5, p: 6, c: "lantanido", cfg: "[Xe] 4f¹ 5d¹ 6s²", d: "Lantánido más abundante, básico en piedras de encendedores." },
+            { Z: 59, s: "Pr", n: "Praseodimio", m: "140.91", g: 6, p: 6, c: "lantanido", cfg: "[Xe] 4f³ 6s²", d: "Aporta color amarillo a vidrios y gafas de soldador." },
+            { Z: 60, s: "Nd", n: "Neodimio", m: "144.24", g: 7, p: 6, c: "lantanido", cfg: "[Xe] 4f⁴ 6s²", d: "Forma los imanes permanentes más potentes conocidos." },
+            { Z: 61, s: "Pm", n: "Prometio", m: "[145]", g: 8, p: 6, c: "lantanido", cfg: "[Xe] 4f⁵ 6s²", d: "Único lantánido totalmente radiactivo e inestable." },
+            { Z: 62, s: "Sm", n: "Samario", m: "150.36", g: 9, p: 6, c: "lantanido", cfg: "[Xe] 4f⁶ 6s²", d: "Usado en imanes que resisten elevadísimas temperaturas." },
+            { Z: 63, s: "Eu", n: "Europio", m: "151.96", g: 10, p: 6, c: "lantanido", cfg: "[Xe] 4f⁷ 6s²", d: "Usado en fósforos rojos para pantallas y medidas anti-falsificación." },
+            { Z: 64, s: "Gd", n: "Gadolinio", m: "157.25", g: 11, p: 6, c: "lantanido", cfg: "[Xe] 4f⁷ 5d¹ 6s²", d: "Posee propiedades magnéticas excepcionales usadas en resonancias." },
+            { Z: 65, s: "Tb", n: "Terbio", m: "158.93", g: 12, p: 6, c: "lantanido", cfg: "[Xe] 4f⁹ 6s²", d: "Aporta color verde fluorescente en dispositivos electrónicos." },
+            { Z: 66, s: "Dy", n: "Disprosio", m: "162.50", g: 13, p: 6, c: "lantanido", cfg: "[Xe] 4f¹⁰ 6s²", d: "Tiene una alta absorción de neutrones en reactores nucleares." },
+            { Z: 67, s: "Ho", n: "Holmio", m: "164.93", g: 14, p: 6, c: "lantanido", cfg: "[Xe] 4f¹¹ 6s²", d: "Posee la mayor fuerza magnética de cualquier elemento." },
+            { Z: 68, s: "Er", n: "Erbio", m: "167.26", g: 15, p: 6, c: "lantanido", cfg: "[Xe] 4f¹² 6s²", d: "Usado en amplificadores de fibra óptica de telecomunicaciones." },
+            { Z: 69, s: "Tm", n: "Tulio", m: "168.93", g: 16, p: 6, c: "lantanido", cfg: "[Xe] 4f¹³ 6s²", d: "El lantánido más raro, utilizado en fuentes portátiles de rayos X." },
+            { Z: 70, s: "Yb", n: "Iterbio", m: "173.05", g: 17, p: 6, c: "lantanido", cfg: "[Xe] 4f¹⁴ 6s²", d: "Usado en relojes atómicos ultraprecisos y láseres industriales." },
+            { Z: 71, s: "Lu", n: "Lutecio", m: "174.97", g: 18, p: 6, c: "lantanido", cfg: "[Xe] 4f¹⁴ 5d¹ 6s²", d: "Último elemento de los lantánidos, denso y duro." },
+            // Continuación Periodo 6
+            { Z: 72, s: "Hf", n: "Hafnio", m: "178.49", g: 4, p: 6, c: "transicion", cfg: "[Xe] 4f¹⁴ 5d² 6s²", d: "Usado en barras de control nuclear y procesadores de última generación." },
+            { Z: 73, s: "Ta", n: "Tántalo", m: "180.95", g: 5, p: 6, c: "transicion", cfg: "[Xe] 4f¹⁴ 5d³ 6s²", d: "Inerte y resistente, vital para condensadores en smartphones." },
+            { Z: 74, s: "W", n: "Wolframio", m: "183.84", g: 6, p: 6, c: "transicion", cfg: "[Xe] 4f¹⁴ 5d⁴ 6s²", d: "Tiene el punto de fusión más alto de todos los metales (3422 °C)." },
+            { Z: 75, s: "Re", n: "Renio", m: "186.21", g: 7, p: 6, c: "transicion", cfg: "[Xe] 4f¹⁴ 5d⁵ 6s²", d: "Metal raro con gran resistencia al calor en turbinas de aviones." },
+            { Z: 76, s: "Os", n: "Osmio", m: "190.23", g: 8, p: 6, c: "transicion", cfg: "[Xe] 4f¹⁴ 5d⁶ 6s²", d: "El elemento natural más denso existente en la naturaleza." },
+            { Z: 77, s: "Ir", n: "Iridio", m: "192.22", g: 9, p: 6, c: "transicion", cfg: "[Xe] 4f¹⁴ 5d⁷ 6s²", d: "El metal más resistente a la corrosión química." },
+            { Z: 78, s: "Pt", n: "Platino", m: "195.08", g: 10, p: 6, c: "transicion", cfg: "[Xe] 4f¹⁴ 5d⁹ 6s¹", d: "Metal noble precioso usado en catalizadores y joyería fina." },
+            { Z: 79, s: "Au", n: "Oro", m: "196.97", g: 11, p: 6, c: "transicion", cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s¹", d: "Metal precioso maleable que no se oxida jamás." },
+            { Z: 80, s: "Hg", n: "Mercurio", m: "200.59", g: 12, p: 6, c: "transicion", cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s²", d: "Único metal líquido en condiciones estándar de presión y temp." },
+            { Z: 81, s: "Tl", n: "Talio", m: "204.38", g: 13, p: 6, c: "metal", cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹", d: "Metal blando extremadamente tóxico usado en fotodetectores." },
+            { Z: 82, s: "Pb", n: "Plomo", m: "207.2", g: 14, p: 6, c: "metal", cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²", d: "Metal denso, escudo principal contra la radiación ionizante." },
+            { Z: 83, s: "Bi", n: "Bismuto", m: "208.98", g: 15, p: 6, c: "metal", cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³", d: "Metal pesado de baja toxicidad con espectaculares cristales iridiscentes." },
+            { Z: 84, s: "Po", n: "Polonio", m: "[209]", g: 16, p: 6, c: "metaloide", cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴", d: "Elemento altamente radiactivo descubierto por Marie Curie." },
+            { Z: 85, s: "At", n: "Astato", m: "[210]", g: 17, p: 6, c: "halógeno", cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵", d: "El elemento natural más raro existente en la corteza terrestre." },
+            { Z: 86, s: "Rn", n: "Radón", m: "[222]", g: 18, p: 6, c: "noble", cfg: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶", d: "Gas noble radiactivo que emana de rocas y suelos con uranio." },
+            { Z: 87, s: "Fr", n: "Francio", m: "[223]", g: 1, p: 7, c: "alcalino", cfg: "[Rn] 7s¹", d: "Metal alcalino extremadamente inestable y radiactivo." },
+            { Z: 88, s: "Ra", n: "Radio", m: "[226]", g: 2, p: 7, c: "alcalinoterreo", cfg: "[Rn] 7s²", d: "Famoso por su intensa luminiscencia y radiactividad histórica." },
+            // Actínidos (89 al 103)
+            { Z: 89, s: "Ac", n: "Actinio", m: "[227]", g: 4, p: 7, c: "actinido", cfg: "[Rn] 6d¹ 7s²", d: "Elemento radiactivo que brilla con un tenue azul en la oscuridad." },
+            { Z: 90, s: "Th", n: "Torio", m: "232.04", g: 5, p: 7, c: "actinido", cfg: "[Rn] 6d² 7s²", d: "Prometedor combustible nuclear alternativo al uranio." },
+            { Z: 91, s: "Pa", n: "Protactinio", m: "231.04", g: 6, p: 7, c: "actinido", cfg: "[Rn] 5f² 6d¹ 7s²", d: "Actínido raro, denso y sumamente tóxico." },
+            { Z: 92, s: "U", n: "Uranio", m: "238.03", g: 7, p: 7, c: "actinido", cfg: "[Rn] 5f³ 6d¹ 7s²", d: "Combustible principal en plantas de energía de fisión nuclear." },
+            { Z: 93, s: "Np", n: "Neptunio", m: "[237]", g: 8, p: 7, c: "actinido", cfg: "[Rn] 5f⁴ 6d¹ 7s²", d: "Primer elemento transuránico sintético producido." },
+            { Z: 94, s: "Pu", n: "Plutonio", m: "[244]", g: 9, p: 7, c: "actinido", cfg: "[Rn] 5f⁶ 7s²", d: "Usado en armas nucleares y generadores térmicos espaciales." },
+            { Z: 95, s: "Am", n: "Americio", m: "[243]", g: 10, p: 7, c: "actinido", cfg: "[Rn] 5f⁷ 7s²", d: "Utilizado comúnmente en los detectores domésticos de humo." },
+            { Z: 96, s: "Cm", n: "Curio", m: "[247]", g: 11, p: 7, c: "actinido", cfg: "[Rn] 5f⁷ 6d¹ 7s²", d: "Nombrado en honor a Pierre y Marie Curie, altamente radiactivo." },
+            { Z: 97, s: "Bk", n: "Berkelio", m: "[247]", g: 12, p: 7, c: "actinido", cfg: "[Rn] 5f⁹ 7s²", d: "Sintetizado en la Universidad de California, Berkeley." },
+            { Z: 98, s: "Cf", n: "Californio", m: "[251]", g: 13, p: 7, c: "actinido", cfg: "[Rn] 5f¹⁰ 7s²", d: "Potente emisor de neutrones para iniciar reactores nucleares." },
+            { Z: 99, s: "Es", n: "Einstenio", m: "[252]", g: 14, p: 7, c: "actinido", cfg: "[Rn] 5f¹¹ 7s²", d: "Descubierto tras la primera prueba de la bomba de hidrógeno." },
+            { Z: 100, s: "Fm", n: "Fermio", m: "[257]", g: 15, p: 7, c: "actinido", cfg: "[Rn] 5f¹² 7s²", d: "Nombrado en honor al físico nuclear Enrico Fermi." },
+            { Z: 101, s: "Md", n: "Mendelevio", m: "[258]", g: 16, p: 7, c: "actinido", cfg: "[Rn] 5f¹³ 7s²", d: "Nombrado en honor a Dmitri Mendeléyev, creador de la tabla." },
+            { Z: 102, s: "No", n: "Nobelio", m: "[259]", g: 17, p: 7, c: "actinido", cfg: "[Rn] 5f¹⁴ 7s²", d: "Nombrado en honor a Alfred Nobel, inventor de la dinamita." },
+            { Z: 103, s: "Lr", n: "Lawrencio", m: "[266]", g: 18, p: 7, c: "actinido", cfg: "[Rn] 5f¹⁴ 6d¹ 7s²", d: "Último elemento de la serie de los actínidos." },
+            // Continuación Periodo 7
+            { Z: 104, s: "Rf", n: "Rutherfordio", m: "[267]", g: 4, p: 7, c: "transicion", cfg: "[Rn] 5f¹⁴ 6d² 7s²", d: "Sintético, primer elemento superpesado del grupo 4." },
+            { Z: 105, s: "Db", n: "Dubnio", m: "[268]", g: 5, p: 7, c: "transicion", cfg: "[Rn] 5f¹⁴ 6d³ 7s²", d: "Sintético, nombrado en honor a la ciudad rusa de Dubná." },
+            { Z: 106, s: "Sg", n: "Seaborgio", m: "[269]", g: 6, p: 7, c: "transicion", cfg: "[Rn] 5f¹⁴ 6d⁴ 7s²", d: "Nombrado en honor al químico nuclear Glenn T. Seaborg." },
+            { Z: 107, s: "Bh", n: "Bohrio", m: "[270]", g: 7, p: 7, c: "transicion", cfg: "[Rn] 5f¹⁴ 6d⁵ 7s²", d: "Nombrado en honor a Niels Bohr, creador del modelo atómico." },
+            { Z: 108, s: "Hs", n: "Hassio", m: "[270]", g: 8, p: 7, c: "transicion", cfg: "[Rn] 5f¹⁴ 6d⁶ 7s²", d: "Sintético, nombrado por el estado alemán de Hesse." },
+            { Z: 109, s: "Mt", n: "Meitnerio", m: "[278]", g: 9, p: 7, c: "transicion", cfg: "[Rn] 5f¹⁴ 6d⁷ 7s²", d: "Nombrado en honor a la física Lise Meitner." },
+            { Z: 110, s: "Ds", n: "Darmstadtio", m: "[281]", g: 10, p: 7, c: "transicion", cfg: "[Rn] 5f¹⁴ 6d⁸ 7s²", d: "Sintetizado en Darmstadt, Alemania." },
+            { Z: 111, s: "Rg", n: "Roentgenio", m: "[282]", g: 11, p: 7, c: "transicion", cfg: "[Rn] 5f¹⁴ 6d⁹ 7s²", d: "Nombrado en honor a Wilhelm Röntgen, descubridor de los Rayos X." },
+            { Z: 112, s: "Cn", n: "Copernicio", m: "[285]", g: 12, p: 7, c: "transicion", cfg: "[Rn] 5f¹⁴ 6d¹⁰ 7s²", d: "Nombrado en honor al astrónomo Nicolás Copérnico." },
+            { Z: 113, s: "Nh", n: "Nihonio", m: "[286]", g: 13, p: 7, c: "metal", cfg: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹", d: "Primer elemento descubierto en un país asiático (Japón)." },
+            { Z: 114, s: "Fl", n: "Flerovio", m: "[289]", g: 14, p: 7, c: "metal", cfg: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²", d: "Elemento superpesado sintetizado en Dubná." },
+            { Z: 115, s: "Mc", n: "Moscovio", m: "[290]", g: 15, p: 7, c: "metal", cfg: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³", d: "Nombrado en honor a la región de Moscú." },
+            { Z: 116, s: "Lv", n: "Livermorio", m: "[293]", g: 16, p: 7, c: "metal", cfg: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴", d: "Nombrado por el Laboratorio Nacional Lawrence Livermore." },
+            { Z: 117, s: "Ts", n: "Tenesino", m: "[294]", g: 17, p: 7, c: "halógeno", cfg: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵", d: "Halógeno superpesado nombrado por el estado de Tennessee." },
+            { Z: 118, s: "Og", n: "Oganesón", m: "[294]", g: 18, p: 7, c: "noble", cfg: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶", d: "El elemento con mayor masa atómica registrado oficialmente." }
+        ];
+
+        // Mapeo de Colores por Categoría
+        const categoryColors = {
+            nometal: "bg-sky-100 border-sky-300 text-sky-900 hover:bg-sky-200",
+            noble: "bg-purple-100 border-purple-300 text-purple-900 hover:bg-purple-200",
+            alcalino: "bg-red-100 border-red-300 text-red-900 hover:bg-red-200",
+            alcalinoterreo: "bg-orange-100 border-orange-300 text-orange-900 hover:bg-orange-200",
+            metaloide: "bg-teal-100 border-teal-300 text-teal-900 hover:bg-teal-200",
+            halógeno: "bg-indigo-100 border-indigo-300 text-indigo-900 hover:bg-indigo-200",
+            metal: "bg-emerald-100 border-emerald-300 text-emerald-900 hover:bg-emerald-200",
+            transicion: "bg-yellow-100 border-yellow-300 text-yellow-900 hover:bg-yellow-200",
+            lantanido: "bg-amber-100 border-amber-300 text-amber-900 hover:bg-amber-200",
+            actinido: "bg-rose-100 border-rose-300 text-rose-900 hover:bg-rose-200"
+        };
+
+        const categoryHeaders = {
+            nometal: "bg-sky-600",
+            noble: "bg-purple-600",
+            alcalino: "bg-red-600",
+            alcalinoterreo: "bg-orange-600",
+            metaloide: "bg-teal-600",
+            halógeno: "bg-indigo-600",
+            metal: "bg-emerald-600",
+            transicion: "bg-yellow-600",
+            lantanido: "bg-amber-600",
+            actinido: "bg-rose-600"
+        };
+
+        const categoryNames = {
+            nometal: "No metal",
+            noble: "Gas noble",
+            alcalino: "Metal alcalino",
+            alcalinoterreo: "Alcalinoterreo",
+            metaloide: "Metaloide",
+            halógeno: "Halógeno",
+            metal: "Otros metales",
+            transicion: "Metal de transición",
+            lantanido: "Lantánido",
+            actinido: "Actínido"
+        };
+
+        // Renderizado de la Tabla Periódica
+        function renderPeriodicTable() {
+            const grid = document.getElementById('periodicGrid');
+            grid.innerHTML = '';
+
+            // 1. Fila de Encabezados de Grupos (1 a 18)
+            grid.appendChild(createHeaderCell(''));
+            for (let g = 1; g <= 18; g++) {
+                grid.appendChild(createHeaderCell(g));
+            }
+
+            // 2. Filas de Periodos (1 a 7)
+            for (let p = 1; p <= 7; p++) {
+                grid.appendChild(createPeriodCell(p));
+
+                for (let g = 1; g <= 18; g++) {
+                    // Marcadores de posición para lantánidos (P:6, G:3) y actínidos (P:7, G:3)
+                    if ((p === 6 || p === 7) && g === 3) {
+                        const marker = document.createElement('div');
+                        if (p === 6) {
+                            marker.className = "p-1 rounded bg-amber-200/60 border-2 border-amber-400 flex flex-col justify-center items-center cursor-default shadow-inner";
+                            marker.innerHTML = `<div class="text-[8px] font-bold text-amber-800">57-71</div><div class="font-bold text-[10px] text-amber-900">La-Lu</div>`;
+                        } else {
+                            marker.className = "p-1 rounded bg-rose-200/60 border-2 border-rose-400 flex flex-col justify-center items-center cursor-default shadow-inner";
+                            marker.innerHTML = `<div class="text-[8px] font-bold text-rose-800">89-103</div><div class="font-bold text-[10px] text-rose-900">Ac-Lr</div>`;
+                        }
+                        grid.appendChild(marker);
+                        continue;
+                    }
+
+                    const elem = elementsData.find(e => 
+                        e.p === p && 
+                        e.g === g && 
+                        !(e.Z >= 57 && e.Z <= 71) && 
+                        !(e.Z >= 89 && e.Z <= 103)
+                    );
+
+                    if (elem) {
+                        grid.appendChild(createElementCard(elem));
+                    } else {
+                        const emptyCell = document.createElement('div');
+                        grid.appendChild(emptyCell);
+                    }
+                }
+            }
+
+            // 3. Cargar Lantánidos (57 a 71)
+            const lanthRow = document.getElementById('lanthanidesRow');
+            lanthRow.innerHTML = '';
+            lanthRow.appendChild(document.createElement('div')); // periodo vacío
+            for (let i = 0; i < 3; i++) lanthRow.appendChild(document.createElement('div')); // grupos 1-3 vacíos
+            const lanthanides = elementsData.filter(e => e.Z >= 57 && e.Z <= 71).sort((a,b) => a.Z - b.Z);
+            lanthanides.forEach(elem => lanthRow.appendChild(createElementCard(elem)));
+
+            // 4. Cargar Actínidos (89 a 103)
+            const actRow = document.getElementById('actinidesRow');
+            actRow.innerHTML = '';
+            actRow.appendChild(document.createElement('div'));
+            for (let i = 0; i < 3; i++) actRow.appendChild(document.createElement('div'));
+            const actinides = elementsData.filter(e => e.Z >= 89 && e.Z <= 103).sort((a,b) => a.Z - b.Z);
+            actinides.forEach(elem => actRow.appendChild(createElementCard(elem)));
+        }
+
+        function createHeaderCell(text) {
+            const div = document.createElement('div');
+            div.className = "text-center text-xs font-bold text-slate-500 py-1";
+            div.innerText = text;
+            return div;
+        }
+
+        function createPeriodCell(period) {
+            const div = document.createElement('div');
+            div.className = "flex items-center justify-center font-bold text-xs text-slate-500 bg-slate-200/60 rounded border border-slate-300/60";
+            div.innerText = period;
+            return div;
+        }
+
+        function createElementCard(elem) {
+            const card = document.createElement('div');
+            const style = categoryColors[elem.c] || "bg-slate-100 border-slate-300 text-slate-800";
+            card.className = `element-card p-1 rounded border shadow-sm flex flex-col justify-between ${style}`;
+            card.onclick = () => openModal(elem);
+
+            card.innerHTML = `
+                <div class="text-[9px] text-slate-600 font-bold leading-none text-left">${elem.Z}</div>
+                <div class="font-black text-sm text-slate-900 tracking-tight my-0.5">${elem.s}</div>
+                <div class="text-[8px] text-slate-700 truncate font-sans font-medium">${elem.n}</div>
+            `;
+            return card;
+        }
+
+        // Abrir y Cerrar Modal Emergente con Detalles
+        function openModal(elem) {
+            const modal = document.getElementById('elementModal');
+            const modalCard = document.getElementById('modalCard');
+            const modalHeader = document.getElementById('modalHeader');
+
+            modalHeader.className = `p-6 text-white relative flex justify-between items-start ${categoryHeaders[elem.c] || 'bg-slate-800'}`;
+
+            document.getElementById('modalNumber').innerText = `#${elem.Z} — Grupo ${elem.g}, Periodo ${elem.p}`;
+            document.getElementById('modalSymbol').innerText = elem.s;
+            document.getElementById('modalName').innerText = elem.n;
+            document.getElementById('modalMass').innerText = `${elem.m} u`;
+            document.getElementById('modalCategory').innerText = categoryNames[elem.c] || elem.c;
+            document.getElementById('modalConfig').innerText = elem.cfg;
+            document.getElementById('modalDesc').innerText = elem.d;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalCard.classList.remove('scale-95', 'opacity-0');
+                modalCard.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('elementModal');
+            const modalCard = document.getElementById('modalCard');
+            modalCard.classList.remove('scale-100', 'opacity-100');
+            modalCard.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('elementModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', renderPeriodicTable);
+    </script>
+</body>
+</html>
