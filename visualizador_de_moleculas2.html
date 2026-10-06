@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Visualizador Molecular 2D/3D | Química Computacional</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primario: '#0F2B6D',
+                        secundario: '#1E3A8A',
+                        terciario: '#3B82F6',
+                        exito: '#10B981',
+                        advertencia: '#F59E0B',
+                        error: '#EF4444',
+                        fondo: '#F8FAFC',
+                        texto: '#0F172A'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/@rdkit/rdkit/dist/RDKit_minimal.js"></script>
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; background-color: #F8FAFC; }
+        .header-blue { background: linear-gradient(135deg, #0F2B6D 0%, #1E3A8A 100%); }
+        .animate-fade-in-up { animation: fadeInUp 0.4s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        .chip { transition: all 0.15s ease; }
+        .chip:active { transform: scale(0.96); }
+        .style-btn.active-style { background-color: #0F2B6D; color: white; border-color: #0F2B6D; }
+        .cat-tab.active-tab { background-color: #0F2B6D; color: white; border-color: #0F2B6D; }
+        #visor3d { width: 100%; height: 100%; position: relative; }
+        .spinner { border: 3px solid #E2E8F0; border-top-color: #1E40AF; border-radius: 50%; width: 28px; height: 28px; animation: girar 0.7s linear infinite; }
+        @keyframes girar { to { transform: rotate(360deg); } }
+        input[type=text]:focus { outline: none; box-shadow: 0 0 0 3px rgba(30,64,175,0.25); border-color: #1E40AF; }
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+
+        .swatch {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, 0.25);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            flex-shrink: 0; font-size: 11px; font-weight: 800;
+            color: rgba(0,0,0,0.7); text-shadow: 0 0 2px rgba(255,255,255,0.7);
+        }
+        .swatch.hidrogeno { border: 2px solid #94a3b8; }
+
+        .btn-descarga { transition: all 0.15s ease; }
+        .btn-descarga:active { transform: scale(0.96); }
+
+        .chart-container { position: relative; height: 220px; width: 100%; }
+
+        .prop-legend {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px;
+            font-size: 10px; margin-top: 8px;
+        }
+        .prop-legend-item {
+            display: flex; align-items: center; gap: 5px;
+            padding: 3px 5px; background: #F8FAFC;
+            border-radius: 5px; border: 1px solid #E2E8F0;
+        }
+        .prop-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .prop-legend-label { font-weight: 700; color: #0F2B6D; }
+        .prop-legend-value { color: #64748B; font-family: monospace; }
+    </style>
+</head>
+<body class="text-texto p-3 sm:p-6 md:p-8">
+
+    <div class="max-w-6xl mx-auto header-blue rounded-2xl shadow-xl p-5 sm:p-6 mb-6 flex flex-col md:flex-row items-center gap-6 md:gap-8 text-white">
+        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" class="flex-shrink-0 group">
+            <div class="p-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl group-hover:bg-white/20 transition">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364"
+                     alt="QR Investigador" class="w-24 h-24 sm:w-28 sm:h-28 transform group-hover:scale-105 transition rounded-lg">
+            </div>
+            <p class="text-[10px] text-center text-blue-200 mt-2 font-bold uppercase">Perfil Científico</p>
+        </a>
+        <div class="flex-1 text-center md:text-left">
+            <h1 class="text-2xl sm:text-3xl font-black mb-2">VISUALIZADOR MOLECULAR 2D / 3D</h1>
+            <p class="text-lg sm:text-xl font-medium text-blue-100 mb-1">Dr. Ronald F. Rodriguez Espinoza</p>
+            <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-2">
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">SMILES → Estructura 2D</span>
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Modelo 3D interactivo</span>
+                <span class="bg-white/20 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Análisis de Lipinski & LogP</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+        <div class="p-5 sm:p-8 md:p-10">
+
+            <div id="estado-motor" class="flex items-center gap-3 bg-blue-50 border border-blue-100 text-blue-800 text-sm px-4 py-3 rounded-xl mb-6">
+                <div class="spinner"></div>
+                <span>Cargando el motor de química (RDKit)…</span>
+            </div>
+
+            <div id="alerta-error" class="hidden bg-red-50 border-l-4 border-error text-error p-4 rounded-md mb-6">
+                <span class="font-bold">Error:</span> <span id="texto-error"></span>
+            </div>
+
+            <form id="form-smiles" class="mb-6">
+                <label class="block text-xs font-black text-slate-500 uppercase mb-2">Código SMILES de la molécula</label>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="input-smiles" value="CN1C=NC2=C1C(=O)N(C(=O)N2C)C" autocomplete="off" spellcheck="false"
+                        placeholder="Ej: CC(=O)OC1=CC=CC=C1C(=O)O"
+                        class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-mono text-base sm:text-lg">
+                    <div class="flex gap-2">
+                        <button type="submit" id="btn-calcular" disabled
+                            class="flex-1 sm:flex-none px-5 py-3 bg-primario text-white font-black text-base rounded-xl shadow-lg hover:bg-blue-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <span>Visualizar</span>
+                        </button>
+                        <button type="button" id="btn-limpiar"
+                            class="px-4 py-3 bg-white text-slate-600 font-bold text-base rounded-xl border border-slate-300 shadow-sm hover:bg-red-50 hover:text-red-600 hover:border-red-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            <span class="hidden sm:inline">Limpiar</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mb-8 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <p class="text-xs font-black text-slate-500 uppercase mb-3">Ejemplos clasificados por categoría:</p>
+                <div class="flex flex-wrap gap-2 mb-3" id="tabs-categorias"></div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2" id="lista-ejemplos"></div>
+            </div>
+
+            <div id="resultados-container" class="hidden space-y-8 animate-fade-in-up">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+                    
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                            <h3 class="text-sm font-black uppercase flex items-center text-primario"><span class="p-2 bg-blue-100 rounded-lg mr-3">🧪</span> Estructura 2D</h3>
+                            <div class="flex gap-1">
+                                <button id="btn-descargar-2d-svg" class="btn-descarga text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 flex items-center gap-1.5" title="Descargar SVG">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <span>SVG</span>
+                                </button>
+                                <button id="btn-descargar-2d-png" class="btn-descarga text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 flex items-center gap-1.5" title="Descargar PNG">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <span>PNG</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="contenedor-2d" class="w-full flex-1 min-h-[340px] bg-white rounded-xl border border-slate-200 flex items-center justify-center overflow-hidden p-2"></div>
+                    </div>
+
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                            <h3 class="text-sm font-black uppercase flex items-center text-primario"><span class="p-2 bg-blue-100 rounded-lg mr-3">🔬</span> Estructura 3D (interactiva)</h3>
+                            <div class="flex gap-1 items-center" id="controles-estilo3d">
+                                <button data-estilo="bolas" class="style-btn active-style text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">Bolas y varillas</button>
+                                <button data-estilo="varillas" class="style-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">Varillas</button>
+                                <button data-estilo="esferas" class="style-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white">Esferas</button>
+                                <button id="btn-descargar-3d" class="btn-descarga text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 flex items-center gap-1.5" title="Descargar PNG 3D">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <span>PNG</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="relative w-full flex-1 min-h-[340px] bg-white rounded-xl border border-slate-200 overflow-hidden">
+                            <div id="visor3d"></div>
+                            <div id="estado-3d" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/90 text-sm text-slate-500">
+                                <div class="spinner"></div>
+                                <span id="texto-estado-3d">Generando modelo 3D…</span>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-2 text-center">Arrastra para rotar · rueda del mouse para zoom</p>
+                        <div id="leyenda-3d" class="mt-3 flex flex-wrap gap-2 justify-center"></div>
+                    </div>
+
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <h3 class="text-sm font-black uppercase mb-4 text-primario flex items-center gap-2">
+                            <span>📊</span> Propiedades Físico-Químicas
+                        </h3>
+                        <div id="info-molecular" class="space-y-2 text-sm"></div>
+                        <div class="mt-4 pt-4 border-t border-slate-100">
+                            <a id="link-pubchem" href="#" target="_blank" class="inline-block text-xs font-semibold text-terciario hover:underline">Buscar esta molécula en PubChem ↗</a>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <h3 class="text-sm font-black uppercase mb-2 text-primario flex items-center gap-2">
+                            <span>💊</span> Regla de Lipinski (Drug-likeness)
+                        </h3>
+                        <p class="text-[11px] text-slate-400 mb-3">Parámetros de biodisponibilidad oral:</p>
+                        <ul id="lista-lipinski" class="space-y-2 text-xs"></ul>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <h3 class="text-sm font-black uppercase mb-2 text-primario flex items-center gap-2">
+                            <span>📊</span> Propiedades (normalizadas)
+                        </h3>
+                        <p class="text-[11px] text-slate-400 mb-2">Cada barra es el % respecto al límite de Lipinski.</p>
+                        <div class="chart-container">
+                            <canvas id="chart-barras"></canvas>
+                        </div>
+                        <div id="prop-legend" class="prop-legend"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <h3 class="text-sm font-black uppercase mb-2 text-primario flex items-center gap-2">
+                            <span>🍩</span> Composición atómica
+                        </h3>
+                        <p class="text-[11px] text-slate-400 mb-2">Distribución porcentual de elementos en la molécula.</p>
+                        <div class="chart-container" style="height: 240px;">
+                            <canvas id="chart-dona"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <h3 class="text-sm font-black uppercase mb-2 text-primario flex items-center gap-2">
+                            <span>📏</span> Cumplimiento de Lipinski
+                        </h3>
+                        <p class="text-[11px] text-slate-400 mb-2">Valores frente a los límites recomendados (verde = cumple, rojo = excede).</p>
+                        <div class="chart-container" style="height: 240px;">
+                            <canvas id="chart-lipinski"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <p class="max-w-6xl mx-auto text-center text-[11px] text-slate-400 mt-6 px-4">
+        Estructuras 2D generadas con RDKit.js · Modelo 3D renderizado mediante NCI Cactus / PubChem y 3Dmol.js
+    </p>
+
+    <script>
+        const ejemplosCategorizados = [
+            { cat: "Moléculas Básicas", nombre: "💧 Agua", smiles: "O" },
+            { cat: "Moléculas Básicas", nombre: "⛽ Metano", smiles: "C" },
+            { cat: "Moléculas Básicas", nombre: "🍺 Etanol", smiles: "CCO" },
+            { cat: "Aromáticos y Anillos", nombre: "⬡ Benceno", smiles: "c1ccccc1" },
+            { cat: "Aromáticos y Anillos", nombre: "⭕ Ciclopropano", smiles: "C1CC1" },
+            { cat: "Aromáticos y Anillos", nombre: "⭕ Ciclobutano", smiles: "C1CCC1" },
+            { cat: "Aromáticos y Anillos", nombre: "⭕ Ciclopentano", smiles: "C1CCCC1" },
+            { cat: "Aromáticos y Anillos", nombre: "⭕ Ciclohexano", smiles: "C1CCCCC1" },
+            { cat: "Aromáticos y Anillos", nombre: "⭕ Cicloheptano", smiles: "C1CCCCCC1" },
+            { cat: "Fármacos y Biología", nombre: "☕ Cafeína", smiles: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C" },
+            { cat: "Fármacos y Biología", nombre: "💊 Aspirina", smiles: "CC(=O)OC1=CC=CC=C1C(=O)O" },
+            { cat: "Fármacos y Biología", nombre: "🤕 Paracetamol", smiles: "CC(=O)NC1=CC=C(C=C1)O" },
+            { cat: "Fármacos y Biología", nombre: "🦴 Ibuprofeno", smiles: "CC(C)CC1=CC=C(C=C1)C(C)C(=O)O" },
+            { cat: "Fármacos y Biología", nombre: "🍬 Glucosa", smiles: "OC[C@H]1OC(O)[C@H](O)[C@@H](O)[C@@H]1O" },
+            { cat: "Fármacos y Biología", nombre: "🌿 Mentol", smiles: "CC(C)C1CCC(C)CC1O" },
+            { cat: "Fármacos y Biología", nombre: "🍫 Teobromina", smiles: "CN1C=NC2=C1C(=O)NC(=O)N2C" },
+            { cat: "Fármacos y Biología", nombre: "🧴 Vainillina", smiles: "COC1=CC(=CC=C1O)C=O" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 Etilciclopropano", smiles: "CCC1CC1" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 Pentilciclobutano", smiles: "CCCCCC1CCC1" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 Pentilciclopentano", smiles: "CCCCCC1CCCC1" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 Butilciclohexano", smiles: "CCCC1CCCCC1" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 Ciclopentilcicloheptano", smiles: "C1CCCC1C2CCCCCC2" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 Ciclobutilciclooctano", smiles: "C1CCC1C2CCCCCCC2" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 1,3-Dietilciclohexano", smiles: "CCC1CCCC(CC)C1" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 1-Etil-3-metilciclohexano", smiles: "CCC1CCCC(C)C1" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 2-Etil-1,4-dimetilciclohexano", smiles: "CCC1C(C)CCC(C)C1" },
+            { cat: "Ciclos Sustituidos", nombre: "🧪 1-Bromo-2-etilciclopentano", smiles: "CCC1CCCC1Br" },
+            { cat: "Ciclos Sustituidos", nombre: "🔗 Hexan-3-ilciclopentano", smiles: "CCCC(CC)C1CCCC1" },
+            { cat: "Ciclos Sustituidos", nombre: "🧪 1-Bromo-2-etil-4-metilciclopentano", smiles: "CCC1CC(C)CC1Br" },
+            { cat: "Estructuras Complejas", nombre: "🧬 7-Ciclohexil-2-ciclopropil-3-cloro-6-undecano", smiles: "C1(CCCCC1)C(C(CCC(C(C)C1CC1)Cl)C(C)CCC)CCCC" },
+            { cat: "Estructuras Complejas", nombre: "🔗 cis-1-Etil-2-metilciclohexano", smiles: "CC[C@H]1CCCC[C@H]1C" },
+            { cat: "Estructuras Complejas", nombre: "🔗 trans-1,4-Dipropilciclohexano", smiles: "C(CC)[C@@H]1CC[C@H](CC1)CCC" },
+            { cat: "Estructuras Complejas", nombre: "🔗 Octan-4-ilciclopentano", smiles: "CCCCC(CCC)C1CCCC1" },
+            { cat: "Estructuras Complejas", nombre: "🔗 (1-Ciclopropil-4-metilpentan-3-il)ciclobutano", smiles: "C1(CC1)CCC(C(C)C)C1CCC1" },
+            { cat: "Estructuras Complejas", nombre: "🔗 cis-1,4-Dimetilciclohexano", smiles: "C[C@H]1CC[C@@H](C)CC1" },
+            { cat: "Estructuras Complejas", nombre: "🔗 1-Metil-3-(propan-2-il)ciclohexano", smiles: "CC(C)C1CCCC(C)C1" },
+            { cat: "Estructuras Complejas", nombre: "🔗 4-Etil-1,1,3-trimetilciclohexano", smiles: "CCC1CCC(C)(C)CC1C" },
+            { cat: "Estructuras Complejas", nombre: "🧪 cis-1-Bromo-3-(butan-2-il)ciclohexano", smiles: "CCC(C)[C@H]1CCC[C@@H](Br)C1" },
+            { cat: "Sustancias Controladas", nombre: "🚫 Cocaína", smiles: "CN1[C@H]2CC[C@@H]1[C@H]([C@H](C2)OC(=O)C3=CC=CC=C3)C(=O)OC" },
+            { cat: "Sustancias Controladas", nombre: "🚫 Éxtasis", smiles: "CC(NC)CC1=CC=C(OCO2)C2=C1" }
+        ];
+
+        const coloresAtomicos = {
+            H: '#FFFFFF', C: '#909090', N: '#3050F8', O: '#FF0D0D',
+            F: '#90E050', Cl: '#1FF01F', Br: '#A62929', I: '#940094',
+            S: '#FFFF30', P: '#FF8000', B: '#FFB5B5', Si: '#F0C8A0',
+            Na: '#AB5CF2', K: '#8F40D4', Ca: '#3DFF00', Fe: '#E06633',
+            Mg: '#8AFF00', Zn: '#7D80B0'
+        };
+
+        const inputSmiles = document.getElementById('input-smiles');
+        const formSmiles = document.getElementById('form-smiles');
+        const btnCalcular = document.getElementById('btn-calcular');
+        const btnLimpiar = document.getElementById('btn-limpiar');
+        const estadoMotor = document.getElementById('estado-motor');
+        const listaEjemplos = document.getElementById('lista-ejemplos');
+        const tabsCategorias = document.getElementById('tabs-categorias');
+        const btnDescargar2DSVG = document.getElementById('btn-descargar-2d-svg');
+        const btnDescargar2DPNG = document.getElementById('btn-descargar-2d-png');
+        const btnDescargar3D = document.getElementById('btn-descargar-3d');
+
+        let RDKit = null;
+        let categoriaSeleccionada = "Todos";
+        let viewer3d = null;
+        let estiloActual = 'bolas';
+
+        let chartBarras = null, chartDona = null, chartLipinski = null;
+
+        function inicializarEjemplos() {
+            const categorias = ["Todos", ...new Set(ejemplosCategorizados.map(e => e.cat))];
+            tabsCategorias.innerHTML = '';
+            categorias.forEach(cat => {
+                const tab = document.createElement('button');
+                tab.type = 'button';
+                tab.className = `cat-tab text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600 ${cat === categoriaSeleccionada ? 'active-tab' : ''}`;
+                tab.innerText = cat;
+                tab.onclick = () => {
+                    categoriaSeleccionada = cat;
+                    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active-tab'));
+                    tab.classList.add('active-tab');
+                    renderizarEjemplos();
+                };
+                tabsCategorias.appendChild(tab);
+            });
+            renderizarEjemplos();
+        }
+
+        function renderizarEjemplos() {
+            listaEjemplos.innerHTML = '';
+            const filtrados = categoriaSeleccionada === "Todos" 
+                ? ejemplosCategorizados 
+                : ejemplosCategorizados.filter(e => e.cat === categoriaSeleccionada);
+            filtrados.forEach(ej => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'chip text-xs font-medium text-left px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-200 text-slate-700 shadow-sm truncate';
+                btn.innerText = ej.nombre;
+                btn.title = `${ej.nombre} (${ej.smiles})`;
+                btn.onclick = () => { inputSmiles.value = ej.smiles; formSmiles.requestSubmit(); };
+                listaEjemplos.appendChild(btn);
+            });
+        }
+
+        function mostrarError(m) {
+            document.getElementById('texto-error').innerText = m;
+            document.getElementById('alerta-error').classList.remove('hidden');
+            document.getElementById('resultados-container').classList.add('hidden');
+        }
+        function ocultarAlertas() { document.getElementById('alerta-error').classList.add('hidden'); }
+
+        btnLimpiar.addEventListener('click', () => {
+            inputSmiles.value = '';
+            ocultarAlertas();
+            document.getElementById('resultados-container').classList.add('hidden');
+            document.getElementById('contenedor-2d').innerHTML = '';
+            document.getElementById('leyenda-3d').innerHTML = '';
+            document.getElementById('info-molecular').innerHTML = '';
+            document.getElementById('lista-lipinski').innerHTML = '';
+            document.getElementById('prop-legend').innerHTML = '';
+            document.getElementById('link-pubchem').href = '#';
+            if (viewer3d) { viewer3d.clear(); viewer3d.render(); }
+            if (chartBarras) { chartBarras.destroy(); chartBarras = null; }
+            if (chartDona) { chartDona.destroy(); chartDona = null; }
+            if (chartLipinski) { chartLipinski.destroy(); chartLipinski = null; }
+            inputSmiles.focus();
+        });
+
+        window.initRDKitModule().then(mod => {
+            RDKit = mod;
+            if (RDKit.prefer_coordgen) RDKit.prefer_coordgen(true);
+            estadoMotor.classList.add('hidden');
+            btnCalcular.disabled = false;
+            inicializarEjemplos();
+        }).catch(() => {
+            estadoMotor.innerHTML = '<span class="text-error font-semibold">⚠️ Error al cargar el motor RDKit.</span>';
+        });
+
+        function crearVisor() {
+            if (!viewer3d && window.$3Dmol) {
+                viewer3d = $3Dmol.createViewer(document.getElementById('visor3d'), { backgroundColor: 'white' });
+            }
+        }
+        crearVisor();
+
+        function aplicarEstilo3d() {
+            if (!viewer3d) return;
+            if (estiloActual === 'bolas') {
+                viewer3d.setStyle({}, { stick: { radius: 0.14, colorscheme: 'Jmol' }, sphere: { scale: 0.28, colorscheme: 'Jmol' } });
+            } else if (estiloActual === 'varillas') {
+                viewer3d.setStyle({}, { stick: { radius: 0.18, colorscheme: 'Jmol' } });
+            } else if (estiloActual === 'esferas') {
+                viewer3d.setStyle({}, { sphere: { scale: 0.9, colorscheme: 'Jmol' } });
+            }
+            viewer3d.render();
+        }
+
+        document.getElementById('controles-estilo3d').addEventListener('click', (e) => {
+            const btn = e.target.closest('.style-btn');
+            if (!btn) return;
+            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active-style'));
+            btn.classList.add('active-style');
+            estiloActual = btn.dataset.estilo;
+            aplicarEstilo3d();
+        });
+
+        function contarAtomos(mol) {
+            try {
+                const molblock = mol.get_molblock();
+                const lineas = molblock.split('\n');
+                if (lineas.length > 4) {
+                    const nAtoms = parseInt(lineas[3].substring(0, 3).trim(), 10) || 0;
+                    const conteo = {};
+                    for (let i = 0; i < nAtoms; i++) {
+                        const linea = lineas[4 + i] || '';
+                        let simbolo = linea.substring(31, 34).trim();
+                        if (!simbolo || simbolo === '0' || !isNaN(simbolo)) {
+                            const partes = linea.trim().split(/\s+/);
+                            simbolo = partes[3] || '';
+                        }
+                        simbolo = simbolo.replace(/[^A-Za-z]/g, '');
+                        if (simbolo && /^[A-Z][a-z]?$/.test(simbolo)) {
+                            conteo[simbolo] = (conteo[simbolo] || 0) + 1;
+                        }
+                    }
+                    if (Object.keys(conteo).length > 0) return conteo;
+                }
+            } catch (e) { }
+            return {};
+        }
+
+        function renderLeyenda(conteo, contenedorId) {
+            const cont = document.getElementById(contenedorId);
+            cont.innerHTML = '';
+            const claves = Object.keys(conteo);
+            if (!claves.length) {
+                cont.innerHTML = '<p class="text-xs text-slate-400">Sin datos de elementos.</p>';
+                return;
+            }
+            claves.sort().forEach(el => {
+                const color = coloresAtomicos[el] || '#CBD5E1';
+                const item = document.createElement('div');
+                item.className = 'flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200';
+                item.innerHTML = `
+                    <span class="swatch ${el === 'H' ? 'hidrogeno' : ''}" style="background-color: ${color}; color: ${el === 'H' ? '#334155' : 'white'}">${el}</span>
+                    <span class="font-bold text-xs text-slate-700">×${conteo[el]}</span>
+                `;
+                cont.appendChild(item);
+            });
+        }
+
+        function evaluarLipinski(mw, logp, hbd, hba) {
+            const ul = document.getElementById('lista-lipinski');
+            ul.innerHTML = '';
+            const reglas = [
+                { nombre: 'Masa Molecular (MW ≤ 500)', ok: mw <= 500, val: `${mw.toFixed(1)}` },
+                { nombre: 'Lipofilia (LogP ≤ 5)', ok: logp <= 5, val: logp.toFixed(2) },
+                { nombre: 'Donadores H (HBD ≤ 5)', ok: hbd <= 5, val: hbd },
+                { nombre: 'Aceptores H (HBA ≤ 10)', ok: hba <= 10, val: hba }
+            ];
+            reglas.forEach(r => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100';
+                li.innerHTML = `
+                    <span class="flex items-center gap-1.5 font-medium">
+                        <span>${r.ok ? '✅' : '❌'}</span> ${r.nombre}
+                    </span>
+                    <span class="font-bold font-mono text-slate-700">${r.val}</span>
+                `;
+                ul.appendChild(li);
+            });
+        }
+
+        function crearGraficoBarras(mw, logp, hbd, hba, rotBonds) {
+            const ctx = document.getElementById('chart-barras').getContext('2d');
+            if (chartBarras) chartBarras.destroy();
+            const valores = [mw, logp, hbd, hba, rotBonds];
+            const limites = [500, 5, 5, 10, 10];
+            const datos = valores.map((v, i) => Math.min((v / limites[i]) * 100, 100));
+
+            chartBarras = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['MW', 'LogP', 'HBD', 'HBA', 'RotB.'],
+                    datasets: [{
+                        label: '% del límite',
+                        data: datos,
+                        backgroundColor: ['rgba(15,43,109,0.75)', 'rgba(30,58,138,0.75)', 'rgba(59,130,246,0.75)', 'rgba(16,185,129,0.75)', 'rgba(245,158,11,0.75)'],
+                        borderColor: ['#0F2B6D', '#1E3A8A', '#3B82F6', '#10B981', '#F59E0B'],
+                        borderWidth: 1, borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => {
+                            const i = ctx.dataIndex;
+                            return `Valor: ${valores[i].toFixed(2)} / Límite: ${limites[i]} (${ctx.parsed.y.toFixed(1)}%)`;
+                        }}}
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, ticks: { callback: (v) => v + '%', font: { size: 9 } }, grid: { color: '#F1F5F9' } },
+                        x: { ticks: { font: { size: 10, weight: 'bold' } }, grid: { display: false } }
+                    }
+                }
+            });
+
+            const legend = document.getElementById('prop-legend');
+            legend.innerHTML = '';
+            const items = [
+                { label: 'MW', value: mw.toFixed(1) + ' g/mol', limite: '≤ 500', color: '#0F2B6D' },
+                { label: 'LogP', value: logp.toFixed(2), limite: '≤ 5', color: '#1E3A8A' },
+                { label: 'HBD', value: hbd.toString(), limite: '≤ 5', color: '#3B82F6' },
+                { label: 'HBA', value: hba.toString(), limite: '≤ 10', color: '#10B981' },
+                { label: 'RotB.', value: rotBonds.toString(), limite: '≤ 10', color: '#F59E0B' }
+            ];
+            items.forEach(it => {
+                const div = document.createElement('div');
+                div.className = 'prop-legend-item';
+                div.innerHTML = `
+                    <span class="prop-legend-dot" style="background:${it.color}"></span>
+                    <span class="prop-legend-label">${it.label}:</span>
+                    <span class="prop-legend-value">${it.value}</span>
+                    <span class="text-[9px] text-slate-400 ml-auto">${it.limite}</span>
+                `;
+                legend.appendChild(div);
+            });
+        }
+
+        function crearGraficoDona(conteo) {
+            const ctx = document.getElementById('chart-dona').getContext('2d');
+            if (chartDona) chartDona.destroy();
+            const elementos = Object.keys(conteo).sort();
+            const valores = elementos.map(el => conteo[el]);
+            const colores = elementos.map(el => coloresAtomicos[el] || '#CBD5E1');
+            chartDona = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: elementos.map(el => `${el} (${conteo[el]})`),
+                    datasets: [{ data: valores, backgroundColor: colores, borderColor: '#FFFFFF', borderWidth: 2 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { font: { size: 11, weight: 'bold' }, boxWidth: 12, padding: 8 } },
+                        tooltip: { callbacks: { label: (ctx) => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            return `${ctx.label}: ${(ctx.parsed / total * 100).toFixed(1)}%`;
+                        }}}
+                    },
+                    cutout: '55%'
+                }
+            });
+        }
+
+        function crearGraficoLipinski(mw, logp, hbd, hba) {
+            const ctx = document.getElementById('chart-lipinski').getContext('2d');
+            if (chartLipinski) chartLipinski.destroy();
+            const valores = [mw, logp, hbd, hba];
+            const limites = [500, 5, 5, 10];
+            const etiquetas = ['MW', 'LogP', 'HBD', 'HBA'];
+            const porcentajes = valores.map((v, i) => Math.min((v / limites[i]) * 100, 150));
+            chartLipinski = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'Valor (% del límite)',
+                        data: porcentajes,
+                        backgroundColor: porcentajes.map(p => p > 100 ? 'rgba(239,68,68,0.7)' : 'rgba(16,185,129,0.7)'),
+                        borderColor: porcentajes.map(p => p > 100 ? '#EF4444' : '#10B981'),
+                        borderWidth: 1, borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => {
+                            const i = ctx.dataIndex;
+                            return `Valor: ${valores[i].toFixed(2)} / Límite: ${limites[i]}`;
+                        }}}
+                    },
+                    scales: {
+                        x: { beginAtZero: true, max: 150, ticks: { callback: (v) => v + '%', font: { size: 9 } }, grid: { color: '#F1F5F9' } },
+                        y: { ticks: { font: { size: 11, weight: 'bold' } }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function prepararSvg2D() {
+            const contenedor = document.getElementById('contenedor-2d');
+            const svg = contenedor.querySelector('svg');
+            if (!svg) return null;
+            const clon = svg.cloneNode(true);
+            clon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            const serializer = new XMLSerializer();
+            return serializer.serializeToString(clon);
+        }
+
+        btnDescargar2DSVG.addEventListener('click', () => {
+            const svgStr = prepararSvg2D();
+            if (!svgStr) return;
+            const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'estructura_2d.svg'; a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        btnDescargar2DPNG.addEventListener('click', () => {
+            const svgStr = prepararSvg2D();
+            if (!svgStr) return;
+            const img = new Image();
+            const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1200; canvas.height = 1000;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                const pngUrl = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = pngUrl; a.download = 'estructura_2d.png'; a.click();
+                URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        });
+
+        btnDescargar3D.addEventListener('click', () => {
+            if (!viewer3d) return;
+            const dataUrl = viewer3d.pngURI();
+            if (dataUrl) {
+                const a = document.createElement('a');
+                a.href = dataUrl; a.download = 'estructura_3d.png'; a.click();
+            }
+        });
+
+        async function obtenerSdf3D(smiles) {
+            const urlCactus = `https://cactus.nci.nih.gov/chemical/structure/${encodeURIComponent(smiles)}/file?format=sdf&get3d=true`;
+            try {
+                const r = await fetch(urlCactus);
+                if (r.ok) { const t = await r.text(); if (t && t.includes('V2000')) return t; }
+            } catch (e) { }
+            const urlPubchem = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/${encodeURIComponent(smiles)}/record/SDF/?record_type=3d`;
+            try {
+                const r2 = await fetch(urlPubchem);
+                if (r2.ok) { const t2 = await r2.text(); if (t2 && t2.includes('V2000')) return t2; }
+            } catch (e) { }
+            return null;
+        }
+
+        formSmiles.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!RDKit) return;
+            ocultarAlertas();
+            const smilesInput = inputSmiles.value.trim();
+            if (!smilesInput) { mostrarError('Ingresa un código SMILES.'); return; }
+
+            let mol;
+            try { mol = RDKit.get_mol(smilesInput); } catch (err) { mol = null; }
+            if (!mol || !mol.is_valid()) {
+                mostrarError('El SMILES ingresado no es válido.');
+                if (mol) mol.delete();
+                return;
+            }
+
+            // Generar SVG 2D tal como en el original (sin intentos de rotación)
+            let svg = "";
+            try { svg = mol.get_svg(380, 340); }
+            catch (err) { svg = "<p class='text-xs text-red-500 p-4'>Error al dibujar SVG 2D.</p>"; }
+
+            document.getElementById('contenedor-2d').innerHTML = svg;
+
+            let desc = {};
+            try { desc = JSON.parse(mol.get_descriptors()); } catch (e) { desc = {}; }
+
+            const smilesCanonico = mol.get_smiles();
+            document.getElementById('link-pubchem').href = `https://pubchem.ncbi.nlm.nih.gov/#query=${encodeURIComponent(smilesCanonico)}`;
+
+            const info = document.getElementById('info-molecular');
+            const mw = desc.amw || 0;
+            const logp = desc.CrippenClogP || 0;
+            const hbd = desc.NumHBD || 0;
+            const hba = desc.NumHBA || 0;
+            const rotBonds = desc.NumRotatableBonds || 0;
+
+            info.innerHTML = `
+                <div class="flex justify-between border-b pb-1">
+                    <span class="text-slate-500 font-semibold">Masa Molecular:</span>
+                    <span class="font-bold">${mw.toFixed(2)} g/mol</span>
+                </div>
+                <div class="flex justify-between border-b pb-1">
+                    <span class="text-slate-500 font-semibold">LogP (Lipofilia):</span>
+                    <span class="font-bold">${logp.toFixed(2)}</span>
+                </div>
+                <div class="flex justify-between border-b pb-1">
+                    <span class="text-slate-500 font-semibold">Enlaces Rotables:</span>
+                    <span class="font-bold">${rotBonds}</span>
+                </div>
+                <div class="flex justify-between border-b pb-1">
+                    <span class="text-slate-500 font-semibold">Donadores / Aceptores H:</span>
+                    <span class="font-bold">${hbd} / ${hba}</span>
+                </div>
+            `;
+
+            evaluarLipinski(mw, logp, hbd, hba);
+            const conteo = contarAtomos(mol);
+            renderLeyenda(conteo, 'leyenda-3d');
+
+            crearGraficoBarras(mw, logp, hbd, hba, rotBonds);
+            crearGraficoDona(conteo);
+            crearGraficoLipinski(mw, logp, hbd, hba);
+
+            document.getElementById('resultados-container').classList.remove('hidden');
+
+            const estado3d = document.getElementById('estado-3d');
+            estado3d.classList.remove('hidden');
+            estado3d.classList.add('flex');
+
+            crearVisor();
+            if (viewer3d) { viewer3d.clear(); }
+
+            const sdf = await obtenerSdf3D(smilesCanonico);
+            if (sdf && viewer3d) {
+                viewer3d.addModel(sdf, 'sdf');
+                aplicarEstilo3d();
+                viewer3d.zoomTo();
+                viewer3d.render();
+                estado3d.classList.add('hidden');
+            } else {
+                document.getElementById('texto-estado-3d').innerHTML = '⚠️ No se pudo cargar el modelo 3D.';
+            }
+
+            mol.delete();
+        });
+
+        window.addEventListener('resize', () => { if (viewer3d) viewer3d.resize(); });
+    </script>
+</body>
+</html>
