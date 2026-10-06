@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solver SEL | Dr. Ronald F. Rodríguez E.</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Fraunces', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#095180',
+                            900: '#0c2e4e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- KaTeX CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- SheetJS CDN (xlsx export) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-brand-600 rounded-lg text-white shadow-inner">
+                    <i class="fa-solid fa-calculator text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight font-serif">Solver de Métodos Numéricos SEL</h1>
+                    <p class="text-xs text-slate-400">Resolución paso a paso de Sistemas AX = B</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 text-xs">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+                    v2.6
+                </span>
+                <button onclick="document.getElementById('authorCard').scrollIntoView({behavior:'smooth'})" class="hover:bg-slate-800 px-3 py-1.5 rounded-md text-slate-300 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-graduate"></i> Dr. Ronald F. Rodriguez E.
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Author Profile Card Block -->
+        <section id="authorCard" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-md">
+            <div class="p-5 md:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+                        <div class="relative">
+                            <div class="w-20 h-20 rounded-full bg-brand-600 border-2 border-white/20 flex items-center justify-center text-2xl font-bold font-serif text-white shadow-lg overflow-hidden">
+                                <i class="fa-solid fa-user-tie text-3xl"></i>
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full" title="Verificado CTI Vitae"></span>
+                        </div>
+                        <div>
+                            <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full mb-1 border border-brand-500/20">
+                                <i class="fa-solid fa-award text-amber-400"></i> Docente Investigador
+                            </div>
+                            <!-- Reduced Name as requested -->
+                            <h2 class="text-lg md:text-xl font-bold font-serif">Dr. Ronald F. Rodríguez Espinoza</h2>
+                            <p class="text-sm text-slate-300">Especialista en Análisis Numérico y Métodos Computacionales</p>
+                            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2 text-xs text-slate-400">
+                                <span><i class="fa-solid fa-building-columns mr-1 text-slate-400"></i> CONCYTEC CTI Vitae</span>
+                                <span><i class="fa-solid fa-square-root-variable mr-1 text-slate-400"></i> Álgebra Lineal & Numérico</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Clickable QR Code Box -->
+                    <div class="flex items-center gap-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 backdrop-blur-sm">
+                        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           title="Haz clic para abrir el perfil oficial CTI Vitae"
+                           class="group relative bg-white p-2 rounded-lg shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-brand-500/20 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                                 alt="QR CTI Vitae - Dr. Ronald F. Rodríguez E." 
+                                 class="w-16 h-16 md:w-20 md:h-20 object-contain transition-opacity group-hover:opacity-90"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/120x120/ffffff/0f172a?text=QR+CTI';">
+                            <div class="absolute inset-0 bg-brand-600/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <span class="bg-slate-900/90 text-white text-[9px] px-1.5 py-0.5 rounded shadow-sm font-semibold flex items-center gap-1">
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i> Abrir
+                                </span>
+                            </div>
+                        </a>
+                        <div class="text-left space-y-1">
+                            <p class="text-xs font-semibold text-slate-200 flex items-center gap-1">
+                                <i class="fa-solid fa-qrcode text-brand-400"></i> Código QR
+                            </p>
+                            <p class="text-[11px] text-slate-300 max-w-[130px] leading-tight">Haz clic en el código QR para consultar la trayectoria académica.</p>
+                            <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-400 hover:text-brand-300 transition-colors">
+                                Perfil CTI Vitae <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mathematical Formulation Display Card -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-square-root-variable text-brand-600"></i> Formulación del Sistema
+            </h3>
+            <div id="mathFormulaContainer" class="overflow-x-auto py-2 text-center text-slate-800 font-mono text-sm md:text-base">
+                <!-- Rendered dynamically with KaTeX -->
+            </div>
+        </section>
+
+        <!-- Matrix Configuration & Method Selection -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Panel: Input & Settings -->
+            <div class="lg:col-span-5 space-y-6">
+                <!-- Matrix Controls Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-brand-600"></i> Configuración del SEL
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-medium text-slate-600">Dimensión n:</label>
+                            <select id="matrixDim" onchange="changeDimension(parseInt(this.value))" class="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-brand-500 outline-none">
+                                <option value="2">2 × 2</option>
+                                <option value="3" selected>3 × 3</option>
+                                <option value="4">4 × 4</option>
+                                <option value="5">5 × 5</option>
+                                <option value="6">6 × 6</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Preset & Random Buttons -->
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-medium text-slate-500 uppercase tracking-wider">Acciones Rápidas:</label>
+                            <button onclick="generateRandomMatrix()" class="text-xs text-brand-600 hover:text-brand-800 font-semibold transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-dice"></i> Matriz Aleatoria
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <button onclick="loadPreset('diagDom')" class="p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-brand-50 hover:border-brand-300 text-left transition-all">
+                                <div class="font-semibold text-slate-700"><i class="fa-solid fa-check-double text-emerald-500 mr-1"></i> Diagonal Dominante</div>
+                                <div class="text-[10px] text-slate-500">Jacobi/Seidel (3x3)</div>
+                            </button>
+                            <button onclick="loadPreset('zeroDiag')" class="p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 text-left transition-all">
+                                <div class="font-semibold text-slate-700"><i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i> Cero en Diagonal</div>
+                                <div class="text-[10px] text-slate-500">Pivoteo requerido (3x3)</div>
+                            </button>
+                            <button onclick="loadPreset('singular')" class="p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-300 text-left transition-all">
+                                <div class="font-semibold text-slate-700"><i class="fa-solid fa-ban text-rose-500 mr-1"></i> Sistema Singular</div>
+                                <div class="text-[10px] text-slate-500">Sin solución / Infinitas (3x3)</div>
+                            </button>
+                            <button onclick="loadPreset('geom2x2')" class="p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-sky-50 hover:border-sky-300 text-left transition-all">
+                                <div class="font-semibold text-slate-700"><i class="fa-solid fa-chart-line text-sky-500 mr-1"></i> Rectas 2x2</div>
+                                <div class="text-[10px] text-slate-500">Gráfico plano 2D</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Matrix Input Grid -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-semibold text-slate-700">Coeficientes [A] y Términos [b]:</label>
+                            <button onclick="clearMatrixInputs()" class="text-xs text-rose-600 hover:text-rose-800 transition-colors">
+                                <i class="fa-solid fa-eraser"></i> Limpiar
+                            </button>
+                        </div>
+                        
+                        <div class="bg-slate-100 p-3 rounded-lg border border-slate-200 overflow-x-auto custom-scrollbar">
+                            <div id="matrixInputsContainer" class="inline-block min-w-full space-y-2">
+                                <!-- Generated Dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Numerical Method Selection & Iterative Params -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+                    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-microchip text-brand-600"></i> Método de Solución
+                    </h2>
+
+                    <div class="grid grid-cols-1 gap-2">
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="method" value="gauss" checked onchange="toggleIterativeParams(false)" class="text-brand-600 focus:ring-brand-500">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-800">Eliminación Gaussiana</div>
+                                <div class="text-xs text-slate-500">Triangulación superior con pivoteo parcial</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="method" value="jordan" onchange="toggleIterativeParams(false)" class="text-brand-600 focus:ring-brand-500">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-800">Gauss - Jordan</div>
+                                <div class="text-xs text-slate-500">Reducción completa a matriz diagonal</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="method" value="jacobi" onchange="toggleIterativeParams(true)" class="text-brand-600 focus:ring-brand-500">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-800">Método Iterativo de Jacobi</div>
+                                <div class="text-xs text-slate-500">Actualizaciones vectoriales en paralelo</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                            <input type="radio" name="method" value="seidel" onchange="toggleIterativeParams(true)" class="text-brand-600 focus:ring-brand-500">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-800">Método de Gauss - Seidel</div>
+                                <div class="text-xs text-slate-500">Actualización en tiempo real por componente</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Iterative Parameters Container -->
+                    <div id="iterativeParamsSection" class="hidden border-t border-slate-200 pt-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Parámetros Iterativos:</span>
+                            <button onclick="autoReorderDiagonalDominance()" class="text-xs text-brand-600 hover:text-brand-800 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-rotate-right"></i> Auto-Reordenar Diag.
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Tolerancia Error Tol (ε):</label>
+                                <input type="number" id="paramTol" value="0.0001" step="0.00001" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Máx Iteraciones:</label>
+                                <input type="number" id="paramMaxIter" value="50" min="1" max="500" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Vector Inicial X<sup>(0)</sup> (separado por comas):</label>
+                            <input type="text" id="paramX0" value="0, 0, 0" placeholder="0, 0, 0" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-brand-500 outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Solve Action Button -->
+                    <button onclick="solveSystem()" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 active:bg-brand-900 text-white font-bold rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play text-sm"></i> Calcular Solución Paso a Paso
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Results, Steps, Iterations & Graphs -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- Alert / Status Banner -->
+                <div id="statusAlert" class="hidden p-4 rounded-xl border flex items-start gap-3">
+                    <i id="statusIcon" class="fa-solid text-lg mt-0.5"></i>
+                    <div>
+                        <h4 id="statusTitle" class="font-bold text-sm"></h4>
+                        <p id="statusMessage" class="text-xs mt-0.5"></p>
+                    </div>
+                </div>
+
+                <!-- Final Solution Box -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-square-check text-emerald-600"></i> Vector Solución Final X
+                        </h3>
+                        <button id="btnExportXlsx" onclick="exportToExcel()" class="hidden text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 px-3 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-excel text-emerald-600"></i> Exportar a Excel
+                        </button>
+                    </div>
+                    <div id="solutionOutput" class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-slate-700 min-h-[60px] flex items-center justify-center font-mono text-sm">
+                        <span class="text-slate-400 italic">Haga clic en "Calcular Solución" para procesar el sistema.</span>
+                    </div>
+                </div>
+
+                <!-- Step-by-step or Iterations Table Display -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <h3 id="detailsSectionTitle" class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-brand-600"></i> Desarrollo del Algoritmo
+                    </h3>
+                    <div id="algorithmDetails" class="space-y-4 max-h-[420px] overflow-y-auto custom-scrollbar p-1">
+                        <p class="text-xs text-slate-400 italic text-center py-8">Los pasos intermedios o tablas de iteración se desplegarán aquí.</p>
+                    </div>
+                </div>
+
+                <!-- Visual Charts Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <h3 class="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-brand-600"></i> Visualización Gráfica
+                    </h3>
+                    <div class="relative w-full h-[320px] bg-slate-50 rounded-lg border border-slate-200 p-2 flex items-center justify-center">
+                        <canvas id="chartCanvas"></canvas>
+                        <div id="chartPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-4 text-center">
+                            <i class="fa-solid fa-chart-line text-3xl mb-2 text-slate-300"></i>
+                            <p class="text-xs">Gráfica interactiva de intersección (2x2) o gráfica de convergencia / residual (3x3+).</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
+            <p>© 2026 <span class="font-semibold text-slate-200">Dr. Ronald F. Rodríguez E.</span> — Análisis Numérico y Métodos Computacionales</p>
+            <p class="text-slate-500">Desarrollado para entornos académicos y profesionales en ingeniería y ciencias aplicadas.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let n = 3; // Default matrix dimension
+        let chartInstance = null;
+        let lastCalculationData = null;
+
+        window.onload = function() {
+            renderMatrixInputs();
+            updateMathFormula();
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ]
+                });
+            }
+        };
+
+        function changeDimension(newN) {
+            n = newN;
+            renderMatrixInputs();
+            updateMathFormula();
+            const defaultX0 = Array(n).fill(0).join(', ');
+            document.getElementById('paramX0').value = defaultX0;
+        }
+
+        function renderMatrixInputs() {
+            const container = document.getElementById('matrixInputsContainer');
+            container.innerHTML = '';
+
+            for (let i = 0; i < n; i++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'flex items-center gap-2 whitespace-nowrap';
+
+                for (let j = 0; j < n; j++) {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.step = 'any';
+                    input.id = `a_${i}_${j}`;
+                    input.placeholder = `a${i+1}${j+1}`;
+                    input.className = 'w-14 h-9 text-center text-xs font-mono bg-white border border-slate-300 rounded-md focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all';
+                    input.value = (i === j) ? '4' : (Math.abs(i - j) === 1 ? '-1' : '0');
+                    input.oninput = updateMathFormula;
+                    rowDiv.appendChild(input);
+                }
+
+                const divider = document.createElement('span');
+                divider.className = 'text-slate-400 font-bold px-1';
+                divider.innerHTML = '|';
+                rowDiv.appendChild(divider);
+
+                const bInput = document.createElement('input');
+                bInput.type = 'number';
+                bInput.step = 'any';
+                bInput.id = `b_${i}`;
+                bInput.placeholder = `b${i+1}`;
+                bInput.className = 'w-16 h-9 text-center text-xs font-mono font-bold bg-amber-50 border border-amber-300 text-amber-900 rounded-md focus:ring-2 focus:ring-amber-500 outline-none transition-all';
+                bInput.value = ((i + 1) * 5).toString();
+                bInput.oninput = updateMathFormula;
+                rowDiv.appendChild(bInput);
+
+                container.appendChild(rowDiv);
+            }
+        }
+
+        function clearMatrixInputs() {
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    document.getElementById(`a_${i}_${j}`).value = '0';
+                }
+                document.getElementById(`b_${i}`).value = '0';
+            }
+            updateMathFormula();
+        }
+
+        function generateRandomMatrix() {
+            for (let i = 0; i < n; i++) {
+                let rowSum = 0;
+                for (let j = 0; j < n; j++) {
+                    if (i !== j) {
+                        const val = Math.floor(Math.random() * 9) - 4; // -4 to 4
+                        document.getElementById(`a_${i}_${j}`).value = val;
+                        rowSum += Math.abs(val);
+                    }
+                }
+                // Ensure strong diagonal for numerical stability
+                document.getElementById(`a_${i}_${i}`).value = rowSum + Math.floor(Math.random() * 5) + 2;
+                document.getElementById(`b_${i}`).value = Math.floor(Math.random() * 20) - 10;
+            }
+            updateMathFormula();
+        }
+
+        function updateMathFormula() {
+            const container = document.getElementById('mathFormulaContainer');
+            if (!container || typeof katex === 'undefined') return;
+
+            let latex = '\\begin{bmatrix}';
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const val = document.getElementById(`a_${i}_${j}`)?.value || `a_{${i+1}${j+1}}`;
+                    latex += val + (j === n - 1 ? '' : ' & ');
+                }
+                if (i < n - 1) latex += ' \\\\ ';
+            }
+            latex += '\\end{bmatrix} \\begin{bmatrix}';
+            for (let i = 0; i < n; i++) {
+                latex += `x_{${i+1}}` + (i === n - 1 ? '' : ' \\\\ ');
+            }
+            latex += '\\end{bmatrix} = \\begin{bmatrix}';
+            for (let i = 0; i < n; i++) {
+                const val = document.getElementById(`b_${i}`)?.value || `b_{${i+1}}`;
+                latex += val + (i === n - 1 ? '' : ' \\\\ ');
+            }
+            latex += '\\end{bmatrix}';
+
+            try {
+                katex.render(latex, container, { displayMode: true, throwOnError: false });
+            } catch (e) {
+                container.innerHTML = `<span class="text-xs text-slate-500 font-mono">${latex}</span>`;
+            }
+        }
+
+        function toggleIterativeParams(show) {
+            const sec = document.getElementById('iterativeParamsSection');
+            if (show) {
+                sec.classList.remove('hidden');
+            } else {
+                sec.classList.add('hidden');
+            }
+        }
+
+        function loadPreset(presetType) {
+            if (presetType === 'diagDom') {
+                document.getElementById('matrixDim').value = '3';
+                changeDimension(3);
+                const A = [[10, -1, 2], [-1, 11, -1], [2, -1, 10]];
+                const b = [6, 25, -11];
+                setMatrixValues(A, b);
+            } else if (presetType === 'zeroDiag') {
+                document.getElementById('matrixDim').value = '3';
+                changeDimension(3);
+                const A = [[0, 2, 3], [4, 1, -1], [-2, 3, 1]];
+                const b = [8, 5, 2];
+                setMatrixValues(A, b);
+            } else if (presetType === 'singular') {
+                document.getElementById('matrixDim').value = '3';
+                changeDimension(3);
+                const A = [[1, 2, 3], [2, 4, 6], [1, 1, 1]];
+                const b = [6, 12, 3];
+                setMatrixValues(A, b);
+            } else if (presetType === 'geom2x2') {
+                document.getElementById('matrixDim').value = '2';
+                changeDimension(2);
+                const A = [[3, 2], [1, -2]];
+                const b = [8, 0];
+                setMatrixValues(A, b);
+            }
+        }
+
+        function setMatrixValues(A, b) {
+            for (let i = 0; i < A.length; i++) {
+                for (let j = 0; j < A[i].length; j++) {
+                    const inp = document.getElementById(`a_${i}_${j}`);
+                    if (inp) inp.value = A[i][j];
+                }
+                const bInp = document.getElementById(`b_${i}`);
+                if (bInp) bInp.value = b[i];
+            }
+            updateMathFormula();
+        }
+
+        function autoReorderDiagonalDominance() {
+            const { A, b } = getInputs();
+            let newA = A.map(r => [...r]);
+            let newB = [...b];
+
+            // Greedy reordering for diagonal dominance
+            for (let i = 0; i < n; i++) {
+                let maxRow = i;
+                let maxVal = Math.abs(newA[i][i]);
+
+                for (let k = i + 1; k < n; k++) {
+                    if (Math.abs(newA[k][i]) > maxVal) {
+                        maxVal = Math.abs(newA[k][i]);
+                        maxRow = k;
+                    }
+                }
+
+                if (maxRow !== i) {
+                    let tempRow = newA[i];
+                    newA[i] = newA[maxRow];
+                    newA[maxRow] = tempRow;
+
+                    let tempB = newB[i];
+                    newB[i] = newB[maxRow];
+                    newB[maxRow] = tempB;
+                }
+            }
+
+            setMatrixValues(newA, newB);
+            showAlert('info', 'Reordenamiento de Filas Aplicado', 'Se han intercambiado filas para optimizar los elementos diagonales principales.');
+        }
+
+        function getInputs() {
+            const A = [];
+            const b = [];
+            for (let i = 0; i < n; i++) {
+                A[i] = [];
+                for (let j = 0; j < n; j++) {
+                    const v = parseFloat(document.getElementById(`a_${i}_${j}`).value);
+                    A[i][j] = isNaN(v) ? 0 : v;
+                }
+                const bv = parseFloat(document.getElementById(`b_${i}`).value);
+                b[i] = isNaN(bv) ? 0 : bv;
+            }
+            return { A, b };
+        }
+
+        function showAlert(type, title, msg) {
+            const alertBox = document.getElementById('statusAlert');
+            const icon = document.getElementById('statusIcon');
+            const titleEl = document.getElementById('statusTitle');
+            const msgEl = document.getElementById('statusMessage');
+
+            alertBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-rose-50', 'border-rose-200', 'text-rose-800', 'bg-amber-50', 'border-amber-200', 'text-amber-800', 'bg-sky-50', 'border-sky-200', 'text-sky-800');
+
+            if (type === 'success') {
+                alertBox.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+                icon.className = 'fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5';
+            } else if (type === 'error') {
+                alertBox.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-800');
+                icon.className = 'fa-solid fa-circle-xmark text-rose-600 text-lg mt-0.5';
+            } else if (type === 'info') {
+                alertBox.classList.add('bg-sky-50', 'border-sky-200', 'text-sky-800');
+                icon.className = 'fa-solid fa-circle-info text-sky-600 text-lg mt-0.5';
+            } else {
+                alertBox.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-800');
+                icon.className = 'fa-solid fa-triangle-exclamation text-amber-600 text-lg mt-0.5';
+            }
+
+            titleEl.textContent = title;
+            msgEl.textContent = msg;
+        }
+
+        function hideAlert() {
+            document.getElementById('statusAlert').classList.add('hidden');
+        }
+
+        function solveSystem() {
+            hideAlert();
+            const { A, b } = getInputs();
+            const method = document.querySelector('input[name="method"]:checked').value;
+
+            lastCalculationData = { method, n, A, b };
+
+            if (method === 'gauss') {
+                solveGaussianElimination(A, b);
+            } else if (method === 'jordan') {
+                solveGaussJordan(A, b);
+            } else if (method === 'jacobi') {
+                solveIterativeMethod('jacobi', A, b);
+            } else if (method === 'seidel') {
+                solveIterativeMethod('seidel', A, b);
+            }
+
+            document.getElementById('btnExportXlsx').classList.remove('hidden');
+        }
+
+        function solveGaussianElimination(A_orig, b_orig) {
+            let A = A_orig.map(row => [...row]);
+            let b = [...b_orig];
+            const steps = [];
+
+            let aug = A.map((row, i) => [...row, b[i]]);
+            steps.push({
+                desc: "Matriz Aumentada Inicial [A|b]:",
+                matrix: aug.map(r => [...r])
+            });
+
+            for (let k = 0; k < n; k++) {
+                let maxRow = k;
+                for (let i = k + 1; i < n; i++) {
+                    if (Math.abs(aug[i][k]) > Math.abs(aug[maxRow][k])) {
+                        maxRow = i;
+                    }
+                }
+
+                if (Math.abs(aug[maxRow][k]) < 1e-12) {
+                    showAlert('error', 'Sistema Singular o Indeterminado', 'Pivote nulo detectado en columna ' + (k + 1) + '. No existe solución única.');
+                    renderSolutionVector(null);
+                    return;
+                }
+
+                if (maxRow !== k) {
+                    let temp = aug[k];
+                    aug[k] = aug[maxRow];
+                    aug[maxRow] = temp;
+                    steps.push({
+                        desc: `Pivoteo Parcial: Intercambiar Fila ${k+1} ↔ Fila ${maxRow+1}`,
+                        matrix: aug.map(r => [...r])
+                    });
+                }
+
+                for (let i = k + 1; i < n; i++) {
+                    let factor = aug[i][k] / aug[k][k];
+                    aug[i][k] = 0;
+                    for (let j = k + 1; j <= n; j++) {
+                        aug[i][j] -= factor * aug[k][j];
+                    }
+                    steps.push({
+                        desc: `Eliminación: Fila ${i+1} ← Fila ${i+1} - (${factor.toFixed(4)}) × Fila ${k+1}`,
+                        matrix: aug.map(r => [...r])
+                    });
+                }
+            }
+
+            let x = new Array(n).fill(0);
+            for (let i = n - 1; i >= 0; i--) {
+                let sum = 0;
+                for (let j = i + 1; j < n; j++) {
+                    sum += aug[i][j] * x[j];
+                }
+                x[i] = (aug[i][n] - sum) / aug[i][i];
+            }
+
+            showAlert('success', 'Solución Calculada Exitosamente', 'El método de Eliminación Gaussiana completó la triangulación y sustitución hacia atrás.');
+            renderSolutionVector(x);
+            renderMatrixSteps(steps);
+            renderVisualChart(A_orig, b_orig, x, null);
+            lastCalculationData.x = x;
+            lastCalculationData.steps = steps;
+        }
+
+        function solveGaussJordan(A_orig, b_orig) {
+            let A = A_orig.map(row => [...row]);
+            let b = [...b_orig];
+            const steps = [];
+
+            let aug = A.map((row, i) => [...row, b[i]]);
+            steps.push({
+                desc: "Matriz Aumentada Inicial [A|b]:",
+                matrix: aug.map(r => [...r])
+            });
+
+            for (let i = 0; i < n; i++) {
+                let maxRow = i;
+                for (let k = i + 1; k < n; k++) {
+                    if (Math.abs(aug[k][i]) > Math.abs(aug[maxRow][i])) {
+                        maxRow = k;
+                    }
+                }
+
+                if (Math.abs(aug[maxRow][i]) < 1e-12) {
+                    showAlert('error', 'Sistema Singular', 'No se puede continuar con Gauss-Jordan pues el pivote es 0.');
+                    renderSolutionVector(null);
+                    return;
+                }
+
+                if (maxRow !== i) {
+                    let temp = aug[i];
+                    aug[i] = aug[maxRow];
+                    aug[maxRow] = temp;
+                    steps.push({
+                        desc: `Intercambio de Filas F${i+1} ↔ F${maxRow+1}`,
+                        matrix: aug.map(r => [...r])
+                    });
+                }
+
+                let pivotVal = aug[i][i];
+                for (let j = 0; j <= n; j++) {
+                    aug[i][j] /= pivotVal;
+                }
+                steps.push({
+                    desc: `Normalizar Pivote: Fila ${i+1} ← Fila ${i+1} / ${pivotVal.toFixed(4)}`,
+                    matrix: aug.map(r => [...r])
+                });
+
+                for (let k = 0; k < n; k++) {
+                    if (k !== i) {
+                        let factor = aug[k][i];
+                        for (let j = 0; j <= n; j++) {
+                            aug[k][j] -= factor * aug[i][j];
+                        }
+                        steps.push({
+                            desc: `Anular Columna ${i+1}: Fila ${k+1} ← Fila ${k+1} - (${factor.toFixed(4)}) × Fila ${i+1}`,
+                            matrix: aug.map(r => [...r])
+                        });
+                    }
+                }
+            }
+
+            let x = aug.map(r => r[n]);
+
+            showAlert('success', 'Solución Reducida Completada', 'Se ha obtenido la Forma Escalonada Reducida mediante Gauss-Jordan.');
+            renderSolutionVector(x);
+            renderMatrixSteps(steps);
+            renderVisualChart(A_orig, b_orig, x, null);
+            lastCalculationData.x = x;
+            lastCalculationData.steps = steps;
+        }
+
+        function solveIterativeMethod(type, A, b) {
+            const tol = parseFloat(document.getElementById('paramTol').value) || 0.0001;
+            const maxIter = parseInt(document.getElementById('paramMaxIter').value) || 50;
+            const x0Str = document.getElementById('paramX0').value;
+            let x0 = x0Str.split(',').map(v => parseFloat(v.trim()) || 0);
+
+            if (x0.length < n) {
+                while (x0.length < n) x0.push(0);
+            } else if (x0.length > n) {
+                x0 = x0.slice(0, n);
+            }
+
+            let isDiagDom = true;
+            for (let i = 0; i < n; i++) {
+                let sum = 0;
+                for (let j = 0; j < n; j++) {
+                    if (i !== j) sum += Math.abs(A[i][j]);
+                }
+                if (Math.abs(A[i][i]) <= sum) {
+                    isDiagDom = false;
+                }
+            }
+
+            const history = [];
+            let xOld = [...x0];
+            let xNew = [...x0];
+            let converged = false;
+            let iter = 0;
+
+            for (iter = 1; iter <= maxIter; iter++) {
+                xNew = [...xOld];
+
+                for (let i = 0; i < n; i++) {
+                    if (Math.abs(A[i][i]) < 1e-12) {
+                        showAlert('error', 'Error de Diagonal Principal', `Elemento a_${i+1}${i+1} es cero. No se puede dividir por cero.`);
+                        renderSolutionVector(null);
+                        return;
+                    }
+
+                    let sum = 0;
+                    for (let j = 0; j < n; j++) {
+                        if (i !== j) {
+                            if (type === 'seidel') {
+                                sum += A[i][j] * xNew[j];
+                            } else {
+                                sum += A[i][j] * xOld[j];
+                            }
+                        }
+                    }
+                    xNew[i] = (b[i] - sum) / A[i][i];
+                }
+
+                let error = 0;
+                for (let i = 0; i < n; i++) {
+                    let diff = Math.abs(xNew[i] - xOld[i]);
+                    if (diff > error) error = diff;
+                }
+
+                history.push({
+                    iter,
+                    x: [...xNew],
+                    error
+                });
+
+                if (error < tol) {
+                    converged = true;
+                    break;
+                }
+
+                xOld = [...xNew];
+            }
+
+            if (converged) {
+                showAlert('success', `Convergencia Exitosa (${type.toUpperCase()})`, `Alcanzada la tolerancia de ${tol} en ${iter} iteraciones.${!isDiagDom ? ' Nota: La matriz no es estrictamente diagonal dominante.' : ''}`);
+            } else {
+                showAlert('warning', `Límite de Iteraciones Alcanzado`, `El método no convergió completamente en ${maxIter} iteraciones. Se muestra la última estimación.`);
+            }
+
+            renderSolutionVector(xNew);
+            renderIterationsTable(history);
+            renderVisualChart(A, b, xNew, history);
+            lastCalculationData.x = xNew;
+            lastCalculationData.history = history;
+        }
+
+        function renderSolutionVector(x) {
+            const container = document.getElementById('solutionOutput');
+            if (!x) {
+                container.innerHTML = `<span class="text-rose-500 font-semibold"><i class="fa-solid fa-circle-exclamation mr-1"></i> No se obtuvo una solución válida.</span>`;
+                return;
+            }
+
+            let html = `<div class="flex flex-wrap items-center justify-center gap-4">`;
+            for (let i = 0; i < x.length; i++) {
+                html += `
+                    <div class="bg-white border border-slate-300 rounded-lg px-4 py-2 shadow-sm flex items-center gap-2">
+                        <span class="font-serif font-bold text-slate-500">x<sub>${i+1}</sub> =</span>
+                        <span class="font-mono font-bold text-brand-700 text-base">${x[i].toFixed(6)}</span>
+                    </div>
+                `;
+            }
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function renderMatrixSteps(steps) {
+            const container = document.getElementById('algorithmDetails');
+            document.getElementById('detailsSectionTitle').innerHTML = `<i class="fa-solid fa-list-check text-brand-600"></i> Pasos del Algoritmo Directo (${steps.length} pasos)`;
+
+            let html = '';
+            steps.forEach((s, idx) => {
+                html += `
+                    <div class="border border-slate-200 rounded-lg p-3 bg-slate-50/50 space-y-2">
+                        <div class="text-xs font-semibold text-brand-700 flex items-center justify-between">
+                            <span>Paso ${idx+1}: ${s.desc}</span>
+                        </div>
+                        <div class="overflow-x-auto py-1">
+                            <table class="mx-auto text-xs font-mono border-collapse border border-slate-300 bg-white">
+                                <tbody>
+                `;
+
+                s.matrix.forEach(row => {
+                    html += `<tr>`;
+                    row.forEach((val, j) => {
+                        const isB = (j === row.length - 1);
+                        html += `<td class="border border-slate-200 px-2.5 py-1 text-center ${isB ? 'bg-amber-50 font-bold border-l-2 border-l-amber-400' : ''}">${val.toFixed(4)}</td>`;
+                    });
+                    html += `</tr>`;
+                });
+
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderIterationsTable(history) {
+            const container = document.getElementById('algorithmDetails');
+            document.getElementById('detailsSectionTitle').innerHTML = `<i class="fa-solid fa-table-list text-brand-600"></i> Tabla de Iteraciones (${history.length} iteraciones)`;
+
+            let html = `
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-xs font-mono border border-slate-200 rounded-lg overflow-hidden">
+                        <thead class="bg-slate-100 text-slate-700 font-bold">
+                            <tr>
+                                <th class="px-3 py-2 text-center border-b">Iter k</th>
+            `;
+
+            for (let i = 0; i < n; i++) {
+                html += `<th class="px-3 py-2 text-center border-b">x<sub>${i+1}</sub></th>`;
+            }
+
+            html += `
+                                <th class="px-3 py-2 text-center border-b">Error ||E||<sub>∞</sub></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white text-center">
+            `;
+
+            history.forEach(row => {
+                html += `<tr class="hover:bg-slate-50 transition-colors">`;
+                html += `<td class="px-3 py-1.5 font-bold text-slate-600">${row.iter}</td>`;
+                row.x.forEach(val => {
+                    html += `<td class="px-3 py-1.5 text-slate-800">${val.toFixed(6)}</td>`;
+                });
+                html += `<td class="px-3 py-1.5 font-bold text-emerald-600">${row.error.toExponential(4)}</td>`;
+                html += `</tr>`;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function renderVisualChart(A, b, xSol, history) {
+            const placeholder = document.getElementById('chartPlaceholder');
+            const canvas = document.getElementById('chartCanvas');
+            placeholder.style.display = 'none';
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+
+            if (n === 2 && xSol) {
+                const x1 = xSol[0];
+                const x2 = xSol[1];
+
+                const minX = Math.floor(x1 - 5);
+                const maxX = Math.ceil(x1 + 5);
+                const step = (maxX - minX) / 20;
+
+                const line1Points = [];
+                const line2Points = [];
+
+                for (let x = minX; x <= maxX; x += step) {
+                    if (Math.abs(A[0][1]) > 1e-6) {
+                        line1Points.push({ x: x, y: (b[0] - A[0][0] * x) / A[0][1] });
+                    }
+                    if (Math.abs(A[1][1]) > 1e-6) {
+                        line2Points.push({ x: x, y: (b[1] - A[1][0] * x) / A[1][1] });
+                    }
+                }
+
+                chartInstance = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: `Ecuación 1: ${A[0][0]}x₁ + ${A[0][1]}x₂ = ${b[0]}`,
+                                data: line1Points,
+                                showLine: true,
+                                borderColor: '#0284c7',
+                                backgroundColor: '#0284c7',
+                                borderWidth: 2,
+                                pointRadius: 0
+                            },
+                            {
+                                label: `Ecuación 2: ${A[1][0]}x₁ + ${A[1][1]}x₂ = ${b[1]}`,
+                                data: line2Points,
+                                showLine: true,
+                                borderColor: '#e11d48',
+                                backgroundColor: '#e11d48',
+                                borderWidth: 2,
+                                pointRadius: 0
+                            },
+                            {
+                                label: `Solución (x₁=${x1.toFixed(2)}, x₂=${x2.toFixed(2)})`,
+                                data: [{ x: x1, y: x2 }],
+                                backgroundColor: '#10b981',
+                                borderColor: '#047857',
+                                pointRadius: 8,
+                                pointHoverRadius: 10
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Intersección Geométrica del Sistema 2x2'
+                            }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Variable x₁' } },
+                            y: { title: { display: true, text: 'Variable x₂' } }
+                        }
+                    }
+                });
+
+            } else if (history && history.length > 0) {
+                const labels = history.map(h => `Iter ${h.iter}`);
+                const datasets = [];
+                const colors = ['#0284c7', '#e11d48', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+
+                for (let i = 0; i < n; i++) {
+                    datasets.push({
+                        label: `Variable x${i+1}`,
+                        data: history.map(h => h.x[i]),
+                        borderColor: colors[i % colors.length],
+                        backgroundColor: colors[i % colors.length],
+                        fill: false,
+                        tension: 0.2
+                    });
+                }
+
+                datasets.push({
+                    label: 'Norma del Error ||E||',
+                    data: history.map(h => h.error),
+                    borderColor: '#64748b',
+                    borderDash: [5, 5],
+                    fill: false,
+                    yAxisID: 'yError'
+                });
+
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Convergencia de Variables e Histórico de Error'
+                            }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Iteración' } },
+                            y: { title: { display: true, text: 'Valor de Variables' } },
+                            yError: {
+                                type: 'logarithmic',
+                                position: 'right',
+                                title: { display: true, text: 'Error Logarítmico' },
+                                grid: { drawOnChartArea: false }
+                            }
+                        }
+                    }
+                });
+
+            } else {
+                const labels = Array.from({ length: n }, (_, i) => `x${i+1}`);
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valores Solución',
+                            data: xSol,
+                            backgroundColor: '#0284c7',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Magnitud del Vector Solución'
+                            }
+                        },
+                        scales: {
+                            y: { title: { display: true, text: 'Valor' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function exportToExcel() {
+            if (!lastCalculationData || !lastCalculationData.x) {
+                alert('No hay datos calculados para exportar.');
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            const summaryData = [
+                ["SOLVER DE SISTEMAS DE ECUACIONES LINEALES"],
+                ["Autor:", "Dr. Ronald F. Rodríguez E."],
+                ["Método Evaluado:", lastCalculationData.method.toUpperCase()],
+                ["Dimensión (n):", lastCalculationData.n],
+                [],
+                ["MATRIZ COEFICIENTES [A]"],
+            ];
+
+            for (let i = 0; i < lastCalculationData.n; i++) {
+                summaryData.push(lastCalculationData.A[i]);
+            }
+
+            summaryData.push([]);
+            summaryData.push(["VECTOR TÉRMINOS INDEPENDIENTES [b]"]);
+            summaryData.push(lastCalculationData.b);
+
+            summaryData.push([]);
+            summaryData.push(["VECTOR SOLUCIÓN [X]"]);
+            summaryData.push(lastCalculationData.x);
+
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen_Solucion");
+
+            if (lastCalculationData.history) {
+                const iterHeaders = ["Iteración"];
+                for (let i = 0; i < lastCalculationData.n; i++) {
+                    iterHeaders.push(`x_${i+1}`);
+                }
+                iterHeaders.push("Error_Absoluto");
+
+                const iterRows = [iterHeaders];
+                lastCalculationData.history.forEach(h => {
+                    const row = [h.iter, ...h.x, h.error];
+                    iterRows.push(row);
+                });
+
+                const wsIter = XLSX.utils.aoa_to_sheet(iterRows);
+                XLSX.utils.book_append_sheet(wb, wsIter, "Tabla_Iteraciones");
+            }
+
+            XLSX.writeFile(wb, `Solucion_SEL_${lastCalculationData.method}_n${lastCalculationData.n}.xlsx`);
+        }
+    </script>
+</body>
+</html>
