@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interpolación Polinomial | Dr. Ronald F. Rodriguez Espinoza</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Fraunces', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#095180',
+                            900: '#0c2e4e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- KaTeX CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .tab-active {
+            border-bottom: 3px solid #0284c7;
+            color: #0369a1;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom: 3px solid transparent;
+            color: #64748b;
+        }
+        .tab-inactive:hover {
+            color: #0f172a;
+            border-bottom-color: #cbd5e1;
+        }
+
+        .math-display { overflow-x: auto; padding: 0.5rem 0; }
+        .step-card { transition: all 0.2s ease; }
+        .step-card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+        table.diff-table td, table.diff-table th {
+            border: 1px solid #e2e8f0;
+            padding: 4px 8px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+        table.diff-table th { background: #f1f5f9; font-weight: 600; }
+        table.diff-table tr:nth-child(even) { background: #f8fafc; }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-brand-600 rounded-lg text-white shadow-inner">
+                    <i class="fa-solid fa-chart-line text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight font-serif">Interpolación Polinomial</h1>
+                    <p class="text-xs text-slate-400">Métodos Numéricos — Ajuste de curvas por nodos</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 text-xs">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+                    v1.1
+                </span>
+                <button onclick="document.getElementById('authorCard').scrollIntoView({behavior:'smooth'})" class="hover:bg-slate-800 px-3 py-1.5 rounded-md text-slate-300 transition-colors flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-graduate"></i> Dr. Ronald Rodriguez E.
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Author Profile Card Block -->
+        <section id="authorCard" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-md">
+            <div class="p-5 md:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+                        <div class="relative">
+                            <div class="w-20 h-20 rounded-full bg-brand-600 border-2 border-white/20 flex items-center justify-center text-2xl font-bold font-serif text-white shadow-lg overflow-hidden">
+                                <i class="fa-solid fa-user-tie text-3xl"></i>
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full" title="Verificado CTI Vitae"></span>
+                        </div>
+                        <div>
+                            <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full mb-1 border border-brand-500/20">
+                                <i class="fa-solid fa-award text-amber-400"></i> Docente Investigador
+                            </div>
+                            <h2 class="text-lg md:text-xl font-bold font-serif">Dr. Ronald F. Rodriguez Espinoza</h2>
+                            <p class="text-sm text-slate-300">Especialista en Análisis Numérico y Métodos Computacionales</p>
+                            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2 text-xs text-slate-400">
+                                <span><i class="fa-solid fa-building-columns mr-1 text-slate-400"></i> CONCYTEC CTI Vitae</span>
+                                <span><i class="fa-solid fa-square-root-variable mr-1 text-slate-400"></i> Interpolación & Ajuste de Curvas</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Clickable QR Code Box -->
+                    <div class="flex items-center gap-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 backdrop-blur-sm">
+                        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           title="Haz clic para abrir el perfil oficial CTI Vitae"
+                           class="group relative bg-white p-2 rounded-lg shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-brand-500/20 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                                 alt="QR CTI Vitae - Dr. Ronald F. Rodríguez E." 
+                                 class="w-16 h-16 md:w-20 md:h-20 object-contain transition-opacity group-hover:opacity-90"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/120x120/ffffff/0f172a?text=QR+CTI';">
+                            <div class="absolute inset-0 bg-brand-600/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <span class="bg-slate-900/90 text-white text-[9px] px-1.5 py-0.5 rounded shadow-sm font-semibold flex items-center gap-1">
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i> Abrir
+                                </span>
+                            </div>
+                        </a>
+                        <div class="text-left space-y-1">
+                            <p class="text-xs font-semibold text-slate-200 flex items-center gap-1">
+                                <i class="fa-solid fa-qrcode text-brand-400"></i> Código QR
+                            </p>
+                            <p class="text-[11px] text-slate-300 max-w-[130px] leading-tight">Haz clic en el código QR para consultar la trayectoria académica.</p>
+                            <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" 
+                               target="_blank" 
+                               rel="noopener noreferrer"
+                               class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-400 hover:text-brand-300 transition-colors">
+                                Perfil CTI Vitae <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TABS NAVIGATION -->
+        <nav class="bg-white rounded-xl shadow-sm border border-slate-200 px-2">
+            <div class="flex flex-wrap gap-1 text-sm font-medium">
+                <button data-tab="datos" class="tab-btn tab-active px-4 py-3 flex items-center gap-2 transition-colors" onclick="switchTab('datos')">
+                    <i class="fa-solid fa-table text-brand-600"></i> Datos
+                </button>
+                <button data-tab="metodo" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors" onclick="switchTab('metodo')">
+                    <i class="fa-solid fa-microchip text-brand-600"></i> Método
+                </button>
+                <button data-tab="procedimiento" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors" onclick="switchTab('procedimiento')">
+                    <i class="fa-solid fa-list-check text-brand-600"></i> Procedimiento
+                </button>
+                <button data-tab="polinomio" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors" onclick="switchTab('polinomio')">
+                    <i class="fa-solid fa-square-root-variable text-brand-600"></i> Polinomio
+                </button>
+                <button data-tab="grafica" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors" onclick="switchTab('grafica')">
+                    <i class="fa-solid fa-chart-area text-brand-600"></i> Gráfica
+                </button>
+                <button data-tab="comparacion" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors" onclick="switchTab('comparacion')">
+                    <i class="fa-solid fa-code-compare text-brand-600"></i> Comparación
+                </button>
+                <button data-tab="evaluacion" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors" onclick="switchTab('evaluacion')">
+                    <i class="fa-solid fa-calculator text-brand-600"></i> Evaluación
+                </button>
+            </div>
+        </nav>
+
+        <!-- TAB: DATOS -->
+        <section id="tab-datos" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-table text-brand-600"></i> Puntos Experimentales (xi, yi)
+                        </h2>
+                        <span id="pointCountBadge" class="text-xs bg-brand-50 text-brand-700 border border-brand-200 px-2.5 py-1 rounded-full font-semibold">0 puntos</span>
+                    </div>
+
+                    <div class="overflow-x-auto custom-scrollbar max-h-80 mb-3">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-100 sticky top-0">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600 w-12">#</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600">xi</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600">yi = f(xi)</th>
+                                    <th class="px-3 py-2 text-center text-xs font-semibold text-slate-600 w-16">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pointsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="addPointRow()" class="flex-1 min-w-[120px] py-2 px-3 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Agregar Punto
+                        </button>
+                        <button onclick="loadExamplePoints()" class="flex-1 min-w-[120px] py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-flask"></i> Cargar Ejemplo
+                        </button>
+                        <button onclick="clearAllPoints()" class="flex-1 min-w-[120px] py-2 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-eraser"></i> Limpiar Todo
+                        </button>
+                    </div>
+
+                    <div id="repeatedXWarning" class="hidden mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-start gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+                        <div>
+                            <strong>Abscisas repetidas detectadas:</strong> Los métodos de interpolación polinomial estándar requieren que todos los xi sean distintos. Corrija los valores duplicados.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-keyboard text-brand-600"></i> Entrada Rápida por Texto
+                    </h2>
+                    <p class="text-xs text-slate-500 mb-3">Ingrese los puntos en formato <code class="bg-slate-100 px-1 rounded">x1, y1; x2, y2; ...</code> o uno por línea. Se aceptan comas, espacios o punto y coma como separadores.</p>
+                    <textarea id="bulkInput" rows="8" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs font-mono text-slate-800 focus:ring-2 focus:ring-brand-500 outline-none custom-scrollbar" placeholder="0, 1&#10;1, 2.718&#10;2, 7.389&#10;3, 20.085"></textarea>
+                    <button onclick="loadFromBulkText()" class="mt-3 w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-import"></i> Cargar Puntos desde Texto
+                    </button>
+                    <div id="bulkValidationMsg" class="hidden mt-3 p-3 rounded-lg text-xs"></div>
+                </div>
+            </div>
+
+            <!-- Intervalo de visualización (solo informativo, auto-calculado) -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-left-right text-brand-600"></i> Intervalo de Visualización
+                </h3>
+                <p class="text-xs text-slate-500 mb-3">
+                    El rango de la gráfica se <strong>auto-dimensione</strong> para abarcar todos los puntos con un margen del 15%. Puedes ajustar manualmente los valores o presionar "Auto-ajustar" para restablecer el comportamiento automático.
+                </p>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">x mínimo:</label>
+                        <input type="number" id="viewXmin" step="any" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono focus:ring-2 focus:ring-brand-500 outline-none" placeholder="Auto">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">x máximo:</label>
+                        <input type="number" id="viewXmax" step="any" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono focus:ring-2 focus:ring-brand-500 outline-none" placeholder="Auto">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">y mínimo:</label>
+                        <input type="number" id="viewYmin" step="any" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono focus:ring-2 focus:ring-brand-500 outline-none" placeholder="Auto">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">y máximo:</label>
+                        <input type="number" id="viewYmax" step="any" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-mono focus:ring-2 focus:ring-brand-500 outline-none" placeholder="Auto">
+                    </div>
+                    <button onclick="autoFitView()" class="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-expand"></i> Auto-ajustar
+                    </button>
+                </div>
+                <button onclick="recalculateAll()" class="mt-3 w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate"></i> Recalcular con los Datos Actuales
+                </button>
+            </div>
+        </section>
+
+        <!-- TAB: MÉTODO -->
+        <section id="tab-metodo" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <label class="method-card cursor-pointer bg-white rounded-xl shadow-sm border-2 border-slate-200 p-5 hover:border-brand-400 transition-all" data-method="lagrange">
+                    <input type="radio" name="interpMethod" value="lagrange" checked class="hidden">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2.5 bg-brand-50 rounded-lg text-brand-600"><i class="fa-solid fa-superscript text-lg"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">Lagrange</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Polinomios base Li(x). Forma clásica y explícita.</p>
+                            <span class="inline-block mt-2 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">Siempre aplicable</span>
+                        </div>
+                    </div>
+                </label>
+
+                <label class="method-card cursor-pointer bg-white rounded-xl shadow-sm border-2 border-slate-200 p-5 hover:border-brand-400 transition-all" data-method="newton_dd">
+                    <input type="radio" name="interpMethod" value="newton_dd" class="hidden">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2.5 bg-brand-50 rounded-lg text-brand-600"><i class="fa-solid fa-layer-group text-lg"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">Newton (Dif. Divididas)</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Tabla de diferencias divididas. Nodos arbitrarios.</p>
+                            <span class="inline-block mt-2 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">Siempre aplicable</span>
+                        </div>
+                    </div>
+                </label>
+
+                <label class="method-card cursor-pointer bg-white rounded-xl shadow-sm border-2 border-slate-200 p-5 hover:border-brand-400 transition-all" data-method="newton_df">
+                    <input type="radio" name="interpMethod" value="newton_df" class="hidden">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2.5 bg-brand-50 rounded-lg text-brand-600"><i class="fa-solid fa-equals text-lg"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">Newton (Dif. Finitas)</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Solo datos equiespaciados. Fórmulas forward/backward.</p>
+                            <span class="inline-block mt-2 text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-semibold">Requiere equiespaciado</span>
+                        </div>
+                    </div>
+                </label>
+
+                <label class="method-card cursor-pointer bg-white rounded-xl shadow-sm border-2 border-slate-200 p-5 hover:border-brand-400 transition-all" data-method="neville">
+                    <input type="radio" name="interpMethod" value="neville" class="hidden">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2.5 bg-brand-50 rounded-lg text-brand-600"><i class="fa-solid fa-table-cells text-lg"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">Neville</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Esquema recursivo. Evalúa en un punto específico.</p>
+                            <span class="inline-block mt-2 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">Siempre aplicable</span>
+                        </div>
+                    </div>
+                </label>
+
+                <label class="method-card cursor-pointer bg-white rounded-xl shadow-sm border-2 border-slate-200 p-5 hover:border-brand-400 transition-all" data-method="barycentric">
+                    <input type="radio" name="interpMethod" value="barycentric" class="hidden">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2.5 bg-brand-50 rounded-lg text-brand-600"><i class="fa-solid fa-weight-hanging text-lg"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">Baricéntrico de Lagrange</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Pesos baricéntricos. Evaluación eficiente y estable.</p>
+                            <span class="inline-block mt-2 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">Siempre aplicable</span>
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-crosshairs text-brand-600"></i> Punto de Evaluación
+                </h3>
+                <div class="flex flex-wrap items-end gap-4">
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Valor de x para evaluar el polinomio:</label>
+                        <input type="number" id="evalX" step="any" value="1.5" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 outline-none">
+                    </div>
+                    <button onclick="recalculateAll()" class="py-2.5 px-6 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-lg transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> Calcular Interpolación
+                    </button>
+                </div>
+            </div>
+
+            <div id="methodStatusMsg" class="hidden p-4 rounded-xl border text-sm"></div>
+        </section>
+
+        <!-- TAB: PROCEDIMIENTO -->
+        <section id="tab-procedimiento" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h2 id="procTitle" class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-brand-600"></i> Procedimiento Paso a Paso
+                </h2>
+                <div id="procedureContent" class="space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar p-1">
+                    <p class="text-xs text-slate-400 italic text-center py-8">Ejecute el cálculo para ver el procedimiento detallado.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: POLINOMIO -->
+        <section id="tab-polinomio" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <!-- MEJORA: Encabezado que indica el método -->
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <h2 id="polyTitle" class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-square-root-variable text-brand-600"></i> Polinomio Interpolante
+                    </h2>
+                    <span id="polyMethodBadge" class="text-xs bg-brand-50 text-brand-700 border border-brand-200 px-3 py-1.5 rounded-full font-semibold">
+                        Método: —
+                    </span>
+                </div>
+                <div id="polynomialOutput" class="p-4 bg-slate-50 rounded-lg border border-slate-200 min-h-[80px]">
+                    <p class="text-xs text-slate-400 italic text-center py-4">El polinomio resultante se mostrará aquí.</p>
+                </div>
+                <div id="coefficientsOutput" class="mt-4"></div>
+            </div>
+        </section>
+
+        <!-- TAB: GRÁFICA -->
+        <section id="tab-grafica" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-area text-brand-600"></i> Visualización Gráfica
+                    </h2>
+                    <div class="flex items-center gap-3 text-xs">
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" id="togglePoints" checked onchange="renderGraph()" class="rounded text-brand-600 focus:ring-brand-500">
+                            Puntos
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" id="toggleCurve" checked onchange="renderGraph()" class="rounded text-brand-600 focus:ring-brand-500">
+                            Curva
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" id="toggleGrid" checked onchange="renderGraph()" class="rounded text-brand-600 focus:ring-brand-500">
+                            Cuadrícula
+                        </label>
+                    </div>
+                </div>
+                <div class="relative w-full h-[420px] bg-slate-50 rounded-lg border border-slate-200 p-2">
+                    <canvas id="interpChart"></canvas>
+                    <div id="chartPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-4 text-center">
+                        <i class="fa-solid fa-chart-line text-4xl mb-3 text-slate-300"></i>
+                        <p class="text-sm">Ingrese puntos y ejecute el cálculo para visualizar la gráfica.</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">
+                    <i class="fa-solid fa-circle-info text-brand-500 mr-1"></i>
+                    El rango se auto-dimensiona para incluir todos los puntos. Use los controles en la pestaña "Datos" para ajustar manualmente.
+                </p>
+            </div>
+        </section>
+
+        <!-- TAB: COMPARACIÓN -->
+        <section id="tab-comparacion" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-code-compare text-brand-600"></i> Comparación de Métodos
+                    </h2>
+                    <button onclick="runComparison()" class="py-2 px-4 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> Ejecutar Comparación Completa
+                    </button>
+                </div>
+                <div id="comparisonContent">
+                    <p class="text-xs text-slate-400 italic text-center py-8">Haga clic en "Ejecutar Comparación Completa" para calcular todos los métodos aplicables.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-brand-600"></i> Gráfica Comparativa
+                </h3>
+                <div class="relative w-full h-[400px] bg-slate-50 rounded-lg border border-slate-200 p-2">
+                    <canvas id="comparisonChart"></canvas>
+                    <div id="comparisonChartPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-4 text-center">
+                        <i class="fa-solid fa-chart-line text-3xl mb-2 text-slate-300"></i>
+                        <p class="text-xs">Ejecute la comparación para visualizar todas las curvas superpuestas.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: EVALUACIÓN -->
+        <section id="tab-evaluacion" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-brand-600"></i> Evaluación Numérica
+                </h2>
+                <div class="flex flex-wrap items-end gap-4 mb-5">
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Evaluar polinomio en x =</label>
+                        <input type="number" id="evalXTab" step="any" value="1.5" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 outline-none">
+                    </div>
+                    <button onclick="evaluateAllMethods()" class="py-2.5 px-6 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-lg transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-equals"></i> Evaluar Todos los Métodos
+                    </button>
+                </div>
+
+                <!-- MEJORA: Tabla de evaluación de TODOS los métodos -->
+                <div id="evaluationOutput" class="min-h-[60px]">
+                    <p class="text-xs text-slate-400 italic text-center py-2">Presione "Evaluar Todos los Métodos" para ver los resultados.</p>
+                </div>
+
+                <div class="mt-5">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3">Verificación en Nodos Originales (f(xi) vs P(xi)):</h3>
+                    <div id="nodeVerificationOutput" class="overflow-x-auto">
+                        <p class="text-xs text-slate-400 italic">Calcule primero un método para ver la verificación.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
+            <p>© 2026 <span class="font-semibold text-slate-200">Dr. Ronald F. Rodriguez E.</span> — Análisis Numérico y Métodos Computacionales</p>
+            <p class="text-slate-500">Desarrollado para entornos académicos y profesionales en ingeniería y ciencias aplicadas.</p>
+            <p class="text-slate-600 text-[10px]">Bibliotecas externas: Tailwind CSS, KaTeX, Chart.js, FontAwesome</p>
+        </div>
+    </footer>
+
+    <script>
+    // =========================================================================
+    // ESTADO GLOBAL
+    // =========================================================================
+    let points = [];
+    let currentMethod = 'lagrange';
+    let lastResults = {};
+    let interpChartInstance = null;
+    let comparisonChartInstance = null;
+    let currentPolynomial = null;
+
+    // =========================================================================
+    // INICIALIZACIÓN
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        loadExamplePoints();
+        bindMethodCards();
+        if (typeof renderMathInElement === 'function') {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ]
+            });
+        }
+    });
+
+    // =========================================================================
+    // GESTIÓN DE PESTAÑAS
+    // =========================================================================
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        const target = document.getElementById('tab-' + tabName);
+        if (target) target.classList.remove('hidden');
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('tab-active');
+            btn.classList.add('tab-inactive');
+        });
+        const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+        if (activeBtn) {
+            activeBtn.classList.remove('tab-inactive');
+            activeBtn.classList.add('tab-active');
+        }
+
+        if (tabName === 'grafica') renderGraph();
+    }
+
+    // =========================================================================
+    // GESTIÓN DE PUNTOS
+    // =========================================================================
+    function renderPointsTable() {
+        const tbody = document.getElementById('pointsTableBody');
+        tbody.innerHTML = '';
+        points.forEach((p, i) => {
+            const tr = document.createElement('tr');
+            tr.className = 'border-b border-slate-100 hover:bg-slate-50';
+            tr.innerHTML = `
+                <td class="px-3 py-2 text-xs text-slate-500 font-mono">${i + 1}</td>
+                <td class="px-3 py-2">
+                    <input type="number" step="any" value="${p.x}" 
+                        onchange="updatePoint(${i}, 'x', this.value)"
+                        class="w-full bg-white border border-slate-300 rounded-md px-2 py-1 text-xs font-mono focus:ring-2 focus:ring-brand-500 outline-none">
+                </td>
+                <td class="px-3 py-2">
+                    <input type="number" step="any" value="${p.y}" 
+                        onchange="updatePoint(${i}, 'y', this.value)"
+                        class="w-full bg-white border border-slate-300 rounded-md px-2 py-1 text-xs font-mono focus:ring-2 focus:ring-brand-500 outline-none">
+                </td>
+                <td class="px-3 py-2 text-center">
+                    <button onclick="removePointRow(${i})" class="text-rose-500 hover:text-rose-700 transition-colors" title="Eliminar">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('pointCountBadge').textContent = `${points.length} puntos`;
+        checkRepeatedX();
+        autoFitView();
+    }
+
+    function addPointRow() {
+        const lastX = points.length > 0 ? points[points.length - 1].x : 0;
+        points.push({ x: lastX + 1, y: 0 });
+        renderPointsTable();
+    }
+
+    function removePointRow(index) {
+        if (points.length <= 2) {
+            alert('Se necesitan al menos 2 puntos para interpolar.');
+            return;
+        }
+        points.splice(index, 1);
+        renderPointsTable();
+    }
+
+    function updatePoint(index, field, value) {
+        const num = parseFloat(value);
+        if (isNaN(num)) {
+            alert('Por favor ingrese un valor numérico válido.');
+            renderPointsTable();
+            return;
+        }
+        points[index][field] = num;
+        checkRepeatedX();
+        autoFitView();
+    }
+
+    function clearAllPoints() {
+        points = [];
+        renderPointsTable();
+        clearResults();
+    }
+
+    function loadExamplePoints() {
+        points = [
+            { x: 0, y: 1 },
+            { x: 1, y: 2.7183 },
+            { x: 2, y: 7.3891 },
+            { x: 3, y: 20.0855 }
+        ];
+        renderPointsTable();
+        clearResults();
+    }
+
+    function loadFromBulkText() {
+        const text = document.getElementById('bulkInput').value.trim();
+        const msgDiv = document.getElementById('bulkValidationMsg');
+        msgDiv.classList.add('hidden');
+
+        if (!text) {
+            showBulkMsg('error', 'El área de texto está vacía.');
+            return;
+        }
+
+        const newPoints = [];
+        let valid = true;
+        let errorMsg = '';
+
+        const normalized = text.replace(/;/g, '\n');
+        const lines = normalized.split('\n').filter(l => l.trim() !== '');
+
+        lines.forEach((line, idx) => {
+            const parts = line.split(/[,\s]+/).filter(p => p.trim() !== '');
+            if (parts.length < 2) {
+                valid = false;
+                errorMsg = `Línea ${idx + 1}: se esperaban al menos 2 valores (x, y).`;
+                return;
+            }
+            const x = parseFloat(parts[0]);
+            const y = parseFloat(parts[1]);
+            if (isNaN(x) || isNaN(y)) {
+                valid = false;
+                errorMsg = `Línea ${idx + 1}: valores no numéricos.`;
+                return;
+            }
+            newPoints.push({ x, y });
+        });
+
+        if (!valid) {
+            showBulkMsg('error', errorMsg);
+            return;
+        }
+
+        if (newPoints.length < 2) {
+            showBulkMsg('error', 'Se necesitan al menos 2 puntos.');
+            return;
+        }
+
+        const xs = newPoints.map(p => p.x);
+        if (new Set(xs).size !== xs.length) {
+            showBulkMsg('warning', 'Se detectaron valores de xi repetidos. Los métodos de interpolación requieren abscisas distintas.');
+        }
+
+        points = newPoints;
+        renderPointsTable();
+        clearResults();
+        showBulkMsg('success', `${points.length} puntos cargados correctamente.`);
+    }
+
+    function showBulkMsg(type, msg) {
+        const div = document.getElementById('bulkValidationMsg');
+        div.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-200',
+                                'bg-amber-50', 'text-amber-800', 'border-amber-200',
+                                'bg-rose-50', 'text-rose-800', 'border-rose-200');
+        if (type === 'success') div.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+        else if (type === 'warning') div.classList.add('bg-amber-50', 'text-amber-800', 'border', 'border-amber-200');
+        else div.classList.add('bg-rose-50', 'text-rose-800', 'border', 'border-rose-200');
+        div.innerHTML = msg;
+    }
+
+    function checkRepeatedX() {
+        const xs = points.map(p => p.x);
+        const warning = document.getElementById('repeatedXWarning');
+        if (new Set(xs).size !== xs.length) warning.classList.remove('hidden');
+        else warning.classList.add('hidden');
+    }
+
+    // =========================================================================
+    // AUTO-AJUSTE DEL INTERVALO DE VISUALIZACIÓN
+    // =========================================================================
+    function autoFitView() {
+        if (points.length === 0) return;
+        const xs = points.map(p => p.x);
+        const ys = points.map(p => p.y);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+        // Margen del 15% (mínimo 0.5 unidades absolutas)
+        const marginX = Math.max((maxX - minX) * 0.15, 0.5);
+        const marginY = Math.max((maxY - minY) * 0.15, 0.5);
+        document.getElementById('viewXmin').value = (minX - marginX).toFixed(4);
+        document.getElementById('viewXmax').value = (maxX + marginX).toFixed(4);
+        document.getElementById('viewYmin').value = (minY - marginY).toFixed(4);
+        document.getElementById('viewYmax').value = (maxY + marginY).toFixed(4);
+    }
+
+    // =========================================================================
+    // SELECCIÓN DE MÉTODO
+    // =========================================================================
+    function bindMethodCards() {
+        document.querySelectorAll('.method-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const method = this.dataset.method;
+                document.querySelectorAll('.method-card').forEach(c => {
+                    c.classList.remove('border-brand-500', 'bg-brand-50/30');
+                    c.classList.add('border-slate-200');
+                });
+                this.classList.remove('border-slate-200');
+                this.classList.add('border-brand-500', 'bg-brand-50/30');
+                this.querySelector('input[type="radio"]').checked = true;
+                currentMethod = method;
+                clearResults();
+            });
+        });
+        const first = document.querySelector('.method-card[data-method="lagrange"]');
+        if (first) {
+            first.classList.remove('border-slate-200');
+            first.classList.add('border-brand-500', 'bg-brand-50/30');
+        }
+    }
+
+    // =========================================================================
+    // CÁLCULO - MÉTODOS DE INTERPOLACIÓN
+    // =========================================================================
+    function computeNewtonDDCoeffs(pts) {
+        const n = pts.length;
+        const x = pts.map(p => p.x);
+        const y = pts.map(p => p.y);
+        const table = Array.from({ length: n }, () => new Array(n).fill(0));
+        for (let i = 0; i < n; i++) table[i][0] = y[i];
+        for (let j = 1; j < n; j++) {
+            for (let i = 0; i < n - j; i++) {
+                table[i][j] = (table[i + 1][j - 1] - table[i][j - 1]) / (x[i + j] - x[i]);
+            }
+        }
+        const coeffs = [];
+        for (let j = 0; j < n; j++) coeffs.push(table[0][j]);
+        return { coeffs, table, x, y };
+    }
+
+    function evalNewtonDD(coeffs, xNodes, xEval) {
+        const n = coeffs.length;
+        let result = coeffs[n - 1];
+        for (let i = n - 2; i >= 0; i--) {
+            result = result * (xEval - xNodes[i]) + coeffs[i];
+        }
+        return result;
+    }
+
+    function computeLagrangeCoeffs(pts) {
+        const n = pts.length;
+        const x = pts.map(p => p.x);
+        const y = pts.map(p => p.y);
+        let coeffs = new Array(n).fill(0);
+        for (let i = 0; i < n; i++) {
+            let basis = [1];
+            let denom = 1;
+            for (let j = 0; j < n; j++) {
+                if (j === i) continue;
+                denom *= (x[i] - x[j]);
+                const newBasis = new Array(basis.length + 1).fill(0);
+                for (let k = 0; k < basis.length; k++) {
+                    newBasis[k] += -x[j] * basis[k];
+                    newBasis[k + 1] += basis[k];
+                }
+                basis = newBasis;
+            }
+            const scale = y[i] / denom;
+            for (let k = 0; k < basis.length; k++) coeffs[k] += scale * basis[k];
+        }
+        return coeffs;
+    }
+
+    function evalPolynomial(coeffs, xEval) {
+        let result = 0;
+        for (let i = coeffs.length - 1; i >= 0; i--) {
+            result = result * xEval + coeffs[i];
+        }
+        return result;
+    }
+
+    function fmt(num, decimals = 6) {
+        if (Math.abs(num) < 1e-12) return '0';
+        return num.toFixed(decimals);
+    }
+
+    function recalculateAll() {
+        if (points.length < 2) {
+            alert('Se necesitan al menos 2 puntos para interpolar.');
+            return;
+        }
+        const xs = points.map(p => p.x);
+        if (new Set(xs).size !== xs.length) {
+            alert('Hay valores de xi repetidos. Corrija los datos antes de calcular.');
+            return;
+        }
+
+        currentMethod = document.querySelector('input[name="interpMethod"]:checked')?.value || 'lagrange';
+        const evalX = parseFloat(document.getElementById('evalX').value) || 0;
+        document.getElementById('evalXTab').value = evalX;
+
+        clearResults();
+
+        switch (currentMethod) {
+            case 'lagrange': computeLagrange(xs, evalX); break;
+            case 'newton_dd': computeNewtonDD(xs, evalX); break;
+            case 'newton_df': computeNewtonDF(xs, evalX); break;
+            case 'neville': computeNeville(xs, evalX); break;
+            case 'barycentric': computeBarycentric(xs, evalX); break;
+            default: computeLagrange(xs, evalX);
+        }
+    }
+
+    // ---------- LAGRANGE ----------
+    function computeLagrange(xs, evalX) {
+        const x = points.map(p => p.x);
+        const y = points.map(p => p.y);
+        const coeffs = computeLagrangeCoeffs(points);
+        currentPolynomial = coeffs;
+        const evalY = evalPolynomial(coeffs, evalX);
+
+        lastResults = {
+            method: 'lagrange',
+            methodName: 'Lagrange',
+            coeffs, evalX, evalY, points,
+            procedureHTML: buildLagrangeProcedure(x, y, coeffs, evalX, evalY)
+        };
+        renderAllOutputs();
+    }
+
+    function buildLagrangeProcedure(x, y, coeffs, evalX, evalY) {
+        const n = x.length;
+        let html = '';
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-1 mr-2"></i>Fórmula General de Lagrange</h4>
+            <div class="math-display text-center">
+                $$P(x) = \\sum_{i=0}^{n} y_i \\cdot L_i(x) \\quad \\text{donde} \\quad L_i(x) = \\prod_{j \\neq i} \\frac{x - x_j}{x_i - x_j}$$
+            </div>
+        </div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-3"><i class="fa-solid fa-2 mr-2"></i>Polinomios Base Li(x)</h4>`;
+        for (let i = 0; i < n; i++) {
+            let numerador = '';
+            let denominador = 1;
+            for (let j = 0; j < n; j++) {
+                if (j === i) continue;
+                numerador += `(x - ${fmt(x[j], 4)})`;
+                denominador *= (x[i] - x[j]);
+            }
+            html += `<div class="mb-2 p-2 bg-slate-50 rounded border border-slate-100">
+                <span class="text-xs font-semibold text-slate-600">L<sub>${i}</sub>(x) =</span>
+                <span class="font-mono text-xs ml-2">$$L_{${i}}(x) = \\frac{${numerador}}{${fmt(denominador, 6)}}$$</span>
+            </div>`;
+        }
+        html += `</div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-3 mr-2"></i>Polinomio Interpolante</h4>
+            <div class="math-display text-center">$$P(x) = ${formatPolynomialLatex(coeffs)}$$</div>
+            <p class="text-xs text-slate-500 mt-2">Coeficientes: <span class="font-mono">[${coeffs.map(c => fmt(c, 6)).join(', ')}]</span></p>
+        </div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-4 mr-2"></i>Evaluación en x = ${fmt(evalX, 4)}</h4>
+            <div class="math-display text-center">$$P(${fmt(evalX, 4)}) = ${fmt(evalY, 6)}$$</div>
+        </div>`;
+        return html;
+    }
+
+    // ---------- NEWTON DD ----------
+    function computeNewtonDD(xs, evalX) {
+        const x = points.map(p => p.x);
+        const y = points.map(p => p.y);
+        const { coeffs, table } = computeNewtonDDCoeffs(points);
+        const evalY = evalNewtonDD(coeffs, x, evalX);
+        const stdCoeffs = computeLagrangeCoeffs(points);
+        currentPolynomial = stdCoeffs;
+
+        lastResults = {
+            method: 'newton_dd',
+            methodName: 'Newton (Diferencias Divididas)',
+            coeffs: stdCoeffs,
+            newtonCoeffs: coeffs,
+            evalX, evalY, points, table,
+            procedureHTML: buildNewtonDDProcedure(x, y, coeffs, table, evalX, evalY)
+        };
+        renderAllOutputs();
+    }
+
+    function buildNewtonDDProcedure(x, y, coeffs, table, evalX, evalY) {
+        const n = x.length;
+        let html = '';
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-1 mr-2"></i>Fórmula de Newton (Diferencias Divididas)</h4>
+            <div class="math-display text-center">
+                $$P(x) = f[x_0] + f[x_0,x_1](x-x_0) + f[x_0,x_1,x_2](x-x_0)(x-x_1) + \\cdots$$
+            </div>
+        </div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-3"><i class="fa-solid fa-2 mr-2"></i>Tabla de Diferencias Divididas</h4>
+            <div class="overflow-x-auto">
+            <table class="diff-table mx-auto"><thead><tr>
+                <th>x<sub>i</sub></th><th>f[x<sub>i</sub>]</th><th>1<sup>er</sup> orden</th><th>2<sup>do</sup> orden</th><th>3<sup>er</sup> orden</th><th>4<sup>to</sup> orden</th>
+            </tr></thead><tbody>`;
+        for (let i = 0; i < n; i++) {
+            html += `<tr><td class="font-bold bg-slate-50">${fmt(x[i], 4)}</td>`;
+            for (let j = 0; j < n; j++) {
+                if (j <= i) html += `<td>${fmt(table[i - j][j], 6)}</td>`;
+                else html += `<td class="text-slate-300">—</td>`;
+            }
+            html += `</tr>`;
+        }
+        html += `</tbody></table></div>
+            <p class="text-xs text-slate-500 mt-2">Coeficientes de Newton: <span class="font-mono">[${coeffs.map(c => fmt(c, 6)).join(', ')}]</span></p>
+        </div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-3 mr-2"></i>Polinomio en Forma de Newton</h4>
+            <div class="math-display text-center">$$P(x) = ${formatNewtonLatex(coeffs, x)}$$</div>
+        </div>`;
+        const stdCoeffs = computeLagrangeCoeffs(points);
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-4 mr-2"></i>Polinomio Expandido (Forma Estándar)</h4>
+            <div class="math-display text-center">$$P(x) = ${formatPolynomialLatex(stdCoeffs)}$$</div>
+        </div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-5 mr-2"></i>Evaluación en x = ${fmt(evalX, 4)}</h4>
+            <div class="math-display text-center">$$P(${fmt(evalX, 4)}) = ${fmt(evalY, 6)}$$</div>
+        </div>`;
+        return html;
+    }
+
+    // ---------- NEWTON DF ----------
+    function computeNewtonDF(xs, evalX) {
+        const n = points.length;
+        const x = points.map(p => p.x);
+        const y = points.map(p => p.y);
+        const h = x[1] - x[0];
+        let isEquispaced = true;
+        for (let i = 1; i < n - 1; i++) {
+            if (Math.abs((x[i + 1] - x[i]) - h) > 1e-8) { isEquispaced = false; break; }
+        }
+        if (!isEquispaced) {
+            showMethodStatus('warning', 'El método de Newton con Diferencias Finitas requiere datos equiespaciados. Los xi no cumplen esta condición.');
+            lastResults = {};
+            renderAllOutputs();
+            return;
+        }
+        const table = Array.from({ length: n }, () => new Array(n).fill(0));
+        for (let i = 0; i < n; i++) table[i][0] = y[i];
+        for (let j = 1; j < n; j++) {
+            for (let i = 0; i < n - j; i++) {
+                table[i][j] = table[i + 1][j - 1] - table[i][j - 1];
+            }
+        }
+        const forwardCoeffs = [];
+        let fact = 1;
+        for (let k = 0; k < n; k++) {
+            if (k > 0) fact *= k;
+            forwardCoeffs.push(table[0][k] / (fact * Math.pow(h, k)));
+        }
+        const t = (evalX - x[0]) / h;
+        let evalY = forwardCoeffs[n - 1];
+        for (let k = n - 2; k >= 0; k--) evalY = evalY * (t - k) + forwardCoeffs[k];
+
+        let useBackward = false;
+        let backwardCoeffs = null;
+        let evalYBackward = null;
+        if (Math.abs(evalX - x[n - 1]) < Math.abs(evalX - x[0])) {
+            useBackward = true;
+            const backTable = Array.from({ length: n }, () => new Array(n).fill(0));
+            for (let i = 0; i < n; i++) backTable[i][0] = y[i];
+            for (let j = 1; j < n; j++) {
+                for (let i = 0; i < n - j; i++) backTable[i][j] = backTable[i + 1][j - 1] - backTable[i][j - 1];
+            }
+            backwardCoeffs = [];
+            fact = 1;
+            for (let k = 0; k < n; k++) {
+                if (k > 0) fact *= k;
+                backwardCoeffs.push(backTable[n - 1 - k][k] / (fact * Math.pow(h, k)));
+            }
+            const s = (evalX - x[n - 1]) / h;
+            evalYBackward = backwardCoeffs[n - 1];
+            for (let k = n - 2; k >= 0; k--) evalYBackward = evalYBackward * (s + k) + backwardCoeffs[k];
+        }
+        const finalEvalY = useBackward ? evalYBackward : evalY;
+        const stdCoeffs = computeLagrangeCoeffs(points);
+        currentPolynomial = stdCoeffs;
+
+        lastResults = {
+            method: 'newton_df',
+            methodName: 'Newton (Diferencias Finitas)',
+            coeffs: stdCoeffs,
+            h, forwardCoeffs, backwardCoeffs, useBackward,
+            evalX, evalY: finalEvalY, points, table, isEquispaced: true,
+            procedureHTML: buildNewtonDFProcedure(x, y, h, table, forwardCoeffs, backwardCoeffs, useBackward, evalX, finalEvalY)
+        };
+        renderAllOutputs();
+    }
+
+    function buildNewtonDFProcedure(x, y, h, table, fwdCoeffs, bwdCoeffs, useBackward, evalX, evalY) {
+        const n = x.length;
+        let html = '';
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-1 mr-2"></i>Datos Equiespaciados</h4>
+            <p class="text-xs text-slate-600">Paso h = ${fmt(h, 6)}</p>
+        </div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-3"><i class="fa-solid fa-2 mr-2"></i>Tabla de Diferencias Progresivas (Δ)</h4>
+            <div class="overflow-x-auto"><table class="diff-table mx-auto">
+                <thead><tr><th>x<sub>i</sub></th><th>f(x<sub>i</sub>)</th><th>Δf</th><th>Δ²f</th><th>Δ³f</th><th>Δ⁴f</th></tr></thead><tbody>`;
+        for (let i = 0; i < n; i++) {
+            html += `<tr><td class="font-bold bg-slate-50">${fmt(x[i], 4)}</td>`;
+            for (let j = 0; j < n; j++) {
+                if (j <= i) html += `<td>${fmt(table[i - j][j], 6)}</td>`;
+                else html += `<td class="text-slate-300">—</td>`;
+            }
+            html += `</tr>`;
+        }
+        html += `</tbody></table></div></div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-3 mr-2"></i>Coeficientes de Diferencias Progresivas</h4>
+            <p class="text-xs text-slate-600">a<sub>k</sub> = Δ<sup>k</sup>f(x<sub>0</sub>) / (k! h<sup>k</sup>)</p>
+            <div class="math-display text-center mt-2">$$P(x) = ${fwdCoeffs.map((c, k) => {
+                if (k === 0) return fmt(c, 6);
+                let term = fmt(c, 6);
+                for (let m = 0; m < k; m++) term += `(x - ${fmt(x[m], 4)})`;
+                return term;
+            }).join(' + ')}$$</div>
+        </div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-4 mr-2"></i>Evaluación</h4>
+            <p class="text-xs text-slate-600">${useBackward ? 'Usando diferencias regresivas' : 'Usando diferencias progresivas'}</p>
+            <div class="math-display text-center mt-2">$$P(${fmt(evalX, 4)}) = ${fmt(evalY, 6)}$$</div>
+        </div>`;
+        return html;
+    }
+
+    // ---------- NEVILLE ----------
+    function computeNeville(xs, evalX) {
+        const n = points.length;
+        const x = points.map(p => p.x);
+        const y = points.map(p => p.y);
+        const Q = Array.from({ length: n }, () => new Array(n).fill(0));
+        for (let i = 0; i < n; i++) Q[i][0] = y[i];
+        for (let j = 1; j < n; j++) {
+            for (let i = 0; i < n - j; i++) {
+                Q[i][j] = ((evalX - x[i + j]) * Q[i][j - 1] - (evalX - x[i]) * Q[i + 1][j - 1]) / (x[i] - x[i + j]);
+            }
+        }
+        const evalY = Q[0][n - 1];
+        const stdCoeffs = computeLagrangeCoeffs(points);
+        currentPolynomial = stdCoeffs;
+        lastResults = {
+            method: 'neville',
+            methodName: 'Neville',
+            coeffs: stdCoeffs, evalX, evalY, points, nevilleTable: Q,
+            procedureHTML: buildNevilleProcedure(x, y, Q, evalX, evalY)
+        };
+        renderAllOutputs();
+    }
+
+    function buildNevilleProcedure(x, y, Q, evalX, evalY) {
+        const n = x.length;
+        let html = '';
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-1 mr-2"></i>Esquema Recursivo de Neville</h4>
+            <div class="math-display text-center">$$Q_{i,j} = \\frac{(x - x_{i+j})Q_{i,j-1} - (x - x_i)Q_{i+1,j-1}}{x_i - x_{i+j}}$$</div>
+        </div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-3"><i class="fa-solid fa-2 mr-2"></i>Tabla de Neville para x = ${fmt(evalX, 4)}</h4>
+            <div class="overflow-x-auto"><table class="diff-table mx-auto">
+                <thead><tr><th>x<sub>i</sub></th><th>Q<sub>i,0</sub></th><th>Q<sub>i,1</sub></th><th>Q<sub>i,2</sub></th><th>Q<sub>i,3</sub></th></tr></thead><tbody>`;
+        for (let i = 0; i < n; i++) {
+            html += `<tr><td class="font-bold bg-slate-50">${fmt(x[i], 4)}</td>`;
+            for (let j = 0; j < n; j++) {
+                if (j <= i) html += `<td>${fmt(Q[i - j][j], 6)}</td>`;
+                else html += `<td class="text-slate-300">—</td>`;
+            }
+            html += `</tr>`;
+        }
+        html += `</tbody></table></div>
+            <p class="text-xs text-slate-500 mt-2">Resultado: P(${fmt(evalX, 4)}) = Q<sub>0,${n-1}</sub> = ${fmt(evalY, 6)}</p>
+        </div>`;
+        return html;
+    }
+
+    // ---------- BARICÉNTRICO ----------
+    function computeBarycentric(xs, evalX) {
+        const n = points.length;
+        const x = points.map(p => p.x);
+        const y = points.map(p => p.y);
+        const w = new Array(n).fill(1);
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                if (i !== j) w[i] /= (x[i] - x[j]);
+            }
+        }
+        let num = 0, den = 0;
+        let exactNode = -1;
+        for (let i = 0; i < n; i++) {
+            if (Math.abs(evalX - x[i]) < 1e-14) { exactNode = i; break; }
+            const term = w[i] / (evalX - x[i]);
+            num += term * y[i];
+            den += term;
+        }
+        const evalY = (exactNode >= 0) ? y[exactNode] : num / den;
+        const stdCoeffs = computeLagrangeCoeffs(points);
+        currentPolynomial = stdCoeffs;
+        lastResults = {
+            method: 'barycentric',
+            methodName: 'Baricéntrico de Lagrange',
+            coeffs: stdCoeffs, weights: w, evalX, evalY, points,
+            procedureHTML: buildBarycentricProcedure(x, y, w, evalX, evalY, exactNode)
+        };
+        renderAllOutputs();
+    }
+
+    function buildBarycentricProcedure(x, y, w, evalX, evalY, exactNode) {
+        const n = x.length;
+        let html = '';
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-1 mr-2"></i>Fórmula Baricéntrica</h4>
+            <div class="math-display text-center">
+                $$P(x) = \\frac{\\sum_{i=0}^{n} \\frac{w_i}{x - x_i} y_i}{\\sum_{i=0}^{n} \\frac{w_i}{x - x_i}} \\quad \\text{con} \\quad w_i = \\prod_{j \\neq i} \\frac{1}{x_i - x_j}$$
+            </div>
+        </div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-3"><i class="fa-solid fa-2 mr-2"></i>Pesos Baricéntricos w<sub>i</sub></h4>
+            <div class="overflow-x-auto"><table class="diff-table mx-auto">
+                <thead><tr><th>i</th><th>x<sub>i</sub></th><th>y<sub>i</sub></th><th>w<sub>i</sub></th></tr></thead><tbody>`;
+        for (let i = 0; i < n; i++) {
+            html += `<tr><td>${i}</td><td>${fmt(x[i], 4)}</td><td>${fmt(y[i], 6)}</td><td class="font-mono">${fmt(w[i], 8)}</td></tr>`;
+        }
+        html += `</tbody></table></div></div>`;
+        html += `<div class="step-card border border-slate-200 rounded-lg p-4 bg-white">
+            <h4 class="text-sm font-bold text-brand-700 mb-2"><i class="fa-solid fa-3 mr-2"></i>Evaluación en x = ${fmt(evalX, 4)}</h4>
+            ${exactNode >= 0 ? `<p class="text-xs text-emerald-700">El punto coincide exactamente con el nodo x<sub>${exactNode}</sub>, por lo que P(x) = y<sub>${exactNode}</sub> = ${fmt(evalY, 6)}</p>` : ''}
+            <div class="math-display text-center">$$P(${fmt(evalX, 4)}) = ${fmt(evalY, 6)}$$</div>
+        </div>`;
+        return html;
+    }
+
+    // =========================================================================
+    // FORMATEO DE POLINOMIOS EN LATEX
+    // =========================================================================
+    function formatPolynomialLatex(coeffs) {
+        let terms = [];
+        for (let i = coeffs.length - 1; i >= 0; i--) {
+            const c = coeffs[i];
+            if (Math.abs(c) < 1e-12) continue;
+            let term = '';
+            if (i === 0) term = fmt(c, 6);
+            else if (i === 1) term = (Math.abs(c - 1) < 1e-12 ? '' : fmt(c, 6) + ' \\cdot ') + 'x';
+            else term = (Math.abs(c - 1) < 1e-12 ? '' : fmt(c, 6) + ' \\cdot ') + `x^{${i}}`;
+            terms.push(term);
+        }
+        if (terms.length === 0) return '0';
+        return terms.join(' + ').replace(/\+ -/g, '- ');
+    }
+
+    function formatNewtonLatex(coeffs, xNodes) {
+        let terms = [];
+        for (let k = 0; k < coeffs.length; k++) {
+            const c = coeffs[k];
+            if (Math.abs(c) < 1e-12) continue;
+            let term = fmt(c, 6);
+            for (let m = 0; m < k; m++) term += `(x - ${fmt(xNodes[m], 4)})`;
+            terms.push(term);
+        }
+        return terms.join(' + ') || '0';
+    }
+
+    // =========================================================================
+    // RENDERIZADO DE RESULTADOS
+    // =========================================================================
+    function renderAllOutputs() {
+        if (!lastResults.method) return;
+
+        // Procedimiento
+        document.getElementById('procedureContent').innerHTML = lastResults.procedureHTML || '<p class="text-xs text-slate-400 italic text-center py-8">No hay procedimiento disponible.</p>';
+        document.getElementById('procTitle').innerHTML = `<i class="fa-solid fa-list-check text-brand-600"></i> Procedimiento — ${lastResults.methodName}`;
+
+        // Polinomio (MEJORA: badge del método)
+        const polyContainer = document.getElementById('polynomialOutput');
+        const coeffs = lastResults.coeffs || [];
+        document.getElementById('polyMethodBadge').textContent = `Método: ${lastResults.methodName}`;
+        polyContainer.innerHTML = `
+            <div class="math-display text-center text-lg">$$P(x) = ${formatPolynomialLatex(coeffs)}$$</div>
+            <div class="mt-4 text-center">
+                <p class="text-xs text-slate-500 font-semibold mb-1">Coeficientes (grado 0 a ${coeffs.length - 1}):</p>
+                <div class="flex flex-wrap justify-center gap-2">
+                    ${coeffs.map((c, i) => `<span class="bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono">a<sub>${i}</sub> = ${fmt(c, 6)}</span>`).join('')}
+                </div>
+            </div>
+        `;
+
+        renderGraph();
+        renderEvaluation();
+        renderNodeVerification();
+
+        if (typeof renderMathInElement === 'function') {
+            renderMathInElement(document.getElementById('tab-procedimiento'), {
+                delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]
+            });
+            renderMathInElement(document.getElementById('tab-polinomio'), {
+                delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]
+            });
+        }
+
+        document.getElementById('methodStatusMsg').classList.add('hidden');
+    }
+
+    function renderEvaluation() {
+        const container = document.getElementById('evaluationOutput');
+        if (!lastResults.method) {
+            container.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-2">Presione "Evaluar Todos los Métodos" para ver los resultados.</p>';
+            return;
+        }
+        // Ya no se usa este contenedor para un solo método; se usa evaluateAllMethods()
+        // Pero mantenemos un pequeño resumen por compatibilidad
+        container.innerHTML = `
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 text-center">
+                Último cálculo: <strong>${lastResults.methodName}</strong> → P(${fmt(lastResults.evalX, 4)}) = <span class="font-mono font-bold text-brand-700">${fmt(lastResults.evalY, 8)}</span>
+                <br><span class="text-slate-400">Presione "Evaluar Todos los Métodos" para ver la comparación completa.</span>
+            </div>
+        `;
+    }
+
+    function renderNodeVerification() {
+        const container = document.getElementById('nodeVerificationOutput');
+        if (!lastResults.method || !lastResults.coeffs) {
+            container.innerHTML = '<p class="text-xs text-slate-400 italic">Calcule primero un método.</p>';
+            return;
+        }
+        const coeffs = lastResults.coeffs;
+        let html = `<table class="min-w-full text-xs border border-slate-200 rounded-lg overflow-hidden">
+            <thead class="bg-slate-100"><tr>
+                <th class="px-3 py-2 text-center">x<sub>i</sub></th>
+                <th class="px-3 py-2 text-center">y<sub>i</sub> (original)</th>
+                <th class="px-3 py-2 text-center">P(x<sub>i</sub>)</th>
+                <th class="px-3 py-2 text-center">Error absoluto</th>
+            </tr></thead><tbody>`;
+        points.forEach(p => {
+            const px = evalPolynomial(coeffs, p.x);
+            const error = Math.abs(px - p.y);
+            html += `<tr class="border-b border-slate-100">
+                <td class="px-3 py-1.5 text-center font-mono">${fmt(p.x, 4)}</td>
+                <td class="px-3 py-1.5 text-center font-mono">${fmt(p.y, 6)}</td>
+                <td class="px-3 py-1.5 text-center font-mono">${fmt(px, 6)}</td>
+                <td class="px-3 py-1.5 text-center font-mono ${error < 1e-6 ? 'text-emerald-600' : 'text-rose-600'}">${error.toExponential(2)}</td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+
+    // =========================================================================
+    // GRÁFICA (con auto-dimensión y auto-fit de y)
+    // =========================================================================
+    function renderGraph() {
+        const canvas = document.getElementById('interpChart');
+        const placeholder = document.getElementById('chartPlaceholder');
+        if (!canvas || !placeholder) return;
+
+        if (!lastResults.method || !lastResults.coeffs || points.length < 2) {
+            placeholder.style.display = 'flex';
+            if (interpChartInstance) { interpChartInstance.destroy(); interpChartInstance = null; }
+            return;
+        }
+
+        placeholder.style.display = 'none';
+        if (interpChartInstance) interpChartInstance.destroy();
+
+        const coeffs = lastResults.coeffs;
+        // Usar los valores de los inputs si existen, si no auto-calcular
+        let xMin = parseFloat(document.getElementById('viewXmin').value);
+        let xMax = parseFloat(document.getElementById('viewXmax').value);
+        if (isNaN(xMin) || isNaN(xMax)) {
+            const xs = points.map(p => p.x);
+            const margin = Math.max((Math.max(...xs) - Math.min(...xs)) * 0.15, 0.5);
+            xMin = Math.min(...xs) - margin;
+            xMax = Math.max(...xs) + margin;
+        }
+
+        const numSamples = 400;
+        const curveData = [];
+        for (let i = 0; i <= numSamples; i++) {
+            const x = xMin + (xMax - xMin) * i / numSamples;
+            curveData.push({ x, y: evalPolynomial(coeffs, x) });
+        }
+
+        const datasets = [];
+        if (document.getElementById('togglePoints').checked) {
+            datasets.push({
+                label: 'Puntos experimentales',
+                data: points.map(p => ({ x: p.x, y: p.y })),
+                backgroundColor: '#e11d48',
+                borderColor: '#9f1239',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                showLine: false,
+                type: 'scatter'
+            });
+        }
+        if (document.getElementById('toggleCurve').checked) {
+            datasets.push({
+                label: `Polinomio ${lastResults.methodName}`,
+                data: curveData,
+                borderColor: '#0284c7',
+                backgroundColor: 'rgba(2, 132, 199, 0.08)',
+                borderWidth: 2.5,
+                pointRadius: 0,
+                fill: true,
+                tension: 0.1,
+                type: 'line'
+            });
+        }
+        if (lastResults.evalX !== undefined && lastResults.evalY !== undefined) {
+            datasets.push({
+                label: `Evaluación (${fmt(lastResults.evalX, 3)}, ${fmt(lastResults.evalY, 3)})`,
+                data: [{ x: lastResults.evalX, y: lastResults.evalY }],
+                backgroundColor: '#10b981',
+                borderColor: '#047857',
+                pointRadius: 8,
+                pointHoverRadius: 10,
+                showLine: false,
+                type: 'scatter'
+            });
+        }
+
+        // Auto-fit del eje Y (a menos que el usuario lo haya fijado manualmente)
+        const yMinInput = parseFloat(document.getElementById('viewYmin').value);
+        const yMaxInput = parseFloat(document.getElementById('viewYmax').value);
+        const useYAuto = isNaN(yMinInput) || isNaN(yMaxInput);
+
+        const yScaleConfig = {
+            title: { display: true, text: 'y = f(x)', font: { weight: 'bold' } },
+            grid: { display: document.getElementById('toggleGrid').checked, color: '#e2e8f0' }
+        };
+        if (!useYAuto) {
+            yScaleConfig.min = yMinInput;
+            yScaleConfig.max = yMaxInput;
+        } else {
+            // Dejar que Chart.js auto-escale, con un poco de grace
+            yScaleConfig.grace = '10%';
+        }
+
+        interpChartInstance = new Chart(canvas, {
+            type: 'scatter',
+            data: { datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', intersect: false },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Interpolación Polinomial — ${lastResults.methodName}`,
+                        font: { size: 14, weight: 'bold' },
+                        color: '#0f172a'
+                    },
+                    legend: {
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 15, font: { size: 11 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return `${ctx.dataset.label}: (${ctx.parsed.x.toFixed(4)}, ${ctx.parsed.y.toFixed(6)})`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        min: xMin,
+                        max: xMax,
+                        title: { display: true, text: 'x', font: { weight: 'bold' } },
+                        grid: { display: document.getElementById('toggleGrid').checked, color: '#e2e8f0' }
+                    },
+                    y: yScaleConfig
+                }
+            }
+        });
+    }
+
+    // =========================================================================
+    // COMPARACIÓN DE MÉTODOS (CORREGIDA)
+    // =========================================================================
+    function runComparison() {
+        if (points.length < 2) { alert('Se necesitan al menos 2 puntos.'); return; }
+        const xs = points.map(p => p.x);
+        if (new Set(xs).size !== xs.length) { alert('Hay valores de xi repetidos.'); return; }
+
+        const evalX = parseFloat(document.getElementById('evalX').value) || 0;
+        const n = points.length;
+
+        // Calcular todos los métodos
+        const results = {};
+
+        // Lagrange
+        const lagCoeffs = computeLagrangeCoeffs(points);
+        results.lagrange = {
+            name: 'Lagrange',
+            coeffs: lagCoeffs,
+            evalY: evalPolynomial(lagCoeffs, evalX),
+            applicable: true,
+            formulation: 'Forma estándar (coeficientes expandidos)',
+            formulaLatex: formatPolynomialLatex(lagCoeffs)
+        };
+
+        // Newton DD
+        const { coeffs: newtDDCoeffs } = computeNewtonDDCoeffs(points);
+        const newtDDEval = evalNewtonDD(newtDDCoeffs, xs, evalX);
+        results.newton_dd = {
+            name: 'Newton (Dif. Divididas)',
+            coeffs: lagCoeffs,
+            evalY: newtDDEval,
+            applicable: true,
+            formulation: 'Forma anidada de Newton con diferencias divididas',
+            formulaLatex: formatNewtonLatex(newtDDCoeffs, xs)
+        };
+
+        // Newton DF
+        const h = xs[1] - xs[0];
+        let equispaced = true;
+        for (let i = 1; i < n - 1; i++) {
+            if (Math.abs((xs[i + 1] - xs[i]) - h) > 1e-8) { equispaced = false; break; }
+        }
+        if (equispaced) {
+            // Evaluar con diferencias finitas
+            const table = Array.from({ length: n }, () => new Array(n).fill(0));
+            for (let i = 0; i < n; i++) table[i][0] = points[i].y;
+            for (let j = 1; j < n; j++) {
+                for (let i = 0; i < n - j; i++) table[i][j] = table[i + 1][j - 1] - table[i][j - 1];
+            }
+            const t = (evalX - xs[0]) / h;
+            let fwdEval = table[0][n - 1];
+            // Usar coeficientes normalizados
+            let fact = 1;
+            const fwdCoeffs = [];
+            for (let k = 0; k < n; k++) {
+                if (k > 0) fact *= k;
+                fwdCoeffs.push(table[0][k] / (fact * Math.pow(h, k)));
+            }
+            let evalDF = fwdCoeffs[n - 1];
+            for (let k = n - 2; k >= 0; k--) evalDF = evalDF * (t - k) + fwdCoeffs[k];
+
+            // Formulación forward
+            let formDF = '';
+            for (let k = 0; k < n; k++) {
+                if (Math.abs(fwdCoeffs[k]) < 1e-12) continue;
+                let term = fmt(fwdCoeffs[k], 6);
+                for (let m = 0; m < k; m++) term += `(x - ${fmt(xs[m], 4)})`;
+                formDF += (formDF ? ' + ' : '') + term;
+            }
+
+            results.newton_df = {
+                name: 'Newton (Dif. Finitas)',
+                coeffs: lagCoeffs,
+                evalY: evalDF,
+                applicable: true,
+                formulation: 'Forma de Newton con diferencias progresivas',
+                formulaLatex: formDF || '0'
+            };
+        } else {
+            results.newton_df = {
+                name: 'Newton (Dif. Finitas)',
+                coeffs: null,
+                evalY: null,
+                applicable: false,
+                reason: 'Los datos no están equiespaciados'
+            };
+        }
+
+        // Neville
+        const Q = Array.from({ length: n }, () => new Array(n).fill(0));
+        for (let i = 0; i < n; i++) Q[i][0] = points[i].y;
+        for (let j = 1; j < n; j++) {
+            for (let i = 0; i < n - j; i++) {
+                Q[i][j] = ((evalX - xs[i + j]) * Q[i][j - 1] - (evalX - xs[i]) * Q[i + 1][j - 1]) / (xs[i] - xs[i + j]);
+            }
+        }
+        results.neville = {
+            name: 'Neville',
+            coeffs: lagCoeffs,
+            evalY: Q[0][n - 1],
+            applicable: true,
+            formulation: 'Evaluación recursiva en el punto x (no construye el polinomio explícitamente)',
+            formulaLatex: 'Q_{i,j} = \\frac{(x - x_{i+j})Q_{i,j-1} - (x - x_i)Q_{i+1,j-1}}{x_i - x_{i+j}}'
+        };
+
+        // Baricéntrico
+        const w = new Array(n).fill(1);
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                if (i !== j) w[i] /= (xs[i] - xs[j]);
+            }
+        }
+        let num = 0, den = 0;
+        let exactNode = -1;
+        for (let i = 0; i < n; i++) {
+            if (Math.abs(evalX - xs[i]) < 1e-14) { exactNode = i; break; }
+            const term = w[i] / (evalX - xs[i]);
+            num += term * points[i].y;
+            den += term;
+        }
+        const barEval = exactNode >= 0 ? points[exactNode].y : num / den;
+
+        // Formulación baricéntrica
+        let formBar = 'P(x) = \\frac{';
+        for (let i = 0; i < n; i++) {
+            if (i > 0) formBar += ' + ';
+            formBar += `\\frac{${fmt(w[i], 6)}}{x - ${fmt(xs[i], 4)}} \\cdot ${fmt(points[i].y, 4)}`;
+        }
+        formBar += '}{';
+        for (let i = 0; i < n; i++) {
+            if (i > 0) formBar += ' + ';
+            formBar += `\\frac{${fmt(w[i], 6)}}{x - ${fmt(xs[i], 4)}}`;
+        }
+        formBar += '}';
+
+        results.barycentric = {
+            name: 'Baricéntrico',
+            coeffs: lagCoeffs,
+            evalY: barEval,
+            applicable: true,
+            formulation: 'Forma baricéntrica (pesos w_i precalculados)',
+            formulaLatex: formBar
+        };
+
+        // Renderizar
+        renderComparisonTable(results, evalX);
+        renderComparisonGraph(results, evalX);
+    }
+
+    function renderComparisonTable(results, evalX) {
+        const container = document.getElementById('comparisonContent');
+        const refY = results.lagrange.evalY;
+
+        let html = `
+            <div class="mb-4 p-4 bg-sky-50 border border-sky-200 rounded-lg text-xs text-sky-900">
+                <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> Teorema de unicidad del polinomio interpolante</p>
+                <p>Todos los métodos que construyen el polinomio interpolante a partir de los <strong>mismos nodos</strong> producen matemáticamente el <strong>mismo polinomio único</strong> de grado ≤ n−1. Las diferencias están en la <strong>formulación algebraica</strong>, la <strong>eficiencia computacional</strong> y la <strong>estabilidad numérica</strong>, no en el resultado.</p>
+            </div>
+            <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-slate-200 rounded-lg overflow-hidden">
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th class="px-3 py-2 text-left">Método</th>
+                        <th class="px-3 py-2 text-center">¿Aplicable?</th>
+                        <th class="px-3 py-2 text-center">P(${fmt(evalX, 4)})</th>
+                        <th class="px-3 py-2 text-center">Dif. vs Lagrange</th>
+                        <th class="px-3 py-2 text-left">Formulación algebraica</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        for (const key of ['lagrange', 'newton_dd', 'newton_df', 'neville', 'barycentric']) {
+            const r = results[key];
+            if (!r) continue;
+            const diff = r.applicable ? Math.abs(r.evalY - refY) : null;
+            html += `<tr class="border-b border-slate-100 hover:bg-slate-50 align-top">
+                <td class="px-3 py-2 font-semibold text-slate-700">${r.name}</td>
+                <td class="px-3 py-2 text-center">
+                    ${r.applicable
+                        ? '<span class="text-emerald-600 font-bold">✓ Sí</span>'
+                        : `<span class="text-rose-600 font-bold">✗ No</span><br><span class="text-[10px] text-slate-500">${r.reason || ''}</span>`}
+                </td>
+                <td class="px-3 py-2 text-center font-mono">${r.applicable ? fmt(r.evalY, 10) : '—'}</td>
+                <td class="px-3 py-2 text-center font-mono ${diff !== null && diff < 1e-8 ? 'text-emerald-600' : ''}">${diff !== null ? diff.toExponential(2) : '—'}</td>
+                <td class="px-3 py-2 text-slate-600 text-[11px]">${r.applicable ? r.formulation : '—'}</td>
+            </tr>`;
+        }
+
+        html += `</tbody></table></div>`;
+
+        // Forma estándar expandida — una de las representaciones equivalentes del polinomio
+html += `
+    <div class="mt-5 p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <h4 class="text-sm font-bold text-slate-800 mb-2">
+            <i class="fa-solid fa-square-root-variable text-brand-600 mr-1"></i>
+            Forma estándar expandida
+            <span class="font-normal text-slate-500">(una de las representaciones equivalentes del polinomio)</span>
+        </h4>
+        <p class="text-xs text-slate-500 mb-2">
+            Esta forma se obtiene típicamente expandiendo el polinomio de Lagrange o el de Newton,
+            y agrupando términos en potencias de <span class="font-mono">x</span>.
+        </p>
+        <div class="math-display text-center text-base">
+            $$P(x) = ${formatPolynomialLatex(results.lagrange.coeffs)}$$
+        </div>
+        <p class="text-xs text-slate-500 mt-2 text-center">
+            Coeficientes en base monomial <span class="font-mono">{1, x, x², …}</span>:
+            <span class="font-mono">[${results.lagrange.coeffs.map(c => fmt(c, 6)).join(', ')}]</span>
+        </p>
+    </div>
+`;
+
+        // Diferentes formulaciones algebraicas
+        html += `
+            <div class="mt-5">
+                <h4 class="text-sm font-bold text-slate-800 mb-3"><i class="fa-solid fa-code-branch text-brand-600 mr-1"></i> Diferentes Formulaciones Algebraicas del Mismo Polinomio</h4>
+                <div class="space-y-3">
+        `;
+
+        const formulations = [
+            { key: 'lagrange', label: 'Lagrange (forma expandida estándar)', color: 'sky' },
+            { key: 'newton_dd', label: 'Newton (forma anidada con diferencias divididas)', color: 'rose' },
+            { key: 'barycentric', label: 'Baricéntrico (forma de pesos)', color: 'violet' }
+        ];
+
+        formulations.forEach(f => {
+            const r = results[f.key];
+            if (!r || !r.applicable) return;
+            html += `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg">
+                    <p class="text-xs font-semibold text-${f.color}-700 mb-1">${f.label}</p>
+                    <div class="math-display text-center text-sm">$$${r.formulaLatex}$$</div>
+                </div>
+            `;
+        });
+
+        // Neville (formulación recursiva, no polinomio explícito)
+        if (results.neville && results.neville.applicable) {
+            html += `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg">
+                    <p class="text-xs font-semibold text-amber-700 mb-1">Neville (esquema recursivo, evalúa sin construir el polinomio)</p>
+                    <div class="math-display text-center text-sm">$$${results.neville.formulaLatex}$$</div>
+                </div>
+            `;
+        }
+
+        if (results.newton_df && results.newton_df.applicable) {
+            html += `
+                <div class="p-3 bg-white border border-slate-200 rounded-lg">
+                    <p class="text-xs font-semibold text-emerald-700 mb-1">Newton Diferencias Finitas (forma con Δ)</p>
+                    <div class="math-display text-center text-sm">$$${results.newton_df.formulaLatex}$$</div>
+                </div>
+            `;
+        } else if (results.newton_df && !results.newton_df.applicable) {
+            html += `
+                <div class="p-3 bg-rose-50 border border-rose-200 rounded-lg">
+                    <p class="text-xs font-semibold text-rose-700 mb-1">Newton Diferencias Finitas — No aplicable</p>
+                    <p class="text-xs text-rose-600">${results.newton_df.reason}</p>
+                </div>
+            `;
+        }
+
+        html += `</div></div>`;
+        container.innerHTML = html;
+
+        if (typeof renderMathInElement === 'function') {
+            renderMathInElement(container, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ]
+            });
+        }
+    }
+
+    function renderComparisonGraph(results, evalX) {
+        const canvas = document.getElementById('comparisonChart');
+        const placeholder = document.getElementById('comparisonChartPlaceholder');
+        if (!canvas) return;
+        placeholder.style.display = 'none';
+        if (comparisonChartInstance) comparisonChartInstance.destroy();
+
+        let xMin = parseFloat(document.getElementById('viewXmin').value);
+        let xMax = parseFloat(document.getElementById('viewXmax').value);
+        if (isNaN(xMin) || isNaN(xMax)) {
+            const xs = points.map(p => p.x);
+            const margin = Math.max((Math.max(...xs) - Math.min(...xs)) * 0.15, 0.5);
+            xMin = Math.min(...xs) - margin;
+            xMax = Math.max(...xs) + margin;
+        }
+
+        const coeffs = results.lagrange.coeffs;
+        const numSamples = 400;
+        const curveData = [];
+        for (let i = 0; i <= numSamples; i++) {
+            const x = xMin + (xMax - xMin) * i / numSamples;
+            curveData.push({ x, y: evalPolynomial(coeffs, x) });
+        }
+
+        const datasets = [
+            {
+                label: 'Puntos originales',
+                data: points.map(p => ({ x: p.x, y: p.y })),
+                backgroundColor: '#0f172a',
+                borderColor: '#0f172a',
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                showLine: false,
+                type: 'scatter'
+            },
+            {
+                label: 'Polinomio interpolante único (todos los métodos)',
+                data: curveData,
+                borderColor: '#0284c7',
+                borderWidth: 3,
+                pointRadius: 0,
+                fill: false,
+                tension: 0.1,
+                type: 'line'
+            },
+            {
+                label: `Evaluación (${fmt(evalX, 3)}, ${fmt(results.lagrange.evalY, 3)})`,
+                data: [{ x: evalX, y: results.lagrange.evalY }],
+                backgroundColor: '#f59e0b',
+                borderColor: '#b45309',
+                pointRadius: 9,
+                pointHoverRadius: 11,
+                showLine: false,
+                type: 'scatter'
+            }
+        ];
+
+        comparisonChartInstance = new Chart(canvas, {
+            type: 'scatter',
+            data: { datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', intersect: false },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Comparación de Métodos — Polinomio Interpolante Único',
+                        font: { size: 13, weight: 'bold' }
+                    },
+                    legend: {
+                        position: 'top',
+                        labels: { usePointStyle: true, padding: 12, font: { size: 10 } }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        min: xMin,
+                        max: xMax,
+                        title: { display: true, text: 'x', font: { weight: 'bold' } },
+                        grid: { color: '#e2e8f0' }
+                    },
+                    y: {
+                        title: { display: true, text: 'y = f(x)', font: { weight: 'bold' } },
+                        grid: { color: '#e2e8f0' },
+                        grace: '10%'
+                    }
+                }
+            }
+        });
+    }
+
+    // =========================================================================
+    // EVALUACIÓN DE TODOS LOS MÉTODOS (MEJORA)
+    // =========================================================================
+    function evaluateAllMethods() {
+        if (points.length < 2) { alert('Se necesitan al menos 2 puntos.'); return; }
+        const xs = points.map(p => p.x);
+        if (new Set(xs).size !== xs.length) { alert('Hay valores de xi repetidos.'); return; }
+
+        const evalX = parseFloat(document.getElementById('evalXTab').value);
+        if (isNaN(evalX)) { alert('Ingrese un valor numérico válido para x.'); return; }
+        document.getElementById('evalX').value = evalX;
+
+        const n = points.length;
+        const refLagCoeffs = computeLagrangeCoeffs(points);
+        const refY = evalPolynomial(refLagCoeffs, evalX);
+
+        // Calcular cada método
+        const evals = [];
+
+        // Lagrange
+        evals.push({
+            name: 'Lagrange',
+            value: refY,
+            applicable: true,
+            formula: `P(x) = ${formatPolynomialLatex(refLagCoeffs)}`
+        });
+
+        // Newton DD
+        const { coeffs: newtDDCoeffs } = computeNewtonDDCoeffs(points);
+        evals.push({
+            name: 'Newton (Dif. Divididas)',
+            value: evalNewtonDD(newtDDCoeffs, xs, evalX),
+            applicable: true,
+            formula: `P(x) = ${formatNewtonLatex(newtDDCoeffs, xs)}`
+        });
+
+        // Newton DF
+        const h = xs[1] - xs[0];
+        let equispaced = true;
+        for (let i = 1; i < n - 1; i++) {
+            if (Math.abs((xs[i + 1] - xs[i]) - h) > 1e-8) { equispaced = false; break; }
+        }
+        if (equispaced) {
+            const table = Array.from({ length: n }, () => new Array(n).fill(0));
+            for (let i = 0; i < n; i++) table[i][0] = points[i].y;
+            for (let j = 1; j < n; j++) {
+                for (let i = 0; i < n - j; i++) table[i][j] = table[i + 1][j - 1] - table[i][j - 1];
+            }
+            let fact = 1;
+            const fwdCoeffs = [];
+            for (let k = 0; k < n; k++) {
+                if (k > 0) fact *= k;
+                fwdCoeffs.push(table[0][k] / (fact * Math.pow(h, k)));
+            }
+            const t = (evalX - xs[0]) / h;
+            let evalDF = fwdCoeffs[n - 1];
+            for (let k = n - 2; k >= 0; k--) evalDF = evalDF * (t - k) + fwdCoeffs[k];
+
+            let formDF = '';
+            for (let k = 0; k < n; k++) {
+                if (Math.abs(fwdCoeffs[k]) < 1e-12) continue;
+                let term = fmt(fwdCoeffs[k], 6);
+                for (let m = 0; m < k; m++) term += `(x - ${fmt(xs[m], 4)})`;
+                formDF += (formDF ? ' + ' : '') + term;
+            }
+
+            evals.push({
+                name: 'Newton (Dif. Finitas)',
+                value: evalDF,
+                applicable: true,
+                formula: `P(x) = ${formDF || '0'}`
+            });
+        } else {
+            evals.push({
+                name: 'Newton (Dif. Finitas)',
+                value: null,
+                applicable: false,
+                reason: 'Datos no equiespaciados'
+            });
+        }
+
+        // Neville
+        const Q = Array.from({ length: n }, () => new Array(n).fill(0));
+        for (let i = 0; i < n; i++) Q[i][0] = points[i].y;
+        for (let j = 1; j < n; j++) {
+            for (let i = 0; i < n - j; i++) {
+                Q[i][j] = ((evalX - xs[i + j]) * Q[i][j - 1] - (evalX - xs[i]) * Q[i + 1][j - 1]) / (xs[i] - xs[i + j]);
+            }
+        }
+        evals.push({
+            name: 'Neville',
+            value: Q[0][n - 1],
+            applicable: true,
+            formula: 'Esquema recursivo (no construye polinomio explícito)'
+        });
+
+        // Baricéntrico
+        const w = new Array(n).fill(1);
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                if (i !== j) w[i] /= (xs[i] - xs[j]);
+            }
+        }
+        let num = 0, den = 0;
+        let exactNode = -1;
+        for (let i = 0; i < n; i++) {
+            if (Math.abs(evalX - xs[i]) < 1e-14) { exactNode = i; break; }
+            const term = w[i] / (evalX - xs[i]);
+            num += term * points[i].y;
+            den += term;
+        }
+        const barEval = exactNode >= 0 ? points[exactNode].y : num / den;
+        evals.push({
+            name: 'Baricéntrico',
+            value: barEval,
+            applicable: true,
+            formula: `P(x) = \\frac{\\sum w_i y_i / (x-x_i)}{\\sum w_i / (x-x_i)}`
+        });
+
+        // Renderizar tabla
+        let html = `
+            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 mb-4">
+                <p class="text-sm text-slate-700">
+                    <i class="fa-solid fa-crosshairs text-brand-600 mr-1"></i>
+                    Evaluación en <strong class="font-mono text-brand-700">x = ${fmt(evalX, 6)}</strong>
+                    — referencia Lagrange: <strong class="font-mono text-brand-700">${fmt(refY, 10)}</strong>
+                </p>
+            </div>
+            <div class="overflow-x-auto">
+            <table class="min-w-full text-xs border border-slate-200 rounded-lg overflow-hidden">
+                <thead class="bg-slate-100">
+                    <tr>
+                        <th class="px-3 py-2 text-left">Método</th>
+                        <th class="px-3 py-2 text-center">¿Aplicable?</th>
+                        <th class="px-3 py-2 text-center">P(${fmt(evalX, 4)})</th>
+                        <th class="px-3 py-2 text-center">|Dif. vs Lagrange|</th>
+                        <th class="px-3 py-2 text-center">Estado numérico</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        evals.forEach(e => {
+            let diff = null;
+            let statusBadge = '';
+            if (e.applicable) {
+                diff = Math.abs(e.value - refY);
+                if (diff < 1e-10) {
+                    statusBadge = '<span class="text-emerald-600 font-bold">✓ Coincide (≈10⁻¹⁵)</span>';
+                } else if (diff < 1e-6) {
+                    statusBadge = '<span class="text-emerald-500">✓ Coincide (tolerancia)</span>';
+                } else {
+                    statusBadge = '<span class="text-amber-600">⚠ Diferencia notable</span>';
+                }
+            } else {
+                statusBadge = `<span class="text-rose-600">✗ ${e.reason || 'No aplicable'}</span>`;
+            }
+            html += `<tr class="border-b border-slate-100 hover:bg-slate-50">
+                <td class="px-3 py-2 font-semibold text-slate-700">${e.name}</td>
+                <td class="px-3 py-2 text-center">${e.applicable ? '<span class="text-emerald-600 font-bold">✓ Sí</span>' : '<span class="text-rose-600 font-bold">✗ No</span>'}</td>
+                <td class="px-3 py-2 text-center font-mono">${e.applicable ? fmt(e.value, 12) : '—'}</td>
+                <td class="px-3 py-2 text-center font-mono">${diff !== null ? diff.toExponential(3) : '—'}</td>
+                <td class="px-3 py-2 text-center text-[10px]">${statusBadge}</td>
+            </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+        html += `<p class="text-xs text-slate-500 mt-3">
+            <i class="fa-solid fa-circle-info text-brand-500 mr-1"></i>
+            Todos los métodos aplicables calculan el <strong>mismo polinomio interpolante único</strong>.
+            Las diferencias mostradas son del orden de la precisión de punto flotante.
+        </p>`;
+
+        document.getElementById('evaluationOutput').innerHTML = html;
+    }
+
+    // =========================================================================
+    // UTILIDADES
+    // =========================================================================
+    function showMethodStatus(type, msg) {
+        const div = document.getElementById('methodStatusMsg');
+        div.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'border-emerald-200',
+                                'bg-amber-50', 'text-amber-800', 'border-amber-200',
+                                'bg-rose-50', 'text-rose-800', 'border-rose-200');
+        if (type === 'success') div.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+        else if (type === 'warning') div.classList.add('bg-amber-50', 'text-amber-800', 'border', 'border-amber-200');
+        else div.classList.add('bg-rose-50', 'text-rose-800', 'border', 'border-rose-200');
+        div.innerHTML = msg;
+        div.classList.remove('hidden');
+    }
+
+    function clearResults() {
+        lastResults = {};
+        currentPolynomial = null;
+        document.getElementById('procedureContent').innerHTML = '<p class="text-xs text-slate-400 italic text-center py-8">Ejecute el cálculo para ver el procedimiento detallado.</p>';
+        document.getElementById('polynomialOutput').innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">El polinomio resultante se mostrará aquí.</p>';
+        document.getElementById('coefficientsOutput').innerHTML = '';
+        document.getElementById('polyMethodBadge').textContent = 'Método: —';
+        document.getElementById('evaluationOutput').innerHTML = '<p class="text-xs text-slate-400 italic text-center py-2">Presione "Evaluar Todos los Métodos" para ver los resultados.</p>';
+        document.getElementById('nodeVerificationOutput').innerHTML = '<p class="text-xs text-slate-400 italic">Calcule primero un método para ver la verificación.</p>';
+        document.getElementById('comparisonContent').innerHTML = '<p class="text-xs text-slate-400 italic text-center py-8">Haga clic en "Ejecutar Comparación Completa" para calcular todos los métodos aplicables.</p>';
+
+        const placeholder = document.getElementById('chartPlaceholder');
+        if (placeholder) placeholder.style.display = 'flex';
+        if (interpChartInstance) { interpChartInstance.destroy(); interpChartInstance = null; }
+        if (comparisonChartInstance) { comparisonChartInstance.destroy(); comparisonChartInstance = null; }
+
+        const compPlaceholder = document.getElementById('comparisonChartPlaceholder');
+        if (compPlaceholder) compPlaceholder.style.display = 'flex';
+
+        document.getElementById('methodStatusMsg').classList.add('hidden');
+    }
+
+    </script>
+</body>
+</html>
