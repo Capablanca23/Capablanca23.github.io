@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mecánica de Fluidos Aplicada | Calculadora (Mott)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],serif:['Fraunces','serif'],mono:['JetBrains Mono','monospace']},
+colors:{brand:{50:'#f0f7ff',100:'#e0effe',500:'#0284c7',600:'#0369a1',700:'#095180',900:'#0c2e4e'}}}}}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--b5:#0284c7;--b6:#0369a1;--b9:#0c2e4e;--bg:#f8fafc;--bd:#e2e8f0;--tx:#1e293b;--mu:#64748b}
+*{box-sizing:border-box}
+.seg{display:flex;border:1px solid #475569;border-radius:8px;overflow:hidden}
+.seg button{background:none;border:0;color:#cbd5e1;padding:7px 12px;font-size:.78rem;font-weight:600;cursor:pointer}
+.seg button.on{background:var(--b5);color:#fff}
+.tab-active{border-bottom:3px solid #0284c7;color:#0369a1;font-weight:600}
+.tab-inactive{border-bottom:3px solid transparent;color:#64748b}
+.tab-inactive:hover{color:#0f172a;border-bottom-color:#cbd5e1}
+.tab{display:none}.tab.on{display:block}
+.thead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.thead p{margin:0;font-size:.83rem;color:var(--mu);max-width:720px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h3{font:700 1rem Fraunces,serif;margin:0 0 8px;color:var(--b9)}
+/* Estilo de ecuaciones (tomado del HTML de referencia) */
+.eq-block{background:#f8f9fa;border-left:4px solid #1976d2;padding:8px 12px;margin:6px 0;border-radius:4px;font-family:'Cambria Math','Times New Roman',serif;font-size:13.5px;color:#0d47a1;text-align:center;overflow-x:auto}
+.eq-block .eq-name{font-family:'Segoe UI',sans-serif;font-size:11px;color:#546e7a;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;letter-spacing:.5px}
+.eq-block sub,.eq-block sup{font-size:.75em}
+.eq-block .frac{display:inline-block;vertical-align:middle;text-align:center;margin:0 2px}
+.eq-block .frac .num{display:block;border-bottom:1px solid #0d47a1;padding:0 4px}
+.eq-block .frac .den{display:block;padding:0 4px}
+.fl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+label{display:block;font-size:.74rem;font-weight:500;color:#475569}label i{font-style:normal;color:var(--mu)}
+.in{display:flex;gap:4px;margin-top:3px}
+/* los selectores llevan .card para ganar a la normalización de Tailwind */
+.card input,.card select{width:100%;margin-top:3px;padding:7px 8px;border:1px solid #cbd5e1;border-radius:7px;font:500 .8rem 'JetBrains Mono',Consolas,monospace;background:#fff;color:var(--tx)}
+.in input,.in select{margin:0}.in select{width:82px;flex:none;padding:7px 3px;font-size:.72rem}
+.card input:focus,.card select:focus{outline:2px solid var(--b5)}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:14px}
+.tile{background:#f0f7ff;border:1px solid #bae0fd;border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:1px}
+.tile span{font-size:.72rem;color:#475569}.tile b{font:600 .95rem 'JetBrains Mono',Consolas,monospace;color:var(--b9);word-break:break-word}.tile em{font-style:normal;font-size:.7rem;color:var(--mu)}
+.msg{grid-column:1/-1;margin:0;font-size:.78rem;color:var(--mu)}.err{color:#be123c;background:#fff1f2;border:1px solid #fecdd3;border-radius:8px;padding:8px}
+.btn{padding:8px 14px;border-radius:8px;border:1px solid var(--bd);background:#fff;font-size:.78rem;font-weight:600;cursor:pointer;color:#334155}
+.btn:hover{background:#f1f5f9}.btn.d{color:#be123c;border-color:#fecdd3;background:#fff1f2}
+.card .btn.p{margin-top:12px;background:var(--b6);color:#fff;border-color:var(--b6)}
+.wide{grid-column:1/-1}
+canvas.moody{display:block;width:100%;max-width:800px;height:auto;margin:14px auto 0;border:1px solid var(--bd);border-radius:8px;background:#fff}
+.st{margin:-4px 0 10px;font-size:.8rem;color:var(--b6)}.st b{color:var(--b9)}
+footer{text-align:center;font-size:.72rem;color:var(--mu);padding:20px}
+@media(max-width:420px){.grid{grid-template-columns:1fr}.fl{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased">
+
+<!-- Encabezado -->
+<header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 bg-brand-600 rounded-lg text-white shadow-inner"><i class="fa-solid fa-droplet text-xl"></i></div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight font-serif">Mecánica de Fluidos Aplicada</h1>
+        <p class="text-xs text-slate-400">Ecuaciones de Robert L. Mott — Estática, dinámica y pérdidas de energía</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3 text-xs">
+      <div class="seg" title="Sistema de unidades"><button id="sSI" class="on" onclick="setSys('SI')">Sistema SI</button><button id="sEN" onclick="setSys('EN')">Sistema inglés</button></div>
+      <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>v1.2
+      </span>
+      <button onclick="document.getElementById('authorCard').scrollIntoView({behavior:'smooth'})" class="hover:bg-slate-800 px-3 py-1.5 rounded-md text-slate-300 transition-colors flex items-center gap-1.5">
+        <i class="fa-solid fa-user-graduate"></i> Dr. Ronald Rodriguez E.
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+<!-- Tarjeta del autor con código QR (CTI Vitae) -->
+<section id="authorCard" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-md">
+  <div class="p-5 md:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+        <div class="relative">
+          <div class="w-20 h-20 rounded-full bg-brand-600 border-2 border-white/20 flex items-center justify-center text-2xl font-bold font-serif text-white shadow-lg overflow-hidden"><i class="fa-solid fa-user-tie text-3xl"></i></div>
+          <span class="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full" title="Verificado CTI Vitae"></span>
+        </div>
+        <div>
+          <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full mb-1 border border-brand-500/20"><i class="fa-solid fa-award text-amber-400"></i> Docente Investigador</div>
+          <h2 class="text-lg md:text-xl font-bold font-serif">Dr. Ronald F. Rodriguez Espinoza</h2>
+          <p class="text-sm text-slate-300">Especialista en Análisis Numérico y Métodos Computacionales</p>
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2 text-xs text-slate-400">
+            <span><i class="fa-solid fa-building-columns mr-1 text-slate-400"></i> CONCYTEC CTI Vitae</span>
+            <span><i class="fa-solid fa-droplet mr-1 text-slate-400"></i> Mecánica de Fluidos Aplicada</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 backdrop-blur-sm">
+        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" title="Haz clic para abrir el perfil oficial CTI Vitae" class="group relative bg-white p-2 rounded-lg shadow-md transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" alt="QR CTI Vitae - Dr. Ronald F. Rodríguez E." class="w-16 h-16 md:w-20 md:h-20 object-contain transition-opacity group-hover:opacity-90" onerror="this.onerror=null; this.src='https://placehold.co/120x120/ffffff/0f172a?text=QR+CTI';">
+        </a>
+        <div class="text-left space-y-1">
+          <p class="text-xs font-semibold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-qrcode text-sky-400"></i> Código QR</p>
+          <p class="text-[11px] text-slate-300 max-w-[130px] leading-tight">Haz clic en el código QR para consultar la trayectoria académica.</p>
+          <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 hover:text-sky-300 transition-colors">Perfil CTI Vitae <i class="fa-solid fa-chevron-right text-[9px]"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pestañas -->
+<nav class="bg-white rounded-xl shadow-sm border border-slate-200 px-2">
+  <div class="flex flex-wrap gap-1 text-sm font-medium">
+    <button data-tab="est" class="tab-btn tab-active px-4 py-3 flex items-center gap-2 transition-colors"><i class="fa-solid fa-droplet text-brand-600"></i> 1. Estática de fluidos</button>
+    <button data-tab="din" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors"><i class="fa-solid fa-water text-brand-600"></i> 2. Dinámica de fluidos</button>
+    <button data-tab="per" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors"><i class="fa-solid fa-gauge-high text-brand-600"></i> 3. Pérdidas por fricción</button>
+    <button data-tab="men" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors"><i class="fa-solid fa-faucet text-brand-600"></i> 4. Pérdidas menores</button>
+  </div>
+</nav>
+<section id="tab-est" class="tab on"><div class="thead"><p>Peso específico, densidad, presión hidrostática y fuerza sobre superficies planas sumergidas. Cada campo permite elegir su unidad; el botón superior cambia todo el módulo entre SI e inglés.</p><div><button class="btn" onclick="resetTab('est')">Restaurar ejemplo</button> <button class="btn d" onclick="clearTab('est')">Limpiar</button></div></div><div class="grid" id="g-est"></div></section>
+<section id="tab-din" class="tab"><div class="thead"><p>Continuidad, flujo másico, ecuación de Bernoulli y ecuación general de la energía (bombas h<sub>A</sub>, motores h<sub>R</sub> y pérdidas h<sub>L</sub>).</p><div><button class="btn" onclick="resetTab('din')">Restaurar ejemplo</button> <button class="btn d" onclick="clearTab('din')">Limpiar</button></div></div><div class="grid" id="g-din"></div></section>
+<section id="tab-per" class="tab"><div class="thead"><p>Tres módulos independientes, cada uno con sus propios datos: número de Reynolds, factor de fricción f (laminar o turbulento, con diagrama de Moody) y ecuación de Darcy-Weisbach.</p><div><button class="btn" onclick="resetTab('per')">Restaurar ejemplo</button> <button class="btn d" onclick="clearTab('per')">Limpiar</button></div></div><div class="grid" id="g-per"></div></section>
+<section id="tab-men" class="tab"><div class="thead"><p>Pérdidas en accesorios con h<sub>m</sub> = K·v²/2g: entradas, salidas, cambios de sección, codos y válvulas (longitud equivalente K = f<sub>T</sub>·L<sub>e</sub>/D).</p><div><button class="btn" onclick="resetTab('men')">Restaurar ejemplo</button> <button class="btn d" onclick="clearTab('men')">Limpiar</button></div></div><div class="grid" id="g-men"></div></section>
+</main>
+<footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
+    <p>© 2026 <span class="font-semibold text-slate-200">Dr. Ronald F. Rodriguez E.</span> — Análisis Numérico y Métodos Computacionales</p>
+    <p class="text-slate-500">Desarrollado para entornos académicos y profesionales en ingeniería y ciencias aplicadas. Verifique los coeficientes con las tablas del texto de Mott antes de usarlos en diseño.</p>
+    <p class="text-slate-600 text-[10px]">Bibliotecas externas: Tailwind CSS, FontAwesome</p>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   CONSTANTES Y UTILIDADES
+   Todo el cálculo interno se hace en SI; la interfaz convierte
+   las entradas y las salidas al sistema elegido (SI o inglés).
+   ========================================================= */
+const g0 = 9.81;                                  // gravedad (m/s²)
+const $ = id => document.getElementById(id);
+let sys = 'SI';                                   // sistema activo: 'SI' | 'EN'
+
+// Unidades de ENTRADA: [texto, factor hacia SI base, sistema por defecto]
+// Bases SI: L→m, Q→m³/s, P→kPa, v→m/s, g→m/s², gam→kN/m³, rho→kg/m³, nu→m²/s
+const U = {
+  L:  [['m',1,'SI'],['mm',1e-3],['cm',1e-2],['ft',.3048,'EN'],['in',.0254]],
+  Q:  [['m³/s',1,'SI'],['L/s',1e-3],['ft³/s',.0283168,'EN'],['gpm',6.30902e-5]],
+  P:  [['kPa',1,'SI'],['Pa',1e-3],['bar',100],['psi',6.89476,'EN'],['psf',.0478803]],
+  v:  [['m/s',1,'SI'],['ft/s',.3048,'EN']],
+  g:  [['m/s²',1,'SI'],['ft/s²',.3048,'EN']],
+  gam:[['kN/m³',1,'SI'],['N/m³',1e-3],['lb/ft³',.157087,'EN']],
+  rho:[['kg/m³',1,'SI'],['slug/ft³',515.379,'EN']],
+  nu: [['m²/s',1,'SI'],['ft²/s',.092903,'EN']],
+  mu: [['Pa·s',1,'SI'],['cP',1e-3],['lb·s/ft²',47.8803,'EN']]
+};
+// Unidades de SALIDA: [[texto SI, divisor], [texto inglés, divisor]]  (valor mostrado = valor SI / divisor)
+const OU = {
+  L:[['m',1],['ft',.3048]], A:[['m²',1],['ft²',.092903]], I4:[['m⁴',1],['ft⁴',.008631]],
+  Q:[['m³/s',1],['ft³/s',.0283168]], Qs:[['L/s',1e-3],['gpm',6.30902e-5]], v:[['m/s',1],['ft/s',.3048]],
+  P:[['kPa',1],['psi',6.89476]], Palt:[['psi',6.89476],['kPa',1]],
+  F:[['kN',1],['lbf',.00444822]], gam:[['kN/m³',1],['lb/ft³',.157087]], gamalt:[['lb/ft³',.157087],['kN/m³',1]],
+  rho:[['kg/m³',1],['slug/ft³',515.379]], rhoalt:[['slug/ft³',515.379],['kg/m³',1]],
+  mdot:[['kg/s',1],['slug/s',14.5939]], W:[['N/s',1],['lbf/s',4.44822]], pg:[['kPa/m',1],['psi/ft',22.6206]],
+  pw:[['kW',1],['hp',.7457]], pwalt:[['hp',.7457],['kW',1]],
+  nu:[['m²/s',1],['ft²/s',.092903]]
+};
+const def = (k,s) => U[k].findIndex(u=>u[2]===s);
+const F = (id,l,d,u,o) => ({id,l,d,u,o});                  // campo numérico (o = opcional)
+const S = (id,l,opts,d,fill) => ({id,l,s:opts,d,fill});    // campo de selección
+const pos = (x,n) => { if(!(x>0)) throw Error((n||'El valor')+' debe ser mayor que cero'); return x; };
+const area = D => Math.PI*D*D/4;
+function fmt(x){
+  if(typeof x==='string') return x;
+  if(!isFinite(x)) return '—';
+  const s = (x!==0 && (Math.abs(x)>=1e6||Math.abs(x)<1e-3)) ? x.toExponential(4) : String(Number(x.toPrecision(6)));
+  return s.replace('.',',');
+}
+// Fracción en el estilo de ecuaciones de referencia
+const fr = (n,d) => `<span class="frac"><span class="num">${n}</span><span class="den">${d}</span></span>`;
+
+/* =========================================================
+   TARJETAS DE CÁLCULO
+   t=título, e=ecuaciones [nombre, HTML], f=campos, k=función de cálculo (en SI)
+   Cada salida: [etiqueta, valor SI, clave de unidad de salida o texto]
+   ========================================================= */
+const CARDS = [
+
+/* ---------- PESTAÑA 1: ESTÁTICA DE FLUIDOS ---------- */
+{id:'sg',tab:'est',st:`γ y ρ a partir de la gravedad específica`,t:'Peso específico y densidad (gravedad específica)',
+ e:[['Gravedad específica',`γ = sg · γ<sub>w</sub> &nbsp;&nbsp;&nbsp; ρ = sg · ρ<sub>w</sub> &nbsp;&nbsp;&nbsp; γ = ρ · g`]],
+ f:[F('sg','Gravedad específica, sg',0.85,'adim.'),F('gw','Peso específico del agua, γ<sub>w</sub>',9.81,'gam',1),F('rw','Densidad del agua, ρ<sub>w</sub>',1000,'rho',1)],
+ k:v=>{pos(v.sg,'sg');const gw=v.gw??9.81,gam=v.sg*gw,rho=v.sg*(v.rw??gw/g0*1000);
+  return [['Peso específico, γ',gam,'gam'],['Peso específico, γ (otro sistema)',gam,'gamalt'],['Densidad, ρ',rho,'rho'],['Densidad, ρ (otro sistema)',rho,'rhoalt']]}},
+
+/* Ecuación de presión hidrostática tomada del HTML de referencia: P = P₀ + ρ·g·h */
+{id:'hid',tab:'est',st:`presión manométrica y absoluta a la profundidad h, y su variación con la profundidad`,t:'Presión hidrostática y variación con la profundidad',
+ e:[['Presión hidrostática',`P = P₀ + ρ · g · h &nbsp;&nbsp;&nbsp; ⇔ &nbsp;&nbsp;&nbsp; P<sub>man</sub> = ρ · g · h`],['Variación con la profundidad',`ΔP = ρ · g · Δh`]],
+ f:[F('P0','Presión en la superficie, P₀',101.325,'P',1),F('rho','Densidad, ρ',998.2,'rho'),F('g','Gravedad, g',9.81,'g'),F('h','Profundidad, h',5,'L')],
+ k:v=>{pos(v.rho,'ρ');pos(v.g,'g');if(v.h<0)throw Error('La profundidad h no puede ser negativa');
+  const gam=v.rho*v.g/1000,p0=v.P0||0,p=z=>p0+gam*z;      // γ en kN/m³, presiones en kPa
+  return [['Peso específico, γ = ρ·g',gam,'gam'],['Gradiente de presión, ΔP/Δh',gam,'pg'],
+   ['Presión manométrica, P<sub>man</sub> = ρ·g·h',gam*v.h,'P'],['Presión absoluta, P = P₀ + ρ·g·h',p(v.h),'P'],['Presión absoluta (otro sistema)',p(v.h),'Palt'],
+   ['Presión absoluta a h/4',p(v.h/4),'P'],['Presión absoluta a h/2',p(v.h/2),'P'],['Presión absoluta a 3h/4',p(3*v.h/4),'P']]}},
+
+{id:'plana',tab:'est',st:`fuerza resultante sobre la pared y ubicación del centro de presión`,t:'Fuerza sobre una pared plana vertical rectangular sumergida',
+ e:[['Fuerza resultante',`F<sub>R</sub> = γ · h<sub>c</sub> · A &nbsp;&nbsp;&nbsp; I<sub>c</sub> = ${fr('b · H³','12')}`],['Centro de presión',`L<sub>p</sub> = L<sub>c</sub> + ${fr('I<sub>c</sub>','L<sub>c</sub> · A')}`]],
+ f:[F('sg','Gravedad específica, sg',1,'adim.'),F('hc','Profundidad del centroide, h<sub>c</sub>',3,'L'),F('b','Ancho, b',2,'L'),F('H','Altura, H',2,'L'),F('gw','Peso específico del agua, γ<sub>w</sub>',9.81,'gam',1)],
+ k:v=>{pos(v.sg,'sg');pos(v.hc,'h_c');pos(v.b,'b');pos(v.H,'H');
+  if(v.hc<v.H/2)throw Error('La pared sobresale de la superficie libre: se requiere h_c ≥ H/2');
+  const gam=v.sg*(v.gw??9.81),A=v.b*v.H,Ic=v.b*v.H**3/12,Lp=v.hc+Ic/(v.hc*A);
+  return [['Área, A',A,'A'],['Momento de inercia, I<sub>c</sub>',Ic,'I4'],['Fuerza resultante, F<sub>R</sub>',gam*v.hc*A,'F'],['Profundidad del centro de presión, L<sub>p</sub>',Lp,'L'],['Distancia L<sub>p</sub> − L<sub>c</sub>',Lp-v.hc,'L']]}},
+
+/* ---------- PESTAÑA 2: DINÁMICA DE FLUIDOS ---------- */
+{id:'cont',tab:'din',st:`caudal Q, velocidad en la sección 2, flujo másico y flujo en peso`,t:'Continuidad y flujo másico',
+ e:[['Ecuación de continuidad',`Q = A<sub>1</sub> · v<sub>1</sub> = A<sub>2</sub> · v<sub>2</sub>`],['Flujo másico y flujo en peso',`ṁ = ρ · Q &nbsp;&nbsp;&nbsp; W = γ · Q`]],
+ f:[F('D1','Diámetro en la sección 1, D₁',0.1,'L'),F('D2','Diámetro en la sección 2, D₂',0.05,'L'),F('v1','Velocidad en 1, v₁',2,'v'),F('rho','Densidad, ρ',1000,'rho')],
+ k:v=>{pos(v.D1,'D₁');pos(v.D2,'D₂');pos(v.rho,'ρ');const A1=area(v.D1),A2=area(v.D2),Q=A1*v.v1;
+  return [['Área, A₁',A1,'A'],['Área, A₂',A2,'A'],['Caudal, Q = A₁·v₁',Q,'Q'],['Caudal, Q (otra unidad)',Q,'Qs'],['Velocidad, v₂ = Q/A₂',Q/A2,'v'],['Flujo másico, ṁ = ρ·Q',v.rho*Q,'mdot'],['Flujo en peso, W = γ·Q',v.rho*g0*Q,'W']]}},
+
+{id:'bp',tab:'din',st:`la presión P₂ en el punto 2 con la ecuación de Bernoulli`,t:'Bernoulli — presión en el punto 2',
+ e:[['Ecuación de Bernoulli',`${fr('P₁','γ')} + ${fr('v₁²','2 · g')} + z₁ = ${fr('P₂','γ')} + ${fr('v₂²','2 · g')} + z₂`]],
+ f:[F('p1','Presión manométrica, P₁',300,'P'),F('z1','Elevación, z₁',10,'L'),F('v1','Velocidad, v₁',1.5,'v'),F('z2','Elevación, z₂',0,'L'),F('v2','Velocidad, v₂',3,'v'),F('gam','Peso específico, γ',9.81,'gam')],
+ k:v=>{pos(v.gam,'γ');const H1=v.p1/v.gam+v.z1+v.v1**2/(2*g0),p2=v.gam*(H1-v.z2-v.v2**2/(2*g0));
+  return [['Presión manométrica, P₂',p2,'P'],['Presión manométrica, P₂ (otro sistema)',p2,'Palt'],['Carga total en ①, H₁',H1,'L'],['Estado',p2<0?'P₂ negativa (succión)':'P₂ ≥ 0','']]}},
+
+{id:'bv',tab:'din',st:`la velocidad v₂ en el punto 2 con la ecuación de Bernoulli`,t:'Bernoulli — velocidad en el punto 2',
+ e:[['Velocidad en el punto 2',`v₂ = √( v₁² + 2 · g · [ ${fr('P₁ − P₂','γ')} + z₁ − z₂ ] )`]],
+ f:[F('p1','Presión manométrica, P₁',0,'P'),F('z1','Elevación, z₁',3,'L'),F('v1','Velocidad, v₁',0,'v'),F('p2','Presión manométrica, P₂',0,'P'),F('z2','Elevación, z₂',0,'L'),F('gam','Peso específico, γ',9.81,'gam')],
+ k:v=>{pos(v.gam,'γ');const t=v.v1**2+2*g0*((v.p1-v.p2)/v.gam+v.z1-v.z2);
+  if(t<0)throw Error('Raíz de un número negativo: con estos datos v₂² < 0, el flujo no es posible.');
+  return [['Velocidad, v₂',Math.sqrt(t),'v'],['Carga de velocidad, v₂²/2g',t/(2*g0),'L']]}},
+
+{id:'en',tab:'din',st:`la carga de la bomba h<sub>A</sub> y su potencia, o la presión P₂, con la ecuación general de la energía`,t:'Ecuación general de la energía',
+ e:[['Energía general (bomba, motor y pérdidas)',`${fr('P₁','γ')} + ${fr('v₁²','2 · g')} + z₁ + h<sub>A</sub> − h<sub>R</sub> − h<sub>L</sub> = ${fr('P₂','γ')} + ${fr('v₂²','2 · g')} + z₂`]],
+ f:[S('modo','Incógnita',[['Carga de la bomba, h_A','hA'],['Presión P₂','p2']],'hA'),F('p1','Presión, P₁',0,'P'),F('z1','Elevación, z₁',0,'L'),F('v1','Velocidad, v₁',0,'v'),
+  F('p2','Presión, P₂ (si se conoce)',300,'P',1),F('z2','Elevación, z₂',15,'L'),F('v2','Velocidad, v₂',2,'v'),F('hA','Carga de la bomba, h<sub>A</sub> (si se conoce)','','L',1),
+  F('hR','Carga retirada por motor, h<sub>R</sub>',0,'L',1),F('hL','Pérdida total, h<sub>L</sub>',5,'L',1),F('gam','Peso específico, γ',9.81,'gam'),F('Q','Caudal, Q (para potencia)',0.01,'Q',1)],
+ k:v=>{pos(v.gam,'γ');const hR=v.hR||0,hL=v.hL||0,kv=(v.v2**2-v.v1**2)/(2*g0);
+  if(v.modo==='hA'){if(v.p2==null)throw Error('Ingrese P₂');
+   const hA=(v.p2-v.p1)/v.gam+v.z2-v.z1+kv+hR+hL,o=[['Carga de la bomba, h<sub>A</sub>',hA,'L']];
+   if(v.Q>0)o.push(['Potencia agregada, P<sub>A</sub> = h<sub>A</sub>·γ·Q',hA*v.gam*v.Q,'pw'],['Potencia agregada (otra unidad)',hA*v.gam*v.Q,'pwalt']);return o}
+  const hA=v.hA||0,p2=v.gam*(v.p1/v.gam+v.z1-v.z2-kv+hA-hR-hL);
+  return [['Presión, P₂',p2,'P'],['Presión, P₂ (otro sistema)',p2,'Palt']]}},
+
+/* ---------- PESTAÑA 3: PÉRDIDAS POR FRICCIÓN ---------- */
+{id:'re',tab:'per',bt:'Calcular Reynolds',st:`el número de Reynolds, la viscosidad cinemática ν y el régimen de flujo`,t:'Número de Reynolds y régimen de flujo',
+ e:[['Número de Reynolds',`Re = ${fr('ρ · v · D','μ')} = ${fr('v · D','ν')} &nbsp;&nbsp;&nbsp; ν = ${fr('μ','ρ')}`],['Clasificación del flujo',`Laminar: Re &lt; 2000 &nbsp;|&nbsp; Crítico: 2000 – 4000 &nbsp;|&nbsp; Turbulento: Re &gt; 4000`]],
+ f:[F('rho','Densidad, ρ',998.2,'rho'),F('mu','Viscosidad dinámica, μ',0.001002,'mu'),F('v','Velocidad, v (tiene prioridad sobre Q)',1.5,'v',1),F('Q','Caudal, Q (si no conoce v)','','Q',1),F('D','Diámetro interior, D',0.1,'L')],
+ k:v=>{pos(v.rho,'ρ');pos(v.mu,'μ');pos(v.D,'D');let vel=v.v;if(vel==null){if(!(v.Q>0))throw Error('Ingrese la velocidad v o el caudal Q');vel=v.Q/area(v.D)}
+  const nu=v.mu/v.rho,Re=vel*v.D/nu,reg=Re<2000?'Laminar':Re<=4000?'Crítico (transición)':'Turbulento';
+  return [['Velocidad, v',vel,'v'],['Viscosidad cinemática, ν = μ/ρ',nu,'nu'],['Número de Reynolds, Re = ρ·v·D/μ',Re,''],['Régimen de flujo',reg,'']]}},
+
+{id:'ff',tab:'per',moody:1,wide:1,bt:'Calcular factor de fricción f',st:`el factor de fricción f de Darcy para flujo laminar o turbulento y lo ubica en el diagrama de Moody (datos: Re; en flujo turbulento también D y ε)`,t:'Factor de fricción f y diagrama de Moody',
+ e:[['Flujo laminar (Re &lt; 2000)',`f = ${fr('64','Re')}`],
+    ['Flujo turbulento — P. K. Swamee y A. K. Jain',`f = ${fr('0,25','[ log( '+fr('1','3,7 · (D/ε)')+' + '+fr('5,74','Re<sup>0,9</sup>')+' ) ]²')}`],
+    ['Flujo turbulento — Colebrook-White (iterativa)',`${fr('1','√f')} = −2 · log( ${fr('ε/D','3,7')} + ${fr('2,51','Re · √f')} )`]],
+ f:[S('fl','Tipo de flujo / ecuación a usar',[['Automático según Re','auto'],['Laminar: f = 64/Re','lam'],['Turbulento: Swamee-Jain','sj'],['Turbulento: Colebrook-White','cw']],'auto'),
+  F('Re','Número de Reynolds, Re',125000,'adim.'),
+  F('D','Diámetro interior, D (solo turbulento)',0.1,'L',1),
+  S('pe','Material (rugosidad ε)',[['— manual —',''],['Plástico (tubería)','3e-7'],['Cobre / latón','1.5e-6'],['Acero comercial','4.6e-5'],['Hierro galvanizado','1.5e-4'],['Hierro dúctil recubierto','1.2e-4'],['Hierro dúctil sin recubrir','2.4e-4'],['Concreto','1.2e-4']],'','eps'),
+  F('eps','Rugosidad, ε (solo turbulento)',4.6e-5,'L',1)],
+ k:v=>{const Re=pos(v.Re,'Re'),reg=Re<2000?'Laminar':Re<=4000?'Crítico (transición)':'Turbulento',modo=v.fl==='auto'?(Re<2000?'lam':'cw'):v.fl,o=[['Número de Reynolds, Re',Re,''],['Régimen de flujo',reg,'']];
+  let f,rel=0;
+  if(modo==='lam'){f=64/Re;o.push(['Factor de fricción laminar, f = 64/Re',f,'Hagen-Poiseuille']);if(Re>=2000)o.push(['Advertencia','Re ≥ 2000: el flujo ya no es laminar',''])}
+  else{if(v.eps==null||v.D==null)throw Error('Para flujo turbulento ingrese el diámetro D y la rugosidad ε');pos(v.D,'D');if(v.eps<0)throw Error('ε no puede ser negativa');
+   rel=v.eps/v.D;const fSJ=0.25/Math.log10(rel/3.7+5.74/Re**0.9)**2,fCW=colebrook(Re,rel);f=modo==='sj'?fSJ:fCW;
+   o.push(['Rugosidad relativa, ε/D',rel,''],['Rugosidad relativa inversa, D/ε',rel>0?1/rel:'∞',''],['Factor f de Swamee-Jain',fSJ,'ecuación explícita'],['Factor f de Colebrook-White',fCW,'ecuación iterativa'],['Factor de fricción seleccionado, f',f,modo==='sj'?'Swamee-Jain':'Colebrook-White']);
+   if(Re<4000)o.push(['Advertencia',Re<2000?'Re < 2000: el flujo es laminar, use f = 64/Re':'Re entre 2000 y 4000: zona crítica, f incierto','']);}
+  C.ff.pt={Re,rel,f};return o}},
+
+{id:'da',tab:'per',bt:'Calcular h<sub>f</sub> (Darcy)',st:`la pérdida de energía por fricción h<sub>f</sub> y la caída de presión ΔP en la tubería (necesita f, L, D y v o Q)`,t:'Ecuación de Darcy-Weisbach',
+ e:[['Pérdida de energía por fricción',`h<sub>f</sub> = f · ${fr('L','D')} · ${fr('v²','2 · g')}`],['Caída de presión por fricción',`ΔP = γ · h<sub>f</sub>`]],
+ f:[F('f','Factor de fricción, f',0.0175,'adim.'),F('Lg','Longitud de la tubería, L',100,'L'),F('D','Diámetro interior, D',0.1,'L'),F('Q','Caudal, Q (si no conoce v)',0.01,'Q',1),F('v','Velocidad, v (tiene prioridad sobre Q)','','v',1),F('gam','Peso específico, γ (para ΔP)',9.81,'gam',1)],
+ x:`<button class="btn" style="margin:12px 0 0 6px" onclick="useF()">Traer f de la tarjeta de factor de fricción</button>`,
+ k:v=>{pos(v.f,'f');pos(v.Lg,'L');pos(v.D,'D');let vel=v.v;if(vel==null){if(!(v.Q>0))throw Error('Ingrese la velocidad v o el caudal Q');vel=v.Q/area(v.D)}
+  const hv=vel**2/(2*g0),hf=v.f*v.Lg/v.D*hv,o=[['Velocidad, v',vel,'v'],['Carga de velocidad, v²/2g',hv,'L'],['Relación L/D',v.Lg/v.D,''],['Pérdida de energía por fricción, h<sub>f</sub>',hf,'L']];
+  if(v.gam>0)o.push(['Caída de presión por fricción, ΔP = γ·h<sub>f</sub>',v.gam*hf,'P'],['Caída de presión (otro sistema)',v.gam*hf,'Palt']);return o}},
+
+/* ---------- PESTAÑA 4: PÉRDIDAS MENORES ---------- */
+{id:'ac',tab:'men',st:`el coeficiente K y la pérdida menor h<sub>m</sub> de entradas, salidas, codos y válvulas`,t:'Pérdida en accesorios, entradas y salidas',
+ e:[['Pérdida menor',`h<sub>m</sub> = K · ${fr('v²','2 · g')}`],['Longitud equivalente',`K = f<sub>T</sub> · ${fr('L<sub>e</sub>','D')}`]],
+ f:[S('acc','Accesorio',[['Entrada de borde agudo (K=0,5)','k:0.5'],['Entrada proyectada hacia adentro (K=1,0)','k:1'],['Entrada bien redondeada r/D≥0,15 (K=0,04)','k:0.04'],['Salida a depósito (K=1,0)','k:1'],
+   ['Codo 90° estándar (Le/D=30)','le:30'],['Codo 90° radio largo (Le/D=20)','le:20'],['Codo 45° (Le/D=16)','le:16'],['Curva cerrada 180° (Le/D=50)','le:50'],['Te, flujo directo (Le/D=20)','le:20'],['Te, flujo por ramal (Le/D=60)','le:60'],
+   ['Válv. globo abierta (Le/D=340)','le:340'],['Válv. ángulo abierta (Le/D=150)','le:150'],['Válv. compuerta abierta (Le/D=8)','le:8'],['Válv. compuerta ¾ abierta (Le/D=35)','le:35'],['Válv. compuerta ½ abierta (Le/D=160)','le:160'],
+   ['Válv. check giratoria (Le/D=100)','le:100'],['Válv. mariposa abierta (Le/D=45)','le:45'],['K manual','man:0']],'le:30'),
+  F('N','Cantidad de accesorios',1,'unid.'),F('D','Diámetro interior, D',0.1,'L'),F('Q','Caudal, Q',0.01,'Q',1),F('v','Velocidad, v (sustituye a Q)','','v',1),F('K','K manual','','adim.',1),F('fT','f<sub>T</sub> (vacío = automático)','','adim.',1)],
+ k:v=>{pos(v.D,'D');pos(v.N,'N');let vel=v.v;if(vel==null){if(!(v.Q>0))throw Error('Ingrese el caudal Q o la velocidad v');vel=v.Q/area(v.D)}
+  const [t,x]=v.acc.split(':');let K,o=[];
+  if(t==='man'){if(v.K==null)throw Error('Ingrese el valor de K manual');K=v.K}
+  else if(t==='k')K=+x;
+  else{const ft=v.fT??fT(v.D);K=ft*x;o.push(['Factor de fricción en turbulencia total, f<sub>T</sub>',ft,'Mott, Tabla 10.5 (aprox.)'])}
+  const hm=K*vel**2/(2*g0);
+  return [['Coeficiente de resistencia, K',K,''],...o,['Velocidad, v',vel,'v'],['Carga de velocidad, v²/2g',vel**2/(2*g0),'L'],['Pérdida menor por accesorio, h<sub>m</sub>',hm,'L'],['Pérdida menor total, Σh<sub>m</sub> (× N accesorios)',hm*v.N,'L']]}},
+
+{id:'cs',tab:'men',st:`el coeficiente K y la pérdida menor h<sub>m</sub> por expansión o contracción súbita`,t:'Expansión y contracción súbitas',
+ e:[['Expansión súbita',`K = [ 1 − ( ${fr('D₁','D₂')} )² ]² &nbsp;&nbsp;&nbsp; h<sub>m</sub> = K · ${fr('v₁²','2 · g')}`],['Contracción súbita (aproximación)',`K ≈ 0,5 · [ 1 − ( ${fr('D₂','D₁')} )² ] &nbsp;&nbsp;&nbsp; h<sub>m</sub> = K · ${fr('v₂²','2 · g')}`]],
+ f:[S('tipo','Tipo de cambio',[['Expansión súbita','exp'],['Contracción súbita','con']],'exp'),F('Q','Caudal, Q',0.01,'Q'),F('D1','Diámetro aguas arriba, D₁',0.05,'L'),F('D2','Diámetro aguas abajo, D₂',0.1,'L')],
+ k:v=>{pos(v.Q,'Q');pos(v.D1,'D₁');pos(v.D2,'D₂');const v1=v.Q/area(v.D1),v2=v.Q/area(v.D2);let K,hm;
+  if(v.tipo==='exp'){if(v.D2<=v.D1)throw Error('En una expansión, D₂ debe ser mayor que D₁');K=(1-(v.D1/v.D2)**2)**2;hm=K*v1**2/(2*g0)}
+  else{if(v.D2>=v.D1)throw Error('En una contracción, D₂ debe ser menor que D₁');K=0.5*(1-(v.D2/v.D1)**2);hm=K*v2**2/(2*g0)}
+  return [['Velocidad, v₁',v1,'v'],['Velocidad, v₂',v2,'v'],['Coeficiente de resistencia, K',K,v.tipo==='exp'?'':'aprox.; compare con Mott, Tabla 10.2'],['Pérdida menor, h<sub>m</sub>',hm,'L']]}},
+
+{id:'tot',tab:'men',st:`la pérdida total h<sub>L</sub> = h<sub>f</sub> + Σh<sub>m</sub> y la caída de presión ΔP de la línea`,t:'Pérdida total en una línea (fricción + accesorios)',
+ e:[['Pérdida total de energía',`h<sub>L</sub> = h<sub>f</sub> + Σh<sub>m</sub> = ( f · ${fr('L','D')} + ΣK ) · ${fr('v²','2 · g')}`],['Caída de presión',`ΔP = γ · h<sub>L</sub>`]],
+ f:[F('Q','Caudal, Q',0.01,'Q'),F('D','Diámetro interior, D',0.1,'L'),F('Lg','Longitud, L',100,'L'),F('f','Factor de fricción, f',0.02,'adim.'),F('SK','Suma de coeficientes, ΣK',3.5,'adim.'),F('gam','Peso específico, γ',9.81,'gam',1)],
+ k:v=>{pos(v.Q,'Q');pos(v.D,'D');pos(v.Lg,'L');const vel=v.Q/area(v.D),hv=vel**2/(2*g0),hf=v.f*v.Lg/v.D*hv,hm=v.SK*hv;
+  return [['Velocidad, v',vel,'v'],['Pérdida por fricción, h<sub>f</sub>',hf,'L'],['Pérdida por accesorios, Σh<sub>m</sub>',hm,'L'],['Pérdida total, h<sub>L</sub> = h<sub>f</sub> + Σh<sub>m</sub>',hf+hm,'L'],['Caída de presión, ΔP = γ·h<sub>L</sub>',(v.gam??9.81)*(hf+hm),'P']]}}
+];
+const C = Object.fromEntries(CARDS.map(c=>[c.id,c]));
+
+/* =========================================================
+   FUNCIONES MATEMÁTICAS
+   ========================================================= */
+// Colebrook-White (iterativa): 1/√f = −2·log10( (ε/D)/3.7 + 2.51/(Re·√f) ). Semilla: Swamee-Jain.
+function colebrook(Re,rel){
+  let x=-2*Math.log10(rel/3.7+5.74/Re**0.9);
+  for(let i=0;i<100;i++){const n=-2*Math.log10(rel/3.7+2.51*x/Re);if(Math.abs(n-x)<1e-12){x=n;break}x=n}
+  return 1/(x*x);
+}
+// f_T (turbulencia total) según diámetro nominal aproximado (Mott, Tabla 10.5)
+function fT(D){const m=D*1000;return m<=17?.027:m<=22?.025:m<=28?.023:m<=36?.022:m<=45?.021:m<=57?.019:m<=90?.018:m<=112?.017:m<=137?.016:m<=175?.015:m<=275?.014:m<=425?.013:.012}
+
+/* =========================================================
+   INTERFAZ
+   ========================================================= */
+const fid=(c,f)=>c.id+'_'+f.id;
+function fieldHTML(c,f){
+  const i=fid(c,f);
+  if(f.s)return `<label>${f.l}<select id="${i}" onchange="onSel('${c.id}','${f.id}')">${f.s.map(o=>`<option value="${o[1]}"${o[1]==f.d?' selected':''}>${o[0]}</option>`).join('')}</select></label>`;
+  const un=U[f.u];
+  return `<label>${f.l}${!un&&f.u?` <i>(${f.u})</i>`:''}<span class="in"><input id="${i}" type="number" step="any" value="${f.d??''}" oninput="calc('${c.id}')">${un?`<select id="${i}_u" onchange="calc('${c.id}')">${un.map(u=>`<option value="${u[1]}">${u[0]}</option>`).join('')}</select>`:''}</span></label>`;
+}
+function build(){
+  CARDS.forEach(c=>{
+    const d=document.createElement('div');d.className='card'+(c.wide?' wide':'');
+    d.innerHTML=`<h3>${c.t}</h3>${c.st?`<p class="st"><b>Calcula:</b> ${c.st}.</p>`:''}${c.e.map(q=>`<div class="eq-block"><span class="eq-name">${q[0]}</span>${q[1]}</div>`).join('')}<div class="fl">${c.f.map(f=>fieldHTML(c,f)).join('')}</div><button class="btn p" onclick="calc('${c.id}')">${c.bt||'Calcular'}</button>${c.x||''}<div class="res" id="r_${c.id}"></div>${c.moody?`<canvas class="moody" id="cv_${c.id}" width="800" height="520"></canvas><p class="msg" style="text-align:center;margin-top:6px">Curvas de rugosidad relativa calculadas con Colebrook-White. El punto rojo es el resultado del cálculo.</p>`:''}`;
+    $('g-'+c.tab).appendChild(d);
+  });
+}
+// Al elegir un material/fluido, rellena el campo asociado (valor SI → unidad elegida)
+function onSel(cid,fid_){
+  const c=C[cid],f=c.f.find(x=>x.id===fid_);
+  if(f.fill){const val=$(cid+'_'+fid_).value,t=$(cid+'_'+f.fill);
+    if(val!==''){const u=$(cid+'_'+f.fill+'_u');t.value=Number((parseFloat(val)/(u?parseFloat(u.value):1)).toPrecision(6))}}
+  calc(cid);
+}
+function calc(cid){
+  const c=C[cid],v={},miss=[],r=$('r_'+cid),si=sys==='EN'?1:0;c.pt=null;
+  c.f.forEach(f=>{
+    const e=$(fid(c,f));
+    if(f.s){v[f.id]=e.value;return}
+    if(e.value===''){if(!f.o)miss.push(f.l);return}
+    const u=$(fid(c,f)+'_u');v[f.id]=parseFloat(e.value)*(u?parseFloat(u.value):1);
+  });
+  if(miss.length){r.innerHTML=`<p class="msg">Complete los campos: ${miss.join(', ')}.</p>`;if(c.moody)drawMoody(c);return}
+  try{
+    r.innerHTML=c.k(v).map(o=>{const u=OU[o[2]];
+      const val=(u&&typeof o[1]==='number')?o[1]/u[si][1]:o[1];
+      return `<div class="tile"><span>${o[0]}</span><b>${fmt(val)}</b><em>${u?u[si][0]:(o[2]||'')}</em></div>`}).join('');
+  }catch(x){c.pt=null;r.innerHTML=`<p class="msg err">${x.message}</p>`}
+  if(c.moody)drawMoody(c);
+}
+/* Diagrama de Moody: f vs Re (ejes logarítmicos), curvas ε/D, zona crítica y punto de operación */
+function drawMoody(c){
+  const cv=$('cv_'+c.id);if(!cv)return;
+  const x=cv.getContext('2d'),W=cv.width,H=cv.height,m={l:72,r:64,t:40,b:58},pw=W-m.l-m.r,ph=H-m.t-m.b;
+  const R0=600,R1=1e8,F0=.008,F1=.1,lx=r=>m.l+pw*Math.log10(r/R0)/Math.log10(R1/R0),ly=f=>m.t+ph*Math.log10(F1/f)/Math.log10(F1/F0);
+  const cm=n=>String(n).replace('.',','),p=c.pt;
+  x.setLineDash([]);x.clearRect(0,0,W,H);x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  x.fillStyle='#eceff1';x.fillRect(lx(2000),m.t,lx(4000)-lx(2000),ph);          // zona crítica
+  x.lineWidth=1;
+  for(let e=3;e<8;e++)for(let k=1;k<10;k++){x.strokeStyle=k===1?'#b0bec5':'#e8ecef';x.beginPath();x.moveTo(lx(k*10**e),m.t);x.lineTo(lx(k*10**e),m.t+ph);x.stroke()}
+  [.008,.009,.01,.015,.02,.025,.03,.04,.05,.06,.07,.08,.09,.1].forEach(f=>{x.strokeStyle=[.01,.02,.05,.1].includes(f)?'#b0bec5':'#e8ecef';x.beginPath();x.moveTo(m.l,ly(f));x.lineTo(m.l+pw,ly(f));x.stroke()});
+  const curve=(rel,col,w,dash)=>{x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();
+    for(let i=0;i<=140;i++){const r=4000*(R1/4000)**(i/140),X=lx(r),Y=ly(colebrook(r,rel));i?x.lineTo(X,Y):x.moveTo(X,Y)}x.stroke();x.setLineDash([])};
+  const rels=[.05,.04,.03,.02,.015,.01,.008,.006,.004,.002,.001,.0006,.0004,.0002,.0001,.00005,.00001,0];
+  x.save();x.beginPath();x.rect(m.l,m.t,pw,ph);x.clip();
+  rels.forEach(rl=>curve(rl,rl===0?'#455a64':'#4f8f5b',1.2));
+  x.strokeStyle='#1976d2';x.lineWidth=2.5;x.beginPath();x.moveTo(lx(R0),ly(64/R0));x.lineTo(lx(2000),ly(64/2000));x.stroke();   // laminar f=64/Re
+  x.strokeStyle='#90a4ae';x.lineWidth=1.5;x.setLineDash([5,4]);x.beginPath();x.moveTo(lx(2000),ly(64/2000));x.lineTo(lx(4000),ly(64/4000));x.stroke();x.setLineDash([]);
+  if(p&&p.rel>0&&p.Re>=4000&&isFinite(p.f))curve(p.rel,'#c62828',1.8,[6,4]);
+  x.restore();
+  x.strokeStyle='#546e7a';x.lineWidth=1.5;x.strokeRect(m.l,m.t,pw,ph);
+  x.fillStyle='#37474f';x.font='12px "JetBrains Mono",Consolas,monospace';x.textAlign='center';
+  ['10³','10⁴','10⁵','10⁶','10⁷','10⁸'].forEach((t,i)=>x.fillText(t,lx(10**(i+3)),m.t+ph+18));
+  x.textAlign='right';[.008,.01,.015,.02,.03,.04,.05,.06,.08,.1].forEach(f=>x.fillText(cm(f),m.l-8,ly(f)+4));
+  x.textAlign='left';x.font='10.5px "JetBrains Mono",Consolas,monospace';x.fillStyle='#2e6b3a';
+  rels.forEach(rl=>{const f=colebrook(R1,rl);if(f>F0&&f<F1)x.fillText(rl===0?'liso':cm(rl),lx(R1)+6,ly(f)+3)});
+  x.font='bold 11px "Segoe UI",sans-serif';x.fillText('ε/D',lx(R1)+6,m.t-8);
+  x.font='italic 11px "Segoe UI",sans-serif';x.fillStyle='#1565c0';x.fillText('Laminar f = 64/Re',lx(1100),ly(.092));
+  x.fillStyle='#78909c';x.textAlign='center';x.font='italic 10px "Segoe UI",sans-serif';x.fillText('Crítica',lx(2830),m.t+13);
+  x.fillStyle='#2e6b3a';x.font='italic 11px "Segoe UI",sans-serif';x.fillText('Flujo turbulento',lx(3e5),m.t+15);
+  x.fillStyle='#0d47a1';x.font='bold 13px "Segoe UI",sans-serif';
+  x.fillText('Número de Reynolds, Re',m.l+pw/2,H-12);x.fillText('Diagrama de Moody',m.l+pw/2,22);
+  x.save();x.translate(18,m.t+ph/2);x.rotate(-Math.PI/2);x.fillText('Factor de fricción, f',0,0);x.restore();
+  if(p&&isFinite(p.Re)&&isFinite(p.f)){
+    if(p.Re>=R0&&p.Re<=R1&&p.f>=F0&&p.f<=F1){
+      const X=lx(p.Re),Y=ly(p.f);
+      x.strokeStyle='#c62828';x.lineWidth=1;x.setLineDash([4,4]);x.beginPath();x.moveTo(X,m.t+ph);x.lineTo(X,Y);x.lineTo(m.l,Y);x.stroke();x.setLineDash([]);
+      x.fillStyle='#c62828';x.beginPath();x.arc(X,Y,6,0,7);x.fill();x.strokeStyle='#fff';x.lineWidth=2;x.stroke();
+      const t='Re = '+fmt(p.Re)+'   f = '+fmt(p.f)+'   ε/D = '+fmt(p.rel);x.font='bold 12px "JetBrains Mono",Consolas,monospace';
+      const tw=x.measureText(t).width,tx=Math.min(Math.max(X+12,m.l+6),m.l+pw-tw-14),ty=Y<m.t+40?Y+30:Y-14;
+      x.fillStyle='rgba(255,255,255,.92)';x.fillRect(tx-5,ty-14,tw+10,20);x.strokeStyle='#c62828';x.lineWidth=1;x.strokeRect(tx-5,ty-14,tw+10,20);
+      x.fillStyle='#c62828';x.textAlign='left';x.fillText(t,tx,ty);
+    }else{x.fillStyle='#c62828';x.font='bold 12px "Segoe UI",sans-serif';x.textAlign='center';x.fillText('El punto (Re = '+fmt(p.Re)+', f = '+fmt(p.f)+') queda fuera del rango del diagrama',m.l+pw/2,m.t+ph-10)}
+  }
+}
+// Restaura el ejemplo en las unidades del sistema activo
+function resetTab(t){CARDS.filter(c=>c.tab===t).forEach(c=>{c.f.forEach(f=>{
+  const e=$(fid(c,f));if(f.s){e.value=f.d??'';return}
+  const u=$(fid(c,f)+'_u');let val=f.d??'';
+  if(u){const i=def(f.u,sys);u.selectedIndex=i;if(val!=='')val=Number((val/U[f.u][i][1]).toPrecision(6))}
+  e.value=val});calc(c.id)})}
+function clearTab(t){CARDS.filter(c=>c.tab===t).forEach(c=>{c.f.forEach(f=>{if(!f.s)$(fid(c,f)).value=''});
+  c.f.filter(f=>f.s&&f.fill).forEach(f=>$(fid(c,f)).selectedIndex=0);$('r_'+c.id).innerHTML='';if(c.moody){c.pt=null;drawMoody(c)}})}
+// Cambia entre SI e inglés conservando las magnitudes físicas ya ingresadas
+function setSys(s){
+  sys=s;$('sSI').classList.toggle('on',s==='SI');$('sEN').classList.toggle('on',s==='EN');
+  CARDS.forEach(c=>{c.f.forEach(f=>{const u=$(fid(c,f)+'_u');if(!u)return;
+    const i=def(f.u,s),e=$(fid(c,f)),x=parseFloat(e.value)*parseFloat(u.value)/U[f.u][i][1];
+    if(e.value!==''&&!isNaN(x))e.value=Number(x.toPrecision(6));u.selectedIndex=i});calc(c.id)});
+}
+// Copia el factor f calculado en la tarjeta del paso 2 a la ecuación de Darcy
+function useF(){const q=C.ff.pt;
+  if(!q||!isFinite(q.f)){$('r_da').innerHTML='<p class="msg err">Primero calcule el factor de fricción en su tarjeta.</p>';return}
+  $('da_f').value=Number(q.f.toPrecision(5));calc('da')}
+// Pestañas
+document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab-btn').forEach(x=>{x.classList.toggle('tab-active',x===b);x.classList.toggle('tab-inactive',x!==b)});
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id==='tab-'+b.dataset.tab));
+});
+build();
+['est','din','per','men'].forEach(resetTab);
+</script>
+</body>
+</html>
