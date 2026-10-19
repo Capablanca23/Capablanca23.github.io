@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diferenciación Numérica | Dr. Ronald F. Rodriguez Espinoza</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],serif:['Fraunces','serif'],mono:['JetBrains Mono','monospace']},colors:{brand:{50:'#f0f7ff',100:'#e0effe',400:'#38a3dc',500:'#0284c7',600:'#0369a1',700:'#095180'}}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:#f8fafc}
+.tab-active{border-bottom:3px solid #0284c7;color:#0369a1;font-weight:600}
+.tab-inactive{border-bottom:3px solid transparent;color:#64748b}
+.tab-inactive:hover{color:#0f172a;border-bottom-color:#cbd5e1}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 .3em}
+.fr>span:first-child{border-bottom:1.5px solid #334155;padding:0 .4em .1em}
+.fr>span:last-child{padding-top:.1em}
+.fm{font-family:'Fraunces',serif;font-size:1.05rem}
+</style>
+</head>
+<body class="font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+
+<header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-50" style="padding-top:env(safe-area-inset-top,0px)">
+ <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+  <div class="flex items-center space-x-3">
+   <div class="p-2 bg-brand-600 rounded-lg text-white shadow-inner text-xl leading-none">📈</div>
+   <div>
+    <h1 class="text-xl font-bold tracking-tight font-serif">Diferenciación Numérica</h1>
+    <p class="text-xs text-slate-400">Métodos Numéricos — Primera y segunda derivada</p>
+   </div>
+  </div>
+  <div class="flex items-center space-x-3 text-xs">
+   <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>v1.1</span>
+   <button onclick="document.getElementById('authorCard').scrollIntoView({behavior:'smooth'})" class="hover:bg-slate-800 px-3 py-1.5 rounded-md text-slate-300 transition-colors">🎓 Dr. Ronald Rodriguez E.</button>
+  </div>
+ </div>
+</header>
+
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+ <!-- Datos del autor -->
+ <section id="authorCard" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+  <div class="p-5 md:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+   <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+     <div class="relative">
+      <div class="w-20 h-20 rounded-full bg-brand-600 border-2 border-white/20 flex items-center justify-center text-3xl shadow-lg">👤</div>
+      <span class="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full" title="Verificado CTI Vitae"></span>
+     </div>
+     <div>
+      <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full mb-1 border border-brand-500/20">🏅 Docente Investigador</div>
+      <h2 class="text-lg md:text-xl font-bold font-serif">Dr. Ronald F. Rodriguez Espinoza</h2>
+      <p class="text-sm text-slate-300">Especialista en Análisis Numérico y Métodos Computacionales</p>
+      <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2 text-xs text-slate-400">
+       <span>🏛️ CONCYTEC CTI Vitae</span><span>∑ Diferenciación e Integración Numérica</span>
+      </div>
+     </div>
+    </div>
+    <div class="flex items-center gap-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700/60">
+     <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" title="Haz clic para abrir el perfil oficial CTI Vitae" class="bg-white p-2 rounded-lg shadow-md transition-transform duration-300 hover:scale-105 block">
+      <div id="qrBox" class="w-20 h-20 flex items-center justify-center text-[10px] text-slate-700 [&_img]:w-20 [&_img]:h-20 [&_canvas]:hidden">QR CTI</div>
+     </a>
+     <div class="text-left space-y-1">
+      <p class="text-xs font-semibold text-slate-200">▦ Código QR</p>
+      <p class="text-[11px] text-slate-300 max-w-[130px] leading-tight">Haz clic en el código QR para consultar la trayectoria académica.</p>
+      <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-400 hover:text-sky-300">Perfil CTI Vitae ›</a>
+     </div>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <!-- Pestañas de métodos -->
+ <nav class="bg-white rounded-xl shadow-sm border border-slate-200 px-2"><div id="methodTabs" class="flex flex-wrap gap-1 text-sm font-medium"></div></nav>
+
+ <!-- Entrada de datos -->
+ <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+   <h2 class="text-base font-bold text-slate-900">📥 Entrada de datos</h2>
+   <div class="inline-flex rounded-lg border border-slate-200 overflow-hidden text-xs font-semibold">
+    <button id="modeFn" onclick="setMode('fn')" class="px-4 py-2">Por función f(x)</button>
+    <button id="modeTab" onclick="setMode('tab')" class="px-4 py-2">Por datos tabulados</button>
+   </div>
+  </div>
+
+  <div id="fnInputs" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+   <div class="md:col-span-2"><label class="block text-xs font-medium text-slate-600 mb-1">f(x) =</label>
+    <input id="fnText" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 outline-none" value="sin(x) + x^2"></div>
+   <div><label class="block text-xs font-medium text-slate-600 mb-1">Punto x₀</label>
+    <input id="x0" type="number" step="any" value="1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 outline-none"></div>
+   <div><label class="block text-xs font-medium text-slate-600 mb-1">Paso h</label>
+    <input id="hStep" type="number" step="any" value="0.1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 outline-none"></div>
+   <p class="md:col-span-4 text-xs text-slate-500">Sintaxis: <code class="bg-slate-100 px-1 rounded">sin(x)</code>, <code class="bg-slate-100 px-1 rounded">cos(x)</code>, <code class="bg-slate-100 px-1 rounded">tan(x)</code>, <code class="bg-slate-100 px-1 rounded">exp(x)</code> o <code class="bg-slate-100 px-1 rounded">e^x</code>, <code class="bg-slate-100 px-1 rounded">log(x)</code> o <code class="bg-slate-100 px-1 rounded">ln(x)</code> (natural), <code class="bg-slate-100 px-1 rounded">sqrt(x)</code> o <code class="bg-slate-100 px-1 rounded">√(x)</code>, <code class="bg-slate-100 px-1 rounded">pi</code>, potencias con <code class="bg-slate-100 px-1 rounded">^</code> o <code class="bg-slate-100 px-1 rounded">**</code>. También se aceptan <code class="bg-slate-100 px-1 rounded">Math.sin(x)</code> y <code class="bg-slate-100 px-1 rounded">sen(x)</code>.</p>
+  </div>
+
+  <div id="tabInputs" class="hidden grid grid-cols-1 md:grid-cols-3 gap-3">
+   <div class="md:col-span-2"><label class="block text-xs font-medium text-slate-600 mb-1">Pares (x, y) — uno por línea, CSV o separados por espacio/;</label>
+    <textarea id="tabText" rows="7" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs font-mono focus:ring-2 focus:ring-brand-500 outline-none" placeholder="0, 1&#10;0.5, 1.6487"></textarea>
+    <div class="mt-2 flex items-center gap-2 text-xs"><span class="text-slate-500">o importar CSV:</span><input type="file" id="csvFile" accept=".csv,.txt" class="text-xs"></div></div>
+   <div><label class="block text-xs font-medium text-slate-600 mb-1">Punto x₀ (debe ser un nodo)</label>
+    <input id="x0Tab" type="number" step="any" value="1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-500 outline-none">
+    <p class="text-xs text-slate-500 mt-2">MDF usa h = espaciado de la tabla (equiespaciada). Lagrange, Newton y Spline aceptan nodos arbitrarios. Richardson requiere función f(x).</p></div>
+  </div>
+
+  <div class="flex flex-wrap gap-2 items-center">
+   <span class="text-xs font-semibold text-slate-500">Ejemplos:</span>
+   <button onclick="loadEx(0)" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">🧪 sen(x)+x²</button>
+   <button onclick="loadEx(1)" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">🧪 eˣ·cos(x)</button>
+   <button onclick="loadEx(2)" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">📋 Tabla de eˣ</button>
+   <button onclick="loadEx(3)" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">📋 Posición de un móvil</button>
+   <button onclick="loadEx(4)" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">📋 Tabla no equiespaciada (Lagrange)</button>
+   <button onclick="loadEx(5)" class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">🧪 x·eˣ (Richardson)</button>
+  </div>
+ </section>
+
+ <!-- Subtipo + orden -->
+ <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+   <div id="subTabs" class="flex flex-wrap gap-1 text-sm font-medium"></div>
+   <div class="flex items-end gap-3">
+    <div><label class="block text-xs font-medium text-slate-600 mb-1">Orden / nº de puntos / niveles</label>
+     <select id="orderSel" class="bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-brand-500 outline-none"></select></div>
+    <button onclick="calculate()" class="py-2.5 px-6 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-lg">▶ Calcular</button>
+   </div>
+  </div>
+  <div id="msg" class="hidden mt-4 p-3 rounded-lg border text-xs bg-rose-50 text-rose-800 border-rose-200"></div>
+ </section>
+
+ <section id="results" class="hidden space-y-6">
+  <div id="cards" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+   <h2 class="text-base font-bold text-slate-900 mb-3">🧮 Fórmulas y algoritmo</h2>
+   <div id="formulas" class="space-y-4"></div>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+   <h2 class="text-base font-bold text-slate-900 mb-3">📊 Visualización</h2>
+   <div class="relative w-full h-[420px] bg-slate-50 rounded-lg border border-slate-200 p-2"><canvas id="chart"></canvas></div>
+   <p class="text-xs text-slate-500 mt-3">Curva f(x), recta tangente con la pendiente numérica f′(x₀) (azul) y analítica (verde, si hay función), y puntos del esquema usados en el cálculo (rojo).</p>
+  </div>
+ </section>
+</main>
+
+<footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-auto">
+ <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
+  <p>© 2026 <span class="font-semibold text-slate-200">Dr. Ronald F. Rodriguez E.</span> — Análisis Numérico y Métodos Computacionales</p>
+  <p class="text-slate-500">Desarrollado para entornos académicos y profesionales en ingeniería y ciencias aplicadas.</p>
+  <p class="text-slate-600 text-[10px]">Bibliotecas externas: Tailwind CSS, math.js, Chart.js, QRCode.js</p>
+ </div>
+</footer>
+
+<script>
+/* ===== Esquemas de diferencias finitas: ST[tipo][derivada][a|b] ===== */
+const ST={
+ forward:{
+  1:{a:{o:[0,1],c:[-1,1],d:1,p:'O(h)'},b:{o:[0,1,2],c:[-3,4,-1],d:2,p:'O(h²)'}},
+  2:{a:{o:[0,1,2],c:[1,-2,1],d:1,p:'O(h)'},b:{o:[0,1,2,3],c:[2,-5,4,-1],d:1,p:'O(h²)'}}},
+ backward:{
+  1:{a:{o:[-1,0],c:[-1,1],d:1,p:'O(h)'},b:{o:[-2,-1,0],c:[1,-4,3],d:2,p:'O(h²)'}},
+  2:{a:{o:[-2,-1,0],c:[1,-2,1],d:1,p:'O(h)'},b:{o:[-3,-2,-1,0],c:[-1,4,-5,2],d:1,p:'O(h²)'}}},
+ centered:{
+  1:{a:{o:[-1,1],c:[-1,1],d:2,p:'O(h²)'},b:{o:[-2,-1,1,2],c:[1,-8,8,-1],d:12,p:'O(h⁴)'}},
+  2:{a:{o:[-1,0,1],c:[1,-2,1],d:1,p:'O(h²)'},b:{o:[-2,-1,0,1,2],c:[-1,16,-30,16,-1],d:12,p:'O(h⁴)'}}}
+};
+const ORD_LABEL={forward:{a:'Primer orden O(h) / O(h)',b:'Segundo orden O(h²)'},backward:{a:'Primer orden O(h)',b:'Segundo orden O(h²)'},centered:{a:'Segundo orden O(h²)',b:'Cuarto orden O(h⁴)'}};
+
+/* ===== Registro de métodos ===== */
+const METHODS=[{
+ id:'mdf',label:'📐 Diferencias Finitas (MDF)',
+ subs:[{id:'forward',label:'Adelantadas'},{id:'backward',label:'Hacia atrás'},{id:'centered',label:'Centradas'}],
+ orders:s=>['a','b'].map(v=>({v,label:ORD_LABEL[s][v]})),
+ compute(sub,ord,ctx){
+  const res=[],pts=new Map(),formulas=[];
+  [1,2].forEach(dv=>{
+   const st=ST[sub][dv][ord];
+   const vals=st.o.map(k=>ctx.f(ctx.x0+k*ctx.h));
+   st.o.forEach((k,i)=>pts.set(k,vals[i]));
+   const num=vals.reduce((s,v,i)=>s+st.c[i]*v,0);
+   const val=num/(st.d*Math.pow(ctx.h,dv));
+   res.push({dv,val,p:st.p});
+   formulas.push(fHTML(st,dv,ctx,vals,val));
+  });
+  return {res,pts:[...pts].map(([k,y])=>({x:ctx.x0+k*ctx.h,y})),formulas};
+ }
+}];
+
+/* ===== Utilidades de formato ===== */
+const sub=k=>k===0?'x₀':(k>0?`x₀ ${k===1?'+':'+ '+k} h`:`x₀ ${k===-1?'−':'− '+(-k)} h`).replace('+ 1 h','+ h');
+const lab=k=>k===0?'f(x₀)':k===1?'f(x₀+h)':k===-1?'f(x₀−h)':`f(x₀${k>0?'+':'−'}${Math.abs(k)}h)`;
+const N=(v,d=8)=>Number.isFinite(v)?String(Number(v.toPrecision(d))):'—';
+const sg=c=>c<0?'−':'+';
+function termsHTML(o,c,labFn){return o.map((k,i)=>{const a=Math.abs(c[i]);const t=(a===1?'':a)+labFn(k,i);return (i===0?(c[i]<0?'−':''):` ${sg(c[i])} `)+t}).join('')}
+function fHTML(st,dv,ctx,vals,val){
+ const hp=dv===1?'h':'h²';const den=(st.d===1?'':st.d)+hp;
+ const sym=dv===1?'f′(x₀)':'f″(x₀)';
+ const gen=`${sym} ≈ <span class="fr"><span>${termsHTML(st.o,st.c,lab)}</span><span>${den}</span></span> <span class="text-xs font-sans text-slate-500">&nbsp;${st.p}</span>`;
+ const subst=`<span class="fr"><span>${termsHTML(st.o,st.c,(k,i)=>'('+N(vals[i],6)+')')}</span><span>${st.d===1?'':st.d+'·'}(${N(ctx.h,6)})${dv===2?'²':''}</span></span> = <b>${N(val)}</b>`;
+ return `<div class="p-4 bg-slate-50 rounded-lg border border-slate-200 overflow-x-auto">
+  <p class="text-xs font-semibold text-brand-700 mb-2">${dv===1?'Primera':'Segunda'} derivada</p>
+  <div class="fm">${gen}</div>
+  <div class="fm mt-2 text-slate-600">≈ ${subst}</div></div>`;
+}
+
+/* ===== Métodos adicionales ===== */
+const card=(t,inner)=>`<div class="p-4 bg-slate-50 rounded-lg border border-slate-200 overflow-x-auto"><p class="text-xs font-semibold text-brand-700 mb-2">${t}</p>${inner}</div>`;
+const tb=(hd,rows)=>`<table class="text-xs font-mono mx-auto border border-slate-200"><thead class="bg-slate-100"><tr>${hd.map(h=>`<th class="px-2 py-1 border border-slate-200">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td class="px-2 py-1 border border-slate-200 text-center">${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+const FR=(a,b)=>`<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+function needFn(ctx,name){if(!ctx.fnMode)throw Error(name+' necesita evaluar f(x) en puntos nuevos: use el modo "Por función".')}
+function nodesFor(ctx,n){
+ if(ctx.fnMode){const s=-Math.floor((n-1)/2);return Array.from({length:n},(_,i)=>{const x=ctx.x0+(s+i)*ctx.h;return {x,y:ctx.f(x)}})}
+ if(ctx.P.length<n)throw Error('La tabla tiene menos de '+n+' puntos.');
+ let s=ctx.i0-Math.floor((n-1)/2);s=Math.max(0,Math.min(s,ctx.P.length-n));return ctx.P.slice(s,s+n);
+}
+function basisPoly(ts,i){let c=[1],den=1;ts.forEach((t,j)=>{if(j===i)return;den*=ts[i]-t;const nc=new Array(c.length+1).fill(0);c.forEach((v,k)=>{nc[k]-=t*v;nc[k+1]+=v});c=nc});return c.map(v=>v/den)}
+const ptsOpts=()=>[3,4,5,6,7].map(n=>({v:''+n,label:`${n} puntos (grado ${n-1})`}));
+
+function richardsonM(sub,ord,ctx){
+ needFn(ctx,'Richardson');
+ const L=+ord,f=ctx.f,x0=ctx.x0,f0=f(x0),pts=new Map(),R=[];
+ for(let dv=1;dv<=2;dv++){const T=[];
+  for(let i=0;i<L;i++){const h=ctx.h/Math.pow(2,i),fp=f(x0+h),fm=f(x0-h);pts.set(x0+h,fp);pts.set(x0-h,fm);
+   const row=[dv===1?(fp-fm)/(2*h):(fp-2*f0+fm)/(h*h)];
+   for(let j=1;j<=i;j++){const q=Math.pow(4,j);row.push((q*row[j-1]-T[i-1][j-1])/(q-1))}
+   T.push(row)}
+  R.push(T)}
+ const p='O(h^'+(2*L)+')';
+ const res=[1,2].map(dv=>({dv,val:R[dv-1][L-1][L-1],p}));
+ const hd=['hᵢ',...Array.from({length:L},(_,j)=>`j=${j} · O(h^${2*(j+1)})`)];
+ const mk=T=>tb(hd,T.map((r,i)=>[N(ctx.h/Math.pow(2,i),6),...Array.from({length:L},(_,j)=>j<r.length?N(r[j],10):'')]));
+ const gen=card('Fórmulas base (diferencias centradas) y extrapolación',`<div class="fm">f′(x₀) ≈ D₁(h) = ${FR('f(x₀+h) − f(x₀−h)','2h')}</div><div class="fm mt-2">f″(x₀) ≈ D₂(h) = ${FR('f(x₀+h) − 2f(x₀) + f(x₀−h)','h²')}</div><div class="fm mt-2">R<sub>i,0</sub> = D(h/2<sup>i</sup>), &nbsp; R<sub>i,j</sub> = ${FR('4<sup>j</sup>·R<sub>i,j−1</sub> − R<sub>i−1,j−1</sub>','4<sup>j</sup> − 1')}</div><p class="text-xs text-slate-500 mt-2">Cada columna elimina el término de error principal (h², h⁴, …). El resultado es R<sub>${L-1},${L-1}</sub>.</p>`);
+ return {res,pts:[...pts].map(([x,y])=>({x,y})),formulas:[gen,card(`Tabla de Richardson — f′(x₀) = ${N(res[0].val)}`,mk(R[0])),card(`Tabla de Richardson — f″(x₀) = ${N(res[1].val)}`,mk(R[1]))]};
+}
+
+function lagrangeM(sub,ord,ctx){
+ const n=+ord,nd=nodesFor(ctx,n),ts=nd.map(p=>p.x-ctx.x0),B=nd.map((_,i)=>basisPoly(ts,i));
+ const w1=B.map(c=>c[1]||0),w2=B.map(c=>2*(c[2]||0));
+ const d1=nd.reduce((s,p,i)=>s+p.y*w1[i],0),d2=nd.reduce((s,p,i)=>s+p.y*w2[i],0);
+ const coef=ts.map((_,k)=>B.reduce((s,c,i)=>s+nd[i].y*(c[k]||0),0));
+ const p='Grado '+(n-1);
+ const gen=card('Derivada del polinomio de Lagrange',`<div class="fm">P(x) = Σ f(zᵢ)·Lᵢ(x), &nbsp; Lᵢ(x) = Π<sub>j≠i</sub> ${FR('x − zⱼ','zᵢ − zⱼ')}</div><div class="fm mt-2">f′(x₀) ≈ P′(x₀) = Σ f(zᵢ)·Lᵢ′(x₀) = <b>${N(d1)}</b></div><div class="fm mt-1">f″(x₀) ≈ P″(x₀) = Σ f(zᵢ)·Lᵢ″(x₀) = <b>${N(d2)}</b></div>`);
+ const tab=card('Nodos y pesos Lᵢ′(x₀), Lᵢ″(x₀)',tb(['i','zᵢ','f(zᵢ)','Lᵢ′(x₀)','Lᵢ″(x₀)'],nd.map((q,i)=>[i,N(q.x,6),N(q.y,6),N(w1[i],6),N(w2[i],6)])));
+ const poly=card('Polinomio en t = x − x₀',`<div class="fm">P = ${coef.map((c,k)=>N(c,6)+(k?'t'+(k>1?'<sup>'+k+'</sup>':''):'')).join(' + ')}</div><p class="text-xs text-slate-500 mt-2">f′(x₀) = a₁ = ${N(coef[1])} · f″(x₀) = 2a₂ = ${N(2*coef[2])}</p>`);
+ return {res:[{dv:1,val:d1,p},{dv:2,val:d2,p}],pts:nd,formulas:[gen,tab,poly]};
+}
+
+function newtonM(sub,ord,ctx){
+ const n=+ord,nd=nodesFor(ctx,n),z=nd.map(p=>p.x);
+ const T=Array.from({length:n},()=>Array(n).fill(0));nd.forEach((q,i)=>T[i][0]=q.y);
+ for(let j=1;j<n;j++)for(let i=0;i<n-j;i++)T[i][j]=(T[i+1][j-1]-T[i][j-1])/(z[i+j]-z[i]);
+ const a=T[0];let p=a[n-1],p1=0,p2=0;
+ for(let i=n-2;i>=0;i--){const d=ctx.x0-z[i];p2=p2*d+2*p1;p1=p1*d+p;p=p*d+a[i]}
+ const lb='Grado '+(n-1);
+ const gen=card('Polinomio de Newton y su derivada',`<div class="fm">P(x) = f[z₀] + f[z₀,z₁](x−z₀) + f[z₀,z₁,z₂](x−z₀)(x−z₁) + ⋯</div><div class="fm mt-2">f[zᵢ,…,z<sub>i+j</sub>] = ${FR('f[zᵢ₊₁,…,z<sub>i+j</sub>] − f[zᵢ,…,z<sub>i+j−1</sub>]','z<sub>i+j</sub> − zᵢ')}</div><p class="text-xs text-slate-500 mt-2">Horner generalizado en x₀, con d = x₀ − zᵢ (de i = n−2 a 0): p″ ← p″·d + 2p′ ; p′ ← p′·d + p ; p ← p·d + aᵢ.</p><div class="fm mt-2">f′(x₀) ≈ P′(x₀) = <b>${N(p1)}</b> &nbsp; · &nbsp; f″(x₀) ≈ P″(x₀) = <b>${N(p2)}</b></div>`);
+ const tab=card('Tabla de diferencias divididas',tb(['zᵢ','f[zᵢ]',...Array.from({length:n-1},(_,j)=>'orden '+(j+1))],nd.map((q,i)=>[N(q.x,6),...Array.from({length:n},(_,j)=>j<n-i?N(T[i][j],6):'')])));
+ return {res:[{dv:1,val:p1,p:lb},{dv:2,val:p2,p:lb}],pts:nd,formulas:[gen,tab]};
+}
+
+function splineM(sub,ord,ctx){
+ let nd;
+ if(ctx.fnMode){const m=+ord;nd=Array.from({length:2*m+1},(_,i)=>{const x=ctx.x0+(i-m)*ctx.h;return {x,y:ctx.f(x)}})}else nd=ctx.P;
+ const n=nd.length,x=nd.map(q=>q.x),y=nd.map(q=>q.y),hh=[];for(let i=0;i<n-1;i++)hh.push(x[i+1]-x[i]);
+ const M=Array(n).fill(0);
+ if(n>2){const m=n-2,a=[],b=[],c=[],d=[];
+  for(let i=1;i<=m;i++){a.push(hh[i-1]);b.push(2*(hh[i-1]+hh[i]));c.push(hh[i]);d.push(6*((y[i+1]-y[i])/hh[i]-(y[i]-y[i-1])/hh[i-1]))}
+  for(let i=1;i<m;i++){const w=a[i]/b[i-1];b[i]-=w*c[i-1];d[i]-=w*d[i-1]}
+  const s=Array(m);s[m-1]=d[m-1]/b[m-1];for(let i=m-2;i>=0;i--)s[i]=(d[i]-c[i]*s[i+1])/b[i];
+  s.forEach((v,i)=>M[i+1]=v)}
+ const X=ctx.x0,k=x.findIndex((v,i)=>i<n-1&&X>=v-1e-12&&X<=x[i+1]+1e-12);
+ if(k<0)throw Error('x₀ está fuera del rango de los nodos del spline.');
+ const h=hh[k],u=x[k+1]-X,v=X-x[k];
+ const d1=-M[k]*u*u/(2*h)+M[k+1]*v*v/(2*h)-(y[k]/h-M[k]*h/6)+(y[k+1]/h-M[k+1]*h/6);
+ const d2=(M[k]*u+M[k+1]*v)/h;
+ const p='Spline natural';
+ const gen=card('Spline cúbico natural (M₀ = M<sub>n</sub> = 0)',`<div class="fm">S<sub>k</sub>(x) = ${FR('M<sub>k</sub>(x<sub>k+1</sub>−x)³ + M<sub>k+1</sub>(x−x<sub>k</sub>)³','6h<sub>k</sub>')} + (${FR('y<sub>k</sub>','h<sub>k</sub>')} − ${FR('M<sub>k</sub>h<sub>k</sub>','6')})(x<sub>k+1</sub>−x) + (${FR('y<sub>k+1</sub>','h<sub>k</sub>')} − ${FR('M<sub>k+1</sub>h<sub>k</sub>','6')})(x−x<sub>k</sub>)</div><div class="fm mt-2">S′<sub>k</sub>(x) = ${FR('−M<sub>k</sub>(x<sub>k+1</sub>−x)² + M<sub>k+1</sub>(x−x<sub>k</sub>)²','2h<sub>k</sub>')} + ${FR('y<sub>k+1</sub> − y<sub>k</sub>','h<sub>k</sub>')} − ${FR('h<sub>k</sub>(M<sub>k+1</sub> − M<sub>k</sub>)','6')}</div><div class="fm mt-2">S″<sub>k</sub>(x) = ${FR('M<sub>k</sub>(x<sub>k+1</sub>−x) + M<sub>k+1</sub>(x−x<sub>k</sub>)','h<sub>k</sub>')}</div><div class="fm mt-2">h<sub>i−1</sub>M<sub>i−1</sub> + 2(h<sub>i−1</sub>+h<sub>i</sub>)M<sub>i</sub> + h<sub>i</sub>M<sub>i+1</sub> = 6[${FR('y<sub>i+1</sub>−y<sub>i</sub>','h<sub>i</sub>')} − ${FR('y<sub>i</sub>−y<sub>i−1</sub>','h<sub>i−1</sub>')}] <span class="text-xs font-sans text-slate-500">(sistema tridiagonal)</span></div><div class="fm mt-3">En x₀ (tramo k = ${k}): f′(x₀) ≈ S′ = <b>${N(d1)}</b> &nbsp; · &nbsp; f″(x₀) ≈ S″ = <b>${N(d2)}</b></div>`);
+ const tab=card('Nodos y segundas derivadas Mᵢ',tb(['i','xᵢ','yᵢ','Mᵢ = S″(xᵢ)'],nd.map((q,i)=>[i,N(q.x,6),N(q.y,6),N(M[i],6)])));
+ return {res:[{dv:1,val:d1,p},{dv:2,val:d2,p}],pts:nd,formulas:[gen,tab]};
+}
+
+METHODS.push(
+ {id:'rich',label:'🔁 Richardson',subs:[],orders:()=>[2,3,4,5].map(L=>({v:''+L,label:`${L} niveles (h, h/2${L>2?', …':''})`})),compute:richardsonM},
+ {id:'lag',label:'∑ Lagrange',subs:[],orders:ptsOpts,compute:lagrangeM},
+ {id:'new',label:'Δ Newton (dif. divididas)',subs:[],orders:ptsOpts,compute:newtonM},
+ {id:'spl',label:'〰 Spline cúbico',subs:[],orders:()=>[2,3,4,5].map(m=>({v:''+m,label:`${2*m+1} nodos (x₀ ± ${m}h)`})),compute:splineM}
+);
+
+/* ===== Estado ===== */
+let mode='fn',mIdx=0,subId='forward',chart=null;
+const $=id=>document.getElementById(id);
+const EX=[
+ {m:'fn',f:'sin(x) + x^2',x0:1,h:0.1},
+ {m:'fn',f:'exp(x)*cos(x)',x0:0.5,h:0.05},
+ {m:'tab',t:'0, 1\n0.5, 1.6487\n1.0, 2.7183\n1.5, 4.4817\n2.0, 7.3891\n2.5, 12.1825\n3.0, 20.0855',x0:1.5},
+ {m:'tab',t:'0, 0\n1, 4.9\n2, 19.6\n3, 44.1\n4, 78.4\n5, 122.5\n6, 176.4',x0:3},
+ {m:'tab',t:'0, 1\n0.3, 1.3499\n0.7, 2.0138\n1.0, 2.7183\n1.6, 4.9530\n2.0, 7.3891',x0:1,meth:2},
+ {m:'fn',f:'x*exp(x)',x0:1,h:0.4,meth:1}
+];
+function loadEx(i){const e=EX[i];if(e.meth!==undefined){mIdx=e.meth;subId=(METHODS[mIdx].subs[0]||{}).id||'';renderTabs()}setMode(e.m);
+ if(e.m==='fn'){$('fnText').value=e.f;$('x0').value=e.x0;$('hStep').value=e.h}
+ else{$('tabText').value=e.t;$('x0Tab').value=e.x0}
+ calculate()}
+function setMode(m){mode=m;
+ $('fnInputs').classList.toggle('hidden',m!=='fn');$('tabInputs').classList.toggle('hidden',m!=='tab');
+ $('modeFn').className='px-4 py-2 '+(m==='fn'?'bg-brand-600 text-white':'bg-white text-slate-600');
+ $('modeTab').className='px-4 py-2 '+(m==='tab'?'bg-brand-600 text-white':'bg-white text-slate-600');}
+function renderTabs(){
+ $('methodTabs').innerHTML=METHODS.map((m,i)=>`<button class="px-4 py-3 transition-colors ${i===mIdx?'tab-active':'tab-inactive'}" onclick="mIdx=${i};subId=(METHODS[${i}].subs[0]||{}).id||'';renderTabs();calculate(true)">${m.label}</button>`).join('');
+ const M=METHODS[mIdx];
+ $('subTabs').innerHTML=M.subs.map(s=>`<button class="px-4 py-2 transition-colors ${s.id===subId?'tab-active':'tab-inactive'}" onclick="subId='${s.id}';renderTabs();calculate(true)">${s.label}</button>`).join('');
+ const cur=$('orderSel').value;
+ $('orderSel').innerHTML=M.orders(subId).map(o=>`<option value="${o.v}">${o.label}</option>`).join('');
+ $('orderSel').value=M.orders(subId).some(o=>o.v===cur)?cur:M.orders(subId)[0].v;
+}
+$('orderSel').addEventListener('change',()=>calculate(true));
+$('csvFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('tabText').value=r.result};r.readAsText(f)});
+
+function err(t){const d=$('msg');d.textContent=t;d.classList.remove('hidden');$('results').classList.add('hidden')}
+
+/* ===== Normalización de la función escrita por el usuario ===== */
+function normalizeFn(raw){
+  let s = (raw||'').trim();
+  if(!s) return s;
+
+  // 1) Quitar prefijos "Math."  (Math.sin → sin)
+  s = s.replace(/Math\./g, '');
+
+  // 2) ** → ^  (potencia)
+  s = s.replace(/\*\*/g, '^');
+
+  // 3) Nombres en español → math.js
+  s = s.replace(/\bsen\s*\(/gi, 'sin(');
+  s = s.replace(/\btg\s*\(/gi, 'tan(');
+  s = s.replace(/\barcsen\s*\(/gi, 'asin(');
+  s = s.replace(/\barccos\s*\(/gi, 'acos(');
+  s = s.replace(/\barctg\s*\(/gi, 'atan(');
+  s = s.replace(/\barctan\s*\(/gi, 'atan(');
+
+  // 4) ln(x) → log(x)  (math.js usa log para logaritmo natural)
+  s = s.replace(/\bln\s*\(/gi, 'log(');
+
+  // 5) e^x, e**(...), e^algo → exp(...)
+  //    Primero el caso con paréntesis simple:  e^(...)
+  s = s.replace(/\be\s*\^\s*\(([^()]*)\)/g, 'exp($1)');
+  //    Luego e^término (identificador/número con posibles decimales)
+  s = s.replace(/\be\s*\^\s*(-?\d+(?:\.\d+)?|[a-zA-Z_]\w*)/g, 'exp($1)');
+
+  // 6) Símbolo de raíz √(x) → sqrt(x)
+  s = s.replace(/√\s*\(/g, 'sqrt(');
+
+  // 7) Símbolos griegos / constantes
+  s = s.replace(/π/g, 'pi');
+
+  return s;
+}
+
+/* ===== Contexto (función o tabla) ===== */
+function buildCtx(){
+ if(mode==='fn'){
+  const src = normalizeFn($('fnText').value);
+  if(!src) throw Error('Ingrese una función f(x).');
+  let node;
+  try{ node = math.parse(src); }
+  catch(e){ throw Error('No se pudo interpretar f(x): '+e.message); }
+  const code=node.compile();
+  const f=x=>{const v=code.evaluate({x});if(typeof v!=='number'||!Number.isFinite(v))throw Error('f(x) no es un número real en x = '+N(x));return v};
+  const x0=parseFloat($('x0').value),h=parseFloat($('hStep').value);
+  if(!isFinite(x0)||!isFinite(h)||h<=0) throw Error('x₀ debe ser numérico y h > 0.');
+  let ex=null;
+  try{
+   const d1=math.derivative(node,'x'),d2=math.derivative(d1,'x');
+   ex=[d1.compile().evaluate({x:x0}),d2.compile().evaluate({x:x0})];
+   ex.d1=d1.compile();
+  }catch(e){}
+  return {f,x0,h,exact:ex,fnMode:true};
+ }
+ const rows=$('tabText').value.replace(/;/g,'\n').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>l.split(/[,\s]+/).map(Number));
+ if(rows.length<3||rows.some(r=>r.length<2||r.slice(0,2).some(isNaN))) throw Error('Ingrese al menos 3 pares (x, y) numéricos válidos.');
+ const P=rows.map(r=>({x:r[0],y:r[1]})).sort((a,b)=>a.x-b.x);
+ const h=P[1].x-P[0].x;
+ if(P.some((p,i)=>i&&p.x-P[i-1].x<=1e-12)) throw Error('Las abscisas x deben ser distintas.');
+ const equi=!P.some((p,i)=>i&&Math.abs(p.x-P[i-1].x-h)>1e-8*Math.max(1,Math.abs(h)));
+ const x0=parseFloat($('x0Tab').value);const i0=P.findIndex(p=>Math.abs(p.x-x0)<1e-9);
+ if(i0<0) throw Error('x₀ debe coincidir con uno de los nodos de la tabla.');
+ const f=x=>{if(!equi){const p=P.find(q=>Math.abs(q.x-x)<1e-9);if(!p)throw Error('Este esquema requiere datos equiespaciados.');return p.y}const i=i0+Math.round((x-x0)/h);if(i<0||i>=P.length)throw Error('El esquema necesita nodos fuera de la tabla. Elija otro tipo de diferencia, otro x₀ u orden menor.');return P[i].y};
+ return {f,x0,h,exact:null,P,i0,equi,fnMode:false};
+}
+
+function calculate(quiet){
+ $('msg').classList.add('hidden');
+ try{
+  const ctx=buildCtx(),M=METHODS[mIdx],ord=$('orderSel').value;
+  const out=M.compute(subId,ord,ctx);
+  renderResults(ctx,out);
+ }catch(e){err(e.message)}
+}
+
+function renderResults(ctx,out){
+ $('results').classList.remove('hidden');
+ $('cards').innerHTML=out.res.map((r,i)=>{
+  const ex=ctx.exact?ctx.exact[i]:null;
+  const ea=ex!==null?Math.abs(r.val-ex):null,er=ex!==null&&ex!==0?ea/Math.abs(ex)*100:null;
+  return `<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+   <div class="flex justify-between items-center mb-3"><h3 class="text-sm font-bold text-slate-900">${r.dv===1?'Primera derivada f′(x₀)':'Segunda derivada f″(x₀)'}</h3>
+   <span class="text-xs bg-brand-50 text-brand-700 border border-brand-100 px-2.5 py-1 rounded-full font-semibold">${r.p}</span></div>
+   <p class="text-3xl font-mono font-semibold text-brand-700">${N(r.val,10)}</p>
+   ${ex!==null?`<div class="mt-4 grid grid-cols-3 gap-2 text-xs">
+    <div class="p-2 bg-emerald-50 rounded border border-emerald-100"><p class="text-slate-500">Valor exacto</p><p class="font-mono font-semibold">${N(ex,10)}</p></div>
+    <div class="p-2 bg-slate-50 rounded border border-slate-200"><p class="text-slate-500">Error absoluto</p><p class="font-mono font-semibold">${ea.toExponential(3)}</p></div>
+    <div class="p-2 bg-slate-50 rounded border border-slate-200"><p class="text-slate-500">Error relativo</p><p class="font-mono font-semibold">${er!==null?er.toExponential(3)+' %':'—'}</p></div></div>`
+   :`<p class="mt-4 text-xs text-slate-400">${ctx.fnMode?'No se pudo obtener la derivada analítica de esta función.':'Modo tabulado: no hay valor exacto disponible.'}</p>`}
+   <p class="text-xs text-slate-500 mt-3 font-mono">x₀ = ${N(ctx.x0)} · h = ${N(ctx.h)}</p></div>`}).join('');
+ $('formulas').innerHTML=out.formulas.join('');
+ drawChart(ctx,out);
+}
+
+function drawChart(ctx,out){
+ const d1=out.res[0].val;let a,b;
+ if(ctx.fnMode){const half=Math.max(6*ctx.h,1);a=ctx.x0-half;b=ctx.x0+half}
+ else{a=ctx.P[0].x;b=ctx.P[ctx.P.length-1].x}
+ const y0=ctx.f(ctx.x0);let curve=[];
+ if(ctx.fnMode){for(let i=0;i<=240;i++){const x=a+(b-a)*i/240;try{curve.push({x,y:ctx.f(x)})}catch(e){}}}
+ else curve=ctx.P.map(p=>({x:p.x,y:p.y}));
+ const ys=curve.map(p=>p.y),yr=Math.max(...ys)-Math.min(...ys)||1;
+ const tan=s=>[{x:a,y:y0+s*(a-ctx.x0)},{x:b,y:y0+s*(b-ctx.x0)}];
+ const ds=[
+  {type:'line',label:'f(x)',data:curve,borderColor:'#0f172a',borderWidth:2,pointRadius:ctx.fnMode?0:3,tension:0},
+  {type:'line',label:`Tangente numérica (f′ ≈ ${N(d1,5)})`,data:tan(d1),borderColor:'#0284c7',borderWidth:2,pointRadius:0}];
+ if(ctx.exact)ds.push({type:'line',label:`Tangente exacta (f′ = ${N(ctx.exact[0],5)})`,data:tan(ctx.exact[0]),borderColor:'#10b981',borderDash:[6,4],borderWidth:2,pointRadius:0});
+ ds.push({type:'scatter',label:'Puntos del esquema',data:out.pts,backgroundColor:'#e11d48',pointRadius:6});
+ ds.push({type:'scatter',label:'(x₀, f(x₀))',data:[{x:ctx.x0,y:y0}],backgroundColor:'#f59e0b',borderColor:'#b45309',pointRadius:9,pointStyle:'rectRot'});
+ if(chart)chart.destroy();
+ chart=new Chart($('chart'),{type:'scatter',data:{datasets:ds},options:{responsive:true,maintainAspectRatio:false,
+  plugins:{title:{display:true,text:'Función, tangente y puntos evaluados',font:{size:14,weight:'bold'}},legend:{labels:{usePointStyle:true,font:{size:11}}}},
+  scales:{x:{type:'linear',min:a,max:b,title:{display:true,text:'x'}},
+   y:{min:Math.min(...ys)-0.25*yr,max:Math.max(...ys)+0.25*yr,title:{display:true,text:'y = f(x)'}}}}});
+}
+
+/* ===== Inicio ===== */
+try{
+  const qrBox = $('qrBox');
+  // Limpiar el texto "QR CTI" antes de generar el código
+  qrBox.innerHTML = '';
+  
+  new QRCode(qrBox, {
+    text: 'https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364',
+    width: 80,
+    height: 80,
+    correctLevel: QRCode.CorrectLevel.L
+  });
+  
+  // Eliminar el canvas generado por QRCode.js, dejando solo la imagen
+  const canvas = qrBox.querySelector('canvas');
+  if(canvas) canvas.remove();
+}catch(e){}
+
+setMode('fn');renderTabs();calculate();
+</script>
+</body>
+</html>
