@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transferencia de Calor | Dr. Ronald F. Rodriguez Espinoza</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],serif:['Fraunces','serif']},colors:{brand:{50:'#f0f7ff',100:'#e0effe',400:'#38a4e8',500:'#0284c7',600:'#0369a1',700:'#095180',900:'#0c2e4e'}}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+.in{width:100%;border:1px solid #cbd5e1;border-radius:.5rem;padding:.4rem .5rem;font:12px 'JetBrains Mono',monospace;background:#f8fafc}
+.in:focus{outline:2px solid #0284c7}
+.btn{padding:.5rem .8rem;border-radius:.5rem;font-size:12px;font-weight:600;background:#0369a1;color:#fff}.btn:hover{background:#095180}
+.btn.g{background:#e2e8f0;color:#334155}.btn.g:hover{background:#cbd5e1}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:.75rem;padding:1rem}
+.lb{display:block;font-size:11px;font-weight:500;color:#475569}
+.tb{width:100%;font-size:12px;border-collapse:collapse}.tb th,.tb td{border:1px solid #e2e8f0;padding:4px 8px;text-align:center}.tb th{background:#f1f5f9}
+.tab-active{border-bottom:3px solid #0284c7;color:#0369a1;font-weight:600}.tab-inactive{border-bottom:3px solid transparent;color:#64748b}
+.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e;padding:.5rem .75rem;border-radius:.5rem;font-size:12px;margin-bottom:.5rem}
+.warn.err{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.step{border:1px solid #e2e8f0;border-radius:.5rem;padding:.75rem;margin-bottom:.5rem;font-size:13px;background:#fff}
+@media print{header,nav,.noprint,#authorCard,footer{display:none!important}}
+</style></head>
+<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased">
+<header class="bg-slate-900 text-white shadow-md sticky top-0 z-50"><div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+ <div class="flex items-center gap-3"><div class="p-2 bg-brand-600 rounded-lg"><i class="fa-solid fa-fire-flame-curved text-xl"></i></div>
+ <div><h1 class="text-xl font-bold font-serif">Simulador de Transferencia de Calor</h1><p class="text-xs text-slate-400">Conducción · Convección · Radiación — estado estacionario</p></div></div>
+ <div class="flex items-center gap-3 text-xs"><label class="flex items-center gap-2 text-slate-300">Unidades
+  <select id="sysSel" class="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white"><option value="si">Sistema Internacional</option><option value="en">Sistema Inglés</option></select></label>
+ <button onclick="document.getElementById('authorCard').scrollIntoView({behavior:'smooth'})" class="hover:bg-slate-800 px-3 py-1.5 rounded-md text-slate-300"><i class="fa-solid fa-user-graduate"></i> Dr. Ronald Rodriguez E.</button></div></div></header>
+
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6 space-y-5">
+<section id="authorCard" class="rounded-xl shadow-sm border border-slate-200 overflow-hidden"><div class="p-5 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+ <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+  <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+   <div class="relative"><div class="w-20 h-20 rounded-full bg-brand-600 border-2 border-white/20 flex items-center justify-center shadow-lg"><i class="fa-solid fa-user-tie text-3xl"></i></div><span class="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full" title="Verificado CTI Vitae"></span></div>
+   <div><div class="inline-flex items-center gap-2 text-xs font-semibold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full mb-1 border border-brand-500/20"><i class="fa-solid fa-award text-amber-400"></i> Docente Investigador</div>
+    <h2 class="text-lg md:text-xl font-bold font-serif">Dr. Ronald F. Rodriguez Espinoza</h2>
+    <p class="text-sm text-slate-300">Especialista en Análisis Numérico y Métodos Computacionales</p>
+    <div class="flex flex-wrap justify-center sm:justify-start gap-4 mt-2 text-xs text-slate-400"><span><i class="fa-solid fa-building-columns mr-1"></i> CONCYTEC CTI Vitae</span><span><i class="fa-solid fa-fire mr-1"></i> Curso de Transferencia de Calor</span></div></div></div>
+  <div class="flex items-center gap-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700/60">
+   <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" title="Abrir el perfil oficial CTI Vitae" class="bg-white p-2 rounded-lg shadow-md hover:scale-105 transition-transform">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" alt="QR CTI Vitae - Dr. Ronald F. Rodríguez E." class="w-16 h-16 md:w-20 md:h-20 object-contain" onerror="this.onerror=null;this.src='https://placehold.co/120x120/ffffff/0f172a?text=QR+CTI';"></a>
+   <div class="text-left space-y-1"><p class="text-xs font-semibold text-slate-200"><i class="fa-solid fa-qrcode text-brand-400"></i> Código QR</p><p class="text-[11px] text-slate-300 max-w-[130px] leading-tight">Haz clic en el código QR para consultar la trayectoria académica.</p>
+    <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" class="text-[11px] font-semibold text-brand-400 hover:text-brand-300">Perfil CTI Vitae <i class="fa-solid fa-chevron-right text-[9px]"></i></a></div></div>
+ </div></div></section>
+
+<nav class="bg-white rounded-xl shadow-sm border border-slate-200 px-2 flex flex-wrap gap-1 text-sm font-medium">
+ <button class="tb-btn tab-active px-4 py-3" data-tab="cond" onclick="tab('cond')"><i class="fa-solid fa-layer-group text-brand-600 mr-1"></i> Conducción</button>
+ <button class="tb-btn tab-inactive px-4 py-3" data-tab="conv" onclick="tab('conv')"><i class="fa-solid fa-wind text-brand-600 mr-1"></i> Convección</button>
+ <button class="tb-btn tab-inactive px-4 py-3" data-tab="rad" onclick="tab('rad')"><i class="fa-solid fa-sun text-brand-600 mr-1"></i> Radiación</button>
+</nav>
+
+<section id="p-cond" class="tp"></section><section id="p-conv" class="tp hidden"></section><section id="p-rad" class="tp hidden"></section>
+
+<details class="card text-xs text-slate-600 leading-relaxed"><summary class="font-semibold text-slate-800 cursor-pointer">Instrucciones, referencias y limitaciones</summary>
+<p class="mt-2"><b>Uso:</b> elija una pestaña, cargue un ejemplo o ingrese datos, y pulse <i>Calcular</i>. Las unidades pueden cambiarse en cualquier momento sin perder los datos (internamente todo se guarda en SI). Los pasos intermedios del desarrollo se escriben en SI; las tablas y resultados usan las unidades elegidas.</p>
+<p class="mt-2"><b>Referencias:</b> Incropera et al., <i>Fundamentos de Transferencia de Calor</i>, 7.ª ed. (propiedades, Churchill–Chu, Dittus–Boelter, placa plana); Çengel &amp; Ghajar, <i>Transferencia de Calor y Masa</i> (conductividades y emisividades típicas); CODATA 2018 (σ = 5,670374419×10⁻⁸ W/m²K⁴).</p>
+<p class="mt-2"><b>Limitaciones:</b> propiedades tabuladas aproximadas a ~300 K, constantes y editables (no son valores universales). Radiación entre dos superficies solo para placas paralelas infinitas o cilindros/esferas concéntricos (F₁₂ = 1). Convección con correlaciones para placa plana isotérmica, tubo turbulento y placa vertical. Esquemas no a escala.</p></details>
+</main>
+<footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-auto"><div class="max-w-7xl mx-auto px-4 text-center space-y-1">
+<p>© 2026 <span class="font-semibold text-slate-200">Dr. Ronald F. Rodriguez E.</span> — Análisis Numérico y Métodos Computacionales</p>
+<p class="text-slate-500">Desarrollado para entornos académicos y profesionales en ingeniería y ciencias aplicadas.</p>
+<p class="text-slate-600 text-[10px]">Bibliotecas externas: Tailwind CSS, KaTeX, Chart.js, FontAwesome</p></div></footer>
+
+<script>
+/* ===== Constantes, unidades y utilidades ===== */
+const SIG=5.670374419e-8, PAL=['#bae6fd','#fde68a','#bbf7d0','#fecaca','#ddd6fe','#fed7aa'];
+const U={e:{si:['mm',1e-3],en:['in',.0254]},L:{si:['m',1],en:['ft',.3048]},A:{si:['m²',1],en:['ft²',.09290304]},
+ k:{si:['W/(m·K)',1],en:['Btu/(h·ft·°F)',1.730735]},h:{si:['W/(m²·K)',1],en:['Btu/(h·ft²·°F)',5.678263]},
+ Q:{si:['W',1],en:['Btu/h',.2930711]},q:{si:['W/m²',1],en:['Btu/(h·ft²)',3.154591]},R:{si:['K/W',1],en:['°F·h/Btu',1.895634]},
+ V:{si:['m/s',1],en:['ft/s',.3048]},nu:{si:['m²/s',1],en:['ft²/s',.09290304]},b:{si:['1/K',1],en:['1/°R',1.8]},
+ n:{si:['',1],en:['',1]},dT:{si:['K',1],en:['°F',5/9]},T:{si:['°C',1],en:['°F',1]},Rr:{si:['1/m²',1],en:['1/ft²',10.7639104]}};
+let sys='si'; const redo={};
+const $=id=>document.getElementById(id), gv=id=>parseFloat($(id).dataset.si), L=String.raw;
+const toSI=(t,v)=>t==='T'?(sys==='si'?v+273.15:(v-32)*5/9+273.15):v*U[t][sys][1];
+const fromSI=(t,s)=>t==='T'?(sys==='si'?s-273.15:(s-273.15)*9/5+32):s/U[t][sys][1];
+const f=x=>!isFinite(x)?'—':x===0?'0':(Math.abs(x)>=1e5||Math.abs(x)<1e-3)?x.toExponential(4):''+(+x.toPrecision(6));
+const fl=x=>f(x).replace(/e([+-]?)(\d+)/,(m,s,d)=>L`\times10^{${s==='-'?'-':''}${+d}}`);
+const o=(t,v)=>f(fromSI(t,v))+' '+U[t][sys][0];
+const inp=(id,lab,t,v)=>`<label class="lb">${lab} <span class="text-slate-400" data-ut="${t}"></span><input id="${id}" data-t="${t}" data-si="${v??NaN}" type="number" step="any" class="in"></label>`;
+const sel=(id,opts,ch='')=>`<select id="${id}" class="in" onchange="${ch}">${opts.map((x,i)=>`<option value="${Array.isArray(x)?x[0]:i}">${Array.isArray(x)?x[1]:x}</option>`).join('')}</select>`;
+function refresh(){document.querySelectorAll('input[data-t]').forEach(e=>{const s=parseFloat(e.dataset.si);e.value=isNaN(s)?'':+fromSI(e.dataset.t,s).toPrecision(6)});
+ document.querySelectorAll('[data-ut]').forEach(s=>s.textContent='['+U[s.dataset.ut][sys][0]+']')}
+const setv=(id,v)=>{$(id).dataset.si=v??NaN;refresh()};
+document.addEventListener('input',e=>{const t=e.target.dataset&&e.target.dataset.t;if(t)e.target.dataset.si=toSI(t,parseFloat(e.target.value))});
+$('sysSel').onchange=e=>setSys(e.target.value);
+function tab(k){document.querySelectorAll('.tp').forEach(x=>x.classList.add('hidden'));$('p-'+k).classList.remove('hidden');
+ document.querySelectorAll('.tb-btn').forEach(b=>b.className='tb-btn px-4 py-3 '+(b.dataset.tab===k?'tab-active':'tab-inactive'))}
+const mj=el=>window.renderMathInElement&&renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true}],throwOnError:false});
+const S=(t,c)=>`<div class="step"><b class="text-sky-700">${t}</b><div class="mt-1">${c}</div></div>`, M=x=>`<div class="overflow-x-auto">$$${x}$$</div>`;
+const tb=(h,r)=>`<div class="overflow-x-auto mb-3"><table class="tb"><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.map(a=>`<tr>${a.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const steps=s=>[S('Paso 1. Identificación del problema',s.id),S('Paso 2. Datos conocidos',tb(['Dato','Valor'],s.dat)),S('Paso 3. Incógnitas',s.inc),
+ S('Paso 4. Hipótesis simplificadoras',`<ul class="list-disc ml-5">${s.hip.map(h=>`<li>${h}</li>`).join('')}</ul>`),S('Paso 5. Ecuaciones fundamentales',s.eq.map(M).join('')),
+ S('Paso 6. Sustitución numérica (valores en SI)',s.sub.map(M).join('')),S('Paso 7. Desarrollo algebraico',s.alg.map(M).join('')),S('Paso 8. Resultados finales',s.res),S('Paso 9. Comprobación',s.chk)].join('');
+const bar=k=>`<div class="noprint flex gap-2 flex-wrap"><button class="btn g" onclick="cp('${k}')"><i class="fa-regular fa-copy"></i> Copiar</button><button class="btn g" onclick="csv('${k}')"><i class="fa-solid fa-file-csv"></i> CSV</button><button class="btn g" onclick="print()"><i class="fa-solid fa-print"></i> Imprimir</button></div>`;
+const show=(k,h)=>{$('out-'+k).innerHTML=bar(k)+h;mj($('out-'+k))};
+const errs=(k,b)=>show(k,b.map(x=>`<div class="warn err"><i class="fa-solid fa-circle-xmark"></i> ${x}</div>`).join(''));
+const wns=w=>w.map(x=>`<div class="warn"><i class="fa-solid fa-triangle-exclamation"></i> ${x}</div>`).join('');
+const cp=k=>navigator.clipboard&&navigator.clipboard.writeText($('out-'+k).innerText);
+function csv(k){const r=[];$('out-'+k).querySelectorAll('table').forEach(t=>{t.querySelectorAll('tr').forEach(tr=>r.push([...tr.children].map(c=>'"'+c.innerText.replace(/"/g,'""')+'"').join(',')));r.push('')});
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+r.join('\n')],{type:'text/csv'}));a.download='resultados_'+k+'.csv';a.click()}
+const arrowDef='<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#0369a1"/></marker></defs>';
+const svg2=(l,r,m)=>`<svg viewBox="0 0 400 90" class="w-full max-w-md mx-auto">${arrowDef}<rect x="10" y="10" width="110" height="70" fill="#fecaca" stroke="#334155"/><text x="65" y="48" text-anchor="middle" font-size="10">${l}</text><line x1="125" y1="50" x2="270" y2="50" stroke="#0369a1" stroke-width="3" marker-end="url(#ar)"/><text x="198" y="40" text-anchor="middle" font-size="10">${m}</text><text x="335" y="50" text-anchor="middle" font-size="10">${r}</text></svg><p class="text-[10px] text-center text-slate-400">Esquema no a escala</p>`;
+const clearP=k=>{document.querySelectorAll('#f-'+k+' input[data-t]').forEach(e=>e.dataset.si=NaN);refresh();$('out-'+k).innerHTML=''};
+const panel=(k,form)=>`<div class="grid lg:grid-cols-5 gap-4"><div class="lg:col-span-2 card space-y-3 self-start" id="f-${k}">${form}</div><div class="lg:col-span-3 space-y-3" id="out-${k}"></div></div>`;
+const exSel=(id,arr,fn)=>`<div class="rounded-lg border border-amber-200 bg-amber-50 p-2"><span class="lb"><i class="fa-solid fa-flask text-amber-600"></i> Ejemplos resueltos <span class="text-slate-400">(cargan datos editables y calculan; luego puede modificarlos)</span></span><div class="flex gap-2 mt-1">${sel(id,arr.map(x=>x.n))}<button class="btn whitespace-nowrap" onclick="${fn}()">Cargar ejemplo</button></div></div>`;
+const unitBox=()=>`<div class="rounded-lg border border-brand-200 bg-brand-50 p-2 flex flex-wrap items-center gap-2 text-xs"><i class="fa-solid fa-ruler-combined text-brand-600"></i><b class="text-slate-700">Sistema de unidades:</b><select class="usel in" style="width:auto" onchange="setSys(this.value)"><option value="si">Internacional (°C, mm, m, W)</option><option value="en">Inglés (°F, in, ft, Btu/h)</option></select></div>`;
+function setSys(v){sys=v;document.querySelectorAll('.usel').forEach(s=>s.value=v);$('sysSel').value=v;refresh();Object.values(redo).forEach(fn=>fn())}
+const hero=(t,big,rows)=>`<div class="rounded-xl p-4 text-white shadow-lg" style="background:linear-gradient(135deg,#0c2e4e,#0369a1)"><div class="text-xs opacity-80">${t}</div><div class="text-3xl font-bold font-serif my-1">${big}</div><div class="flex flex-wrap gap-x-5 gap-y-1 mt-1 text-sm">${rows.map(r=>`<span><span class="opacity-70">${r[0]}:</span> <b>${r[1]}</b></span>`).join('')}</div></div>`;
+
+/* ===== Base de datos de propiedades (aprox. a ~300 K; Incropera / Çengel) ===== */
+const MAT=[['Cobre',401],['Aluminio',237],['Acero al carbono',60.5],['Acero inoxidable 304',14.9],['Vidrio',1.4],['Ladrillo común',.72],['Concreto',1.4],['Madera (pino)',.12],
+ ['Lana mineral',.04],['Fibra de vidrio',.043],['Poliestireno expandido',.035],['Poliuretano rígido',.026],['Aire (en reposo)',.0263],['Agua (en reposo)',.613],['Personalizado',1]];
+const EM=[['Cuerpo negro',1],['Pintura negra mate',.95],['Vidrio',.92],['Ladrillo',.93],['Acero oxidado',.8],['Acero inox. pulido',.17],['Aluminio pulido',.04],['Cobre pulido',.03]];
+const FL=[['Aire (300 K, 1 atm)',.0263,1.589e-5,.707,1/300],['Agua líquida (300 K)',.613,8.575e-7,5.83,2.761e-4],['Manual',NaN,NaN,NaN,NaN]];
+const C=x=>x+273.15;
+
+/* ===================== CONDUCCIÓN ===================== */
+let layers=[{m:5,e:.2,k:.72}], chart;
+$('p-cond').innerHTML=panel('cond',`
+ <h3 class="font-bold text-slate-900"><i class="fa-solid fa-layer-group text-brand-600"></i> Conducción en estado estacionario</h3>
+ <p class="text-xs text-slate-500">Ley de Fourier con resistencias en serie. Una capa o varias, con o sin convección en las superficies.</p>
+ <div class="text-xs bg-slate-50 rounded p-2 overflow-x-auto" id="eqc">${L`$$\begin{aligned}\dot Q&=\frac{T_c-T_f}{\sum R}\\[4pt] R_{\mathrm{pl}}&=\frac{e}{kA}\\[4pt] R_{\mathrm{cil}}&=\frac{\ln(r_2/r_1)}{2\pi kL}\\[4pt] R_{\mathrm{esf}}&=\frac{1}{4\pi k}\left(\frac{1}{r_1}-\frac{1}{r_2}\right)\end{aligned}$$`}</div>
+ ${unitBox()}
+ ${exSel('ec',[{n:'1. Pared de ladrillo'},{n:'2. Pared de 3 materiales con convección'},{n:'3. Tubería de acero aislada'},{n:'4. Tubería con 3 capas'},{n:'5. Espesor de aislamiento requerido'}],'loadC')}
+ <div class="text-xs font-semibold text-slate-500 border-t pt-2">O ingrese sus propios datos:</div>
+ <label class="lb">Geometría del sistema ${sel('cg',[['p','Pared plana (simple o compuesta)'],['c','Cilindro / tubería multicapa'],['s','Esfera multicapa']],'setG()')}</label>
+ <div class="grid grid-cols-2 gap-2">
+  <div data-g="p">${inp('A','Área','A')}</div><div data-g="cs">${inp('r1','Radio interior','e')}</div><div data-g="c">${inp('L','Longitud','L')}</div>
+  ${inp('Th','T caliente (lado interior)','T')}${inp('h1','h interior (0 = T superficial)','h')}${inp('Tc','T fría (lado exterior)','T')}${inp('h2','h exterior (0 = T superficial)','h')}</div>
+ <div><div class="flex justify-between items-center mb-1"><span class="lb">Capas (de adentro hacia afuera)</span><button class="btn g" onclick="addLayer()">+ Capa</button></div><div id="ll"></div></div>
+ ${inp('Qm','Problema inverso: Q máx. permitido → espesor de la última capa (vacío = no)','Q')}
+ <div class="flex gap-2"><button class="btn flex-1" onclick="calcCond()"><i class="fa-solid fa-play"></i> Calcular</button><button class="btn g flex-1" onclick="clearP('cond')">Limpiar</button></div>
+`);
+const EXC=[{g:'p',A:12,Th:C(20),Tc:C(-5),h1:0,h2:0,ly:[[5,.2]]},
+ {g:'p',A:10,Th:C(22),Tc:C(-5),h1:8,h2:25,ly:[[5,.1],[8,.05],[6,.15]]},
+ {g:'c',r1:.025,L:10,Th:C(150),Tc:C(20),h1:500,h2:10,ly:[[2,.005],[8,.04]]},
+ {g:'c',r1:.025,L:10,Th:C(150),Tc:C(20),h1:500,h2:10,ly:[[2,.005],[9,.03],[11,.02]]},
+ {g:'c',r1:.025,L:10,Th:C(150),Tc:C(20),h1:500,h2:10,Qm:400,ly:[[2,.005],[8,.01]]}];
+function setG(){const g=$('cg').value;document.querySelectorAll('#f-cond [data-g]').forEach(d=>d.style.display=d.dataset.g.includes(g)?'':'none')}
+function renderLayers(){$('ll').innerHTML=layers.map((l,i)=>`<div class="grid grid-cols-12 gap-1 items-end mb-1"><div class="col-span-4"><select id="lm${i}" class="in" onchange="matSel(${i})">${MAT.map((m,j)=>`<option value="${j}" ${j==l.m?'selected':''}>${m[0]}</option>`).join('')}</select></div><div class="col-span-3">${inp('le'+i,'e','e',l.e)}</div><div class="col-span-4">${inp('lk'+i,'k','k',l.k)}</div><button class="col-span-1 text-rose-600 pb-2" onclick="delLayer(${i})" title="Quitar">✕</button></div>`).join('');refresh()}
+function syncLayers(){layers=layers.map((l,i)=>({m:+$('lm'+i).value,e:gv('le'+i),k:gv('lk'+i)}))}
+const addLayer=()=>{syncLayers();layers.push({m:8,e:NaN,k:MAT[8][1]});renderLayers()};
+const delLayer=i=>{syncLayers();if(layers.length>1){layers.splice(i,1);renderLayers()}};
+const matSel=i=>setv('lk'+i,MAT[$('lm'+i).value][1]);
+function loadC(){const x=EXC[$('ec').value];$('cg').value=x.g;layers=x.ly.map(([m,e])=>({m,e,k:MAT[m][1]}));renderLayers();
+ ['A','r1','L','Th','Tc','h1','h2','Qm'].forEach(i=>$(i).dataset.si=x[i]??NaN);if(x.g==='p')$('A').dataset.si=x.A;refresh();setG();calcCond()}
+const Rl=(g,k,e,r,p)=>g==='p'?e/(k*p.A):g==='c'?Math.log((r+e)/r)/(2*Math.PI*k*p.L):(1/r-1/(r+e))/(4*Math.PI*k);
+function rs(es,p){const g=p.g,els=[];let r=g==='p'?0:p.r1,xc=0;
+ const Ain=g==='p'?p.A:g==='c'?2*Math.PI*p.r1*p.L:4*Math.PI*p.r1**2;
+ if(p.h1>0)els.push({n:'Convección interior',R:1/(p.h1*Ain),h:p.h1,A:Ain});
+ p.k.forEach((k,i)=>{const e=es[i];els.push({n:'Capa '+(i+1),mat:p.mn[i],R:Rl(g,k,e,r,p),k,e,r1:r,r2:r+e,pos0:g==='p'?xc:r,sol:1,i});r+=e;xc+=e});
+ const Aout=g==='p'?p.A:g==='c'?2*Math.PI*r*p.L:4*Math.PI*r*r;
+ if(p.h2>0)els.push({n:'Convección exterior',R:1/(p.h2*Aout),h:p.h2,A:Aout});
+ return {els,Ain,Aout}}
+function calcCond(){syncLayers();redo.c=calcCond;
+ const g=$('cg').value,p={g,A:gv('A'),r1:gv('r1'),L:gv('L'),h1:gv('h1')||0,h2:gv('h2')||0,k:layers.map(l=>l.k),mn:layers.map(l=>MAT[l.m][0])};
+ const Th=gv('Th'),Tc=gv('Tc'),Qm=gv('Qm'),inv=Qm>0,n=layers.length,es=layers.map(l=>l.e),bad=[],w=[];
+ if(g==='p'&&!(p.A>0))bad.push('El área debe ser mayor que 0.');if(g!=='p'&&!(p.r1>0))bad.push('El radio interior debe ser mayor que 0.');if(g==='c'&&!(p.L>0))bad.push('La longitud debe ser mayor que 0.');
+ es.forEach((e,i)=>{if(!(inv&&i===n-1)&&!(e>0))bad.push(`El espesor de la capa ${i+1} debe ser mayor que 0.`);if(!(p.k[i]>0))bad.push(`La conductividad de la capa ${i+1} debe ser mayor que 0.`)});
+ if(isNaN(Th)||isNaN(Tc))bad.push('Ingrese ambas temperaturas.');else if(Th<=0||Tc<=0)bad.push('Temperatura absoluta inválida (≤ 0 K).');
+ if(p.h1<0||p.h2<0)bad.push('Los coeficientes h no pueden ser negativos.');
+ if(inv&&Th===Tc)bad.push('Con T caliente = T fría no existe flujo de calor: el problema inverso no tiene sentido.');
+ if(bad.length)return errs('cond',bad);
+ let note='';
+ if(inv){const Rn=Math.abs(Th-Tc)/Qm,tot=e=>{es[n-1]=e;return rs(es,p).els.reduce((a,x)=>a+x.R,0)};
+  if(tot(1e-9)>=Rn)return errs('cond',['Sin la última capa ya se cumple (o se supera) el límite: la resistencia restante es mayor que la necesaria.']);
+  let lo=1e-9,hi=1e3;for(let i=0;i<200;i++){const m=(lo+hi)/2;tot(m)<Rn?lo=m:hi=m}es[n-1]=(lo+hi)/2;setv('le'+(n-1),es[n-1]);
+  note=`<div class="warn" style="background:#ecfdf5;border-color:#a7f3d0;color:#065f46">Problema inverso (bisección): espesor de la capa ${n} = <b>${o('e',es[n-1])}</b> para Q = ${o('Q',Qm)}.</div>`}
+ const {els,Ain}=rs(es,p),Rt=els.reduce((a,x)=>a+x.R,0),Q=(Th-Tc)/Rt;let T=Th;
+ els.forEach(e=>{e.T0=T;e.dT=Q*e.R;T-=e.dT;e.T1=T});const sol=els.filter(e=>e.sol);
+ const sumdT=els.reduce((a,x)=>a+x.dT,0);
+ if(g==='c'&&p.h2>0){const l=sol[n-1],rc=l.k/p.h2;if(l.r1<rc)w.push(`Radio crítico r<sub>c</sub> = k/h = ${o('e',rc)} &gt; radio interior de la última capa (${o('e',l.r1)}): agregar aislante hasta r<sub>c</sub> aumenta Q. Válido para cilindro, k y h constantes, régimen radial estacionario, sin radiación.`);
+  else w.push(`Radio crítico r<sub>c</sub> = k/h = ${o('e',rc)} ≤ radio interior de la última capa: el aislamiento reduce las pérdidas.`)}
+ if(Th<Tc)w.push('T caliente &lt; T fría: el flujo de calor va en sentido contrario al definido (Q negativo).');
+ const det=tb(['Elemento','Material','Espesor','k','R','% R','ΔT','T entrada','T salida'],els.map(e=>[e.n,e.mat||'—',e.sol?o('e',e.e):'—',e.sol?o('k',e.k):'—',o('R',e.R),f(100*e.R/Rt)+'%',o('dT',e.dT),o('T',e.T0),o('T',e.T1)]));
+ const ints=sol.slice(0,-1).map((s,i)=>['T interfaz '+(i+1)+'–'+(i+2),o('T',s.T1)]);
+ const sum=tb(['Magnitud','Resultado'],[['Tasa de transferencia de calor Q',o('Q',Q)],['Flujo de calor (sup. interior)',o('q',Q/Ain)],...(g==='c'?[['Q por unidad de longitud',f(Q/p.L*(sys==='si'?1:.2930711/.3048/1)/(sys==='si'?1:.2930711/.3048))+(sys==='si'?' W/m':' W/m')]]:[]),['Resistencia térmica total',o('R',Rt)],['T superficie interior',o('T',sol[0].T0)],['T superficie exterior',o('T',sol[n-1].T1)],...ints]);
+ const sg=sol.map(s=>g==='p'?L`R_{${s.i+1}}=\frac{e}{kA}=\frac{${fl(s.e)}}{${fl(s.k)}\cdot ${fl(p.A)}}=${fl(s.R)}`:g==='c'?L`R_{${s.i+1}}=\frac{\ln(${fl(s.r2)}/${fl(s.r1)})}{2\pi(${fl(s.k)})(${fl(p.L)})}=${fl(s.R)}`:L`R_{${s.i+1}}=\frac{1}{4\pi(${fl(s.k)})}\Big(\frac{1}{${fl(s.r1)}}-\frac{1}{${fl(s.r2)}}\Big)=${fl(s.R)}`);
+ const cv=els.filter(e=>e.h).map(e=>L`R_{conv}=\frac{1}{hA}=\frac{1}{${fl(e.h)}\cdot ${fl(e.A)}}=${fl(e.R)}`);
+ const st=steps({id:`Sistema ${g==='p'?'plano':g==='c'?'cilíndrico':'esférico'} de ${n} capa(s) por conducción${p.h1>0||p.h2>0?' y convección':''}. Objetivo: calcular Q, resistencias y temperaturas internas.`,
+  dat:[['T caliente / fría',o('T',Th)+' / '+o('T',Tc)],...layers.map((l,i)=>['Capa '+(i+1),`${MAT[l.m][0]}, e = ${o('e',es[i])}, k = ${o('k',l.k)}`]),...(g==='p'?[['A',o('A',p.A)]]:[['r₁',o('e',p.r1)]]),...(g==='c'?[['L',o('L',p.L)]]:[]),['h₁ / h₂',`${o('h',p.h1)} / ${o('h',p.h2)}`]],
+  inc:'Q̇, R<sub>total</sub> y temperaturas de superficies e interfaces'+(inv?' y el espesor de la última capa':'')+'.',
+  hip:['Estado estacionario, sin generación interna.','Conductividad constante en cada capa.',g==='p'?'Flujo unidimensional (x).':'Flujo unidimensional radial.','Contacto térmico ideal entre capas.'],
+  eq:[L`\dot Q=\frac{T_{c}-T_{f}}{R_{total}},\qquad R_{total}=\sum_i R_i`,L`T_{j+1}=T_j-\dot Q\,R_j`],sub:[...cv.slice(0,1),...sg,...cv.slice(1)],
+  alg:[L`R_{total}=${els.map(e=>fl(e.R)).join('+')}=${fl(Rt)}\ \mathrm{K/W}`,L`\dot Q=\frac{${fl(Th-Tc)}}{${fl(Rt)}}=${fl(Q)}\ \mathrm{W}`],
+  res:`Q = <b>${o('Q',Q)}</b>; R<sub>total</sub> = ${o('R',Rt)}. Mayor resistencia: ${els.reduce((a,b)=>b.R>a.R?b:a).n} (${f(100*Math.max(...els.map(e=>e.R))/Rt)}% del total).`,
+  chk:`ΣΔT = ${o('dT',sumdT)} vs T<sub>c</sub>−T<sub>f</sub> = ${o('dT',Th-Tc)} (error ${Math.abs(sumdT-(Th-Tc)).toExponential(1)} K). Las temperaturas decrecen monótonamente en el sentido del flujo.`});
+ let svg=`<svg viewBox="0 0 560 190" class="w-full max-w-xl mx-auto">${arrowDef}`;
+ if(g==='p'){const wd=440/n;svg+=`<line x1="60" y1="14" x2="500" y2="14" stroke="#0369a1" stroke-width="3" marker-end="url(#ar)"/><text x="280" y="10" text-anchor="middle" font-size="10">Q̇ = ${o('Q',Q)}</text>`;
+  sol.forEach((s,i)=>{const x=60+i*wd;svg+=`<rect x="${x}" y="30" width="${wd}" height="90" fill="${PAL[i%6]}" stroke="#334155"/><text x="${x+wd/2}" y="68" text-anchor="middle" font-size="10">${s.mat}</text><text x="${x+wd/2}" y="82" text-anchor="middle" font-size="9">e=${o('e',s.e)}</text><text x="${x+wd/2}" y="95" text-anchor="middle" font-size="9">k=${f(fromSI('k',s.k))}</text><text x="${x}" y="138" text-anchor="middle" font-size="9">${o('T',s.T0)}</text>`});
+  svg+=`<text x="500" y="138" text-anchor="middle" font-size="9">${o('T',sol[n-1].T1)}</text>`}
+ else{const R0=70,ro=sol[n-1].r2;for(let i=n-1;i>=0;i--)svg+=`<circle cx="130" cy="95" r="${R0*sol[i].r2/ro}" fill="${PAL[i%6]}" stroke="#334155"/>`;svg+=`<circle cx="130" cy="95" r="${R0*p.r1/ro}" fill="#fff" stroke="#334155"/><text x="130" y="98" text-anchor="middle" font-size="9">fluido</text>`;
+  svg+=sol.map((s,i)=>`<text x="270" y="${30+i*28}" font-size="10">Capa ${i+1}: ${s.mat} (r ${f(fromSI('e',s.r1))}→${f(fromSI('e',s.r2))} ${U.e[sys][0]})</text><text x="270" y="${42+i*28}" font-size="9">T: ${o('T',s.T0)} → ${o('T',s.T1)}</text>`).join('')}
+ svg+=`</svg><p class="text-[10px] text-center text-slate-400">Esquema no a escala · flujo de calor de caliente a frío</p>`;
+ const ser=sol.map((s,i)=>{const d=[];for(let j=0;j<=20;j++){const xx=s.e*j/20;d.push({x:fromSI('e',s.pos0+xx),y:fromSI('T',s.T0-Q*Rl(g,s.k,xx,g==='p'?0:s.r1,p))})}return{label:'Capa '+(i+1)+' '+s.mat,data:d,showLine:true,borderColor:PAL[i%6].replace(/^#/,'#'),pointRadius:0,borderWidth:3}});
+ show('cond',hero('Tasa de transferencia de calor Q̇',o('Q',Q),[['R total',o('R',Rt)],['q″',o('q',Q/Ain)],['T sup. interior',o('T',sol[0].T0)],['T sup. exterior',o('T',sol[n-1].T1)]])+note+wns(w)+`<div class="card">${svg}</div><div class="card"><div style="height:260px"><canvas id="cc"></canvas></div></div><div class="card"><h4 class="font-bold text-sm mb-2">Resultados detallados</h4>${det}<h4 class="font-bold text-sm mb-2">Resumen</h4>${sum}</div>${st}`);
+ if(chart)chart.destroy();const cols=['#0284c7','#d97706','#16a34a','#dc2626','#7c3aed','#ea580c'];ser.forEach((s,i)=>s.borderColor=cols[i%6]);
+ chart=new Chart($('cc'),{type:'scatter',data:{datasets:ser},options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:(g==='p'?'x':'r')+' ['+U.e[sys][0]+']'}},y:{title:{display:true,text:'T ['+U.T[sys][0]+']'}}},plugins:{title:{display:true,text:'Perfil de temperatura'}}}})}
+
+/* ===================== CONVECCIÓN ===================== */
+$('p-conv').innerHTML=panel('conv',`
+ <h3 class="font-bold text-slate-900"><i class="fa-solid fa-wind text-brand-600"></i> Convección (ley de enfriamiento de Newton)</h3>
+ <div class="text-xs bg-slate-50 rounded p-2 overflow-x-auto" id="eqv">${L`$$\begin{aligned}\dot Q&=hA\,(T_s-T_\infty)\\[4pt] R_{\mathrm{conv}}&=\frac{1}{hA}\end{aligned}$$`}</div>
+ ${unitBox()}
+ ${exSel('ev',[{n:'1. Placa metálica en aire (forzada)'},{n:'2. Superficie calentada por agua'},{n:'3. Tubería con agua (Dittus–Boelter)'},{n:'4. Convección natural, pared vertical'}],'loadV')}
+ <div class="text-xs font-semibold text-slate-500 border-t pt-2">O ingrese sus propios datos:</div>
+ <label class="lb">Geometría ${sel('vg',[['p','Superficie plana'],['c','Cilindro / tubería'],['s','Esfera']],'setV()')}</label>
+ <div class="grid grid-cols-2 gap-2"><div data-v="p">${inp('Av','Área','A')}</div><div data-v="cs">${inp('D','Diámetro','e')}</div><div data-v="c">${inp('Lv','Longitud','L')}</div>
+  <div data-v="c" class="flex items-end text-xs"><label><input type="checkbox" id="ends"> incluir áreas de los extremos</label></div>${inp('Ts','T superficie T<sub>s</sub>','T')}${inp('Ti','T fluido T<sub>∞</sub>','T')}</div>
+ <label class="lb">Fluido (propiedades editables) ${sel('vf',FL.map((x,i)=>[i,x[0]]),'setF()')}</label>
+ <div class="grid grid-cols-2 gap-2">${inp('kf','k fluido','k')}${inp('nu','ν (viscosidad cinemática)','nu')}${inp('Pr','Pr','n')}${inp('be','β (expansión térmica)','b')}</div>
+ <label class="lb">Coeficiente h ${sel('vm',[['m','Ingreso manual'],['fp','Forzada: placa plana (V, L)'],['tb','Forzada: tubo, Dittus–Boelter (V, D)'],['nv','Natural: placa vertical, Churchill–Chu (L)']],'setV()')}</label>
+ <div class="grid grid-cols-2 gap-2"><div data-m="m">${inp('hv','h','h')}</div><div data-m="fp tb">${inp('Vv','Velocidad V','V')}</div><div data-m="fp tb nv">${inp('Lc','Longitud característica (L o D)','L')}</div></div>
+ <div class="flex gap-2"><button class="btn flex-1" onclick="calcConv()"><i class="fa-solid fa-play"></i> Calcular</button><button class="btn g flex-1" onclick="clearP('conv')">Limpiar</button></div>
+`);
+const EXV=[{g:'p',Av:.5,Ts:C(80),Ti:C(20),f:0,m:'fp',Vv:5,Lc:1},{g:'p',Av:2,Ts:C(40),Ti:C(80),f:1,m:'m',hv:800},
+ {g:'c',D:.025,Lv:3,Ts:C(60),Ti:C(20),f:1,m:'tb',Vv:2,Lc:.025},{g:'p',Av:1.5,Ts:C(60),Ti:C(20),f:0,m:'nv',Lc:1.5,be:1/C(40)}];
+function setV(){const g=$('vg').value,m=$('vm').value;document.querySelectorAll('#f-conv [data-v]').forEach(d=>d.style.display=d.dataset.v.includes(g)?'':'none');document.querySelectorAll('#f-conv [data-m]').forEach(d=>d.style.display=d.dataset.m.split(' ').includes(m)?'':'none')}
+function setF(){const x=FL[$('vf').value];['kf','nu','Pr','be'].forEach((id,i)=>$(id).dataset.si=x[i+1]);refresh()}
+function loadV(){const x=EXV[$('ev').value];$('vg').value=x.g;$('vm').value=x.m;$('vf').value=x.f;setF();['Av','D','Lv','Ts','Ti','hv','Vv','Lc'].forEach(i=>$(i).dataset.si=x[i]??NaN);if(x.be)$('be').dataset.si=x.be;refresh();setV();calcConv()}
+function calcConv(){redo.v=calcConv;const g=$('vg').value,m=$('vm').value,Ts=gv('Ts'),Ti=gv('Ti'),bad=[],w=[];let A,D=gv('D');
+ if(g==='p'){A=gv('Av');if(!(A>0))bad.push('El área debe ser mayor que 0.')}else{if(!(D>0))bad.push('El diámetro debe ser mayor que 0.');
+  if(g==='c'){const Lv=gv('Lv');if(!(Lv>0))bad.push('La longitud debe ser mayor que 0.');A=Math.PI*D*Lv+($('ends').checked?Math.PI*D*D/2:0)}else A=Math.PI*D*D}
+ if(isNaN(Ts)||isNaN(Ti)||Ts<=0||Ti<=0)bad.push('Ingrese temperaturas válidas (absolutas > 0 K).');
+ const k=gv('kf'),nu=gv('nu'),Pr=gv('Pr'),be=gv('be'),V=gv('Vv'),Lc=gv('Lc');let h=gv('hv'),extra=[],corr='';
+ if(m==='m'){if(!(h>0))bad.push('El coeficiente h debe ser mayor que 0.')}
+ else{if(!(k>0&&nu>0&&Pr>0))bad.push('Complete k, ν y Pr del fluido (todos > 0).');if(!(Lc>0))bad.push('Longitud característica > 0.');if(m!=='nv'&&!(V>0))bad.push('La velocidad debe ser mayor que 0.');if(m==='nv'&&!(be>0))bad.push('β debe ser mayor que 0.')}
+ if(bad.length)return errs('conv',bad);
+ const Tf=(Ts+Ti)/2;if($('vf').value!=='2'&&Math.abs(Tf-300)>25)w.push(`T<sub>película</sub> = ${o('T',Tf)} se aleja de 300 K: las propiedades tabuladas son aproximadas, edítelas.`);
+ let eqc='';
+ if(m==='fp'){const Re=V*Lc/nu;let Nu;extra=[['Re',f(Re)],['Pr',f(Pr)]];if(Pr<.6||Pr>60)w.push('Pr fuera de 0,6–60: correlación no válida.');
+  if(Re<5e5){Nu=.664*Math.sqrt(Re)*Math.cbrt(Pr);corr='Laminar, placa isotérmica';eqc=L`Nu=0{,}664\,Re^{1/2}Pr^{1/3}`}else{if(Re>1e8)w.push('Re &gt; 10⁸: fuera de rango.');Nu=(.037*Re**.8-871)*Math.cbrt(Pr);corr='Flujo mixto (Re<sub>crit</sub>=5×10⁵)';eqc=L`Nu=(0{,}037Re^{4/5}-871)Pr^{1/3}`}
+  h=Nu*k/Lc;extra.push(['Nu',f(Nu)])}
+ if(m==='tb'){const Re=V*Lc/nu,n=Ts>Ti?.4:.3;if(Re<1e4)return errs('conv',[`Re = ${f(Re)} &lt; 10⁴: Dittus–Boelter no es válida (flujo no turbulento desarrollado).`]);if(Pr<.6||Pr>160)w.push('Pr fuera de 0,6–160: correlación fuera de rango.');
+  w.push('Dittus–Boelter supone flujo plenamente desarrollado (L/D ≳ 10) y es aproximada (±25 %).');const Nu=.023*Re**.8*Pr**n;h=Nu*k/Lc;corr='Tubo turbulento, n='+n;eqc=L`Nu=0{,}023Re^{0{,}8}Pr^{n}`;extra=[['Re',f(Re)],['Pr',f(Pr)],['Nu',f(Nu)]]}
+ if(m==='nv'){const Ra=9.80665*be*Math.abs(Ts-Ti)*Lc**3*Pr/(nu*nu),Nu=(.825+.387*Ra**(1/6)/(1+(.492/Pr)**(9/16))**(8/27))**2;h=Nu*k/Lc;corr='Churchill–Chu, placa vertical isotérmica';eqc=L`Nu=\Big[0{,}825+\frac{0{,}387Ra^{1/6}}{[1+(0{,}492/Pr)^{9/16}]^{8/27}}\Big]^2`;extra=[['Ra',f(Ra)],['Pr',f(Pr)],['Nu',f(Nu)]]}
+ const Q=h*A*(Ts-Ti),R=1/(h*A);if(Q<0)w.push('Q negativo: el calor fluye del fluido hacia la superficie (la superficie se calienta).');
+ const st=steps({id:`Convección entre ${g==='p'?'una superficie plana':g==='c'?'un cilindro':'una esfera'} y un fluido${corr?' ('+corr+')':' (h dado)'}.`,
+  dat:[['T<sub>s</sub> / T<sub>∞</sub>',o('T',Ts)+' / '+o('T',Ti)],['Área A',o('A',A)],...(m==='m'?[['h',o('h',h)]]:[['k, ν, Pr',`${o('k',k)}, ${o('nu',nu)}, ${f(Pr)}`],['L<sub>c</sub>, V',`${o('L',Lc)}, ${o('V',V||0)}`]])],
+  inc:'Q̇, q″ y R<sub>conv</sub>'+(m!=='m'?', además de h mediante la correlación':'')+'.',hip:['Estado estacionario.','T<sub>s</sub> uniforme y propiedades constantes evaluadas a ~T<sub>película</sub>.',...(corr?['Correlación usada dentro de su rango de validez (ver avisos).']:[])],
+  eq:[L`\dot Q=hA(T_s-T_\infty)`,...(eqc?[eqc,L`h=\frac{Nu\,k}{L_c}`]:[])],sub:[...(m!=='m'?[L`h=\frac{${fl(parseFloat(extra[extra.length-1][1]))}\cdot ${fl(k)}}{${fl(Lc)}}=${fl(h)}\ \mathrm{W/m^2K}`]:[]),L`\dot Q=${fl(h)}\cdot ${fl(A)}\cdot(${fl(Ts-Ti)})`],
+  alg:[L`R=\frac{1}{hA}=${fl(R)}\ \mathrm{K/W}`,L`\dot Q=${fl(Q)}\ \mathrm{W}`],res:`Q = <b>${o('Q',Q)}</b>, q″ = ${o('q',Q/A)}, h = ${o('h',h)}.`,chk:`Q·R = ${o('dT',Q*R)} coincide con T<sub>s</sub>−T<sub>∞</sub> = ${o('dT',Ts-Ti)}.`});
+ show('conv',hero('Tasa de transferencia de calor Q̇',o('Q',Q),[['h',o('h',h)],['q″',o('q',Q/A)],['R',o('R',R)]])+wns(w)+`<div class="card">${svg2('Superficie '+o('T',Ts),'Fluido '+o('T',Ti),'Q̇ = '+o('Q',Q))}</div><div class="card"><h4 class="font-bold text-sm mb-2">Resultados detallados</h4>${tb(['Parámetro','Símbolo','Valor','Unidad'],[...extra.map(e=>[e[0]==='Nu'?'Número de Nusselt':e[0]==='Re'?'Reynolds':e[0]==='Ra'?'Rayleigh':'Prandtl',e[0],e[1],'—']),['Coeficiente de convección','h',f(fromSI('h',h)),U.h[sys][0]],['Área','A',f(fromSI('A',A)),U.A[sys][0]],['Resistencia','R<sub>conv</sub>',f(fromSI('R',R)),U.R[sys][0]]])}<h4 class="font-bold text-sm mb-2">Resumen</h4>${tb(['Magnitud','Resultado'],[['Tasa de transferencia de calor',o('Q',Q)],['Flujo de calor',o('q',Q/A)],['Resistencia térmica',o('R',R)]])}</div>${st}`)}
+
+/* ===================== RADIACIÓN ===================== */
+$('p-rad').innerHTML=panel('rad',`
+ <h3 class="font-bold text-slate-900"><i class="fa-solid fa-sun text-brand-600"></i> Radiación térmica</h3>
+ <div class="text-xs bg-slate-50 rounded p-2 overflow-x-auto" id="eqr">${L`$$\begin{aligned}\dot Q_{\mathrm{rad}}&=\varepsilon\,\sigma\,A\,\left(T_s^{4}-T_{\mathrm{ent}}^{4}\right)\\[4pt] \sigma&=5{,}670374419\times10^{-8}\ \mathrm{W\,m^{-2}\,K^{-4}}\end{aligned}$$`}</div>
+ ${unitBox()}
+ ${exSel('er',[{n:'1. Pérdida desde superficie caliente'},{n:'2. Superficie negra vs gris'},{n:'3. Placas paralelas'},{n:'4. Convección + radiación'},{n:'5. Temperatura de equilibrio'}],'loadR')}
+ <div class="text-xs font-semibold text-slate-500 border-t pt-2">O ingrese sus propios datos:</div>
+ <label class="lb">Tipo de problema (cambia solo al cargar un ejemplo) ${sel('rm',[['ent','Superficie ↔ entorno grande (gris vs negra)'],['comb','Convección + radiación'],['eq','Temperatura de equilibrio (inverso)'],['two','Dos superficies grises']],'setR()')}</label>
+ <div class="grid grid-cols-2 gap-2">
+  <div data-r="ent comb two">${inp('Tr','T superficie (T₁)','T')}</div><div data-r="ent comb eq two">${inp('Te','T entorno (T₂)','T')}</div>
+  <div data-r="ent comb eq two"><label class="lb">Material (ε típica)${sel('em',EM.map((x,i)=>[i,x[0]]),"setv('e1',EM[$('em').value][1])")}</label></div><div data-r="ent comb eq two">${inp('e1','Emisividad ε (₁)','n')}</div>
+  <div data-r="ent comb two">${inp('Ar','Área A (₁)','A')}</div><div data-r="comb eq">${inp('hr','h convección','h')}</div><div data-r="comb eq">${inp('Tir','T fluido T<sub>∞</sub>','T')}</div>
+  <div data-r="eq">${inp('qa','Flujo absorbido/generado q″','q')}</div>
+  <div data-r="two">${inp('e2','Emisividad ε₂','n')}</div><div data-r="two">${inp('A2','Área A₂ (concéntricas)','A')}</div>
+  <div data-r="two"><label class="lb">Geometría${sel('gg',[['pp','Placas paralelas infinitas (A₂=A₁)'],['cc','Cilindros/esferas concéntricos']])}</label></div></div>
+ <div class="flex gap-2"><button class="btn flex-1" onclick="calcRad()"><i class="fa-solid fa-play"></i> Calcular</button><button class="btn g flex-1" onclick="clearP('rad')">Limpiar</button></div>
+`);
+const EXR=[{m:'ent',Tr:C(200),Te:C(25),e1:.85,Ar:2},{m:'ent',Tr:500,Te:300,e1:.3,Ar:1},{m:'two',Tr:400,Te:300,e1:.8,e2:.5,Ar:1,A2:1,gg:'pp'},
+ {m:'comb',Tr:C(80),Te:C(20),e1:.9,Ar:1,hr:10,Tir:C(20)},{m:'eq',Te:C(25),e1:.8,hr:15,Tir:C(25),qa:600}];
+function setR(){const m=$('rm').value;document.querySelectorAll('#f-rad [data-r]').forEach(d=>d.style.display=d.dataset.r.split(' ').includes(m)?'':'none')}
+function loadR(){const x=EXR[$('er').value];$('rm').value=x.m;if(x.gg)$('gg').value=x.gg;['Tr','Te','e1','Ar','hr','Tir','qa','e2','A2'].forEach(i=>$(i).dataset.si=x[i]??NaN);refresh();setR();calcRad()}
+function calcRad(){redo.r=calcRad;const m=$('rm').value,T1=gv('Tr'),T2=gv('Te'),e1=gv('e1'),A=gv('Ar'),h=gv('hr')||0,Ti=gv('Tir'),bad=[],w=[];
+ if(!(T2>0))bad.push('La temperatura del entorno debe ser absoluta y mayor que 0 K.');if(m!=='eq'&&!(T1>0))bad.push('La temperatura de la superficie debe ser mayor que 0 K.');
+ if(!(e1>0&&e1<=1))bad.push('La emisividad debe cumplir 0 < ε ≤ 1.');if(m!=='eq'&&!(A>0))bad.push('El área debe ser mayor que 0.');
+ if((m==='comb'||m==='eq')&&h>0&&!(Ti>0))bad.push('Ingrese T∞ válida.');if(m==='comb'&&!(h>0))bad.push('Ingrese h > 0 para el caso combinado.');if(m==='eq'&&!(gv('qa')>=0))bad.push('Ingrese q″ ≥ 0.');
+ let e2,A2;if(m==='two'){e2=gv('e2');A2=$('gg').value==='pp'?A:gv('A2');if(!(e2>0&&e2<=1))bad.push('ε₂ debe cumplir 0 < ε ≤ 1.');if(!(A2>=A))bad.push('Para superficies concéntricas A₂ debe ser ≥ A₁.')}
+ if(bad.length)return errs('rad',bad);
+ const T14=t=>t**4;let rows,sum,st,sv,hd;
+ if(m==='ent'||m==='comb'){const Qr=e1*SIG*A*(T14(T1)-T14(T2)),Qb=SIG*A*(T14(T1)-T14(T2)),hrad=e1*SIG*(T1+T2)*(T1*T1+T2*T2);
+  if(Qr<0)w.push('Q negativo: la superficie absorbe más de lo que emite (transferencia neta hacia la superficie).');
+  rows=[['Q rad (gris)','Q̇<sub>rad</sub>',f(fromSI('Q',Qr)),U.Q[sys][0]],['Q rad (negro, ε=1)','Q̇<sub>b</sub>',f(fromSI('Q',Qb)),U.Q[sys][0]],['Razón gris/negro','Q̇/Q̇<sub>b</sub>',f(Qr/Qb),'—'],['h radiativo','h<sub>r</sub>',f(fromSI('h',hrad)),U.h[sys][0]],['T absolutas','T<sub>s</sub>, T<sub>ent</sub>',`${f(T1)}, ${f(T2)}`,'K']];
+  sum=[['Q radiación neta',o('Q',Qr)],['Flujo radiativo',o('q',Qr/A)]];let Qc=0,Qt=Qr;
+  if(m==='comb'){Qc=h*A*(T1-Ti);Qt=Qc+Qr;const pc=100*Math.abs(Qc)/(Math.abs(Qc)+Math.abs(Qr));rows.push(['Q convección','Q̇<sub>conv</sub>',f(fromSI('Q',Qc)),U.Q[sys][0]]);sum.push(['Q convección',o('Q',Qc)],['Q total',o('Q',Qt)],['Contribución conv. / rad.',`${f(pc)}% / ${f(100-pc)}%`],['Mecanismo predominante',Math.abs(Qc)>=Math.abs(Qr)?'Convección':'Radiación'])}
+  sum.push(['Q comparación negro',o('Q',Qb)]);
+  st=steps({id:m==='ent'?'Superficie gris que intercambia radiación con un entorno grande a T<sub>ent</sub>.':'Superficie que intercambia calor por convección y radiación.',dat:[['T<sub>s</sub>, T<sub>ent</sub>',`${f(T1)} K, ${f(T2)} K`],['ε, A',`${f(e1)}, ${o('A',A)}`],...(m==='comb'?[['h, T<sub>∞</sub>',`${o('h',h)}, ${o('T',Ti)}`]]:[])],inc:m==='ent'?'Q̇ neto y comparación con superficie negra.':'Q̇ conv, Q̇ rad, Q̇ total y mecanismo predominante.',
+   hip:['Estado estacionario.','Superficie gris y difusa, ε constante.','Entorno grande y isotermo (se comporta como cuerpo negro).','Temperaturas absolutas en K (conversión automática).'],eq:[L`\dot Q_{rad}=\varepsilon\sigma A(T_s^4-T_{ent}^4)`,...(m==='comb'?[L`\dot Q_{tot}=hA(T_s-T_\infty)+\varepsilon\sigma A(T_s^4-T_{ent}^4)`]:[])],
+   sub:[L`\dot Q_{rad}=${fl(e1)}(5{,}6704\times10^{-8})(${fl(A)})(${fl(T1)}^4-${fl(T2)}^4)`,...(m==='comb'?[L`\dot Q_{conv}=${fl(h)}(${fl(A)})(${fl(T1-Ti)})`]:[])],alg:[L`\dot Q_{rad}=${fl(Qr)}\ \mathrm{W}`,...(m==='comb'?[L`\dot Q_{tot}=${fl(Qc)}+${fl(Qr)}=${fl(Qt)}\ \mathrm{W}`]:[])],
+   res:`Q<sub>rad</sub> = <b>${o('Q',Qr)}</b>${m==='comb'?`; Q<sub>total</sub> = <b>${o('Q',Qt)}</b>`:''}.`,chk:`Q<sub>rad</sub>/Q<sub>b</sub> = ${f(Qr/Qb)} = ε = ${f(e1)} ✓.`});
+  sv=svg2('Superficie '+o('T',T1),'Entorno '+o('T',T2),'Q̇ rad = '+o('Q',Qr))}
+ else if(m==='eq'){const q=gv('qa'),fn=t=>h*(t-(h>0?Ti:0))+e1*SIG*(T14(t)-T14(T2))-q;let lo=1,hi=6000,it=0;if(fn(hi)<0)return errs('rad',['No hay equilibrio por debajo de 6000 K.']);
+  while(it<300&&hi-lo>1e-10){const mid=(lo+hi)/2;fn(mid)<0?lo=mid:hi=mid;it++}const Ts=(lo+hi)/2,Qc=h*(Ts-Ti||0),Qr=e1*SIG*(T14(Ts)-T14(T2));
+  rows=[['T equilibrio','T<sub>s</sub>',f(fromSI('T',Ts)),U.T[sys][0]],['Flujo conv.','q″<sub>conv</sub>',f(fromSI('q',h>0?h*(Ts-Ti):0)),U.q[sys][0]],['Flujo rad.','q″<sub>rad</sub>',f(fromSI('q',Qr)),U.q[sys][0]],['Iteraciones (bisección)','n',it,'—'],['Residuo','|f(T<sub>s</sub>)|',Math.abs(fn(Ts)).toExponential(2),'W/m²']];
+  sum=[['Temperatura de equilibrio',o('T',Ts)],['Flujo absorbido q″',o('q',q)],['Convección / radiación',`${o('q',h>0?h*(Ts-Ti):0)} / ${o('q',Qr)}`]];
+  st=steps({id:'Balance de energía en una superficie: lo absorbido/generado se disipa por convección y radiación.',dat:[['q″',o('q',q)],['ε, h',`${f(e1)}, ${o('h',h)}`],['T<sub>∞</sub>, T<sub>ent</sub>',`${h>0?o('T',Ti):'—'}, ${o('T',T2)}`]],inc:'T<sub>s</sub> de equilibrio.',hip:['Estacionario, superficie gris, entorno grande.','Ecuación no lineal en T<sub>s</sub>: se resuelve numéricamente (bisección en [1 K, 6000 K]); f es creciente, la raíz es única.'],
+   eq:[L`q''=h(T_s-T_\infty)+\varepsilon\sigma(T_s^4-T_{ent}^4)`],sub:[L`f(T_s)=${fl(h)}(T_s-${fl(Ti||0)})+${fl(e1)}\sigma(T_s^4-${fl(T2)}^4)-${fl(q)}=0`],alg:[L`T_s=${fl(Ts)}\ \mathrm{K}\quad(n=${it}\ \text{iteraciones})`],res:`T<sub>s</sub> = <b>${o('T',Ts)}</b>.`,chk:`Residuo |f(T<sub>s</sub>)| = ${Math.abs(fn(Ts)).toExponential(2)} W/m² (convergido).`});
+  sv=svg2('q″ absorbido '+o('q',q),'Ts = '+o('T',Ts),'conv + rad')}
+ else{const R1=(1-e1)/(e1*A),R12=1/A,R2=(1-e2)/(e2*A2),Q=SIG*(T14(T1)-T14(T2))/(R1+R12+R2);w.push('F₁₂ = 1 solo es válido para placas paralelas infinitas o superficies concéntricas largas (una encierra a la otra); no use este modelo con otras geometrías.');
+  rows=[['Resistencia superficial 1','(1−ε₁)/(ε₁A₁)',f(fromSI('Rr',R1)),U.Rr[sys][0]],['Resistencia espacial','1/(A₁F₁₂)',f(fromSI('Rr',R12)),U.Rr[sys][0]],['Resistencia superficial 2','(1−ε₂)/(ε₂A₂)',f(fromSI('Rr',R2)),U.Rr[sys][0]],['Q neto 1→2','Q̇₁₂',f(fromSI('Q',Q)),U.Q[sys][0]]];
+  sum=[['Q neto 1→2',o('Q',Q)],['Flujo sobre superficie 1',o('q',Q/A)],['Resistencia total (1/m²)',f(fromSI('Rr',R1+R12+R2))+' '+U.Rr[sys][0]]];
+  st=steps({id:'Intercambio radiativo neto entre dos superficies grises difusas con F₁₂ = 1.',dat:[['T₁, T₂',`${f(T1)} K, ${f(T2)} K`],['ε₁, ε₂',`${f(e1)}, ${f(e2)}`],['A₁, A₂',`${o('A',A)}, ${o('A',A2)}`]],inc:'Q̇₁₂.',hip:['Estacionario, superficies grises, difusas e isotermas.','F₁₂ = 1 (geometría seleccionada).'],
+   eq:[L`\dot Q_{12}=\frac{\sigma(T_1^4-T_2^4)}{\frac{1-\varepsilon_1}{\varepsilon_1A_1}+\frac{1}{A_1F_{12}}+\frac{1-\varepsilon_2}{\varepsilon_2A_2}}`],sub:[L`R_1=${fl(R1)},\ R_{12}=${fl(R12)},\ R_2=${fl(R2)}\ \mathrm{m^{-2}}`],alg:[L`\dot Q_{12}=\frac{${fl(SIG*(T14(T1)-T14(T2)))}}{${fl(R1+R12+R2)}}=${fl(Q)}\ \mathrm{W}`],res:`Q̇₁₂ = <b>${o('Q',Q)}</b>.`,chk:`Si ε₁=ε₂=1, Q = σA(T₁⁴−T₂⁴) = ${o('Q',SIG*A*(T14(T1)-T14(T2)))} (cota superior).`});
+  sv=svg2('Superficie 1 '+o('T',T1)+' ε='+f(e1),'Superficie 2 '+o('T',T2)+' ε='+f(e2),'Q̇₁₂ = '+o('Q',Q))}
+ show('rad',(()=>{const k=m==='comb'?sum.find(r=>r[0]==='Q total'):sum[0];return hero(k[0],k[1],sum.filter(r=>r!==k).slice(0,3))})()+wns(w)+`<div class="card">${sv}</div><div class="card"><h4 class="font-bold text-sm mb-2">Resultados detallados</h4>${tb(['Parámetro','Símbolo','Valor','Unidad'],rows)}<h4 class="font-bold text-sm mb-2">Resumen</h4>${tb(['Magnitud','Resultado'],sum)}</div>${st}`)}
+
+/* ===== Inicialización ===== */
+renderLayers();setG();setV();setR();setF();setv('e1',1);loadC();
+window.addEventListener('load',()=>{mj($('p-cond'));mj($('p-conv'));mj($('p-rad'))});
+</script>
+</body></html>
