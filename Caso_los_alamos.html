@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gestión de la calidad del aire: Caso Los Álamos</title>
+<style>
+:root{--bg:#eef3f9;--card:#fff;--tx:#14243b;--mu:#4a5d78;--hd:#1f497d;--lt:#dbe5f1;--ok:#1b7a4b;--al:#b3341f;--bd:#c5d3e6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1726;--card:#16233a;--tx:#e6eefb;--mu:#9fb3d1;--hd:#5f9bdc;--lt:#1d2f4d;--ok:#4cc38a;--al:#ff8a73;--bd:#2c4266;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1726;--card:#16233a;--tx:#e6eefb;--mu:#9fb3d1;--hd:#5f9bdc;--lt:#1d2f4d;--ok:#4cc38a;--al:#ff8a73;--bd:#2c4266;color-scheme:dark}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:clamp(13px,2.1vh,16px)/1.38 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;display:flex;flex-direction:column}
+#deck{flex:1;position:relative;overflow:hidden}
+section{position:absolute;inset:0;padding:clamp(8px,2vh,24px) clamp(14px,4vw,56px);overflow-y:auto;opacity:0;visibility:hidden;transform:translateX(40px);transition:opacity .5s,transform .5s,visibility .5s}
+section.on{opacity:1;visibility:visible;transform:none}
+section.prev{transform:translateX(-40px)}
+h1{font-size:clamp(22px,min(4.4vw,6.5vh),42px);margin:.15em 0;color:var(--hd);line-height:1.15}
+h2{font-size:clamp(18px,min(3vw,4.4vh),28px);margin:0 0 .45em;color:var(--hd);border-bottom:3px solid var(--hd);padding-bottom:.25em}
+h3{margin:0 0 .4em;font-size:1rem;color:var(--hd)}
+.on .a{animation:up .6s both}
+.on .a:nth-child(2){animation-delay:.12s}.on .a:nth-child(3){animation-delay:.24s}.on .a:nth-child(4){animation-delay:.36s}.on .a:nth-child(5){animation-delay:.48s}.on .a:nth-child(6){animation-delay:.6s}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.g{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.c{background:var(--card);border:1px solid var(--bd);border-left:5px solid var(--hd);border-radius:10px;padding:8px 14px}
+.c.ok{border-left-color:var(--ok)}.c.al{border-left-color:var(--al)}
+ul{margin:.2em 0;padding-left:1.1em}li{margin:.25em 0}
+.cover{display:flex;flex-direction:column;justify-content:center;min-height:100%;text-align:center;align-items:center}
+.cover .m{color:var(--mu)}
+.logo{height:clamp(40px,11vh,90px);max-width:60%;object-fit:contain;margin-bottom:6px}
+.cover .a:nth-child(n){animation-delay:0s}
+#tm{font-variant-numeric:tabular-nums;cursor:pointer;background:#fff2;border-radius:6px;padding:2px 10px}
+#tm.w{background:#e0a800;color:#000}#tm.r{background:#c0392b}
+.names{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px;max-width:820px}
+.names span{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:4px 12px;font-size:.85rem;transition:.2s}
+.names span:hover{background:var(--hd);color:#fff;transform:translateY(-3px)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;background:var(--card)}
+th{background:var(--hd);color:#fff;text-align:left;padding:7px 10px}
+td{padding:6px 10px;border-bottom:1px solid var(--bd)}
+tbody tr:nth-child(even){background:var(--lt)}
+tbody tr{transition:.2s}tbody tr:hover{outline:2px solid var(--hd)}
+.note{color:var(--mu);font-size:.85rem;font-style:italic;margin-top:8px}
+.btn{border:1px solid var(--hd);background:var(--card);color:var(--hd);padding:6px 14px;border-radius:20px;cursor:pointer;font:inherit}
+.btn.s{background:var(--hd);color:#fff}
+.bars{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.bar{display:grid;grid-template-columns:minmax(120px,190px) 1fr;align-items:center;gap:10px;cursor:pointer}
+.tr{background:var(--lt);border-radius:6px;height:30px;overflow:hidden}
+.fl{height:100%;background:var(--hd);color:#fff;font-weight:700;padding:5px 8px;box-sizing:border-box;width:0;transition:width .9s cubic-bezier(.2,.8,.2,1);white-space:nowrap}
+.fl.mx{background:var(--al)}
+.opt{display:flex;gap:12px;align-items:flex-start;cursor:pointer;margin-bottom:10px;transition:.2s}
+.opt input{margin-top:5px;width:18px;height:18px}
+.opt.off{opacity:.55}
+.opt small{display:block;color:var(--mu)}
+.meter{height:16px;background:var(--lt);border-radius:8px;overflow:hidden;margin:6px 0}
+.meter i{display:block;height:100%;background:var(--ok);width:0;transition:width .5s,background .3s}
+.tot{font-size:1.2rem;font-weight:700}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.q{font-size:clamp(18px,2.6vw,26px);font-weight:600;text-align:center;margin:18px 0;color:var(--hd)}
+.hid{display:none}
+#bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:var(--hd);color:#fff;font-size:.85rem}
+#bar button{background:none;border:1px solid #fff8;color:#fff;border-radius:6px;padding:4px 12px;cursor:pointer;font:inherit}
+#dots{display:flex;gap:6px}#dots b{width:9px;height:9px;border-radius:50%;background:#fff5;cursor:pointer}#dots b.on{background:#fff;transform:scale(1.3)}
+#prog{height:3px;background:#fff4}#prog i{display:block;height:100%;background:#7fd1ff;transition:width .4s}
+@media(max-width:600px){#ft{display:none}}
+</style></head><body>
+<div id="deck">
+
+<section class="on"><div class="cover">
+<img class="a logo" id="logo" src="logoutp.png" alt="Logo UTP" onerror="this.style.display='none'">
+<div class="a m">Universidad Tecnológica del Perú</div>
+<h1 class="a">Gestión de la calidad del aire:<br>Caso Los Álamos</h1>
+<div class="a m" style="font-size:1.15rem">Diagnóstico, plan de intervención y respuesta ante contingencia</div>
+<div class="a m" style="margin-top:8px">Gestión del Medio Ambiente – Sección 54700 · 2026</div>
+<div class="a names"><span>Mesía Ricopa, Noreli Acelita</span><span>Chávez Ochoa, Diana Yacely</span><span>Huancas Coronel, Jakory Alexandra</span><span>Castro García, Analy</span><span>Rodriguez Espinoza, Ronald Fernando</span></div>
+<div class="a m" style="margin-top:10px;font-size:.8rem">Usa ← → o los puntos inferiores · Cronómetro: 15 min máx.</div>
+</div></section>
+
+<section><h2>Introducción: contexto del caso Los Álamos</h2>
+<div class="c a" style="margin-bottom:14px">Sector urbano ficticio de Lima Este con viviendas, pequeños negocios, talleres y un colegio de <b>650 estudiantes</b>. Vecinos reportan polvo, humo y olores; la dirección del colegio, molestias en el ingreso y salida.</div>
+<div class="g a"><div class="c ok"><h3>Fuentes identificadas</h3><ul><li>Tránsito y motor encendido frente al colegio</li><li>Calles sin pavimentar con camiones</li><li>Obra con materiales al aire libre</li><li>Quema de residuos ≈ 2 veces/semana</li><li>Taller metálico (corte y soldadura)</li></ul></div>
+<div class="c al"><h3>Tensión del caso</h3><ul><li>Vecinos piden medidas inmediatas</li><li>Comerciantes: una restricción total afectaría su economía</li><li>Presupuesto: <b>S/20 000</b> para 30 días</li><li>Datos: 3 mañanas, 7–9 a. m.</li></ul></div></div>
+<p class="note a">Se requiere una propuesta viable que proteja a la población vulnerable sin afectar la economía local.</p></section>
+
+<section><h2>Diagnóstico: fuentes, contaminantes y población expuesta</h2>
+<div class="tw a"><table><thead><tr><th>Fuente o actividad</th><th>Contaminante probable</th><th>Población expuesta</th><th>Evidencia del caso</th></tr></thead><tbody>
+<tr><td>Tránsito vehicular</td><td>PM₂,₅, PM₁₀, NOx, CO</td><td>Escolares (650), vecinos</td><td>Buses, camiones y autos; motor encendido frente al colegio</td></tr>
+<tr><td>Calles sin pavimentar</td><td>PM₁₀ (polvo)</td><td>Viviendas aledañas, peatones</td><td>Polvo visible al circular camiones</td></tr>
+<tr><td>Obra de construcción</td><td>PM₁₀, PM₂,₅</td><td>Vecinos, escolares</td><td>Materiales al aire libre; cargas sin cubrir</td></tr>
+<tr><td>Quema de residuos</td><td>PM₂,₅, COV, dioxinas</td><td>Vecinos, colegio (7–9 a. m.)</td><td>≈2 veces/semana; observada una mañana</td></tr>
+<tr><td>Taller metálico</td><td>PM₂,₅, humos metálicos</td><td>Viviendas contiguas</td><td>Corte y soldadura cerca de viviendas</td></tr></tbody></table></div>
+<p class="note a">Datos simulados con fines académicos; no permiten asignar categorías INCA ni determinar incumplimientos legales (MINAM, 2017). Los contaminantes son hipótesis a verificar.</p></section>
+
+<section><h2>Análisis de las mediciones y prioridades</h2>
+<div class="tabs a"><button class="btn s" data-p="0">PM₂,₅</button><button class="btn" data-p="1">PM₁₀</button><span class="note" style="align-self:center">Toca un punto para ver su observación</span></div>
+<div class="bars a" id="bars"></div><div class="c a" id="obs">Observación de campo del punto seleccionado.</div>
+<div class="g a" style="margin-top:12px"><div class="c ok"><h3>Prioridad</h3>C (quema, partículas finas) y A (colegio, 650 escolares en horario crítico). Mayor PM₂,₅: C; mayor PM₁₀: B.</div>
+<div class="c al"><h3>Limitaciones</h3>Mediciones cortas, sin viento ni datos nocturnos. Los 4 puntos superan los niveles guía de 24 h de la OMS (15 y 45 µg/m³), solo como referencia indicativa (WHO, 2021). Se requiere monitoreo con registro meteorológico (F; SENAMHI, 2023).</div></div></section>
+
+<section><h2>Plan de intervención: arma tu presupuesto</h2>
+<p class="a" style="margin-top:0">Marca o desmarca acciones. Nuestra propuesta: <b>A, B, C y D</b>.
+<button class="btn" id="rst">Restablecer propuesta</button></p>
+<div class="g a"><div id="opts"></div>
+<div class="c"><h3>Presupuesto S/20 000</h3><div class="tot" id="tot"></div><div class="meter"><i id="mt"></i></div><div id="sal"></div><div class="note" id="msg"></div></div></div></section>
+
+<section><h2>Justificación, pendientes e indicadores</h2>
+<div class="g"><div><div class="c ok a"><h3>Criterios de selección</h3><ul><li><b>Población expuesta:</b> colegio (650) y viviendas cerca de B y C</li><li><b>Evidencia:</b> A, B y C concentran los mayores valores y observaciones directas</li><li><b>Viabilidad:</b> A–D ejecutables en 30 días sin restringir totalmente el tránsito</li></ul></div>
+<div class="c al a" style="margin-top:14px"><h3>Pendientes</h3><ul><li><b>E (taller, S/4 000):</b> postergarlo mantiene emisiones de soldadura</li><li><b>F (monitoreo, S/6 000):</b> limita evaluar eficacia; no reduce emisiones por sí solo</li></ul></div></div>
+<div class="c a"><h3>Indicadores y medición</h3><ul><li><b>Ejecución:</b> % de acciones A–D implementadas (checklist municipal semanal)</li><li><b>Resultado:</b> PM₂,₅ y PM₁₀ en A, B y C (monitoreo portátil, 3 mañanas/semana, 7–9 a. m.)</li><li><b>Complementario:</b> n.º de quejas vecinales y quemas reportadas</li><li><b>Datos:</b> campaña inicial como línea base; registro meteorológico si se aprueba F en fase 2</li></ul></div></div></section>
+
+<section><h2>Contingencia: nueva quema en horario escolar</h2>
+<div class="c al a" style="margin-bottom:12px">Segunda semana de intervención: se produce una nueva quema mientras los escolares ingresan (7–9 a. m.).</div>
+<div class="tabs a"><button class="btn s" data-t="0">1 · Acciones inmediatas</button><button class="btn" data-t="1">2 · Coordinación</button><button class="btn" data-t="2">3 · Comunicación</button><button class="btn" data-t="3">4 · Prevención</button></div>
+<div class="c a" id="tp" style="font-size:1.05rem"></div></section>
+
+<section><h2>Conclusiones</h2>
+<div class="c al a"><h3>Diagnóstico y priorización</h3>Las fuentes son múltiples. A (colegio) y C (quema) son prioritarios por población vulnerable y PM₂,₅; B concentra el mayor PM₁₀. Intervenir un solo punto sería insuficiente.</div>
+<div class="g a" style="margin-top:14px"><div class="c ok"><h3>Plan viable</h3>Con S/19 000 de S/20 000 se ejecutan A, B, C y D en 30 días, con responsables, plazos e indicadores de ejecución y resultado. Quedan pendientes E y F.</div>
+<div class="c ok"><h3>Gestión y contingencia</h3>Coordinación con colegio y autoridades, comunicación oportuna y prevención de quemas reducen la exposición. El monitoreo con registro meteorológico se incorpora en fase 2.</div></div>
+<div class="q a">«La calidad del aire se gestiona con evidencia, priorización de la población vulnerable y acciones coordinadas.»</div></section>
+
+<section><h2>Referencias</h2><div class="a" style="font-size:.92rem">
+<p>Ministerio del Ambiente [MINAM]. (2017, 7 de junio). <i>Decreto Supremo N.º 003-2017-MINAM: Aprueban Estándares de Calidad Ambiental (ECA) para Aire y establecen disposiciones complementarias</i>. SINIA. https://sinia.minam.gob.pe/normas/aprueban-estandares-calidad-ambiental-eca-aire-establecen-3</p>
+<p>Servicio Nacional de Meteorología e Hidrología del Perú [SENAMHI]. (2023). <i>Boletín vigilancia de calidad del aire (octubre 2023)</i> [Boletín]. https://hdl.handle.net/20.500.12542/3042</p>
+<p>Universidad Tecnológica del Perú. (2026). <i>Instructivo de la actividad grupal: Gestión de la calidad del aire – caso Los Álamos</i> [Documento del curso]. UTP.</p>
+<p>World Health Organization [WHO]. (2021). <i>WHO global air quality guidelines: Particulate matter (PM2.5 and PM10), ozone, nitrogen dioxide, sulfur dioxide and carbon monoxide</i>. WHO IRIS. https://iris.who.int/handle/10665/345329</p></div></section>
+
+<section><h2>Pregunta final y cierre</h2>
+<div class="c a">¿Cómo mejorar el aire en Los Álamos garantizando la protección de los escolares y la viabilidad económica de los comerciantes, con S/20 000 y en 30 días?</div>
+<div class="a" style="text-align:center;margin:14px"><button class="btn s" id="rv">Mostrar respuesta</button></div>
+<div class="g hid" id="ans"><div class="c ok"><h3>Respuesta sintética</h3><ul><li>Priorizar A, B, C y D (S/19 000)</li><li>Proteger a los 650 escolares de 7 a 9 a. m.</li><li>Evitar la restricción total del tránsito; ordenar y controlar</li></ul></div>
+<div class="c al"><h3>Siguiente paso</h3><ul><li>Evaluar resultados con indicadores</li><li>Incorporar E y F en fase 2 (S/10 000; requiere financiamiento adicional)</li><li>Sostener la vigilancia contra quemas</li></ul></div></div>
+<div class="q a" style="margin-top:22px">Gracias. Quedamos atentos a sus preguntas.</div></section>
+</div>
+
+<div id="prog"><i></i></div>
+<div id="bar"><span id="ft">Gestión del Medio Ambiente – Sección 54700</span><span id="tm" title="Clic: iniciar/pausar · doble clic: reiniciar">⏱ 15:00</span><button id="pv">←</button><div id="dots"></div><button id="nx">→</button><span id="num"></span></div>
+
+<script>
+const S=[...document.querySelectorAll('section')],N=S.length;let cur=0;
+const $=id=>document.getElementById(id);
+const dots=$('dots');S.forEach((_,i)=>{const b=document.createElement('b');b.onclick=()=>go(i);dots.appendChild(b)});
+function go(n){n=Math.max(0,Math.min(N-1,n));S.forEach((s,i)=>{s.classList.toggle('on',i==n);s.classList.toggle('prev',i<n)});
+[...dots.children].forEach((d,i)=>d.classList.toggle('on',i==n));$('num').textContent=(n+1)+' / '+N;$('prog').firstElementChild.style.width=((n+1)/N*100)+'%';
+S[n].scrollTop=0;cur=n;if(n==3)bars(mode);try{history.replaceState(null,'','#'+(n+1))}catch(e){}}
+$('pv').onclick=()=>go(cur-1);$('nx').onclick=()=>go(cur+1);
+addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1)}if(['ArrowLeft','PageUp'].includes(e.key))go(cur-1)});
+let tx=0;addEventListener('touchstart',e=>tx=e.touches[0].clientX);addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>70)go(cur+(d<0?1:-1))});
+// cronómetro de exposición (15 min)
+let tl=900,ti=null;const tm=$('tm');
+function tmr(){const m=Math.floor(tl/60),s=tl%60;tm.textContent='⏱ '+m+':'+String(s).padStart(2,'0');tm.className=tl<=0?'r':tl<=120?'w':''}
+tm.onclick=()=>{if(ti){clearInterval(ti);ti=null}else ti=setInterval(()=>{if(tl>0)tl--;tmr()},1000)};
+tm.ondblclick=()=>{clearInterval(ti);ti=null;tl=900;tmr()};
+// mediciones
+const P=[['A. Ingreso del colegio',48,96,'Tránsito intenso y motor encendido'],['B. Calle sin pavimentar',35,165,'Polvo visible por camiones'],['C. Cercanías del terreno',72,138,'Quema de residuos observada'],['D. Parque interior',24,54,'Menor circulación y sin fuentes visibles']];
+let mode=0;
+function bars(m){mode=m;const k=m+1,mx=Math.max(...P.map(p=>p[k]));$('bars').innerHTML=P.map((p,i)=>`<div class="bar" data-i="${i}"><span>${p[0]}</span><div class="tr"><div class="fl ${p[k]==mx?'mx':''}" data-w="${p[k]/mx*100}">${p[k]} µg/m³</div></div></div>`).join('');
+setTimeout(()=>document.querySelectorAll('.fl').forEach(f=>f.style.width=f.dataset.w+'%'),60);
+document.querySelectorAll('.bar').forEach(b=>b.onclick=()=>{const p=P[b.dataset.i];$('obs').innerHTML='<b>'+p[0]+':</b> PM₂,₅ '+p[1]+' · PM₁₀ '+p[2]+' µg/m³. '+p[3]+'.'})}
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-p]').forEach(x=>x.classList.toggle('s',x==b));bars(+b.dataset.p)});
+// plan
+const A=[['A','Ordenar tránsito y controlar motor encendido',4000,'Municipalidad + PNP Tránsito','30 días','N.º de vehículos controlados/día'],['B','Control de polvo y ruta de camiones',7000,'Municipalidad + transportistas','30 días','m de vía tratada'],['C','Cubrir cargas y ordenar materiales de la obra',3000,'Empresa constructora','15 días','% de camiones con carga cubierta'],['D','Prevenir quema: recolección y vigilancia',5000,'Municipalidad + comité vecinal','30 días','N.º de quemas detectadas'],['E','Evaluación técnica del taller y capacitación',4000,'Municipalidad + dueño del taller','30 días','Medidas de control adoptadas'],['F','Campaña de monitoreo con registro meteorológico',6000,'Municipalidad / consultora','30 días','N.º de jornadas con datos válidos']];
+const sel=new Set('ABCD');
+function plan(){$('opts').innerHTML=A.map(a=>`<label class="opt ${sel.has(a[0])?'':'off'} c"><input type="checkbox" value="${a[0]}" ${sel.has(a[0])?'checked':''}><span><b>${a[0]}. ${a[1]}</b> — S/${a[2].toLocaleString('es-PE')}<small>Resp.: ${a[3]} · Plazo: ${a[4]} · Indicador: ${a[5]}</small></span></label>`).join('');
+document.querySelectorAll('#opts input').forEach(i=>i.onchange=()=>{i.checked?sel.add(i.value):sel.delete(i.value);plan()});
+const t=A.filter(a=>sel.has(a[0])).reduce((s,a)=>s+a[2],0),ov=t>20000;
+$('tot').textContent='Total: S/'+t.toLocaleString('es-PE');$('mt').style.width=Math.min(100,t/200)+'%';$('mt').style.background=ov?'var(--al)':'var(--ok)';
+$('sal').innerHTML=ov?'<b style="color:var(--al)">Excede en S/'+(t-20000).toLocaleString('es-PE')+'</b>':'Saldo: <b>S/'+(20000-t).toLocaleString('es-PE')+'</b>';
+$('msg').textContent=ov?'Supera el presupuesto disponible.':(['A','B','C','D'].every(x=>sel.has(x))&&sel.size==4?'Propuesta del equipo: protege al colegio y atiende B y C.':'Recuerda: F aporta información, no reduce emisiones.')}
+$('rst').onclick=()=>{sel.clear();'ABCD'.split('').forEach(x=>sel.add(x));plan()};plan();
+// contingencia
+const T=[['Activar protocolo con el colegio: retener el ingreso o reubicar a los estudiantes en zonas interiores.','Aviso inmediato a Serenazgo, Bomberos y municipalidad para sofocar la quema.','Restringir temporalmente el paso peatonal por la ruta afectada.'],['Dirección del colegio, municipalidad (Gestión Ambiental y Serenazgo), comité vecinal y PNP actúan de forma coordinada.'],['Comunicado breve a padres y vecinos por canales oficiales.','Mensaje claro: acción tomada, riesgo controlado y prevención.','Registro del incidente para el informe de seguimiento.'],['Reforzar recolección coordinada y vigilancia (acción D).','Sensibilización a vecinos; señalización y puntos de acopio.','Incluir la quema como indicador semanal.']];
+function tab(i){$('tp').innerHTML='<ul>'+T[i].map(x=>'<li>'+x+'</li>').join('')+'</ul>'}
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('s',x==b));tab(+b.dataset.t)});tab(0);
+$('rv').onclick=()=>{$('ans').classList.remove('hid');$('ans').style.animation='up .6s both';$('rv').style.display='none'};
+const h=parseInt(location.hash.slice(1));go(h>=1&&h<=N?h-1:0);
+</script></body></html>
