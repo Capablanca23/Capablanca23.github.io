@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Simulador de Conducción de Calor 2D y 3D | Dr. Ronald F. Rodriguez Espinoza</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],serif:['Fraunces','serif'],mono:['JetBrains Mono','monospace']},
+colors:{brand:{50:'#f0f7ff',100:'#e0effe',500:'#0284c7',600:'#0369a1',700:'#095180',900:'#0c2e4e'}}}}}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+:root{--b5:#0284c7;--b6:#0369a1;--b9:#0c2e4e;--bg:#f8fafc;--bd:#e2e8f0;--tx:#1e293b;--mu:#64748b;--acc:#0369a1;--line:#cbd5e1;--pn:#fff;--tab:#f1f5f9}
+*{box-sizing:border-box}
+.tab-active{border-bottom:3px solid #0284c7;color:#0369a1;font-weight:600}
+.tab-inactive{border-bottom:3px solid transparent;color:#64748b}
+.tab-inactive:hover{color:#0f172a;border-bottom-color:#cbd5e1}
+.tab{display:none}.tab.on{display:block}
+.thead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.thead p{margin:0;font-size:.83rem;color:var(--mu);max-width:760px}
+.grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h3{font:700 1rem Fraunces,serif;margin:0 0 8px;color:var(--b9)}
+aside.card{position:relative}
+fieldset{border:1px solid var(--bd);border-radius:8px;margin:0 0 10px;padding:8px 10px}
+legend{font-weight:600;font-size:.78rem;color:var(--acc);padding:0 4px}
+label{display:block;font-size:.74rem;font-weight:500;color:#475569}
+label small{color:var(--mu);font-weight:400}
+.hint{display:block;font-size:.68rem;line-height:1.3;color:var(--mu);margin:2px 0 4px;font-weight:400}
+.card input,.card select{width:100%;margin-top:3px;padding:6px 8px;border:1px solid #cbd5e1;border-radius:7px;font:500 .78rem 'JetBrains Mono',Consolas,monospace;background:#fff;color:var(--tx)}
+.card input[type=checkbox]{width:auto;margin:0 4px 0 0}
+.card input[type=range]{padding:0}
+.card input:focus,.card select:focus{outline:2px solid var(--b5)}
+.fr{display:grid;grid-template-columns:78px 1fr 70px;gap:4px;margin:4px 0;align-items:center;font-size:.74rem;font-weight:500;color:#475569}
+.fr select,.fr input{margin:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+button.b{background:var(--b6);color:#fff;border:1px solid var(--b6);border-radius:8px;padding:7px 12px;cursor:pointer;margin:3px 3px 3px 0;font-size:.78rem;font-weight:600;transition:background .15s}
+button.b:hover{background:var(--b5)}
+button.b.g{background:#fff;color:#334155;border-color:var(--bd)}
+button.b.g:hover{background:#f1f5f9}
+.msg{padding:8px 11px;border-radius:8px;margin:0 0 10px;font-size:.8rem;display:none}
+.msg.err{display:block;background:#fff1f2;color:#be123c;border:1px solid #fecdd3}
+.msg.warn{display:block;background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.msg.ok{display:block;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.res{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:10px}
+.res div{background:#f0f7ff;border:1px solid #bae0fd;border-radius:8px;padding:6px 9px;font-size:.72rem;color:#475569}
+.res b{display:block;font:600 .85rem 'JetBrains Mono',Consolas,monospace;color:var(--b9);word-break:break-word}
+.plots{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:10px}
+.pl{min-height:380px;border:1px solid var(--bd);border-radius:8px;background:#fff}
+.th{border-top:2px solid var(--acc);margin-top:14px;padding-top:8px;font-size:.82rem}
+.th h3{color:var(--acc);margin:8px 0;font:700 1rem Fraunces,serif}
+.cw{overflow-x:auto}
+.ct{border-collapse:collapse;width:100%;font-size:.75rem;margin:6px 0 10px}
+.ct td,.ct th{border:1px solid var(--bd);padding:3px 7px;text-align:right}.ct th{background:var(--tab);color:var(--b9)}.ct td:first-child,.ct th:first-child{text-align:left}
+.eq{font-family:'JetBrains Mono',Consolas,monospace;font-size:.75rem;background:var(--tab);border-left:4px solid var(--b5);border-radius:6px;padding:8px 10px;margin:6px 0;overflow-x:auto;white-space:pre-wrap;color:var(--b9)}
+/* Bloque de ecuaciones estilo referencia */
+.eq-block{background:#f8f9fa;border-left:4px solid #1976d2;padding:8px 12px;margin:6px 0;border-radius:4px;font-family:'Cambria Math','Times New Roman',serif;font-size:13.5px;color:#0d47a1;text-align:center;overflow-x:auto}
+.eq-block .eq-name{font-family:'Segoe UI',sans-serif;font-size:11px;color:#546e7a;font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px;letter-spacing:.5px}
+details{font-size:.78rem;margin-bottom:8px}details summary{cursor:pointer;font-weight:600;color:var(--acc)}details dt{font-weight:600;margin-top:6px;color:var(--b9)}details dd{margin:0 0 0 10px;color:var(--mu)}
+footer{text-align:center;font-size:.72rem;color:#94a3b8;padding:22px}
+@media(max-width:420px){.grid{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="min-h-full flex flex-col font-sans text-slate-800 bg-slate-50 antialiased">
+
+<!-- Encabezado -->
+<header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 bg-brand-600 rounded-lg text-white shadow-inner"><i class="fa-solid fa-temperature-high text-xl"></i></div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight font-serif">Simulador de Conducción de Calor 2D y 3D</h1>
+        <p class="text-xs text-slate-400">Diferencias finitas, explícito y SOR — Ing. Ambiental, Química e Industrial</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3 text-xs">
+      <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>v1.0
+      </span>
+      <button onclick="document.getElementById('authorCard').scrollIntoView({behavior:'smooth'})" class="hover:bg-slate-800 px-3 py-1.5 rounded-md text-slate-300 transition-colors flex items-center gap-1.5">
+        <i class="fa-solid fa-user-graduate"></i> Dr. Ronald Rodriguez E.
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+<!-- Tarjeta del autor con código QR (CTI Vitae) -->
+<section id="authorCard" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-md">
+  <div class="p-5 md:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+        <div class="relative">
+          <div class="w-20 h-20 rounded-full bg-brand-600 border-2 border-white/20 flex items-center justify-center text-2xl font-bold font-serif text-white shadow-lg overflow-hidden"><i class="fa-solid fa-user-tie text-3xl"></i></div>
+          <span class="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full" title="Verificado CTI Vitae"></span>
+        </div>
+        <div>
+          <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full mb-1 border border-brand-500/20"><i class="fa-solid fa-award text-amber-400"></i> Docente Investigador</div>
+          <h2 class="text-lg md:text-xl font-bold font-serif">Dr. Ronald F. Rodriguez Espinoza</h2>
+          <p class="text-sm text-slate-300">Especialista en Análisis Numérico y Métodos Computacionales</p>
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2 text-xs text-slate-400">
+            <span><i class="fa-solid fa-building-columns mr-1 text-slate-400"></i> CONCYTEC CTI Vitae</span>
+            <span><i class="fa-solid fa-fire mr-1 text-slate-400"></i> Transferencia de Calor</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 backdrop-blur-sm">
+        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" title="Haz clic para abrir el perfil oficial CTI Vitae" class="group relative bg-white p-2 rounded-lg shadow-md transition-transform duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" alt="QR CTI Vitae - Dr. Ronald F. Rodríguez E." class="w-16 h-16 md:w-20 md:h-20 object-contain transition-opacity group-hover:opacity-90" onerror="this.onerror=null; this.src='https://placehold.co/120x120/ffffff/0f172a?text=QR+CTI';">
+        </a>
+        <div class="text-left space-y-1">
+          <p class="text-xs font-semibold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-qrcode text-sky-400"></i> Código QR</p>
+          <p class="text-[11px] text-slate-300 max-w-[130px] leading-tight">Haz clic en el código QR para consultar la trayectoria académica.</p>
+          <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 hover:text-sky-300 transition-colors">Perfil CTI Vitae <i class="fa-solid fa-chevron-right text-[9px]"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pestañas -->
+<nav class="bg-white rounded-xl shadow-sm border border-slate-200 px-2">
+  <div class="flex flex-wrap gap-1 text-sm font-medium">
+    <button data-tab="2" id="nb2" class="tab-btn tab-active px-4 py-3 flex items-center gap-2 transition-colors"><i class="fa-solid fa-square text-brand-600"></i> Transferencia de calor 2D</button>
+    <button data-tab="3" id="nb3" class="tab-btn tab-inactive px-4 py-3 flex items-center gap-2 transition-colors"><i class="fa-solid fa-cube text-brand-600"></i> Transferencia de calor 3D</button>
+  </div>
+</nav>
+
+<section id="tab2" class="tab on">
+  <div class="thead">
+    <p>Placa rectangular con conducción de calor, generación interna q̇, fronteras de temperatura fija, aisladas o convectivas. Régimen transitorio (esquema explícito FTCS) o estacionario (Gauss-Seidel / SOR).</p>
+    <div><button class="b g" onclick="load('t2',$('t2_ex').value);run('t2')">Restaurar ejemplo</button></div>
+  </div>
+  <div class="grid" id="g_t2"></div>
+</section>
+
+<section id="tab3" class="tab">
+  <div class="thead">
+    <p>Bloque 3D con las mismas fronteras y métodos. Visualización por cortes internos XY/XZ/YZ, isosuperficie, volumétrica o nodos, con secciones y T(t) en el nodo elegido.</p>
+    <div><button class="b g" onclick="load('t3',$('t3_ex').value);run('t3')">Restaurar ejemplo</button></div>
+  </div>
+  <div class="grid" id="g_t3"></div>
+</section>
+</main>
+
+<footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
+    <p>© 2026 <span class="font-semibold text-slate-200">Dr. Ronald F. Rodriguez Espinoza</span> — Análisis Numérico y Métodos Computacionales</p>
+    <p class="text-slate-500">Los valores de propiedades de materiales son ilustrativos. Resultados numéricos aproximados, no soluciones analíticas exactas. Refine la malla o reduzca Δt para comprobar convergencia.</p>
+    <p class="text-slate-600 text-[10px]">Bibliotecas externas: Tailwind CSS, FontAwesome, Plotly, MathJax</p>
+  </div>
+</footer>
+
+<script>
+/* ===== Utilidades y estado independiente por pestaña ===== */
+const $=id=>document.getElementById(id), DIM={t2:2,t3:3}, S={};
+const MATS={'Aluminio':[237,2700,897],'Cobre':[401,8960,385],'Acero al carbono':[50,7850,490],'Acero inoxidable':[16,8000,500],'Concreto':[1.4,2300,880],'Ladrillo':[0.72,1920,835],'Vidrio':[1.0,2500,840],'Madera':[0.15,600,1600],'Agua (quieta)':[0.6,998,4180],'Personalizado':null};
+const msg=(pre,t,c)=>{const e=$(pre+'_msg');e.className='msg '+(c||'ok');e.textContent=t};
+const nomsg=pre=>{$(pre+'_msg').className='msg'};
+function tab(n){[2,3].forEach(i=>{$('tab'+i).classList.toggle('on',i==n);$('nb'+i).classList.toggle('tab-active',i==n);$('nb'+i).classList.toggle('tab-inactive',i!=n)});
+ const pre='t'+n;if(!S[pre])run(pre);else{render(pre);setTimeout(()=>window.dispatchEvent(new Event('resize')),50)}}
+
+/* ===== Textos de ayuda de cada parámetro ===== */
+const HT={lx:'Longitud del dominio en x.',ly:'Longitud del dominio en y.',lz:'Longitud del dominio en z.',th:'Espesor perpendicular al plano (solo escala Q y q̇·V en 2D; el campo T no cambia).',
+ nx:'Número de nodos en x. Más nodos = más precisión, pero más costo y Δt menor.',ny:'Número de nodos en y.',nz:'Número de nodos en z.',
+ k:'Conductividad térmica: qué tan fácil conduce calor el material (alta = metales).',rho:'Densidad del material.',cp:'Calor específico: energía para subir 1 K a 1 kg.',
+ q:'Generación interna de calor por unidad de volumen (>0 calienta, <0 es un sumidero). 0 = sin fuente.',T0:'Temperatura uniforme con que empieza el cálculo.',
+ h:'Coeficiente de convección con el fluido exterior. Solo se usa en las caras marcadas como Convectiva.',
+ tt:'Duración total simulada (solo transitorio).',dt:'Paso de tiempo. Debe ser menor que el Δt máx. estable; si no, se corrige solo.',
+ tol:'Criterio de parada del SOR: se detiene cuando el mayor cambio de T entre iteraciones es menor que este valor.',maxit:'Tope de iteraciones del SOR por si no converge.',
+ w:'ω (omega) = factor de sobrerrelajación del SOR. 1 = Gauss-Seidel puro; entre 1.5 y 1.95 suele acelerar mucho; ≥2 diverge. En Cálculos se muestra un ω óptimo estimado.',
+ ni:'Índice del nodo en x (0 = primero). Define el nodo del gráfico T(t) y del cálculo detallado.',nj:'Índice del nodo en y.',nk:'Índice del nodo en z.',
+ rx0:'Inicio de la región (fracción 0–1 de Lx).',rx1:'Fin de la región (fracción de Lx).',ry0:'Inicio en y (fracción de Ly).',ry1:'Fin en y.',rz0:'Inicio en z (fracción de Lz).',rz1:'Fin en z.',Tr:'Temperatura inicial dentro de la región.'};
+const GL=[['k, ρ, cp','Propiedades del material. α = k/(ρ·cp) es la difusividad térmica: rapidez con que el calor se propaga.'],
+ ['q̇','Calor generado dentro del material (resistencia eléctrica, reacción, etc.).'],
+ ['Régimen transitorio','Calcula cómo cambia T con el tiempo (esquema explícito). Requiere Δt estable.'],
+ ['Régimen estacionario','Busca el equilibrio (∂T/∂t = 0) iterando con Gauss-Seidel/SOR.'],
+ ['Δt estable / Fo','Fo = α·Δt·Σ(1/Δ²) debe ser ≤ 1/2 para que el esquema explícito no diverja.'],
+ ['ω SOR','Sobrerrelajación: avanza cada nodo más que Gauss-Seidel (ω = 1). Un ω entre 1 y 2 reduce las iteraciones; ω ≥ 2 diverge.'],
+ ['Tolerancia','Cuándo el SOR se considera convergido (máximo cambio de T por iteración).'],
+ ['T fija','Frontera con temperatura impuesta (°C).'],['Aislada','Flujo de calor nulo en la cara (dT/dn = 0); el número de la fila se ignora.'],
+ ['Convectiva','La cara intercambia calor con un fluido a T∞ (el número de la fila) con coeficiente h.'],
+ ['Biot (h·Δ/k)','Compara la resistencia conductiva con la convectiva en una celda.'],
+ ['Región inicial','Zona interior con otra T inicial (no es condición de frontera).'],
+ ['Nodo i, j, k','Posición del nodo analizado en los cálculos y en T(t). En 2D también se elige con clic en el mapa.']];
+
+/* ===== Ejemplos (valores ilustrativos) ===== */
+const B2={lx:.1,ly:.1,nx:31,ny:31,th:.01,mat:'Aluminio',q:0,T0:20,tt:200,mode:'tr',tol:1e-6,maxit:20000,w:1.8,h:25,reg:false,rx0:.4,rx1:.6,ry0:.4,ry1:.6,Tr:60};
+const B3={lx:.1,ly:.1,lz:.1,nx:21,ny:21,nz:21,mat:'Aluminio',q:0,T0:20,tt:100,mode:'tr',tol:1e-6,maxit:20000,w:1.6,h:25,reg:false,rx0:.4,rx1:.6,ry0:.4,ry1:.6,rz0:.4,rz1:.6,Tr:60};
+const T20=['T',20],A=['A',0],Tx=v=>['T',v],Cx=v=>['C',v],N15={nx:15,ny:15,nz:15},A4=[A,A,A,A],A6=[A,A,A,A,A,A];
+const EX={
+ 1:{d:2,n:'Ej. 1: placa calentada por un borde (izq. 100 °C)',f:[Tx(100),T20,T20,T20]},
+ 2:{d:2,n:'Ej. 2: placa con calentamiento central (q̇ uniforme)',q:1e7,tt:100,f:[T20,T20,T20,T20]},
+ 3:{d:2,n:'Ej. 3: temperaturas opuestas, bordes sup./inf. aislados',f:[Tx(100),T20,A,A]},
+ 4:{d:2,n:'Ej. 4: estacionario 1D (100 y 0 °C, bordes sup./inf. aislados)',mode:'st',f:[Tx(100),Tx(0),A,A]},
+ 5:{d:2,n:'Ej. 5: Laplace clásico (3 bordes a 0 °C, el superior a 100 °C)',mode:'st',f:[Tx(0),Tx(0),Tx(0),Tx(100)]},
+ 6:{d:2,n:'Ej. 6: estacionario con generación q̇ y bordes a 20 °C',mode:'st',q:5e6,f:[T20,T20,T20,T20]},
+ 7:{d:2,n:'Ej. 7: sumidero de calor (q̇<0) en cobre, bordes a 60 °C',mode:'st',mat:'Cobre',q:-5e6,f:[Tx(60),Tx(60),Tx(60),Tx(60)]},
+ 8:{d:2,n:'Ej. 8: acero inox.: borde a 100 °C y tres bordes convectivos',mat:'Acero inoxidable',tt:600,h:50,f:[Tx(100),Cx(20),Cx(20),Cx(20)]},
+ 9:{d:2,n:'Ej. 9: enfriamiento de placa de aluminio (150 °C) por convección',T0:150,h:100,tt:200,f:[Cx(20),Cx(20),Cx(20),Cx(20)]},
+ 10:{d:2,n:'Ej. 10: muro de concreto 0.3×0.2 m (interior 22 °C, exterior 0 °C)',lx:.3,ly:.2,nx:31,ny:21,mat:'Concreto',T0:22,h:15,tt:36000,f:[Tx(22),Cx(0),A,A]},
+ 11:{d:2,n:'Ej. 11: región caliente en madera, bordes aislados (conserva energía)',mat:'Madera',reg:true,Tr:200,tt:5000,f:A4},
+ 12:{d:2,n:'Ej. 12: región caliente en aluminio enfriada por bordes a 20 °C',reg:true,Tr:100,tt:15,f:[T20,T20,T20,T20]},
+ 13:{d:2,n:'Ej. 13: cobre con cuatro temperaturas distintas (estacionario)',mat:'Cobre',mode:'st',f:[Tx(100),Tx(50),Tx(0),Tx(25)]},
+ 14:{d:2,n:'Ej. 14: agua quieta calentada abajo (80 °C) y enfriada arriba (20 °C)',mat:'Agua (quieta)',mode:'st',f:[A,A,Tx(80),Tx(20)]},
+ 15:{d:2,n:'Ej. 15: vidrio: cara izq. a 80 °C y cara der. convectiva',mat:'Vidrio',h:10,tt:3600,f:[Tx(80),Cx(20),A,A]},
+ 16:{d:2,n:'Ej. 16: placa con generación q̇ y convección en los cuatro bordes (estacionario)',mode:'st',q:1e5,h:25,f:[Cx(20),Cx(20),Cx(20),Cx(20)]},
+ /* 3D */
+ 21:{d:3,n:'Ej. 21: bloque calentado por una cara (x=0 a 100 °C)',f:[Tx(100),T20,T20,T20,T20,T20]},
+ 22:{d:3,n:'Ej. 22: bloque con generación interna (q̇ uniforme)',q:2e7,f:[T20,T20,T20,T20,T20,T20]},
+ 23:{d:3,n:'Ej. 23: gradientes en los tres ejes',tt:150,f:[Tx(100),T20,Tx(60),Tx(40),Tx(80),Tx(30)]},
+ 24:{d:3,n:'Ej. 24: estacionario 1D (x=0 a 100 °C, x=Lx a 0 °C, resto aislado)',...N15,mode:'st',f:[Tx(100),Tx(0),A,A,A,A]},
+ 25:{d:3,n:'Ej. 25: Laplace 3D (una cara a 100 °C, cinco a 0 °C)',...N15,mode:'st',f:[Tx(100),Tx(0),Tx(0),Tx(0),Tx(0),Tx(0)]},
+ 26:{d:3,n:'Ej. 26: cubo de acero con generación q̇ y convección en 6 caras (estacionario)',...N15,mode:'st',mat:'Acero al carbono',q:1e5,f:[Cx(20),Cx(20),Cx(20),Cx(20),Cx(20),Cx(20)]},
+ 27:{d:3,n:'Ej. 27: enfriamiento de cubo de cobre (200 °C) por convección',...N15,mat:'Cobre',T0:200,h:100,tt:60,f:[Cx(20),Cx(20),Cx(20),Cx(20),Cx(20),Cx(20)]},
+ 28:{d:3,n:'Ej. 28: núcleo caliente en concreto con caras aisladas',...N15,mat:'Concreto',reg:true,Tr:150,rx0:.35,rx1:.65,ry0:.35,ry1:.65,rz0:.35,rz1:.65,tt:20000,f:A6},
+ 29:{d:3,n:'Ej. 29: barra de acero 0.3×0.05×0.05 m, extremo a 200 °C y otro convectivo',lx:.3,ly:.05,lz:.05,nx:31,ny:9,nz:9,mat:'Acero al carbono',h:15,tt:600,f:[Tx(200),Cx(20),A,A,A,A]},
+ 30:{d:3,n:'Ej. 30: disipador: aluminio con generación y base fría (z=0 a 20 °C)',...N15,mode:'st',q:1e6,f:[A,A,A,A,T20,A]},
+ 31:{d:3,n:'Ej. 31: muro de ladrillo (5 °C afuera, 22 °C adentro), laterales aislados',lx:.2,ly:.1,lz:.1,nx:21,ny:11,nz:11,mat:'Ladrillo',mode:'st',f:[Tx(22),Tx(5),A,A,A,A]},
+ 32:{d:3,n:'Ej. 32: cobre con seis temperaturas distintas (estacionario)',...N15,mat:'Cobre',mode:'st',f:[Tx(100),Tx(0),Tx(60),Tx(40),Tx(80),Tx(20)]},
+ 33:{d:3,n:'Ej. 33: madera calentada por la cara superior (200 °C), laterales convectivos',...N15,mat:'Madera',h:10,tt:1200,f:[Cx(20),Cx(20),Cx(20),Cx(20),A,Tx(200)]}};
+
+/* ===== Construcción de la interfaz ===== */
+function build(pre,d){
+ const F=(id,l,u,v)=>`<label title="${HT[id]||''}">${l} <small>${u||''}</small><input id="${pre}_${id}" type="number" step="any" value="${v}"><span class="hint">${HT[id]||''}</span></label>`;
+ const L=d==3?['x=0','x=Lx','y=0','y=Ly','z=0','z=Lz']:['Izq (x=0)','Der (x=Lx)','Inf (y=0)','Sup (y=Ly)'];
+ const exs=Object.keys(EX).filter(k=>EX[k].d==d).map(k=>`<option value="${k}">${EX[k].n}</option>`).join('');
+ const sl=(id,l,v)=>`<label>${l}<input id="${pre}_${id}" type="range" min="0" max="100" value="${v}" oninput="render('${pre}')"></label>`;
+ const faces=L.map((n,i)=>`<div class="fr"><span>${n}</span><select id="${pre}_ft${i}"><option value="T">T fija</option><option value="A">Aislada</option><option value="C">Convectiva</option></select><input id="${pre}_fv${i}" type="number" step="any" value="20" title="T fija (°C) o T∞ si es convectiva"></div>`).join('');
+ const reg=`<label><input type="checkbox" id="${pre}_reg"> Región interna con T inicial distinta (fracciones 0–1)</label><div class="two">${F('rx0','x ini','',.4)}${F('rx1','x fin','',.6)}${F('ry0','y ini','',.4)}${F('ry1','y fin','',.6)}${d==3?F('rz0','z ini','',.4)+F('rz1','z fin','',.6):''}${F('Tr','T región','°C',60)}</div>`;
+ $('g_'+pre).innerHTML=`<aside class="card">
+ <fieldset><legend>Ejemplos</legend><select id="${pre}_ex">${exs}</select>
+ <span class="hint">Cada ejemplo carga geometría, material, fronteras y régimen. Después puede modificar cualquier valor.</span>
+ <button class="b" onclick="load('${pre}',$('${pre}_ex').value);run('${pre}')">Cargar y calcular</button><button class="b g" onclick="load('${pre}',$('${pre}_ex').value)">Restaurar valores</button></fieldset>
+ <fieldset><legend>Geometría y malla (m)</legend><div class="two">${F('lx','Lx','m',.1)}${F('ly','Ly','m',.1)}${d==3?F('lz','Lz','m',.1):F('th','Espesor','m',.01)}
+ ${F('nx','Nx (nodos)','',31)}${F('ny','Ny (nodos)','',31)}${d==3?F('nz','Nz (nodos)','',21):''}</div>
+ <small id="${pre}_dl">Intervalos = nodos − 1</small></fieldset>
+ <fieldset><legend>Material y fuentes</legend><label>Material <small>(ilustrativo)</small><select id="${pre}_mat" onchange="applyMat('${pre}')">${Object.keys(MATS).map(m=>`<option>${m}</option>`).join('')}</select><span class="hint">Al elegirlo se rellenan k, ρ y cp. Con Personalizado, escriba sus propios valores.</span></label>
+ <div class="two">${F('k','k','W/(m·K)',237)}${F('rho','ρ','kg/m³',2700)}${F('cp','cp','J/(kg·K)',897)}${F('q','q̇ generación','W/m³',0)}${F('T0','T inicial','°C',20)}${F('h','h convección','W/(m²·K)',25)}</div></fieldset>
+ <fieldset><legend>Método</legend><label>Régimen<select id="${pre}_mode" onchange="theory('${pre}')"><option value="tr">Transitorio (explícito)</option><option value="st">Estacionario (SOR)</option></select>
+ <span class="hint">Transitorio: T cambia con el tiempo y se usan tiempo total y Δt. Estacionario: equilibrio final; se usan tolerancia, iteraciones y ω.</span></label>
+ <div class="two">${F('tt','Tiempo total','s',200)}${F('dt','Δt','s',0.02)}${F('tol','Tolerancia','°C',1e-6)}${F('maxit','Iter. máx.','',20000)}${F('w','ω sobrerrelajación SOR','(1–2)',1.8)}</div>
+ <button class="b g" onclick="safeDt('${pre}',true)">Calcular Δt seguro</button></fieldset>
+ <fieldset><legend>Condiciones de frontera</legend>${faces}<span class="hint"><b>T fija</b>: se impone la temperatura de la fila. <b>Aislada</b>: sin flujo de calor (el número se ignora). <b>Convectiva</b>: intercambia con un fluido a T∞ (el número) usando h.</span><small>Esquinas/aristas: si coinciden bordes con T fija distinta, se usa el promedio; T fija prevalece sobre aislada/convectiva.</small></fieldset>
+ <fieldset><legend>Temperatura inicial por región</legend>${reg}</fieldset>
+ <fieldset><legend>Visualización y nodo analizado</legend>
+ <label>Escala de color<select id="${pre}_cs" onchange="render('${pre}')">${['Jet','Hot','Viridis','Plasma','Inferno','Portland'].map(c=>`<option>${c}</option>`).join('')}</select></label>
+ <label>Tamaño visual del nodo (px; no cambia la malla)<input id="${pre}_ms" type="range" min="1" max="14" value="4" oninput="render('${pre}')"></label>
+ <label><input type="checkbox" id="${pre}_nodes" onchange="render('${pre}')" ${d==2?'checked':''}> Mostrar nodos</label>
+ ${d==2?`<label>Vista principal<select id="${pre}_view" onchange="render('${pre}')"><option value="heat">Mapa de calor</option><option value="surf">Superficie 3D T(x,y)</option><option value="cont">Curvas isotermas</option></select></label>
+ <label><input type="checkbox" id="${pre}_flux" onchange="render('${pre}')"> Vectores de flujo de calor</label>
+ <label>Perfil<select id="${pre}_pd" onchange="render('${pre}')"><option value="h">Horizontal T(x) a y fijo</option><option value="v">Vertical T(y) a x fijo</option></select></label>${sl('pp','Posición del perfil (%)',50)}
+ <label><input type="checkbox" id="${pre}_cmp" onchange="render('${pre}')"> Comparar instantes en el perfil</label>`
+ :`<label>Vista principal<select id="${pre}_view" onchange="render('${pre}')"><option value="sl">Cortes internos XY/XZ/YZ</option><option value="iso">Isosuperficie</option><option value="vol">Volumétrica</option><option value="nd">Solo nodos</option></select></label>
+ <label><input type="checkbox" id="${pre}_edges" onchange="render('${pre}')" checked> Mostrar aristas</label>
+ ${sl('sx','Corte x (%)',50)}${sl('sy','Corte y (%)',50)}${sl('sz','Corte z (%)',50)}${sl('iso','Valor isosuperficie (% del rango)',50)}
+ <small>Rendimiento: hasta ~60 000 nodos; isosuperficies y volumen son costosos en mallas finas.</small>`}
+ <div class="two">${F('ni','Nodo i','',15)}${F('nj','Nodo j','',15)}${d==3?F('nk','Nodo k','',10):''}</div></fieldset>
+ <details><summary>Glosario de parámetros</summary><dl>${GL.map(g=>`<dt>${g[0]}</dt><dd>${g[1]}</dd>`).join('')}</dl></details>
+ </aside><main class="card">
+ <div id="${pre}_msg" class="msg"></div>
+ <div id="${pre}_res" class="res"></div>
+ <div><button class="b" onclick="run('${pre}')">Calcular</button><button class="b" id="${pre}_pb" onclick="play('${pre}')">▶ Iniciar</button><button class="b g" onclick="reset('${pre}')">⟲ Reiniciar</button>
+ <button class="b g" onclick="csv('${pre}')">Exportar CSV</button><button class="b g" onclick="verify('${pre}')">Verificar (caso 1D lineal)</button>
+ <span id="${pre}_tl"></span></div>
+ <label>Instante <small>(deslice para recorrer la evolución en el tiempo)</small><input id="${pre}_fs" type="range" min="0" max="0" value="0" oninput="stopA('${pre}');showFrame('${pre}',+this.value)"></label>
+ <label style="max-width:300px">Velocidad de animación <input id="${pre}_sp" type="range" min="1" max="10" value="3" oninput="if(S['${pre}']&&S['${pre}'].timer){stopA('${pre}');play('${pre}')}"></label>
+ <div class="plots"><div id="${pre}_main" class="pl"></div>${d==2?`<div id="${pre}_prof" class="pl"></div>`:`<div id="${pre}_s1" class="pl"></div><div id="${pre}_s2" class="pl"></div><div id="${pre}_s3" class="pl"></div>`}<div id="${pre}_ts" class="pl"></div></div>
+ <div id="${pre}_calc" class="th"></div>
+ <div id="${pre}_th" class="th"></div></main>`;
+ $(pre+'_mat').value='Aluminio';
+ ['nx','ny','nz','lx','ly','lz'].forEach(id=>{const e=$(pre+'_'+id);if(e)e.oninput=()=>dl(pre)});
+ ['ni','nj','nk'].forEach(id=>{const e=$(pre+'_'+id);if(e)e.oninput=()=>render(pre)});
+}
+function setv(pre,id,v){const e=$(pre+'_'+id);if(!e)return;if(e.type=='checkbox')e.checked=!!v;else e.value=v}
+function applyMat(pre){const m=MATS[$(pre+'_mat').value];if(m){setv(pre,'k',m[0]);setv(pre,'rho',m[1]);setv(pre,'cp',m[2])}}
+function load(pre,key){const d=DIM[pre],e=EX[key],o={...(d==2?B2:B3),...e};
+ setv(pre,'mat',o.mat);applyMat(pre);for(const id in o)if(id!='f'&&id!='mat'&&id!='n'&&id!='d')setv(pre,id,o[id]);
+ o.f.forEach((f,i)=>{setv(pre,'ft'+i,f[0]);setv(pre,'fv'+i,f[1])});
+ setv(pre,'ni',Math.floor(o.nx/2));setv(pre,'nj',Math.floor(o.ny/2));if(d==3)setv(pre,'nk',Math.floor(o.nz/2));
+ safeDt(pre);dl(pre)}
+function dl(pre){try{const d=DIM[pre],g=i=>parseFloat($(pre+'_'+i).value);let t='Δx='+(g('lx')/(g('nx')-1)).toPrecision(3)+' m, Δy='+(g('ly')/(g('ny')-1)).toPrecision(3)+' m';
+ if(d==3)t+=', Δz='+(g('lz')/(g('nz')-1)).toPrecision(3)+' m';$(pre+'_dl').textContent=t+' (intervalos = nodos − 1)'}catch(e){}}
+
+/* ===== Lectura y validación ===== */
+function readP(pre,nodt){
+ const d=DIM[pre],g=id=>{const x=parseFloat($(pre+'_'+id).value);if(!isFinite(x))throw Error('Campo vacío o no numérico: '+id);return x};
+ const p={d,pre,lx:g('lx'),ly:g('ly'),lz:d==3?g('lz'):1,nx:Math.round(g('nx')),ny:Math.round(g('ny')),nz:d==3?Math.round(g('nz')):1,
+ th:d==2?g('th'):1,k:g('k'),rho:g('rho'),cp:g('cp'),q:g('q'),T0:g('T0'),h:g('h'),tol:g('tol'),maxit:Math.round(g('maxit')),w:g('w'),
+ mode:$(pre+'_mode').value,tt:g('tt'),dt:nodt?1:g('dt')};
+ if(p.lx<=0||p.ly<=0||p.lz<=0||p.th<=0)throw Error('Las dimensiones deben ser positivas.');
+ if(p.nx<3||p.ny<3||(d==3&&p.nz<3))throw Error('Se requieren al menos 3 nodos por dirección.');
+ const n=p.nx*p.ny*p.nz;if(n>(d==3?100000:60000))throw Error('Malla demasiado grande ('+n+' nodos). Reduzca N.');
+ if(p.k<=0||p.rho<=0||p.cp<=0)throw Error('k, ρ y cp deben ser positivos.');
+ if(p.h<0||p.tol<=0||p.maxit<1)throw Error('h ≥ 0, tolerancia > 0 e iteraciones ≥ 1.');
+ if(p.w<=0||p.w>=2)throw Error('El factor ω de SOR debe estar entre 0 y 2.');
+ if(p.mode=='tr'&&(p.tt<=0||p.dt<=0))throw Error('Tiempo total y Δt deben ser positivos.');
+ p.dx=p.lx/(p.nx-1);p.dy=p.ly/(p.ny-1);p.dz=d==3?p.lz/(p.nz-1):1;p.al=p.k/(p.rho*p.cp);
+ p.F=[];for(let i=0;i<2*d;i++){const t=$(pre+'_ft'+i).value,v=g('fv'+i);if(v<-273.15)throw Error('Temperatura inferior al cero absoluto.');p.F.push({t,v})}
+ if(p.F.some(f=>f.t=='C')&&p.h<=0)throw Error('Frontera convectiva requiere h > 0.');
+ if(p.mode=='st'&&!p.F.some(f=>f.t=='T'||f.t=='C'))throw Error('Régimen estacionario sin temperatura fija ni convección: problema indeterminado.');
+ if(p.T0<-273.15)throw Error('T inicial inferior al cero absoluto.');
+ p.reg=$(pre+'_reg').checked?{x0:g('rx0'),x1:g('rx1'),y0:g('ry0'),y1:g('ry1'),z0:d==3?g('rz0'):0,z1:d==3?g('rz1'):1,T:g('Tr')}:null;
+ prep(p);return p}
+
+/* ===== Núcleo numérico (independiente de la visualización) ===== */
+function prep(p){const{nx,ny,nz,d}=p,n=nx*ny*nz;p.n=n;p.fx=new Float64Array(n).fill(NaN);p.fl=Array.from({length:2*d},()=>[]);
+ const S3=[1,nx,nx*ny],N=[nx,ny,nz],D=[p.dx,p.dy,p.dz];
+ for(let k=0;k<nz;k++)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const m=i+nx*(j+ny*k),I=[i,j,k];let s=0,c=0;
+  for(let a=0;a<d;a++)for(let sd=0;sd<2;sd++)if(I[a]==(sd?N[a]-1:0)){const f=2*a+sd;if(p.F[f].t=='T'){s+=p.F[f].v;c++}
+   let w=d==2?p.th:1;for(let o=0;o<d;o++)if(o!=a)w*=D[o]*((I[o]==0||I[o]==N[o]-1)?.5:1);p.fl[f].push([m,sd?-S3[a]:S3[a],w,D[a]])}
+  if(c)p.fx[m]=s/c}}
+function initT(p){const T=new Float64Array(p.n).fill(p.T0),{nx,ny,nz}=p;
+ if(p.reg){const r=p.reg;for(let k=0;k<nz;k++)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const x=i/(nx-1),y=j/(ny-1),z=nz>1?k/(nz-1):0;
+  if(x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1&&(p.d==2||(z>=r.z0&&z<=r.z1)))T[i+nx*(j+ny*k)]=r.T}}
+ for(let m=0;m<p.n;m++)if(p.fx[m]===p.fx[m])T[m]=p.fx[m];return T}
+let DG=0;
+function ax(T,n,c,i,N,s,D,f0,p){let lo,hi,b=0;
+ if(i>0)lo=T[n-s];if(i<N-1)hi=T[n+s];
+ if(i==0){const f=p.F[f0];if(f.t=='C'){b=2*D*p.h/p.k;lo=T[n+s]-b*(c-f.v)}else lo=T[n+s]}
+ if(i==N-1){const f=p.F[f0+1];if(f.t=='C'){b=2*D*p.h/p.k;hi=T[n-s]-b*(c-f.v)}else hi=T[n-s]}
+ DG+=(2+b)/(D*D);return(lo+hi-2*c)/(D*D)}
+function stepE(T,Tn,p){const{nx,ny,nz,dt,al}=p,g=p.q/(p.rho*p.cp),d3=p.d==3;
+ for(let k=0;k<nz;k++)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const n=i+nx*(j+ny*k),f=p.fx[n];if(f===f){Tn[n]=f;continue}
+  const c=T[n];let L=ax(T,n,c,i,nx,1,p.dx,0,p)+ax(T,n,c,j,ny,nx,p.dy,2,p);if(d3)L+=ax(T,n,c,k,nz,nx*ny,p.dz,4,p);
+  Tn[n]=c+dt*(al*L+g)}}
+function sweep(T,p){const{nx,ny,nz}=p;let err=0;
+ for(let k=0;k<nz;k++)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const n=i+nx*(j+ny*k),f=p.fx[n];if(f===f)continue;
+  const c=T[n];DG=0;let R=p.q/p.k+ax(T,n,c,i,nx,1,p.dx,0,p)+ax(T,n,c,j,ny,nx,p.dy,2,p);if(p.d==3)R+=ax(T,n,c,k,nz,nx*ny,p.dz,4,p);
+  const dT=p.w*R/DG;T[n]=c+dT;if(Math.abs(dT)>err)err=Math.abs(dT)}return err}
+function stabDt(p){let s=1/p.dx**2+1/p.dy**2+(p.d==3?1/p.dz**2:0),cv=0;const D=[p.dx,p.dy,p.dz];
+ p.F.forEach((f,i)=>{if(f.t=='C')cv+=2*p.al*p.h/(p.k*D[i>>1])});return 1/(2*p.al*s+cv)}
+function safeDt(pre,show){try{const p=readP(pre,true),m=stabDt(p);setv(pre,'dt',Number((0.9*m).toPrecision(2)));if(show)msg(pre,'Δt máximo estable = '+m.toPrecision(3)+' s; se aplicó 0.9·Δt_máx.','ok')}catch(e){if(show)msg(pre,e.message,'err')}}
+function gr(T,p,i,j,k,a){const N=[p.nx,p.ny,p.nz][a],D=[p.dx,p.dy,p.dz][a],s=[1,p.nx,p.nx*p.ny][a],ii=[i,j,k][a],n=i+p.nx*(j+p.ny*k);
+ return ii==0?(T[n+s]-T[n])/D:ii==N-1?(T[n]-T[n-s])/D:(T[n+s]-T[n-s])/(2*D)}
+function fluxMax(T,p){let m=0;for(let k=0;k<p.nz;k++)for(let j=0;j<p.ny;j++)for(let i=0;i<p.nx;i++){let s=0;for(let a=0;a<p.d;a++)s+=gr(T,p,i,j,k,a)**2;m=Math.max(m,Math.sqrt(s))}return m*p.k}
+function heatRates(T,p){return p.fl.map(L=>{let Q=0;for(const[m,st,w,D]of L)Q+=w*(-p.k)*((-3*T[m]+4*T[m+st]-T[m+2*st])/(2*D));return Q})}
+
+/* ===== Ejecución (por lotes para no bloquear la interfaz) ===== */
+const yieldUI=()=>new Promise(r=>setTimeout(r));
+async function run(pre){const d=DIM[pre];stopA(pre);nomsg(pre);let p;
+ try{p=readP(pre)}catch(e){msg(pre,e.message,'err');return}
+ const tok=(S[pre]?S[pre].tok:0)+1;S[pre]={tok,p};const st=S[pre];let T=initT(p),stable=true,notes='';
+ const frames=[],times=[],save=t=>{frames.push(new Float32Array(T));times.push(t)};
+ const t0=performance.now();let last=t0,iters=0,err=0;
+ if(p.mode=='tr'){const dm=stabDt(p);
+  if(p.dt>dm*(1+1e-9)){stable=false;const nd=0.9*dm;notes=`Δt=${p.dt} s inestable (máx. ${dm.toPrecision(3)} s). Se usó Δt seguro=${nd.toPrecision(3)} s.`;p.dt=nd;setv(pre,'dt',Number(nd.toPrecision(2)))}
+  const steps=Math.ceil(p.tt/p.dt-1e-9);p.dt=p.tt/steps;if(steps*p.n>6e9){msg(pre,'Cálculo demasiado largo; reduzca malla o tiempo.','err');return}
+  const nf=Math.max(2,Math.min(100,Math.floor(4e6/p.n))),every=Math.max(1,Math.floor(steps/(nf-1)));let Tn=new Float64Array(p.n);save(0);
+  for(let s=1;s<=steps;s++){stepE(T,Tn,p);[T,Tn]=[Tn,T];if(s%every==0||s==steps)save(s*p.dt);iters=s;
+   if(performance.now()-last>40){await yieldUI();last=performance.now();if(S[pre].tok!=tok)return;msg(pre,'Calculando… '+Math.round(100*s/steps)+' %','warn')}}
+  err=null;st.steps=steps;
+ }else{err=1;while(iters<p.maxit&&err>p.tol){err=sweep(T,p);iters++;if(performance.now()-last>40){await yieldUI();last=performance.now();if(S[pre].tok!=tok)return;msg(pre,'Iterando… '+iters+' (error '+err.toExponential(2)+')','warn')}}
+  save(null);if(err>p.tol)notes='No convergió en el máximo de iteraciones.'}
+ let mn=1e99,mx=-1e99;frames.forEach(f=>{for(const v of f){if(v<mn)mn=v;if(v>mx)mx=v}});if(mx-mn<1e-9)mx=mn+1;
+ Object.assign(st,{frames,times,gmin:mn,gmax:mx,iters,err,stable,cur:frames.length-1,ms:Math.round(performance.now()-t0)});
+ const xs=[],ys=[],zs=[];for(let k=0;k<p.nz;k++)for(let j=0;j<p.ny;j++)for(let i=0;i<p.nx;i++){xs.push(i*p.dx);ys.push(j*p.dy);zs.push(k*p.dz)}st.xs=xs;st.ys=ys;st.zs=zs;
+ const fs=$(pre+'_fs');fs.max=frames.length-1;fs.value=st.cur;
+ msg(pre,notes?'Aviso: '+notes:'Cálculo completado en '+st.ms+' ms.',notes?'warn':'ok');theory(pre);showFrame(pre,st.cur)}
+
+/* ===== Animación (reproduce resultados ya calculados) ===== */
+function stopA(pre){const s=S[pre];if(s&&s.timer){clearInterval(s.timer);s.timer=null}$(pre+'_pb').textContent='▶ Iniciar'}
+function play(pre){const s=S[pre];if(!s||!s.frames)return;if(s.timer){stopA(pre);return}
+ if(s.frames.length<2){msg(pre,'El régimen estacionario no tiene evolución temporal para animar.','warn');return}
+ if(s.cur>=s.frames.length-1)showFrame(pre,0);$(pre+'_pb').textContent='⏸ Pausar';
+ s.timer=setInterval(()=>{if(s.cur>=s.frames.length-1){stopA(pre);return}showFrame(pre,s.cur+1)},1000/(4*$(pre+'_sp').value))}
+function reset(pre){const s=S[pre];if(!s||!s.frames)return;stopA(pre);showFrame(pre,0)}
+function showFrame(pre,fi){const s=S[pre];s.cur=fi;$(pre+'_fs').value=fi;const t=s.times[fi];
+ $(pre+'_tl').textContent=t==null?' Estacionario':' t = '+t.toPrecision(4)+' s';stats(pre);render(pre)}
+
+/* ===== Resultados ===== */
+function stats(pre){const s=S[pre],p=s.p,T=s.frames[s.cur];let mn=1e99,mx=-1e99,sm=0;for(const v of T){if(v<mn)mn=v;if(v>mx)mx=v;sm+=v}
+ const Q=heatRates(T,p),V=p.lx*p.ly*(p.d==3?p.lz:p.th),qv=p.q*V,sQ=Q.reduce((a,b)=>a+b,0)+qv,f=n=>Math.abs(n)>=1e4||(Math.abs(n)<1e-2&&n!=0)?n.toExponential(2):n.toFixed(2);
+ const c=[['T mínima',mn.toFixed(2)+' °C'],['T máxima',mx.toFixed(2)+' °C'],['T media',(sm/p.n).toFixed(2)+' °C'],['Tiempo simulado',s.times[s.cur]==null?'estacionario':s.times[s.cur].toPrecision(4)+' s'],
+ ['Nodos',p.nx+'×'+p.ny+(p.d==3?'×'+p.nz:'')+' = '+p.n],[p.mode=='tr'?'Pasos de tiempo':'Iteraciones',p.mode=='tr'?s.steps:s.iters],['Error final',s.err==null?'n/a (explícito)':s.err.toExponential(2)+' °C'],
+ ['Δt usado',p.mode=='tr'?p.dt.toPrecision(3)+' s':'n/a'],['Estabilidad',p.mode=='tr'?(s.stable?'Estable':'Se corrigió Δt'):'SOR '+(s.err<=p.tol?'convergió':'no convergió')],
+ ['|q″| máx (Fourier)',f(fluxMax(T,p))+' W/m²'],['ΣQ entrada + q̇V',f(sQ)+' W'+(p.mode=='st'?' (≈0)':'')],['Q por cara (W)',Q.map(f).join(' | ')]];
+ $(pre+'_res').innerHTML=c.map(a=>`<div>${a[0]}<b>${a[1]}</b></div>`).join('')}
+
+/* ===== Cálculos detallados (parámetros derivados, nodo elegido, balance de energía) ===== */
+const FN=d=>d==3?['x=0','x=Lx','y=0','y=Ly','z=0','z=Lz']:['Izq (x=0)','Der (x=Lx)','Inf (y=0)','Sup (y=Ly)'];
+function calc(pre){const s=S[pre];if(!s||!s.frames)return;const p=s.p,d=p.d,T=s.frames[s.cur],tr=p.mode=='tr',[i,j,k]=nodeSel(pre),n=i+p.nx*(j+p.ny*k),I=[i,j,k],N=[p.nx,p.ny,p.nz],D=[p.dx,p.dy,p.dz],St=[1,p.nx,p.nx*p.ny],nm=['x','y','z'],c=T[n];
+ const sg=v=>Number(v).toPrecision(5),sD=D.slice(0,d),sum=sD.reduce((a,x)=>a+1/x**2,0),dm=stabDt(p),Fo=p.al*p.dt*sum;
+ const rho=sD.reduce((a,x,q)=>a+Math.cos(Math.PI/(N[q]-1))/x**2,0)/sum,wo=2/(1+Math.sqrt(1-rho*rho)),Lmax=Math.max(p.lx,p.ly,d==3?p.lz:0);
+ const par=[['Difusividad α = k/(ρ·cp)',sg(p.al)+' m²/s'],['Pasos de malla '+nm.slice(0,d).map(x=>'Δ'+x).join(', '),sD.map(sg).join(' ; ')+' m'],
+  ['Tiempo difusivo L²/α (L mayor)',sg(Lmax*Lmax/p.al)+' s'],['Biot de celda h·Δmáx/k',sg(p.h*Math.max(...sD)/p.k)]];
+ if(tr)par.push(['Δt máx. estable',sg(dm)+' s'],['Δt usado',sg(p.dt)+' s'],['Fo = α·Δt·Σ(1/Δ²)  (debe ser ≤ 0.5)',sg(Fo)]);
+ else par.push(['ω usado',sg(p.w)],['ω óptimo estimado (aprox.)',sg(wo)],['Iteraciones realizadas',s.iters+' (tolerancia '+p.tol+')']);
+ let h=`<h3>Cálculos numéricos</h3><p>Valores derivados de los datos, un ejemplo de cálculo paso a paso en el nodo elegido y el balance de energía. El nodo se cambia con Nodo i, j${d==3?', k':''}${d==2?' o haciendo clic en el mapa':''}. Los resultados corresponden al instante mostrado.</p>
+ <b>1) Parámetros derivados</b><div class="cw"><table class="ct"><tr><th>Magnitud</th><th>Valor</th></tr>${par.map(a=>`<tr><td>${a[0]}</td><td>${a[1]}</td></tr>`).join('')}</table></div>`;
+ const bd=[];for(let a=0;a<d;a++){if(I[a]==0)bd.push(FN(d)[2*a]);if(I[a]==N[a]-1)bd.push(FN(d)[2*a+1])}
+ const fixed=p.fx[n]===p.fx[n];
+ h+=`<b>2) Nodo (${I.slice(0,d).join(', ')}) en ${I.slice(0,d).map((v,a)=>nm[a]+'='+sg(v*D[a])).join(', ')} m</b> — T = ${sg(c)} °C · ${bd.length?'en frontera: '+bd.join(', '):'nodo interior'}`;
+ if(fixed)h+=`<p>Este nodo tiene temperatura fija (${sg(p.fx[n])} °C): no se calcula, se impone. Elija un nodo interior o de frontera aislada/convectiva para ver la ecuación.</p>`;
+ else{let L=0,dg=0;const rows=[];
+  for(let a=0;a<d;a++){const ii=I[a],Na=N[a],s1=St[a],Da=D[a];let lo,hi,b=0,nl='vecino −',nh='vecino +';
+   if(ii>0)lo=T[n-s1];if(ii<Na-1)hi=T[n+s1];
+   if(ii==0){const f=p.F[2*a];if(f.t=='C'){b=2*Da*p.h/p.k;lo=T[n+s1]-b*(c-f.v);nl='fantasma convectivo'}else{lo=T[n+s1];nl='fantasma aislado'}}
+   if(ii==Na-1){const f=p.F[2*a+1];if(f.t=='C'){b=2*Da*p.h/p.k;hi=T[n-s1]-b*(c-f.v);nh='fantasma convectivo'}else{hi=T[n-s1];nh='fantasma aislado'}}
+   const term=(lo+hi-2*c)/(Da*Da);L+=term;dg+=(2+b)/(Da*Da);
+   rows.push(`<tr><td>${nm[a]}</td><td>${sg(lo)} <small>(${nl})</small></td><td>${sg(c)}</td><td>${sg(hi)} <small>(${nh})</small></td><td>${sg(Da)}</td><td>${sg(term)}</td></tr>`)}
+  h+=`<div class="cw"><table class="ct"><tr><th>Eje</th><th>T₋ (°C)</th><th>T centro (°C)</th><th>T₊ (°C)</th><th>Δ (m)</th><th>(T₋+T₊−2T)/Δ² (K/m²)</th></tr>${rows.join('')}</table></div>
+  <div class="eq">∇²T ≈ Σ términos = ${sg(L)} K/m²</div>`;
+  if(tr){const g=p.q/(p.rho*p.cp),dT=p.dt*(p.al*L+g);
+   h+=`<div class="eq">Tⁿ⁺¹ = T + Δt·[α·∇²T + q̇/(ρ·cp)]
+     = ${sg(c)} + ${sg(p.dt)}·[${sg(p.al)}·${sg(L)} + ${sg(g)}]
+     = ${sg(c)} + ${sg(dT)} = ${sg(c+dT)} °C</div><small>Este es el valor que tendrá el nodo en el siguiente paso de tiempo a partir del campo mostrado.</small>`}
+  else{const R=p.q/p.k+L,dT=p.w*R/dg;
+   h+=`<div class="eq">Residuo R = ∇²T + q̇/k = ${sg(L)} + ${sg(p.q/p.k)} = ${sg(R)}
+ Diagonal Σ(2/Δ²) = ${sg(dg)}
+ T ← T + ω·R/diag = ${sg(c)} + ${sg(p.w)}·${sg(R)}/${sg(dg)} = ${sg(c+dT)} °C</div><small>En equilibrio R tiende a 0 (el nodo ya no cambia). Un R pequeño indica que el campo está convergido.</small>`}}
+ const q3=[0,1,2].slice(0,d).map(a=>-p.k*gr(T,p,i,j,k,a)),qm=Math.hypot(...q3);
+ h+=`<p><b>3) Flujo de calor en el nodo (Fourier)</b></p><div class="eq">${q3.map((v,a)=>`q″${nm[a]} = −k·∂T/∂${nm[a]} = −${sg(p.k)}·${sg(gr(T,p,i,j,k,a))} = ${sg(v)} W/m²`).join('\n')}
+|q″| = ${sg(qm)} W/m²</div>`;
+ const Q=heatRates(T,p),V=p.lx*p.ly*(d==3?p.lz:p.th),qv=p.q*V,sQ=Q.reduce((a,b)=>a+b,0)+qv,mQ=Math.max(Math.abs(qv),...Q.map(Math.abs))||1;
+ h+=`<b>4) Balance de energía global</b> (Q &gt; 0: calor que entra al sólido${d==2?'; se multiplica por el espesor '+p.th+' m':''})<div class="cw"><table class="ct"><tr><th>Término</th><th>Q (W)</th></tr>${Q.map((v,a)=>`<tr><td>Cara ${FN(d)[a]} (${p.F[a].t=='T'?'T fija':p.F[a].t=='C'?'convectiva':'aislada'})</td><td>${sg(v)}</td></tr>`).join('')}
+ <tr><td>Generación q̇·V = ${sg(p.q)}·${sg(V)}</td><td>${sg(qv)}</td></tr><tr><th>Σ = ΣQ + q̇V</th><th>${sg(sQ)}</th></tr></table></div>
+ <small>${tr?'En transitorio, Σ es la rapidez con que se almacena energía en el sólido: ρ·cp·V·d(T media)/dt. Tiende a 0 al acercarse al equilibrio.':'En estacionario Σ debe ser ≈ 0 (error relativo '+(Math.abs(sQ)/mQ*100).toExponential(2)+' % respecto al mayor término).'}</small>`;
+ $(pre+'_calc').innerHTML=h}
+
+/* ===== Visualización ===== */
+const lin=(n,D)=>Array.from({length:n},(_,i)=>i*D);
+const lay=(t,o)=>Object.assign({title:{text:t,font:{size:13}},margin:{l:55,r:15,t:35,b:45},uirevision:'k',paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:getComputedStyle(document.body).color}},o||{});
+const PL=(id,tr,l)=>{Plotly.react(id,tr,l,{responsive:true,displaylogo:false})};
+function nodeSel(pre){const p=S[pre].p,g=id=>{const e=$(pre+'_'+id);return e?Math.min(Math.max(Math.round(+e.value)||0,0),[p.nx,p.ny,p.nz][{ni:0,nj:1,nk:2}[id]]-1):0};return[g('ni'),g('nj'),p.d==3?g('nk'):0]}
+function render(pre){const s=S[pre];if(!s||!s.frames)return;try{calc(pre)}catch(e){console.error(e)}
+ const p=s.p,T=s.frames[s.cur],cs=$(pre+'_cs').value,ms=+$(pre+'_ms').value,[ni,nj,nk]=nodeSel(pre),I=(i,j,k)=>i+p.nx*(j+p.ny*k);
+ const xs=lin(p.nx,p.dx),ys=lin(p.ny,p.dy),zs=lin(p.nz,p.dz);
+ const cb={title:{text:'T (°C)'}};
+ const ts=s.frames.map(f=>f[I(ni,nj,nk)]);
+ PL(pre+'_ts',[{x:s.times.map(t=>t==null?0:t),y:ts,mode:'lines+markers',line:{color:'#0b6e6e'}},{x:[s.times[s.cur]||0],y:[ts[s.cur]],mode:'markers',marker:{size:11,color:'red'}}],
+  lay('T(t) en el nodo ('+ni+','+nj+(p.d==3?','+nk:'')+') x='+xs[ni].toFixed(3)+' m',{xaxis:{title:'t (s)'},yaxis:{title:'T (°C)'},showlegend:false}));
+ if(p.d==2){const z=[];for(let j=0;j<p.ny;j++){const r=[];for(let i=0;i<p.nx;i++)r.push(T[I(i,j,0)]);z.push(r)}
+  const v=$(pre+'_view').value,hov='x=%{x:.4f} m<br>y=%{y:.4f} m<br>T=%{z:.2f} °C<extra></extra>',tr=[];
+  if(v=='surf')tr.push({type:'surface',x:xs,y:ys,z,colorscale:cs,cmin:s.gmin,cmax:s.gmax,colorbar:cb});
+  else tr.push({type:v=='heat'?'heatmap':'contour',x:xs,y:ys,z,colorscale:cs,zmin:s.gmin,zmax:s.gmax,colorbar:cb,hovertemplate:hov,...(v=='cont'?{ncontours:15,contours:{showlabels:true}}:{})});
+  if(v!='surf'&&$(pre+'_nodes').checked){const X=[],Y=[];for(let j=0;j<p.ny;j++)for(let i=0;i<p.nx;i++){X.push(xs[i]);Y.push(ys[j])}
+   tr.push({type:'scatter',mode:'markers',x:X,y:Y,hoverinfo:'skip',marker:{size:ms,color:'rgba(0,0,0,0)',line:{color:'#111',width:1}}})}
+  if(v!='surf'){tr.push({type:'scatter',mode:'markers',x:[xs[ni]],y:[ys[nj]],hoverinfo:'skip',marker:{size:11,color:'rgba(0,0,0,0)',line:{color:'magenta',width:3}}})}
+  if(v!='surf'&&$(pre+'_flux').checked){const st=Math.ceil(Math.max(p.nx,p.ny)/20),q=[];let mq=0;
+   for(let j=0;j<p.ny;j+=st)for(let i=0;i<p.nx;i+=st){const a=-p.k*gr(T,p,i,j,0,0),b=-p.k*gr(T,p,i,j,0,1);q.push([i,j,a,b]);mq=Math.max(mq,Math.hypot(a,b))}
+   const L=0.9*st*Math.min(p.dx,p.dy),X=[],Y=[],X2=[],Y2=[];if(mq>0)for(const[i,j,a,b]of q){const m=Math.hypot(a,b)/mq*L,u=Math.hypot(a,b)||1,x1=xs[i]+a/u*m,y1=ys[j]+b/u*m;X.push(xs[i],x1,null);Y.push(ys[j],y1,null);X2.push(x1);Y2.push(y1)}
+   tr.push({type:'scatter',mode:'lines',x:X,y:Y,hoverinfo:'skip',line:{color:'white',width:1.5}},{type:'scatter',mode:'markers',x:X2,y:Y2,hoverinfo:'skip',marker:{size:4,color:'white',line:{color:'black',width:.5}}})}
+  PL(pre+'_main',tr,lay(v=='surf'?'Superficie T(x,y)':'Campo de temperatura (flecha: −k∇T; círculo magenta: nodo analizado)',v=='surf'?{scene:{xaxis:{title:'x (m)'},yaxis:{title:'y (m)'},zaxis:{title:'T (°C)'}}}:{xaxis:{title:'x (m)'},yaxis:{title:'y (m)',scaleanchor:'x'},showlegend:false}));
+  const dv=$(pre+'_main');if(!dv._c){dv._c=1;dv.on('plotly_click',e=>{const pt=e.points[0];if(pt.x==null||pt.y==null)return;const S2=S[pre].p;setv(pre,'ni',Math.round(pt.x/S2.dx));setv(pre,'nj',Math.round(pt.y/S2.dy));render(pre)})}
+  const hz=$(pre+'_pd').value=='h',pp=+$(pre+'_pp').value/100,idx=Math.round(pp*((hz?p.ny:p.nx)-1)),prof=f=>hz?xs.map((_,i)=>f[I(i,idx,0)]):ys.map((_,j)=>f[I(idx,j,0)]);
+  const ids=$(pre+'_cmp').checked?[...new Set([0,.25,.5,.75,1].map(r=>Math.round(r*(s.frames.length-1))))]:[],pt=[];
+  ids.forEach(fi=>pt.push({x:hz?xs:ys,y:prof(s.frames[fi]),mode:'lines',name:'t='+(s.times[fi]==null?'est.':s.times[fi].toPrecision(3)+' s')}));
+  pt.push({x:hz?xs:ys,y:prof(T),mode:'lines',name:'actual',line:{color:'#888',width:3}});
+  PL(pre+'_prof',pt,lay('Perfil de T a '+(hz?'y='+ys[idx].toFixed(3):'x='+xs[idx].toFixed(3))+' m',{xaxis:{title:(hz?'x':'y')+' (m)'},yaxis:{title:'T (°C)',range:[s.gmin,s.gmax]}}))
+ }else{const v=$(pre+'_view').value,tr=[],fr=id=>Math.round(+$(pre+'_'+id).value/100*([p.nx,p.ny,p.nz]['xyz'.indexOf(id[1])]-1)),a=fr('sx'),b=fr('sy'),c=fr('sz');
+  const sf=(R,C,fn,first)=>{const X=[],Y=[],Z=[],K=[];for(let r=0;r<R;r++){const x=[],y=[],z=[],k=[];for(let c2=0;c2<C;c2++){const o=fn(r,c2);x.push(o[0]);y.push(o[1]);z.push(o[2]);k.push(o[3])}X.push(x);Y.push(y);Z.push(z);K.push(k)}
+   return{type:'surface',x:X,y:Y,z:Z,surfacecolor:K,colorscale:cs,cmin:s.gmin,cmax:s.gmax,showscale:first,colorbar:cb,hovertemplate:'x=%{x:.3f} y=%{y:.3f} z=%{z:.3f}<br>T=%{surfacecolor:.2f} °C<extra></extra>'}};
+  if(v=='sl'){tr.push(sf(p.nz,p.ny,(k,j)=>[xs[a],ys[j],zs[k],T[I(a,j,k)]],true),sf(p.nz,p.nx,(k,i)=>[xs[i],ys[b],zs[k],T[I(i,b,k)]]),sf(p.ny,p.nx,(j,i)=>[xs[i],ys[j],zs[c],T[I(i,j,c)]]))}
+  else if(v=='iso'||v=='vol'){const iv=s.gmin+(s.gmax-s.gmin)*(+$(pre+'_iso').value/100);
+   tr.push(v=='iso'?{type:'isosurface',x:s.xs,y:s.ys,z:s.zs,value:T,isomin:iv,isomax:iv,surface:{count:1},caps:{x:{show:false},y:{show:false},z:{show:false}},colorscale:cs,cmin:s.gmin,cmax:s.gmax,colorbar:cb}
+    :{type:'volume',x:s.xs,y:s.ys,z:s.zs,value:T,isomin:s.gmin,isomax:s.gmax,opacity:.12,surface_count:15,colorscale:cs,colorbar:cb})}
+  if(v=='nd'||$(pre+'_nodes').checked)tr.push({type:'scatter3d',mode:'markers',x:s.xs,y:s.ys,z:s.zs,hoverinfo:'skip',marker:{size:ms,color:v=='nd'?T:'#222',colorscale:cs,cmin:s.gmin,cmax:s.gmax,opacity:v=='nd'?.9:.35},...(v=='nd'?{showlegend:false}:{})});
+  tr.push({type:'scatter3d',mode:'markers',x:[xs[ni]],y:[ys[nj]],z:[zs[nk]],hoverinfo:'skip',showlegend:false,marker:{size:6,color:'magenta'}});
+  if($(pre+'_edges').checked){const X=[],Y=[],Z=[];for(const[e1,e2]of[[0,1],[1,3],[3,2],[2,0],[4,5],[5,7],[7,6],[6,4],[0,4],[1,5],[2,6],[3,7]])for(const e of[e1,e2]){X.push((e&1)*p.lx);Y.push(((e>>1)&1)*p.ly);Z.push(((e>>2)&1)*p.lz)}
+   const X2=[],Y2=[],Z2=[];for(let i=0;i<24;i+=2){X2.push(X[i],X[i+1],null);Y2.push(Y[i],Y[i+1],null);Z2.push(Z[i],Z[i+1],null)}tr.push({type:'scatter3d',mode:'lines',x:X2,y:Y2,z:Z2,hoverinfo:'skip',line:{color:'#888',width:3},showlegend:false})}
+  PL(pre+'_main',tr,lay('Bloque 3D (m); punto magenta: nodo analizado',{scene:{aspectmode:'data',xaxis:{title:'x (m)'},yaxis:{title:'y (m)'},zaxis:{title:'z (m)'}},showlegend:false}));
+  const hm=(id,xx,yy,fn,nr,nc,t,xl,yl)=>{const z=[];for(let r=0;r<nr;r++){const w=[];for(let q=0;q<nc;q++)w.push(fn(r,q));z.push(w)}PL(pre+'_'+id,[{type:'heatmap',x:xx,y:yy,z,colorscale:cs,zmin:s.gmin,zmax:s.gmax,colorbar:cb}],lay(t,{xaxis:{title:xl},yaxis:{title:yl}}))};
+  hm('s1',xs,ys,(j,i)=>T[I(i,j,c)],p.ny,p.nx,'Sección XY en z='+zs[c].toFixed(3)+' m','x (m)','y (m)');
+  hm('s2',xs,zs,(k,i)=>T[I(i,b,k)],p.nz,p.nx,'Sección XZ en y='+ys[b].toFixed(3)+' m','x (m)','z (m)');
+  hm('s3',ys,zs,(k,j)=>T[I(a,j,k)],p.nz,p.ny,'Sección YZ en x='+xs[a].toFixed(3)+' m','y (m)','z (m)')}}
+
+/* ===== CSV, verificación y fundamento teórico ===== */
+function csv(pre){const s=S[pre];if(!s||!s.frames){msg(pre,'Calcule primero.','warn');return}const p=s.p,T=s.frames[s.cur];
+ let o='x_m,y_m'+(p.d==3?',z_m':'')+',T_C\n';for(let k=0;k<p.nz;k++)for(let j=0;j<p.ny;j++)for(let i=0;i<p.nx;i++)o+=(i*p.dx)+','+(j*p.dy)+','+(p.d==3?(k*p.dz)+',':'')+T[i+p.nx*(j+p.ny*k)]+'\n';
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([o],{type:'text/csv'}));a.download='temperaturas_'+pre+'.csv';a.click()}
+function verify(pre){const p={d:2,nx:21,ny:5,nz:1,lx:1,ly:.2,lz:1,th:1,dx:.05,dy:.05,dz:1,k:50,rho:1,cp:1,q:0,h:0,w:1.8,T0:50,al:50,
+ F:[{t:'T',v:100},{t:'T',v:20},{t:'A',v:0},{t:'A',v:0}]};prep(p);const T=initT(p);let it=0,e=1;while(it<20000&&e>1e-10){e=sweep(T,p);it++}
+ let m=0;for(let j=0;j<5;j++)for(let i=0;i<21;i++)m=Math.max(m,Math.abs(T[i+21*j]-(100-80*i/20)));
+ msg(pre,`Verificación (T=100 y 20 °C en extremos, bordes aislados): error máx. frente al perfil lineal analítico = ${m.toExponential(2)} °C tras ${it} iteraciones; T(0)=${T[0].toFixed(3)}, T(L)=${T[20].toFixed(3)} °C.`,m<1e-6?'ok':'warn')}
+function theory(pre){const d=DIM[pre],st=$(pre+'_mode').value=='st',e=$(pre+'_th'),y3=d==3;
+ e.innerHTML=String.raw`<h3>Fundamento teórico</h3>
+ <p><b>Ecuación gobernante</b> (conducción con generación): \[\rho c_p\frac{\partial T}{\partial t}=\nabla\cdot(k\nabla T)+\dot q\]
+ con T (°C o K), t (s), ρ (kg/m³), c<sub>p</sub> (J/(kg·K)), k (W/(m·K)) y q̇ (W/m³). Con k constante y material homogéneo: \[\frac{\partial T}{\partial t}=\alpha\nabla^2T+\frac{\dot q}{\rho c_p},\quad \alpha=\frac{k}{\rho c_p}\]
+ ${st?String.raw`<b>Modelo activo: estacionario.</b> \[\nabla\cdot(k\nabla T)+\dot q=0\;\Rightarrow\;\nabla^2T=-\frac{\dot q}{k}\;(\text{y }\nabla^2T=0\text{ si }\dot q=0)\]`:'<b>Modelo activo: transitorio.</b>'}</p>
+ <p><b>Discretización</b> (nodos: Δx=L<sub>x</sub>/(N<sub>x</sub>−1), análogo en y${y3?',z':''}):
+ ${st?String.raw`\[T_{i,j${y3?',k':''}}\leftarrow T_{i,j${y3?',k':''}}+\omega\,\frac{R_{i,j${y3?',k':''}}}{\sum 2/\Delta^2_a},\quad R=\sum_a\frac{T_+ -2T+T_-}{\Delta_a^2}+\frac{\dot q}{k}\]Iteración Gauss-Seidel/SOR (1<ω<2; ω = 1 es Gauss-Seidel puro). <b>Convergencia:</b> \(\max|T^{m+1}-T^{m}|<\text{tol}\).`
+ :(y3?String.raw`\[T^{n+1}_{i,j,k}=T^n_{i,j,k}+\alpha\Delta t\Big[\tfrac{T_{i+1}-2T+T_{i-1}}{\Delta x^2}+\tfrac{T_{j+1}-2T+T_{j-1}}{\Delta y^2}+\tfrac{T_{k+1}-2T+T_{k-1}}{\Delta z^2}\Big]+\tfrac{\dot q\Delta t}{\rho c_p}\]<b>Estabilidad:</b> \[\alpha\Delta t\Big(\tfrac1{\Delta x^2}+\tfrac1{\Delta y^2}+\tfrac1{\Delta z^2}\Big)\le\tfrac12\]`
+ :String.raw`\[T^{n+1}_{i,j}=T^n_{i,j}+\alpha\Delta t\Big[\tfrac{T_{i+1,j}-2T_{i,j}+T_{i-1,j}}{\Delta x^2}+\tfrac{T_{i,j+1}-2T_{i,j}+T_{i,j-1}}{\Delta y^2}\Big]+\tfrac{\dot q\Delta t}{\rho c_p}\]<b>Estabilidad:</b> \[\alpha\Delta t\Big(\tfrac1{\Delta x^2}+\tfrac1{\Delta y^2}\Big)\le\tfrac12\]`)+' Con convección se reduce además el Δt máximo; si el Δt es inestable se sustituye por 0.9·Δt<sub>máx</sub>.'}</p>
+ <p><b>Fronteras.</b> Temperatura prescrita (se mantiene siempre); aislada \(\partial T/\partial n=0\) (nodo fantasma T<sub>−1</sub>=T<sub>1</sub>); convectiva \(-k\,\partial T/\partial n=h(T_s-T_\infty)\) con nodo fantasma \(T_{-1}=T_1-\tfrac{2\Delta h}{k}(T_0-T_\infty)\). En esquinas/aristas con T fijas distintas se promedia; la T fija prevalece. La temperatura inicial de regiones internas no es una condición de frontera.</p>
+ <p><b>Ley de Fourier</b> (flujo, W/m²): \[\mathbf q''=-k\nabla T,\quad q''_x=-k\tfrac{\partial T}{\partial x},\;q''_y=-k\tfrac{\partial T}{\partial y}${y3?String.raw`,\;q''_z=-k\tfrac{\partial T}{\partial z}`:''}\]
+ La tasa de calor Q (W) se obtiene integrando el flujo normal sobre cada cara${y3?'':' (multiplicado por el espesor)'}; la suma ΣQ+q̇V debe ser ≈0 en estado estacionario.</p>
+ <p><i>Hipótesis y límites:</i> propiedades constantes y homogéneas, conducción pura (sin radiación), mallas uniformes, error de truncamiento O(Δ²) en el espacio y O(Δt) en el tiempo. Los resultados son aproximaciones numéricas; refine la malla o reduzca Δt para comprobar convergencia.</p>`;
+ if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([e]).catch(()=>{})}
+
+/* ===== Inicio ===== */
+document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab-btn').forEach(x=>{x.classList.toggle('tab-active',x===b);x.classList.toggle('tab-inactive',x!==b)});
+  tab(+b.dataset.tab);
+});
+build('t2',2);build('t3',3);load('t2',1);load('t3',21);theory('t2');theory('t3');
+window.addEventListener('load',()=>{run('t2');setTimeout(()=>MathJax&&MathJax.typesetPromise&&MathJax.typesetPromise(),500)});
+</script>
+</body>
+</html>
