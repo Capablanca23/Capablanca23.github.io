@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Espectro Electromagnético | Dr. Ronald F. Rodriguez Espinoza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1020;--panel:#131a30;--line:#26304f;--tx:#e6ebff;--mu:#8e9acb;--ac:#4cc9f0;--l:#ffd166;--f:#06d6a0;--n:#f78fb3;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{color-scheme:dark;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:radial-gradient(1200px 600px at 20% -10%,#1a2550 0,var(--bg) 60%);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 40px}
+.serif{font-family:Fraunces,Georgia,serif}
+header.hd{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:#080c1a;border-bottom:1px solid var(--line);box-shadow:0 2px 14px #0007}
+.hd .in{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#7048e8,#4cc9f0 55%,#06d6a0);display:flex;align-items:center;justify-content:center;font-size:22px}
+.brand h1{font-size:clamp(1.05rem,2.4vw,1.35rem);margin:0;letter-spacing:.2px}
+.brand p{margin:0;font-size:.75rem;color:var(--mu)}
+.hr{display:flex;align-items:center;gap:10px;font-size:.78rem}
+.badge{padding:3px 10px;border-radius:99px;color:var(--f);border:1px solid #06d6a044;background:#06d6a014;font-weight:600}
+.hr a.au{color:var(--tx);text-decoration:none;padding:6px 12px;border-radius:8px;border:1px solid var(--line)}
+.hr a.au:hover{border-color:var(--ac)}
+h2{font-size:1.05rem;margin:0 0 12px;color:var(--ac);font-weight:600}
+.sub{color:var(--mu);margin:0 0 18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:18px}
+#author{padding:0;overflow:hidden}
+#author .bx{padding:18px;display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:center;background:linear-gradient(100deg,#0e1530,#16204a 50%,#0e1530)}
+.who{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.av{width:72px;height:72px;border-radius:50%;border:2px solid #ffffff33;background:#1d2850;display:flex;align-items:center;justify-content:center;font-size:32px}
+.tag{display:inline-block;font-size:.72rem;font-weight:600;color:var(--l);border:1px solid #ffd16644;background:#ffd16612;padding:1px 10px;border-radius:99px;margin-bottom:4px}
+.who h3{margin:0;font-size:1.2rem}
+.who p{margin:2px 0 0;color:var(--mu);font-size:.85rem}
+.qrb{display:flex;align-items:center;gap:14px;background:#0a0f22;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+#qrlink{display:block;line-height:0;flex:none}
+#qr{background:#fff;padding:7px;border-radius:8px;width:94px;height:94px;display:block;color:#000;font-size:12px;line-height:0;overflow:hidden}
+#qr img{display:none!important}
+#qr canvas{display:block!important;width:80px!important;height:80px!important;margin:0!important}
+.qrb small{display:block;color:var(--mu);font-size:.75rem;max-width:150px;line-height:1.3;margin:2px 0 4px}
+.qrb a{color:var(--ac);font-weight:600;font-size:.8rem;text-decoration:none}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.legend{font-size:.8rem;color:var(--mu)}.legend b{margin-right:10px}
+button{font:inherit;background:#1d2850;color:var(--tx);border:1px solid var(--line);border-radius:9px;padding:7px 14px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+.scroller{overflow-x:auto;padding-bottom:6px}
+.inner{position:relative;min-width:1500px;padding:34px 0 4px}
+.bar{position:relative;height:56px;border-radius:8px;overflow:hidden;display:flex;cursor:crosshair;border:1px solid #000}
+.reg{height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;text-shadow:0 1px 3px #000;white-space:nowrap;transition:filter .15s}
+.reg:hover{filter:brightness(1.25)}
+.vlab{position:absolute;top:8px;font-size:12px;color:var(--tx);transform:translateX(-50%);white-space:nowrap}
+.tk{position:absolute;transform:translateX(-50%);font-size:11px;white-space:nowrap;text-align:center}
+.row{position:relative;height:20px}
+.row .tk::before{content:"";position:absolute;left:50%;top:-4px;height:4px;border-left:1px solid var(--mu)}
+.rl{color:var(--l)}.rf{color:var(--f)}.rn{color:var(--n)}
+.mk{position:absolute;top:22px;width:2px;background:#fff;box-shadow:0 0 8px #fff;pointer-events:none;height:68px}
+.mk span{position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:#fff;color:#000;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;white-space:nowrap}
+#zoomBox{display:none;margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+#zoomBox.on{display:block}
+.vbar{position:relative;height:70px;border-radius:8px;cursor:crosshair;border:1px solid #000}
+.vwrap{position:relative;padding:0 2px}
+.vt{position:relative;height:20px}
+.vt .tk::before{content:"";position:absolute;left:50%;top:-4px;height:4px;border-left:1px solid var(--mu)}
+.vmk{position:absolute;top:-6px;width:2px;height:82px;background:#fff;box-shadow:0 0 8px #fff;pointer-events:none}
+.names{position:relative;height:18px;font-size:11px;color:var(--mu)}
+.names span{position:absolute;transform:translateX(-50%)}
+#tip{position:fixed;z-index:50;pointer-events:none;background:#05081a;border:1px solid var(--ac);border-radius:10px;padding:8px 11px;font-size:12px;max-width:260px;display:none;box-shadow:0 6px 24px #0008}
+#tip b{color:var(--ac)}
+#info{border-left:4px solid var(--ac)}
+#info h3{margin:0 0 4px;font-size:1.1rem}
+#info p{margin:4px 0;color:#c9d2f7}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.fld{background:#0e1428;border:1px solid var(--line);border-radius:10px;padding:10px}
+.fld label{display:block;font-size:.8rem;color:var(--mu);margin-bottom:4px}
+.fld .r{display:flex;gap:6px}
+input,select{font:inherit;background:#070b1a;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:7px 9px;min-width:0}
+input{flex:1;width:100%}input:focus,select:focus{outline:none;border-color:var(--ac)}
+.note{font-size:.78rem;color:var(--mu);margin-top:10px}
+.ex{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.ex button{text-align:left;padding:10px 12px;border-left-width:5px}
+.ex button small{display:block;color:var(--mu);font-size:.75rem}
+.ex button.act{background:#26356e;border-color:var(--ac)}
+.ex .nm{font-weight:600;font-size:.9rem}
+.cc{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.cn{background:#0e1428;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.cn h4{margin:0 0 4px;font-size:.95rem;color:var(--tx)}
+.cn p{margin:4px 0;font-size:.85rem;color:#c9d2f7}
+.cn code{color:var(--l);font-size:.85rem}
+/* símbolo del número de onda: ν con tilde */
+.wn{position:relative;display:inline-block;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:600;line-height:1;padding-top:.08em}
+.wn::before{content:"~";position:absolute;left:55%;top:-.5em;transform:translateX(-50%);font-style:normal;font-size:1.05em}
+footer{border-top:1px solid var(--line);color:var(--mu);font-size:.78rem;text-align:center;padding:20px 16px;background:#080c1a}
+footer b{color:var(--tx)}
+</style>
+</head>
+<body>
+<header class="hd"><div class="in">
+  <div class="brand"><div class="logo">🌈</div><div><h1 class="serif">Espectro Electromagnético</h1><p>Curso de Física y Ciencias Ambientales — Simulador interactivo</p></div></div>
+  <div class="hr"><span class="badge">v2.0</span><a class="au" href="#author">🎓 Dr. Ronald F. Rodriguez E.</a></div>
+</div></header>
+
+<main>
+<section class="card" id="author"><div class="bx">
+  <div class="who"><div class="av">👨‍🏫</div><div>
+    <span class="tag">🏅 Docente investigador</span>
+    <h3 class="serif">Dr. Ronald F. Rodriguez Espinoza</h3>
+    <p>Especialista en análisis numérico y Ciencias Ambientales</p>
+    <p>🏛️ CONCYTEC CTI Vitae · 🔬 Física, métodos computacionales y recursos naturales</p>
+  </div></div>
+  <div class="qrb">
+    <a id="qrlink" href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" title="Abrir el perfil oficial en CTI Vitae"><div id="qr">QR</div></a>
+    <div><b style="font-size:.85rem">Perfil académico</b><small>Haz clic en el código QR para ver la trayectoria del autor.</small>
+    <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer">Abrir CTI Vitae →</a></div>
+  </div>
+</div></section>
+
+<p class="sub">De los rayos gamma a las ondas de radio · escala logarítmica de longitud de onda · pasa el cursor o haz clic en la barra.</p>
+
+<section class="card">
+  <div class="top">
+    <h2 style="margin:0">Barra del espectro</h2>
+    <div class="legend"><b class="rl">■ λ longitud de onda</b><b class="rf">■ f frecuencia</b><b class="rn">■ <i class="wn">ν</i> número de onda</b></div>
+    <button id="zbtn">🔍 Zoom: luz visible (380–750 nm)</button>
+  </div>
+  <div class="scroller"><div class="inner" id="inner">
+    <div class="bar" id="bar"></div>
+    <div class="row rl" id="r1"></div><div class="row rf" id="r2"></div><div class="row rn" id="r3"></div>
+    <div class="mk" id="mk"><span id="mkl"></span></div>
+  </div></div>
+  <div id="zoomBox">
+    <div class="names" id="vnames"></div>
+    <div class="vwrap"><div class="vbar" id="vbar"></div><div class="vmk" id="vmk"></div></div>
+    <div class="vt rl" id="vt1"></div><div class="vt rf" id="vt2"></div><div class="vt rn" id="vt3"></div>
+  </div>
+</section>
+
+<section class="card" id="info"><h3>Información</h3><p>Haz clic en una región del espectro o elige un ejemplo para ver sus detalles aquí.</p></section>
+
+<section class="card">
+  <h2>Calculadora de conversión</h2>
+  <div class="grid">
+    <div class="fld"><label>Longitud de onda λ</label><div class="r"><input id="i_lam" inputmode="decimal"><select id="u_lam"><option value="1e-12">pm</option><option value="1e-9">nm</option><option value="1e-6">µm</option><option value="1e-3">mm</option><option value="1">m</option><option value="1e3">km</option></select></div></div>
+    <div class="fld"><label>Frecuencia f</label><div class="r"><input id="i_f" inputmode="decimal"><select id="u_f"><option value="1">Hz</option><option value="1e3">kHz</option><option value="1e6">MHz</option><option value="1e9">GHz</option><option value="1e12">THz</option><option value="1e15">PHz</option><option value="1e18">EHz</option><option value="1e21">ZHz</option></select></div></div>
+    <div class="fld"><label>Número de onda <i class="wn">ν</i> (cm⁻¹)</label><div class="r"><input id="i_nu" inputmode="decimal"></div></div>
+    <div class="fld"><label>Energía del fotón E (J)</label><div class="r"><input id="i_ej" inputmode="decimal"></div></div>
+    <div class="fld"><label>Energía del fotón E (eV)</label><div class="r"><input id="i_ev" inputmode="decimal"><select id="u_ev"><option value="1e-3">meV</option><option value="1">eV</option><option value="1e3">keV</option><option value="1e6">MeV</option></select></div></div>
+  </div>
+  <p class="note">Acepta notación científica (p. ej. 2.45e9). Constantes: c = 299 792 458 m/s (≈ 3×10⁸), h = 6.626×10⁻³⁴ J·s, 1 eV = 1.602×10⁻¹⁹ J. Relaciones: f = c/λ · <i class="wn">ν</i> = 1/λ · E = hf = hc/λ.</p>
+</section>
+
+<section class="card">
+  <h2>Aplicaciones y ejemplos (clic para cargar)</h2>
+  <div class="ex" id="ex"></div>
+</section>
+
+<section class="card">
+  <h2>Conceptos clave</h2>
+  <div class="cc">
+    <div class="cn"><h4>🌊 ¿Qué es una onda electromagnética?</h4><p>Oscilación acoplada de un campo eléctrico y uno magnético, perpendiculares entre sí y a la dirección de propagación. Es transversal y no necesita medio material: en el vacío viaja a c.</p></div>
+    <div class="cn"><h4>📐 Relaciones fundamentales</h4><p><code>c = λ·f</code> · <code>E = h·f</code> · <code><i class="wn">ν</i> = 1/λ</code></p><p>A mayor frecuencia: menor longitud de onda y mayor energía por fotón. Por eso los rayos gamma son los más energéticos y las ondas de radio los menos.</p></div>
+    <div class="cn"><h4>〰️ Número de onda (<i class="wn">ν</i>)</h4><p>Es el número de ondas por unidad de longitud, normalmente en cm⁻¹. Muy usado en espectroscopía IR y Raman porque es proporcional a la energía.</p><p>1 cm⁻¹ ≈ 29,98 GHz ≈ 0,124 meV. Ejemplo: 10 µm → 1000 cm⁻¹.</p></div>
+    <div class="cn"><h4>⚛️ Dualidad onda–partícula</h4><p>La luz se comporta como onda (interferencia, difracción) y como partículas llamadas fotones, cada uno con energía E = hf. En el extremo de alta energía domina el carácter corpuscular.</p></div>
+    <div class="cn"><h4>☢️ Radiación ionizante</h4><p>Un fotón ioniza cuando su energía supera la de enlace de los electrones atómicos (≈ 10 eV o más). Ionizan los rayos gamma, los X y el UV más energético; el visible, IR, microondas y radio no ionizan.</p></div>
+    <div class="cn"><h4>🔥 Radiación térmica y ley de Wien</h4><p>Todo cuerpo caliente emite radiación. La longitud de onda del máximo es <code>λ<sub>máx</sub> = 2898 µm·K / T</code>. El Sol (≈ 5800 K) alcanza su máximo hacia 500 nm; una persona (310 K), cerca de 9,4 µm.</p></div>
+    <div class="cn"><h4>🌍 Ventanas atmosféricas</h4><p>La atmósfera es casi opaca a gamma, X y gran parte del UV (el ozono absorbe el UV-C), pero transparente al visible, a ciertas bandas del IR y a las ondas de radio. Por eso la astronomía de rayos X se hace desde el espacio.</p></div>
+    <div class="cn"><h4>📏 Regla práctica</h4><p><code>E (eV) ≈ 1240 / λ (nm)</code>. Un fotón verde de 532 nm tiene ≈ 2,33 eV; uno de 254 nm (UV-C), ≈ 4,88 eV.</p></div>
+    <div class="cn"><h4>🔟 Escala logarítmica</h4><p>El espectro abarca más de 18 órdenes de magnitud. Cada marca de la barra es 10 veces mayor que la anterior; el visible ocupa una franja minúscula (menos de una octava de frecuencia).</p></div>
+    <div class="cn"><h4>⚠️ Límites convencionales</h4><p>Las fronteras entre regiones no son exactas ni universales: gamma y X se solapan, y se distinguen más por su origen (núcleo o electrones) que por su energía.</p></div>
+  </div>
+</section>
+</main>
+<footer>
+  <p>© 2026 <b>Dr. Ronald F. Rodriguez E.</b> — Análisis numérico y métodos computacionales</p>
+  <p>Simulador educativo sobre el espectro electromagnético.</p>
+</footer>
+<div id="tip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+try{new QRCode(document.getElementById('qr'),{text:'https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364',width:80,height:80,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.L})}catch(e){}
+const C=299792458,H=6.62607015e-34,EV=1.602176634e-19,LMIN=-13,LMAX=5,SPAN=LMAX-LMIN;
+const $=id=>document.getElementById(id);
+const WN='<i class="wn">ν</i>';
+const pos=l=>((Math.log10(l)-LMIN)/SPAN*100);
+const REG=[
+ {n:'Rayos gamma',a:1e-13,b:1e-11,c:'#c2358f',ion:'Sí, muy penetrante',src:'Núcleos atómicos, aniquilación de pares, supernovas.',use:'Tomografía PET, radioterapia, esterilización industrial, astronomía de altas energías. Radiación ionizante muy penetrante.'},
+ {n:'Rayos X',a:1e-11,b:1e-8,c:'#3b5bdb',ion:'Sí',src:'Electrones internos de átomos pesados, frenado de electrones.',use:'Radiografía médica, TAC, cristalografía, control de seguridad. Ionizante.'},
+ {n:'Ultravioleta',a:1e-8,b:380e-9,c:'#7048e8',ion:'Parcial (UV lejano)',src:'Sol, lámparas de mercurio, arcos eléctricos.',use:'Esterilización (UV-C), fototerapia, bronceado y quemaduras (UV-B), fluorescencia.'},
+ {n:'Visible',a:380e-9,b:750e-9,c:'#2f9e44',ion:'No',src:'Sol, filamentos incandescentes, LED, láseres.',use:'Única región que percibe el ojo humano. Fotosíntesis, iluminación, fibra óptica, láseres.'},
+ {n:'Infrarrojo',a:750e-9,b:1e-3,c:'#e03131',ion:'No',src:'Cualquier cuerpo caliente (radiación térmica), LED IR.',use:'Mandos a distancia, visión nocturna, cámaras térmicas, espectroscopía vibracional.'},
+ {n:'Microondas',a:1e-3,b:1,c:'#e8590c',ion:'No',src:'Magnetrones, klystrons, radiación cósmica de fondo.',use:'Hornos, radar, Wi-Fi, telefonía móvil, comunicaciones por satélite.'},
+ {n:'Ondas de radio',a:1,b:1e5,c:'#2b8a3e',ion:'No',src:'Antenas, circuitos oscilantes, púlsares, rayos.',use:'Radio AM/FM, TV, GPS, radioastronomía, comunicación submarina (VLF/ELF).'}
+];
+const FRAC=[['pm',1e-12],['nm',1e-9],['µm',1e-6],['mm',1e-3],['m',1],['km',1e3]];
+const FU=[['Hz',1],['kHz',1e3],['MHz',1e6],['GHz',1e9],['THz',1e12],['PHz',1e15],['EHz',1e18],['ZHz',1e21]];
+const EU=[['meV',1e-3],['eV',1],['keV',1e3],['MeV',1e6]];
+function num(x,p=4){if(!isFinite(x))return '—';const a=Math.abs(x);if(a!==0&&(a<1e-3||a>=1e6)){const [m,e]=x.toExponential(p-1).split('e');return m+'×10'+sup(+e)}return +x.toPrecision(p)+''}
+function sup(n){return String(n).replace(/-/g,'⁻').replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d])}
+function best(list,v){let r=list[0];for(const u of list)if(v>=u[1]*0.9999)r=u;return r}
+function fmtL(l){const u=best(FRAC,l);return num(l/u[1],4)+' '+u[0]}
+function fmtF(f){const u=best(FU,f);return num(f/u[1],4)+' '+u[0]}
+function fmtE(l){const e=H*C/l/EV,u=best(EU,e);return num(e/u[1],4)+' '+u[0]}
+const fmtN=l=>num(0.01/l,4)+' cm⁻¹';
+function regionOf(l){return REG.find(r=>l>=Math.min(r.a,r.b)&&l<Math.max(r.a,r.b))||(l<1e-13?REG[0]:REG[6])}
+function rng(r){const lo=Math.min(r.a,r.b),hi=Math.max(r.a,r.b);return `λ: ${fmtL(lo)} – ${fmtL(hi)}<br>f: ${fmtF(C/hi)} – ${fmtF(C/lo)}<br>E: ${fmtE(hi)} – ${fmtE(lo)}`}
+
+const bar=$('bar');
+REG.forEach(r=>{const d=document.createElement('div');d.className='reg';d.dataset.n=r.n;
+ const w=(Math.log10(Math.max(r.a,r.b))-Math.log10(Math.min(r.a,r.b)))/SPAN*100;d.style.width=w+'%';
+ d.style.background=r.n==='Visible'?'linear-gradient(90deg,#8b00ff,#00f,#0ff,#0f0,#ff0,#f80,#f00)':r.c;
+ d.textContent=r.n==='Visible'?'':r.n;bar.appendChild(d)});
+const vl=document.createElement('div');vl.className='vlab';vl.style.left=(pos(530e-9))+'%';vl.textContent='Visible ↓';$('inner').appendChild(vl);
+for(let k=LMIN;k<=LMAX;k++){const l=Math.pow(10,k),x=(k-LMIN)/SPAN*100+'%';
+ [['r1',fmtL(l)],['r2',fmtF(C/l)],['r3',fmtN(l)]].forEach(([id,t])=>{const s=document.createElement('span');s.className='tk';s.style.left=x;s.textContent=t;$(id).appendChild(s)})}
+
+function rgb(w){let r=0,g=0,b=0;
+ if(w<440){r=-(w-440)/60;b=1}else if(w<490){g=(w-440)/50;b=1}else if(w<510){g=1;b=-(w-510)/20}
+ else if(w<580){r=(w-510)/70;g=1}else if(w<645){r=1;g=-(w-645)/65}else r=1;
+ let f=w<420?.3+.7*(w-380)/40:w>645?.3+.7*(750-w)/105:1;
+ return `rgb(${[r,g,b].map(v=>Math.round(255*Math.pow(Math.max(0,v)*f,.8))).join(',')})`}
+const vx=w=>(w-380)/370*100;
+(function(){const st=[];for(let w=380;w<=750;w+=5)st.push(rgb(w)+' '+vx(w).toFixed(2)+'%');
+ $('vbar').style.background='linear-gradient(90deg,'+st.join(',')+')';
+ for(let w=380;w<=750;w+=50){const x=vx(w)+'%';
+  [['vt1',w+' nm'],['vt2',num(C/(w*1e-9)/1e12,4)+' THz'],['vt3',num(1e7/w,5)+' cm⁻¹']].forEach(([id,t])=>{const s=document.createElement('span');s.className='tk';s.style.left=x;s.textContent=t;$(id).appendChild(s)})}
+ [['Violeta',415],['Azul',465],['Cian',492],['Verde',535],['Amarillo',580],['Naranja',605],['Rojo',690]].forEach(([n,w])=>{const s=document.createElement('span');s.textContent=n;s.style.left=vx(w)+'%';$('vnames').appendChild(s)});
+ ['vt1','vt2','vt3'].forEach(id=>$(id).style.height='20px')})();
+$('zbtn').onclick=()=>{$('zoomBox').classList.toggle('on')};
+
+let LAM=530e-9;
+function setLam(l,src){
+ LAM=l;
+ const p=Math.min(100,Math.max(0,pos(l)));$('mk').style.left=p+'%';$('mkl').textContent=fmtL(l)+' · '+fmtF(C/l);
+ const vis=l>=380e-9&&l<=750e-9;$('vmk').style.display=vis?'block':'none';if(vis)$('vmk').style.left=vx(l*1e9)+'%';
+ const set=(id,v)=>{if(src!==id)$(id).value=v};
+ const ul=best(FRAC,l),f=C/l,uf=best(FU,f),e=H*f/EV,ue=best(EU,e);
+ if(src!=='i_lam'){$('u_lam').value=ul[1];}if(src!=='i_f'){$('u_f').value=uf[1];}if(src!=='i_ev'){$('u_ev').value=ue[1];}
+ set('i_lam',+(l/$('u_lam').value).toPrecision(6));set('i_f',+(f/$('u_f').value).toPrecision(6));
+ set('i_nu',+(0.01/l).toPrecision(6));set('i_ej',(H*f).toExponential(5));set('i_ev',+(e/$('u_ev').value).toPrecision(6));
+}
+const conv={
+ i_lam:()=>+$('i_lam').value.replace(',','.')*$('u_lam').value,
+ i_f:()=>C/(+$('i_f').value.replace(',','.')*$('u_f').value),
+ i_nu:()=>0.01/+$('i_nu').value.replace(',','.'),
+ i_ej:()=>H*C/+$('i_ej').value.replace(',','.'),
+ i_ev:()=>H*C/(+$('i_ev').value.replace(',','.')*$('u_ev').value*EV)};
+Object.keys(conv).forEach(id=>{const h=()=>{const l=conv[id]();if(isFinite(l)&&l>0){setLam(l,id);showRegion(regionOf(l),null)}};
+ $(id).addEventListener('input',h);const u=$('u_'+id.slice(2));if(u&&id!=='i_ej'&&id!=='i_nu')u.addEventListener('change',()=>{const l=conv[id]();if(isFinite(l)&&l>0){setLam(l,id);}})});
+
+function showRegion(r,ex){
+ const c=r.n==='Visible'?'#2f9e44':r.c;$('info').style.borderLeftColor=c;
+ $('info').innerHTML=`<h3>${ex?ex.n+' · ':''}${r.n}</h3>`+(ex?`<p><b>Aplicación:</b> ${ex.d}</p>`:'')+
+ `<p><b>Rango de la región:</b><br>${rng(r)}</p><p><b>Fuentes:</b> ${r.src}</p><p><b>Usos:</b> ${r.use}</p><p><b>¿Ionizante?</b> ${r.ion}</p>`+
+ `<p><b>Valor actual:</b> λ = ${fmtL(LAM)} · f = ${fmtF(C/LAM)} · ${WN} = ${fmtN(LAM)} · E = ${fmtE(LAM)} (${num(H*C/LAM,4)} J)</p>`}
+const tip=$('tip');
+function lamAt(ev,el,vis){const b=el.getBoundingClientRect(),t=Math.min(1,Math.max(0,(ev.clientX-b.left)/b.width));
+ return vis?(380+t*370)*1e-9:Math.pow(10,LMIN+t*SPAN)}
+function hover(ev,el,vis){const l=lamAt(ev,el,vis),r=regionOf(l);
+ tip.style.display='block';tip.style.left=Math.min(innerWidth-270,ev.clientX+14)+'px';tip.style.top=(ev.clientY+16)+'px';
+ tip.innerHTML=`<b>${r.n}</b><br>λ = ${fmtL(l)}<br>f = ${fmtF(C/l)}<br>${WN} = ${fmtN(l)}<br>E = ${fmtE(l)}<br><i style="color:#8e9acb">${r.use.split('.')[0]}.</i>`}
+[[bar,false],[$('vbar'),true]].forEach(([el,vis])=>{
+ el.addEventListener('mousemove',e=>hover(e,el,vis));
+ el.addEventListener('mouseleave',()=>tip.style.display='none');
+ el.addEventListener('click',e=>{const l=lamAt(e,el,vis);setLam(l);showRegion(regionOf(l),null)})});
+
+const fl=f=>C/f;
+const EX=[
+ {n:'Rayos gamma',s:'PET / terapia · 511 keV',l:H*C/(511e3*EV),d:'Tomografía PET: la aniquilación positrón-electrón emite dos fotones de 511 keV. También usados en radioterapia (Co-60: 1.17 y 1.33 MeV).'},
+ {n:'Rayos X',s:'Radiografía médica · ~12 keV',l:1e-10,d:'Radiografía: λ ≈ 0.1 nm (≈12.4 keV). Los huesos absorben más que los tejidos blandos y forman el contraste.'},
+ {n:'Ultravioleta UV-C',s:'Esterilización · 254 nm',l:254e-9,d:'Lámparas de mercurio de baja presión (254 nm) dañan el ADN de bacterias y virus en agua y aire.'},
+ {n:'Láser verde',s:'Visible · 532 nm',l:532e-9,d:'Láser Nd:YAG con frecuencia duplicada. Punteros, alineación, microscopía. El ojo es muy sensible a este verde.'},
+ {n:'LED rojo',s:'Visible · 650 nm',l:650e-9,d:'LED rojo típico de indicadores y punteros láser baratos; también DVD (650 nm).'},
+ {n:'Infrarrojo cercano',s:'Mando / visión nocturna · 940 nm',l:940e-9,d:'LED IR de mandos a distancia (940 nm), invisible al ojo pero detectado por sensores de cámaras.'},
+ {n:'Infrarrojo lejano',s:'Cámara térmica · 9.4 µm',l:9.35e-6,d:'Un cuerpo a 310 K emite con máximo cerca de 9.4 µm (ley de Wien). Las cámaras térmicas detectan 8–14 µm.'},
+ {n:'IR medio · CO₂',s:'Espectroscopía · 4.26 µm',l:4.26e-6,d:'El CO₂ absorbe con fuerza a 4.26 µm (≈ 2350 cm⁻¹, estiramiento asimétrico). Es la base de los sensores de CO₂ y del efecto invernadero.'},
+ {n:'Microondas',s:'Horno · 2.45 GHz',l:fl(2.45e9),d:'El magnetrón de un horno genera 2.45 GHz (λ ≈ 12.2 cm), que hace rotar las moléculas de agua y calienta el alimento.'},
+ {n:'Línea del hidrógeno',s:'Radioastronomía · 21 cm',l:0.2110611,d:'El hidrógeno neutro emite a 1420.4 MHz (λ ≈ 21 cm). Permite cartografiar la estructura espiral de la Vía Láctea.'},
+ {n:'Radio FM',s:'Emisora · 100 MHz',l:fl(100e6),d:'Banda FM comercial (88–108 MHz), λ ≈ 3 m. Modulación en frecuencia de la portadora.'},
+ {n:'Radio onda larga',s:'Submarinos · VLF 20 kHz',l:fl(20e3),d:'Las ondas VLF/ELF (3–30 kHz y menos) penetran en el agua de mar y permiten comunicarse con submarinos sumergidos. λ ≈ 15 km.'}
+];
+EX.forEach((x,i)=>{const b=document.createElement('button');b.style.borderLeftColor=regionOf(x.l).n==='Visible'?rgb(x.l*1e9):regionOf(x.l).c;
+ b.innerHTML=`<span class="nm">${i+1}. ${x.n}</span><small>${x.s}</small>`;
+ b.onclick=()=>{document.querySelectorAll('.ex button').forEach(e=>e.classList.remove('act'));b.classList.add('act');
+  setLam(x.l);if(x.l>=380e-9&&x.l<=750e-9)$('zoomBox').classList.add('on');showRegion(regionOf(x.l),x);
+  const m=$('mk').getBoundingClientRect(),s=document.querySelector('.scroller');s.scrollLeft+=m.left-s.getBoundingClientRect().left-s.clientWidth/2;
+  scrollTo({top:0,behavior:'smooth'})};
+ $('ex').appendChild(b)});
+setLam(LAM);showRegion(REG[3],null);
+</script>
+</body>
+</html>
