@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lípidos, Índice de Yodo y Saponificación</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#120a2e;--card:#1e1347;--tx:#f5f3ff;--mu:#c4b5fd;--a:#ffd60a;--b:#ff3d7f;--c:#00e5ff;--d:#7cff6b}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:linear-gradient(160deg,#6ec1ff,#3a9bf0 55%,#2b7fdc);background-attachment:fixed;color:var(--tx);min-height:100vh;color-scheme:dark}
+header{padding:22px 18px 10px;text-align:center}
+h1{margin:0;font-size:clamp(1.4rem,4.5vw,2.4rem);color:#fff;text-shadow:0 2px 8px #0a2a6b99}
+.au{margin-top:6px;color:#fff;font-size:1rem}.au b{color:#002266}
+main{max-width:980px;margin:auto;padding:8px 14px 30px}
+.tabs,.sub{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+button{font:inherit;cursor:pointer;border:2px solid transparent;border-radius:999px;padding:8px 16px;background:var(--card);color:var(--tx);transition:.15s}
+button:hover{transform:translateY(-2px);border-color:var(--c)}
+.tabs button{font-weight:700;font-size:1.02rem}
+.tabs button.on{background:linear-gradient(90deg,var(--b),#ff8a00);color:#fff}
+.sub button.on{background:var(--c);color:#04222a;font-weight:700}
+.card{background:var(--card);border-radius:18px;padding:20px 22px;border-left:6px solid var(--a);box-shadow:0 8px 30px #0006;overflow-x:auto}
+.card h2{margin:0 0 10px;color:var(--a)}
+.card p{line-height:1.6;margin:.5em 0}
+.q{background:#2b1b66;border-radius:12px;padding:12px 14px;margin-bottom:12px;color:#fff}
+.step{margin:10px 0;padding:8px 12px;border-left:4px solid var(--c);background:#ffffff0d;border-radius:0 10px 10px 0}
+.ans{margin-top:12px;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,var(--d),#00e5a0);color:#06240a;font-weight:700;font-size:1.05rem}
+.hide{display:none}.k{color:var(--b);font-weight:700}
+mjx-container{color:var(--tx)}
+</style>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+</head><body>
+<header><h1>🧪 Lípidos: Índice de Yodo e Índice de Saponificación</h1>
+<div class="au">Autor: <b>Dr. Ronald F. Rodriguez Espinoza</b></div></header>
+<main>
+<div class="tabs" id="tabs"></div>
+<div class="sub" id="sub"></div>
+<div class="card" id="view"></div>
+</main>
+<script>
+const I2='M(\\mathrm{I_2})=254\\ \\text{g/mol}';
+const T=[
+["¿Qué son los lípidos?","Son biomoléculas orgánicas <span class='k'>insolubles en agua</span> y solubles en solventes apolares (éter, cloroformo, hexano). Cumplen funciones de reserva energética, estructura de membranas, aislamiento y señalización. Se clasifican en simples (acilgliceroles, ceras), complejos (fosfolípidos, glucolípidos) y derivados (esteroides, ácidos grasos)."],
+["¿Qué son los acilgliceroles?","Son ésteres de <span class='k'>glicerol</span> con ácidos grasos. Según los OH esterificados: monoacilgliceroles, diacilgliceroles y triacilgliceroles (triglicéridos). Son la principal forma de almacenamiento de energía: grasas (sólidas) y aceites (líquidos).\\[\\text{Glicerol}+3\\,\\text{R–COOH}\\rightarrow\\text{Triacilglicerol}+3\\,\\mathrm{H_2O}\\]"],
+["¿Qué son los fosfolípidos?","Lípidos complejos <span class='k'>anfipáticos</span>: una cabeza polar (fosfato + alcohol como colina, etanolamina o serina) y dos colas apolares de ácidos grasos. Derivan del glicerol (glicerofosfolípidos) o de la esfingosina (esfingomielina). Forman la <span class='k'>bicapa lipídica</span> de las membranas celulares."],
+["¿Qué son los ácidos grasos?","Ácidos carboxílicos de cadena hidrocarbonada larga, normalmente lineal y de número par de carbonos (C4–C24). Pueden ser <span class='k'>saturados</span> (sin dobles enlaces, ej. palmítico C16:0) o <span class='k'>insaturados</span> (ej. oleico C18:1, linoleico C18:2).\\[\\mathrm{CH_3(CH_2)_n\\,COOH}\\]"],
+["¿Qué es el índice de yodo?","Son los <span class='k'>gramos de yodo (I₂)</span> que reaccionan con los dobles enlaces de <span class='k'>100 g</span> de grasa. Mide el grado de insaturación: a mayor I.I., más dobles enlaces.\\[\\mathrm{-CH{=}CH-}+\\mathrm{I_2}\\rightarrow\\mathrm{-CHI{-}CHI-}\\]"],
+["¿Qué es el índice de saponificación?","Son los <span class='k'>miligramos de KOH</span> necesarios para saponificar completamente <span class='k'>1 g</span> de grasa. Es inversamente proporcional al peso molecular promedio de los ácidos grasos (cadenas cortas → I.S. alto).\\[\\text{Triacilglicerol}+3\\,\\mathrm{KOH}\\rightarrow\\text{Glicerol}+3\\,\\text{R–COOK}\\]"]
+];
+const II=[
+["Si el índice de yodo de una muestra lipídica es 130, ¿cuántos gramos de yodo serán necesarios para 20 gramos de muestra?",
+["Definición: I.I. = 130 g de I₂ por cada 100 g de muestra.","\\[m_{I_2}=20\\ \\text{g muestra}\\times\\frac{130\\ \\text{g } I_2}{100\\ \\text{g muestra}}\\]"],"m = 26 g de yodo"],
+["Si 200 g de muestra de un lípido requieren 0,5 mol de yodo para reaccionar, determine el índice de yodo de esa muestra. Nota: Considere que la masa atómica del yodo (I) es 127 uma.",
+["Masa molar del yodo molecular: \\("+I2+"\\)","\\[m_{I_2}=0{,}5\\ \\text{mol}\\times254\\ \\tfrac{\\text{g}}{\\text{mol}}=127\\ \\text{g}\\]","\\[\\text{I.I.}=\\frac{127\\ \\text{g } I_2}{200\\ \\text{g}}\\times100=63{,}5\\]"],"I.I. = 63,5"],
+["¿Cuántos gramos de yodo promedio serán necesarios para halogenar 10 gramos de aceite de oliva? Dato: I.I. = 81.",
+["\\[m_{I_2}=10\\ \\text{g}\\times\\frac{81\\ \\text{g } I_2}{100\\ \\text{g aceite}}\\]"],"m = 8,1 g de yodo"],
+["Calcular el número de enlaces dobles por mol de un acilglicerol, si 35 gramos de lípido consumen 0,2 moles de yodo. El peso molecular del acilglicerol es 700 uma.",
+["Moles de lípido: \\(n=\\dfrac{35}{700}=0{,}05\\ \\text{mol}\\)","Cada doble enlace consume 1 mol de I₂:","\\[\\text{N.º de dobles enlaces}=\\frac{n_{I_2}}{n_{lípido}}=\\frac{0{,}2}{0{,}05}=4\\]"],"4 dobles enlaces por mol"],
+["Si un triacilglicerol de peso molecular 884 uma contiene solamente ácido linoleico. ¿Cuánto es su I.I.?",
+["Ácido linoleico (C18:2) → 2 dobles enlaces; son 3 cadenas: \\(3\\times2=6\\) dobles enlaces.","\\[m_{I_2}=6\\times254=1524\\ \\text{g por mol de lípido (884 g)}\\]","\\[\\text{I.I.}=\\frac{1524}{884}\\times100\\approx172{,}4\\]"],"I.I. ≈ 172,4"],
+["Calcular el número promedio de enlaces dobles que tendrá un acilglicerol, si se sabe que 70 g de muestra consumen 304.8 g de yodo, y que el peso molecular de dicha muestra es de 700 uma.",
+["Moles de lípido: \\(n=\\dfrac{70}{700}=0{,}1\\ \\text{mol}\\)","Moles de yodo: \\(n_{I_2}=\\dfrac{304{,}8}{254}=1{,}2\\ \\text{mol}\\)","\\[\\text{N.º de dobles enlaces}=\\frac{1{,}2}{0{,}1}=12\\]"],"12 dobles enlaces promedio"]
+];
+const IS=[
+["Determine el índice de saponificación de 15,5 gramos de grasa que reaccionan totalmente con 120 mL de una solución de KOH 0,4 M. Nota: la masa molar de KOH es 56 g/mol.",
+["Moles de KOH: \\(n=0{,}4\\ \\tfrac{\\text{mol}}{\\text{L}}\\times0{,}120\\ \\text{L}=0{,}048\\ \\text{mol}\\)","Masa de KOH: \\(m=0{,}048\\times56=2{,}688\\ \\text{g}=2688\\ \\text{mg}\\)","\\[\\text{I.S.}=\\frac{2688\\ \\text{mg KOH}}{15{,}5\\ \\text{g grasa}}\\approx173{,}4\\ \\text{mg KOH/g}\\]"],"I.S. ≈ 173,4 mg KOH/g"],
+["Determine el índice de saponificación del trioleato de glicerilo cuyo peso molecular es 886 uma. Asimismo, dibuje los productos obtenidos de la saponificación.",
+["Se necesitan 3 mol de KOH por mol de triacilglicerol:","\\[m_{KOH}=3\\times56=168\\ \\text{g}=168\\,000\\ \\text{mg por 886 g de grasa}\\]","\\[\\text{I.S.}=\\frac{168\\,000\\ \\text{mg}}{886\\ \\text{g}}\\approx189{,}6\\ \\text{mg KOH/g}\\]","Reacción de saponificación:","\\[\\underset{\\text{trioleína}}{\\begin{matrix}\\mathrm{CH_2{-}OCO{-}R}\\\\\\mathrm{CH{-}OCO{-}R}\\\\\\mathrm{CH_2{-}OCO{-}R}\\end{matrix}}+3\\,\\mathrm{KOH}\\rightarrow\\underset{\\text{glicerol}}{\\begin{matrix}\\mathrm{CH_2OH}\\\\\\mathrm{CHOH}\\\\\\mathrm{CH_2OH}\\end{matrix}}+3\\,\\underset{\\text{oleato de potasio (jabón)}}{\\mathrm{R{-}COO^-K^+}}\\]","con \\(\\mathrm{R}=\\mathrm{CH_3(CH_2)_7CH{=}CH(CH_2)_7}\\) (oleico, C18:1)."],"I.S. ≈ 189,6 mg KOH/g · Productos: glicerol + 3 oleato de potasio"]
+];
+const SEC=[{n:"📚 Teoría",d:T,t:0},{n:"🧪 Índice de yodo",d:II,t:1},{n:"🧼 Saponificación",d:IS,t:1}];
+let s=0,i=0;
+const $=id=>document.getElementById(id);
+function render(){
+ $('tabs').innerHTML=SEC.map((x,k)=>`<button class="${k==s?'on':''}" onclick="s=${k};i=0;render()">${x.n}</button>`).join('');
+ const S=SEC[s];
+ $('sub').innerHTML=S.d.map((x,k)=>`<button class="${k==i?'on':''}" onclick="i=${k};render()">${S.t?'Problema '+(k+1):x[0].replace('¿Qué son los ','').replace('¿Qué es el ','').replace('¿Qué son las ','').replace('?','')}</button>`).join('');
+ const x=S.d[i];let h;
+ if(!S.t) h=`<h2>${x[0]}</h2><p>${x[1]}</p>`;
+ else h=`<h2>Problema ${i+1}</h2><div class="q">${x[0]}</div>`+x[1].map((p,n)=>`<div class="step"><b style="color:var(--c)">Paso ${n+1}.</b> ${p}</div>`).join('')+`<div class="ans">✅ ${x[2]}</div>`;
+ $('view').innerHTML=h;
+ if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([$('view')]);
+}
+render();
+window.addEventListener('load',()=>MathJax.typesetPromise&&MathJax.typesetPromise([$('view')]));
+</script></body></html>
