@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gestión integral de residuos: Caso Santa Esperanza</title>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+<style>
+:root{--bg:#f1f6fa;--card:#fff;--ink:#1d2b3a;--mut:#5b6b7b;--pri:#1f497d;--acc:#2a9d8f;--warn:#e9a23b;--bad:#d1604d;--soft:#dbe5f1;--line:#cfdbe6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a27;--card:#18263a;--ink:#e6eef6;--mut:#9fb2c5;--pri:#8fbaf0;--acc:#4cc3b3;--warn:#f0b955;--bad:#ef8a78;--soft:#223653;--line:#2b4261;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1a27;--card:#18263a;--ink:#e6eef6;--mut:#9fb2c5;--pri:#8fbaf0;--acc:#4cc3b3;--warn:#f0b955;--bad:#ef8a78;--soft:#223653;--line:#2b4261;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:#0c1522;color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+#view{flex:1;position:relative;min-height:0;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;background:var(--bg);overflow:hidden;border-radius:6px}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateX(30px);transition:.4s;--c:#1f497d;--c2:#2a9d8f;
+background:linear-gradient(180deg,color-mix(in srgb,var(--c) 11%,var(--bg)),var(--bg) 60%)}
+.slide.on{opacity:1;visibility:visible;transform:none}
+.hd{height:78px;display:flex;align-items:center;gap:16px;padding:0 44px;background:linear-gradient(100deg,var(--c),var(--c2));color:#fff}
+.hd h2{margin:0;font-size:30px;flex:1;font-weight:700}
+.hd .n{background:rgba(255,255,255,.22);border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-weight:800}
+.lgw{height:54px;min-width:54px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none}
+.lgw img{height:100%;width:auto;max-width:210px;display:block}
+.lb{display:none;font-weight:800;color:#1f497d;font-size:15px;padding:0 14px}
+.bd{padding:18px 44px;height:calc(100% - 78px);display:flex;flex-direction:column;gap:12px;font-size:17px}
+.mut{color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;box-shadow:0 4px 14px rgba(31,73,125,.08)}
+.row2{display:grid;gap:14px;grid-template-columns:1fr 1fr}.row3{display:grid;gap:14px;grid-template-columns:repeat(3,1fr)}
+button{font:inherit;cursor:pointer}
+.pill{border:2px solid var(--c);background:var(--card);color:var(--c);padding:8px 16px;border-radius:99px;font-weight:700;font-size:16px;transition:.2s}
+.pill.on,.pill:hover{background:var(--c);color:#fff}
+.pills{display:flex;gap:10px;flex-wrap:wrap}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:15px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+th{background:var(--c);color:#fff;text-align:left;padding:9px 12px;font-size:15px}
+td{padding:8px 12px;border-top:1px solid var(--line);background:var(--card);vertical-align:middle}
+tr:nth-child(even) td{background:color-mix(in srgb,var(--c) 7%,var(--card))}
+tr.hl td{background:color-mix(in srgb,var(--c2) 24%,var(--card));font-weight:600}
+tr.dim td{opacity:.45}
+td.res{font-weight:800;color:var(--c)}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:700;color:#fff}
+.t1{background:#2a9d8f}.t2{background:#e9a23b}.t3{background:#d1604d}
+.k{border-left:6px solid var(--c2)}
+.big{font-size:44px;font-weight:800;color:var(--c);line-height:1}
+.hint{font-size:13px;color:var(--mut)}
+.msg{min-height:20px;font-size:14px;font-weight:700;color:var(--bad)}
+.meter{height:20px;background:var(--soft);border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c2),var(--c));transition:.4s}
+.rg{display:flex;align-items:center;gap:8px;font-size:14px;margin:3px 0}.rg label{flex:1}.rg b{min-width:70px;text-align:right;color:var(--c)}
+input[type=range]{width:100%;accent-color:var(--c)}
+.hid{display:none}
+#cover{background:linear-gradient(135deg,#1f497d,#2a9d8f 70%,#7bd3c4);color:#fff;--c:#fff}
+#cover .bd{align-items:center;justify-content:center;text-align:center;height:100%;gap:10px}
+#cover h1{font-size:50px;margin:6px 0;line-height:1.1}
+.biglogo{height:96px;min-width:150px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+.biglogo img{height:100%;width:auto;max-width:420px;display:block}.biglogo .lb{font-size:32px;padding:0 28px}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.chip{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);padding:8px 16px;border-radius:99px;font-weight:600;font-size:17px;color:#fff;text-decoration:none}
+a.chip{background:#fff;color:#1f497d;font-weight:800}a.chip:hover{background:#ffe8a8}
+.steps{display:flex;flex-direction:column;gap:8px}
+.st{display:flex;gap:10px;align-items:center;text-align:left;border:2px solid var(--line);background:var(--card);color:var(--ink);padding:9px 12px;border-radius:14px;font-weight:600;transition:.2s}
+.st i{font-style:normal;width:30px;height:30px;border-radius:50%;background:var(--soft);color:var(--c);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.st.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}.st.on i{background:var(--c);color:#fff}
+.st.done i{background:var(--acc);color:#fff}
+.chk{display:flex;gap:10px;align-items:center;padding:7px 12px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);text-align:left;width:100%;margin-bottom:6px}
+.chk.on{border-color:var(--c2);background:color-mix(in srgb,var(--c2) 16%,var(--card))}
+.refs p{padding-left:1.6em;text-indent:-1.6em;margin:.55em 0;font-size:16px}.refs a{color:var(--pri);word-break:break-all}
+nav{display:flex;align-items:center;gap:12px;padding:8px 16px;background:#0c1522;color:#9fb2c5;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+nav button{border:none;background:#2a9d8f;color:#fff;border-radius:10px;width:40px;height:34px;font-size:19px}
+nav .foot{flex:1;font-size:12px;text-align:center}
+.dots{display:flex;gap:6px}.dots i{width:9px;height:9px;border-radius:50%;background:#3a4c63;cursor:pointer}.dots i.on{background:#7bd3c4;transform:scale(1.4)}
+mjx-container{font-size:100%!important}
+</style>
+</head>
+<body>
+<div id="view"><div id="stage">
+
+<!-- 1 PORTADA -->
+<section class="slide" id="cover" data-s="s1"><div class="bd">
+ <label class="biglogo" title="Clic para cargar el logo"><img class="lg" src="logoutp.png" alt="Logo UTP" onerror="logoFail(this)"><span class="lb">UTP</span><input type="file" accept="image/*" id="lf" class="hid"></label>
+ <div style="opacity:.9;font-size:18px">Universidad Tecnológica del Perú · Gestión del Medio Ambiente – Sección 54700</div>
+ <h1>Gestión integral de residuos:<br>Caso Santa Esperanza</h1>
+ <div style="font-size:20px;opacity:.95">Diagnóstico, plan de intervención y respuesta ante contingencia · 2026</div>
+ <div class="chips" style="margin-top:14px"><span class="chip">Mesía Ricopa, Noreli Acelita</span><span class="chip">Chávez Ochoa, Diana Yacely</span><span class="chip">Huancas Coronel, Jakory Alexandra</span><span class="chip">Castro García, Analy</span></div>
+ <div class="chips" style="width:100%;justify-content:center"><a class="chip" target="_blank" rel="noopener" href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" title="Ver CTI Vitae">Rodriguez Espinoza, Ronald Fernando ↗</a></div>
+</div></section>
+
+<!-- 2 DIAGNÓSTICO I -->
+<section class="slide" data-s="s2" style="--c:#1f497d;--c2:#3b8bd9"><div class="hd"><span class="n">2</span><h2>Diagnóstico: problemas, riesgos y evidencias</h2><span class="lgw"><img class="lg" src="logoutp.png" alt="" onerror="logoFail(this)"><span class="lb">UTP</span></span></div>
+<div class="bd">
+ <div class="pills" id="p2"></div>
+ <table><thead><tr><th style="width:15%">Flujo / fuente</th><th>Problema y riesgo</th><th style="width:20%">Población o ambiente afectado</th><th style="width:24%">Evidencia disponible</th></tr></thead><tbody id="t2"></tbody></table>
+ <div class="row3" id="d2"></div>
+ <div class="hint">Datos simulados con fines académicos (UTP, 2026). Elige un flujo para diferenciar hechos, inferencias y datos por verificar.</div>
+</div></section>
+
+<!-- 3 DIAGNÓSTICO II -->
+<section class="slide" data-s="s3" style="--c:#0f7a73;--c2:#35b9a8"><div class="hd"><span class="n">3</span><h2>Diagnóstico: responsables y marco normativo</h2><span class="lgw"><img class="lg" src="logoutp.png" alt="" onerror="logoFail(this)"><span class="lb">UTP</span></span></div>
+<div class="bd">
+ <div class="pills" id="p3"><button class="pill on" data-m="all">Ver todo</button><button class="pill" data-m="mun">Acción municipal</button><button class="pill" data-m="otr">Obligación de otros actores</button></div>
+ <table id="t3"><thead><tr><th style="width:17%">Flujo</th><th>Acción municipal</th><th>Obligación de otros actores</th><th style="width:22%">Base</th></tr></thead><tbody>
+ <tr><td><b>Residuos sólidos municipales</b></td><td class="m">Recolección, transporte y limpieza de puntos críticos</td><td class="o">Generadores: segregar y entregar sus residuos; prestadores: cumplir rutas</td><td>Decreto Legislativo N.º 1278, 2016</td></tr>
+ <tr><td><b>Aguas residuales</b></td><td class="m">Diagnóstico de descargas y reporte a autoridades</td><td class="o">EPS y titulares de la descarga: tratamiento y cumplimiento de LMP y VMA</td><td>DS 003-2010-MINAM; DS 010-2019-VIVIENDA</td></tr>
+ <tr><td><b>Residuos peligrosos</b></td><td class="m">Inventario, señalización, capacitación y fiscalización en su ámbito</td><td class="o">Generador: manejo seguro; contratar operador autorizado</td><td>Decreto Legislativo N.º 1278, 2016</td></tr>
+ <tr><td><b>Gestión institucional</b></td><td class="m">Registro, inspecciones y coordinación entre actores</td><td class="o">Informar y colaborar con la municipalidad</td><td>Responsabilidad compartida</td></tr></tbody></table>
+ <div class="card k"><b>Responsabilidad compartida.</b> La gestión integral es una corresponsabilidad de generadores, operadores y municipalidades, de forma coordinada y diferenciada. La municipalidad <b>no</b> es responsable directa de todos los flujos del caso.</div>
+ <div class="hint">No se afirman incumplimientos específicos sin verificación (UTP, 2026).</div>
+</div></section>
+
+<!-- 4 ANÁLISIS DE DATOS -->
+<section class="slide" data-s="s4" style="--c:#7b3fb0;--c2:#b57be0"><div class="hd"><span class="n">4</span><h2>Análisis de datos, cálculos y limitaciones</h2><span class="lgw"><img class="lg" src="logoutp.png" alt="" onerror="logoFail(this)"><span class="lb">UTP</span></span></div>
+<div class="bd">
+ <div class="pills" id="p4"><button class="pill on" data-v="a">Cálculos</button><button class="pill" data-v="b">Impactos y limitaciones</button><button class="pill" data-x="1" id="rst" style="margin-left:auto">↺ Valores del caso</button></div>
+ <div id="v4a" style="display:grid;grid-template-columns:290px 1fr;gap:14px;flex:1;min-height:0">
+  <div class="card" id="sl"></div>
+  <table><thead><tr><th style="width:26%">Resultado</th><th>Procedimiento</th><th style="width:20%">Valor</th></tr></thead><tbody id="t4"></tbody></table>
+ </div>
+ <div id="v4b" class="hid" style="flex:1;min-height:0">
+  <div class="card"><b>Aguas residuales: tratadas y sin tratar (m³/día)</b><div class="meter" style="height:30px;margin:8px 0"><i id="wb"></i></div><div id="wt" class="mut"></div></div>
+  <div class="pills" id="p4b" style="margin:10px 0"><button class="pill on" data-i="0">Canal y ambiente</button><button class="pill" data-i="1">Salud pública</button><button class="pill" data-i="2">Convivencia</button></div>
+  <div class="card k" id="imp" style="margin-bottom:10px"></div>
+  <div class="row2"><div class="card"><b>Dos limitaciones</b><br>1) Porcentajes promedio supuestos, sin series de tiempo ni eficiencia medida.<br>2) Sin caracterización química de las aguas ni inventario de peligrosidad.</div>
+  <div class="card"><b>Información necesaria</b><br>Caracterización de residuos, parámetros del efluente, inventario de generadores y destino real de la disposición final.</div></div>
+ </div>
+</div></section>
+
+<!-- 5 PLAN: ALTERNATIVAS -->
+<section class="slide" data-s="s5" style="--c:#c9701c;--c2:#f0a73a"><div class="hd"><span class="n">5</span><h2>Plan de intervención: arma tu presupuesto</h2><span class="lgw"><img class="lg" src="logoutp.png" alt="" onerror="logoFail(this)"><span class="lb">UTP</span></span></div>
+<div class="bd">
+ <div style="display:grid;grid-template-columns:1fr 330px;gap:16px;flex:1;min-height:0">
+  <table><thead><tr><th style="width:8%">Cód.</th><th>Alternativa de intervención</th><th style="width:15%">Costo</th><th style="width:10%">Elegida</th></tr></thead><tbody id="t5"></tbody></table>
+  <div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="mut">Presupuesto inicial</div><div class="big" style="font-size:34px">\(\mathrm{S/}\,30\,000\)</div>
+   <div class="mut">Costo total</div><div class="big" id="tot"></div><div class="meter"><i id="bar"></i></div>
+   <div>Saldo: <b id="sal"></b></div><div class="msg" id="msg"></div>
+   <button class="pill" id="rec">Ver propuesta del equipo</button><button class="pill" id="clr">Limpiar</button></div>
+ </div>
+ <div class="hint">Haz clic en una fila para elegir o quitar alternativas. Los costos son supuestos didácticos (UTP, 2026).</div>
+</div></section>
+
+<!-- 6 PLAN: TABLA -->
+<section class="slide" data-s="s6" style="--c:#b3402f;--c2:#ee7d68"><div class="hd"><span class="n">6</span><h2>Plan de intervención: acciones, costos y plazos</h2><span class="lgw"><img class="lg" src="logoutp.png" alt="" onerror="logoFail(this)"><span class="lb">UTP</span></span></div>
+<div class="bd">
+ <table><thead><tr><th style="width:19%">Acción</th><th>Justificación</th><th style="width:10%">Costo</th><th style="width:17%">Responsable</th><th style="width:8%">Plazo</th><th style="width:17%">Indicador</th></tr></thead><tbody>
+ <tr><td><b>B.</b> Reforzar recolección y limpieza de puntos críticos</td><td>15 t/día sin recolectar; riesgo de vectores y olores</td><td>\(\mathrm{S/}\,9\,000\)</td><td>Municipalidad + prestador</td><td>\(30\,\text{d}\)</td><td>Puntos críticos atendidos/semana</td></tr>
+ <tr><td><b>C.</b> Caracterizar aguas y puntos de descarga</td><td>3 600 m³/día sin tratar y sin análisis de calidad</td><td>\(\mathrm{S/}\,7\,000\)</td><td>Municipalidad + laboratorio acreditado</td><td>\(30\,\text{d}\)</td><td>Puntos con informe de laboratorio</td></tr>
+ <tr><td><b>E.</b> Inventariar y señalizar peligrosos; capacitar generadores</td><td>175 kg/día sin manejo documentado</td><td>\(\mathrm{S/}\,6\,000\)</td><td>Municipalidad (fiscaliza) + generadores</td><td>\(21\,\text{d}\)</td><td>Establecimientos inventariados</td></tr>
+ <tr><td><b>G.</b> Registro de indicadores e inspecciones</td><td>Registros incompletos; permite medir resultados</td><td>\(\mathrm{S/}\,4\,000\)</td><td>Gestión Ambiental municipal</td><td>\(30\,\text{d}\)</td><td>Inspecciones registradas</td></tr>
+ <tr class="hl"><td colspan="2"><b>Total</b> \(= 9\,000+7\,000+6\,000+4\,000\)</td><td colspan="4"><b>\(\mathrm{S/}\,26\,000\)</b> · Saldo: \(30\,000-26\,000=\mathrm{S/}\,4\,000\) (reserva para contingencias)</td></tr></tbody></table>
+ <div class="pills"><span class="mut" style="align-self:center">Postergadas, ¿qué pasa si…?</span><button class="pill" data-p="A">A. Segregación piloto</button><button class="pill" data-p="D">D. Control de descargas</button><button class="pill" data-p="F">F. Almacén seguro</button></div>
+ <div class="card k" id="pp">Toca una alternativa postergada para ver su consecuencia. Las soluciones estructurales quedan para fases posteriores, sin costo asignado.</div>
+</div></section>
+
+<!-- 7 RESPONSABLES E INDICADORES -->
+<section class="slide" data-s="s7" style="--c:#2f7d3a;--c2:#7cc46a"><div class="hd"><span class="n">7</span><h2>Responsables, indicadores y verificación</h2><span class="lgw"><img class="lg" src="logoutp.png" alt="" onerror="logoFail(this)"><span class="lb">UTP</span></span></div>
+<div class="bd">
+ <div class="pills" id="p7"><button class="pill on" data-r="0">🏛️ Municipalidad</button><button class="pill" data-r="1">🏪 Generadores</button><button class="pill" data-r="2">🚚 Prestadores y EPS</button></div>
+ <div class="card k" id="rl" style="min-height:92px"></div>
+ <table><thead><tr><th style="width:13%">Tipo</th><th>Indicador</th><th style="width:38%">Fuente de verificación</th></tr></thead><tbody>
+ <tr><td><span class="tag t1">Ejecución</span></td><td>\(\%\) de acciones B, C, E y G ejecutadas en el plazo</td><td>Checklist semanal y comprobantes de gasto</td></tr>
+ <tr><td><span class="tag t1">Ejecución</span></td><td>N.º de establecimientos inventariados y capacitados</td><td>Fichas de inventario y actas</td></tr>
+ <tr><td><span class="tag t2">Resultado</span></td><td>Puntos críticos sin acumulación en 3 inspecciones seguidas</td><td>Fichas de inspección y fotos fechadas</td></tr>
+ <tr><td><span class="tag t2">Resultado</span></td><td>Puntos de descarga caracterizados y reportados</td><td>Informes de laboratorio acreditado y oficios</td></tr>
+ <tr><td><span class="tag t2">Resultado</span></td><td>Establecimientos con peligrosos separados y registrados</td><td>Inspección de campo y registro de manejo</td></tr></tbody></table>
+ <div class="hint">Línea base en la semana 1; no se asumen porcentajes de reducción. Las acciones diagnostican y reducen riesgos, no tratan todo el caudal.</div>
+</div></section>
+
+<!-- 8 CONTINGENCIA -->
+<section class="slide" data-s="s8" style="--c:#c2410c;--c2:#f59e0b"><div class="hd"><span class="n">8</span><h2>Respuesta ante contingencia (semana 2)</h2><span class="lgw"><img class="lg" src="logoutp.png" alt="" onerror="logoFail(this)"><span class="lb">UTP</span></span></div>
+<div class="bd">
+ <div class="card">Aceite usado y envases químicos mezclados con residuos ordinarios cerca del mercado, mientras persiste una descarga de aguas residuales al canal.</div>
+ <div style="display:grid;grid-template-columns:340px 1fr;gap:16px;flex:1;min-height:0">
+  <div class="steps" id="s8"></div>
+  <div class="card k" style="display:flex;flex-direction:column"><h3 id="h8" style="margin:0 0 8px;color:var(--c);font-size:24px"></h3><div id="b8" style="flex:1;font-size:18px;line-height:1.5"></div>
+   <div style="display:flex;gap:10px"><button class="pill" id="pv8">← Anterior</button><button class="pill on" id="nx8">Siguiente paso →</button></div></div>
+ </div>
+</div></section>
+
+<!-- 9 CONCLUSIONES -->
+<section class="slide" data-s="s9" style="--c:#0b6e8a;--c2:#38bdf8"><div class="hd"><span class="n">9</span><h2>Conclusiones y pregunta final</h2><span class="lgw"><img class="lg" src="logoutp.png" alt="" onerror="logoFail(this)"><span class="lb">UTP</span></span></div>
+<div class="bd" style="flex-direction:row;gap:20px">
+ <div style="width:520px;display:flex;flex-direction:column;gap:10px">
+  <div style="font-weight:800;font-size:20px;color:var(--c)">Tres conclusiones</div>
+  <div class="pills" id="p9"><button class="pill on" data-i="0">1 · Diagnóstico</button><button class="pill" data-i="1">2 · Intervención</button><button class="pill" data-i="2">3 · Seguimiento</button></div>
+  <div class="card k" id="c9" style="flex:1;font-size:18px;line-height:1.5"></div>
+ </div>
+ <div style="flex:1;display:flex;flex-direction:column;gap:10px">
+  <div style="font-weight:800;font-size:20px;color:var(--c)">Pregunta final</div>
+  <div class="card" style="background:var(--c);color:#fff;font-size:18px;font-weight:700">¿La disminución de residuos visibles en las calles demostraría por sí sola que mejoró la gestión integral?</div>
+  <div class="pills" id="q9"><button class="pill" data-a="si">Sí, lo demuestra</button><button class="pill" data-a="no">No, no basta</button></div>
+  <div class="card" id="f9" style="min-height:74px">Elige una respuesta para ver la explicación.</div>
+  <div style="font-weight:700;margin-top:4px">¿Qué evidencias adicionales harían falta? Márcalas:</div>
+  <div id="ev"></div>
+  <div class="meter"><i id="evb"></i></div>
+  <div class="card k" id="ev9" style="font-weight:600"></div>
+ </div>
+</div></section>
+
+<!-- 10 REFERENCIAS -->
+<section class="slide" data-s="s10" style="--c:#475569;--c2:#94a3b8"><div class="hd"><span class="n">10</span><h2>Referencias</h2><span class="lgw"><img class="lg" src="logoutp.png" alt="" onerror="logoFail(this)"><span class="lb">UTP</span></span></div>
+<div class="bd"><div class="card refs">
+ <p>Decreto Legislativo N.º 1278. (2016, 23 de diciembre). <i>Ley de Gestión Integral de Residuos Sólidos</i>. El Peruano. <a href="https://cdn.www.gob.pe/uploads/document/file/155774/Decreto-Legislativo-1278.pdf" target="_blank" rel="noopener">https://cdn.www.gob.pe/uploads/document/file/155774/Decreto-Legislativo-1278.pdf</a></p>
+ <p>Decreto Supremo N.º 003-2010-MINAM. (2010, 17 de marzo). <i>Límites Máximos Permisibles para los efluentes de Plantas de Tratamiento de Aguas Residuales Domésticas o Municipales</i>. SINIA. <a href="https://sinia.minam.gob.pe/normas/limites-maximos-permisibles-lmp-efluentes-plantas-tratamiento-aguas" target="_blank" rel="noopener">https://sinia.minam.gob.pe/normas/limites-maximos-permisibles-lmp-efluentes-plantas-tratamiento-aguas</a></p>
+ <p>Decreto Supremo N.º 010-2019-VIVIENDA. (2019). <i>Reglamento de Valores Máximos Admisibles (VMA) para las descargas de aguas residuales no domésticas en el sistema de alcantarillado sanitario</i>. El Peruano.</p>
+ <p>Decreto Supremo N.º 014-2017-MINAM. (2017, 21 de diciembre). <i>Reglamento del Decreto Legislativo N.º 1278, Ley de Gestión Integral de Residuos Sólidos</i>. El Peruano.</p>
+ <p>Universidad Tecnológica del Perú [UTP]. (2026). <i>Instructivo de la actividad grupal: Gestión integral de residuos, caso Santa Esperanza</i> [Documento del curso]. UTP.</p></div>
+ <div style="text-align:center;font-size:22px;font-weight:800;color:var(--c)">Gracias. Quedamos atentos a sus preguntas.</div>
+</div></section>
+
+</div></div>
+<nav><button id="pv" aria-label="Anterior">‹</button><div class="dots" id="dots"></div><span class="foot">Gestión del Medio Ambiente – Sección 54700 · usa ← → del teclado</span><span id="nm"></span><button id="nx" aria-label="Siguiente">›</button></nav>
+
+<script>
+var $=function(i){return document.getElementById(i)},Q=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
+function mj(el){try{if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetClear&&MathJax.typesetClear([el]);MathJax.typesetPromise([el])}}catch(e){}}
+function logoFail(i){i.style.display='none';i.nextElementSibling.style.display='flex'}
+$('lf').onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){Q('img.lg').forEach(function(i){i.src=r.result;i.style.display='block';i.nextElementSibling.style.display='none'})};r.readAsDataURL(f)};
+
+/* escala 16:9 para laptop */
+function fit(){var v=$('view'),w=v.clientWidth,h=v.clientHeight,s=Math.min(w/1280,h/720);$('stage').style.transform='translate('+(w-1280*s)/2+'px,'+(h-720*s)/2+'px) scale('+s+')'}
+window.addEventListener('resize',fit);fit();
+
+/* navegación */
+var S=Q('.slide'),cur=0;
+S.forEach(function(s,i){var d=document.createElement('i');d.onclick=function(){go(i)};$('dots').appendChild(d)});
+function go(n){cur=Math.max(0,Math.min(S.length-1,n));S.forEach(function(s,i){s.classList.toggle('on',i===cur)});Q('#dots i').forEach(function(d,i){d.classList.toggle('on',i===cur)});$('nm').textContent=(cur+1)+' / '+S.length;if(location.hash!=='#'+S[cur].dataset.s)history.replaceState(null,'','#'+S[cur].dataset.s)}
+$('pv').onclick=function(){go(cur-1)};$('nx').onclick=function(){go(cur+1)};
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='PageDown')go(cur+1);if(e.key==='ArrowLeft'||e.key==='PageUp')go(cur-1)});
+function fromHash(){var h=location.hash.slice(1),i=S.findIndex(function(s){return s.dataset.s===h});go(i<0?0:i)}
+window.addEventListener('hashchange',fromHash);
+function pills(box,fn){var L=Q('.pill',box).filter(function(x){return !x.dataset.x});L.forEach(function(b){b.addEventListener('click',function(){L.forEach(function(x){x.classList.toggle('on',x===b)});fn(b)})})}
+
+/* 2 diagnóstico */
+var D=[['🗑️ Residuos sólidos','Residuos sólidos','Segregación insuficiente y puntos críticos: vectores, olores y obstrucción de drenaje','Vecinos y comerciantes del mercado','Cobertura de recolección del 75 % de la masa; reclamos vecinales','75 % cobertura','La recolección no equivale a valorización ni disposición final adecuada','Destino real de los residuos y composición medida'],
+['💧 Aguas residuales','Aguas residuales','Parte del caudal sin tratamiento: contaminación del canal y riesgo sanitario','Vecinos del canal y ambiente acuático','40 % del volumen tratado; sin análisis de calidad del vertimiento','60 % sin tratar','El caudal sin tratar puede aportar carga contaminante al canal','Parámetros del efluente, puntos de descarga y autorizaciones'],
+['☣️ Residuos peligrosos','Residuos peligrosos','Aceites, baterías y envases con restos químicos sin separación: contaminación y accidentes','Trabajadores, recicladores y personal de limpieza','250 kg/día identificados; solo 30 % con manejo documentado','70 % sin documentar','Almacenar sin separar aumenta el riesgo de derrames y mezclas','Peligrosidad real, inventario y operador que los recoge'],
+['🏛️ Gestión institucional','Gestión institucional','Registros incompletos y poca coordinación: decisiones sin evidencia','Población en general','Inspección preliminar; sin series de datos','Sin registros','Sin datos no se pueden priorizar acciones ni evaluar resultados','Qué registros existen y quién los lleva']];
+D.forEach(function(d,i){var b=document.createElement('button');b.className='pill'+(i?'':' on');b.textContent=d[0];$('p2').appendChild(b);var tr=document.createElement('tr');tr.innerHTML='<td><b>'+d[1]+'</b></td><td>'+d[2]+'</td><td>'+d[3]+'</td><td>'+d[4]+'</td>';tr.onclick=function(){Q('#p2 .pill')[i].click()};$('t2').appendChild(tr)});
+function sel2(i){Q('#t2 tr').forEach(function(r,k){r.className=k===i?'hl':'dim'});var d=D[i];$('d2').innerHTML='<div class="card k" style="border-left-color:#2a9d8f"><span class="tag t1">Hecho del caso</span><div class="big" style="font-size:30px;margin:6px 0">'+d[5]+'</div>'+d[4]+'</div><div class="card k" style="border-left-color:#e9a23b"><span class="tag t2">Inferencia</span><p style="margin:8px 0 0">'+d[6]+'</p></div><div class="card k" style="border-left-color:#d1604d"><span class="tag t3">Por verificar</span><p style="margin:8px 0 0">'+d[7]+'</p></div>'}
+pills($('p2'),function(b){sel2(Q('#p2 .pill').indexOf(b))});sel2(0);
+
+/* 3 responsables */
+pills($('p3'),function(b){var m=b.dataset.m,t=$('t3');Q('td.m',t).forEach(function(c){c.style.opacity=m==='otr'?.25:1;c.style.fontWeight=m==='mun'?700:400});Q('td.o',t).forEach(function(c){c.style.opacity=m==='mun'?.25:1;c.style.fontWeight=m==='otr'?700:400})});
+
+/* 4 cálculos */
+var def={P:80000,g:.75,c:75,t:40,h:30},v=JSON.parse(JSON.stringify(def));
+var SL=[['P','Población (hab)',20000,150000,1000,function(x){return x.toLocaleString('es-PE')}],['g','Generación (kg/hab·día)',.3,1.5,.05,function(x){return x.toFixed(2).replace('.',',')}],['c','Cobertura de recolección (%)',30,100,1,function(x){return x+' %'}],['t','Aguas tratadas (%)',0,100,5,function(x){return x+' %'}],['h','Peligrosos con manejo documentado (%)',0,100,5,function(x){return x+' %'}]];
+function nf(x,d){var s=(+x.toFixed(d)).toString().split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'\\,');return s.length>1?s[0]+'{,}'+s[1]:s[0]}
+function buildSl(){$('sl').innerHTML=SL.map(function(s){return '<div class="rg"><label>'+s[1]+'</label><b id="v_'+s[0]+'">'+s[5](v[s[0]])+'</b></div><input type="range" id="r_'+s[0]+'" min="'+s[2]+'" max="'+s[3]+'" step="'+s[4]+'" value="'+v[s[0]]+'">'}).join('')+'<div class="hint" style="margin-top:8px">Mueve los controles para ver cómo cambian los resultados.</div>';SL.forEach(function(s){$('r_'+s[0]).oninput=function(){v[s[0]]=+this.value;$('v_'+s[0]).textContent=s[5](v[s[0]]);calc()}})}
+var tm;function calc(){clearTimeout(tm);tm=setTimeout(draw4,60)}
+function draw4(){var Gk=v.P*v.g,G=Gk/1000,R=G*v.c/100,N=G-R,u=function(x){return nf(x,2)},tx='\\,\\text{t/día}';
+var rows=[['Generados','\\text{'+'}'+nf(v.P,0)+'\\,\\text{hab}\\times'+nf(v.g,2)+'\\,\\text{kg/(hab·día)}='+nf(Gk,0)+'\\,\\text{kg/día}',u(G)+tx],
+['Recolectados',u(G)+tx+'\\times'+nf(v.c/100,2),u(R)+tx],['No recolectados',u(G)+'-'+u(R)+'\\,\\text{t/día}',u(N)+tx],
+['Orgánicos (50 %)',u(G)+'\\times0{,}50',u(G*.5)+tx],['Reciclables (30 %)',u(G)+'\\times0{,}30',u(G*.3)+tx],['No aprovechables (20 %)',u(G)+'\\times0{,}20',u(G*.2)+tx],
+['Aguas sin tratar','6\\,000\\,\\text{m}^3\\text{/día}\\times(1-'+nf(v.t/100,2)+')',nf(6000*(1-v.t/100),0)+'\\,\\text{m}^3\\text{/día}'],
+['Peligrosos sin manejo','250\\,\\text{kg/día}\\times(1-'+nf(v.h/100,2)+')',nf(250*(1-v.h/100),1)+'\\,\\text{kg/día}']];
+rows[0][1]=rows[0][1].replace('\\text{}','');
+$('t4').innerHTML=rows.map(function(r){return '<tr><td><b>'+r[0]+'</b></td><td>\\('+r[1]+'\\)</td><td class="res">\\('+r[2]+'\\)</td></tr>'}).join('');mj($('t4'));
+var sin=6000*(1-v.t/100);$('wb').style.width=(100-v.t)+'%';$('wb').style.background='linear-gradient(90deg,#d1604d,#e9a23b)';
+$('wt').innerHTML='Sin tratar: <b>'+Math.round(sin).toLocaleString('es-PE')+' m³/día</b> ('+(100-v.t)+' %) · Tratadas: <b>'+Math.round(6000-sin).toLocaleString('es-PE')+' m³/día</b>'}
+$('rst').onclick=function(){v=JSON.parse(JSON.stringify(def));buildSl();draw4()};
+buildSl();draw4();
+pills($('p4'),function(b){if(!b.dataset.v)return;$('v4a').style.display=b.dataset.v==='a'?'grid':'none';$('v4b').className=b.dataset.v==='b'?'':'hid'});
+var IM=['Los vertimientos sin tratar pueden aportar materia orgánica y patógenos al canal y degradar el ambiente acuático. No se afirma incumplimiento sin análisis de calidad.','Aguas sin tratar y basura acumulada favorecen vectores y contacto con patógenos para vecinos cercanos al canal, en especial población vulnerable.','Olores, acumulación visible y descargas generan malestar social y desconfianza hacia las instituciones.'];
+function imp(i){$('imp').textContent=IM[i]}imp(0);pills($('p4b'),function(b){imp(+b.dataset.i)});
+
+/* 5 presupuesto */
+var A=[['A','Instalar segregación piloto y señalización en el mercado',6000],['B','Reforzar recolección y limpieza de puntos críticos',9000],['C','Caracterización y diagnóstico de aguas residuales y descargas',7000],['D','Control temporal y reporte de descargas irregulares',5000],['E','Inventariar y señalizar residuos peligrosos; capacitar generadores',6000],['F','Almacenamiento temporal seguro y coordinación con operador autorizado',10000],['G','Registro de indicadores, inspecciones y seguimiento',4000]],sel={B:1,C:1,E:1,G:1},MAX=30000;
+function sm(n){return '\\(\\mathrm{S/}\\,'+nf(n,0)+'\\)'}
+function draw5(msg){var t=0;A.forEach(function(a){if(sel[a[0]])t+=a[2]});
+$('t5').innerHTML=A.map(function(a){return '<tr data-k="'+a[0]+'" class="'+(sel[a[0]]?'hl':'')+'" style="cursor:pointer"><td><b>'+a[0]+'</b></td><td>'+a[1]+'</td><td>'+sm(a[2])+'</td><td style="text-align:center;font-size:20px">'+(sel[a[0]]?'✔':'○')+'</td></tr>'}).join('');
+Q('#t5 tr').forEach(function(r){r.onclick=function(){var k=r.dataset.k,c=A.filter(function(a){return a[0]===k})[0];if(sel[k]){delete sel[k];draw5('')}else if(t+c[2]>MAX){draw5('Excede S/ 30 000: quita otra alternativa.')}else{sel[k]=1;draw5('')}}});
+$('tot').innerHTML=sm(t);$('sal').innerHTML=sm(MAX-t);$('bar').style.width=(t/MAX*100)+'%';$('msg').textContent=msg||'';mj($('t5'));mj($('tot'));mj($('sal'))}
+$('rec').onclick=function(){sel={B:1,C:1,E:1,G:1};draw5('')};$('clr').onclick=function(){sel={};draw5('')};draw5('');
+
+/* 6 postergadas */
+var PP={A:'Sin segregación piloto, la mezcla de residuos en el mercado continúa y se pierde la oportunidad de recuperar los reciclables.',D:'Sin control temporal formal, el reporte de descargas depende de la evidencia que genere la acción C y de las inspecciones de G.',F:'Sin almacenamiento seguro ni operador contratado, el riesgo con peligrosos se reduce solo parcialmente (inventario y capacitación), no se elimina.'};
+pills($('s6')||document.querySelector('[data-s="s6"]'),function(b){if(b.dataset.p)$('pp').innerHTML='<b>'+b.textContent+':</b> '+PP[b.dataset.p]});
+
+/* 7 roles */
+var RL=['<b>Municipalidad distrital:</b> presta y organiza la recolección y limpieza, coordina con actores, realiza inventario, capacitación e inspecciones y mantiene el registro (Decreto Legislativo N.º 1278, 2016).','<b>Generadores (mercado, comercios, centros de salud, talleres):</b> segregan y almacenan adecuadamente sus residuos y, si son peligrosos, los entregan a un operador autorizado.','<b>Prestadores y EPS:</b> cumplen rutas y frecuencias de servicio; las descargas se evalúan frente a los LMP y VMA y se reportan a la autoridad competente (DS 003-2010-MINAM; DS 010-2019-VIVIENDA).'];
+function rl(i){$('rl').innerHTML=RL[i]}rl(0);pills($('p7'),function(b){rl(+b.dataset.r)});
+
+/* 8 contingencia */
+var CT=[['Aislar y proteger','Delimitar y señalizar el área; restringir el paso de personas y animales. Evitar que el material llegue al drenaje y al canal usando material absorbente, solo por personal capacitado.'],['Contactar responsables','Gestión Ambiental y Serenazgo municipal; Bomberos si hay riesgo de incendio o derrame; operador autorizado de residuos peligrosos; generador identificado; EPS y autoridad competente por la descarga.'],['No improvisar','No manipular ni mezclar los envases. No trasvasar ni tapar con material ordinario. El recojo y traslado lo realiza un operador autorizado.'],['Informar a vecinos','Aviso breve por canales oficiales: qué ocurrió, zona restringida, no tocar envases ni usar el agua del canal, y dónde reportar.'],['Prevenir recurrencia','Reforzar inventario y capacitación (E) e inspecciones (G); usar parte del saldo de S/ 4 000 en señalización y cerco temporal, previa aprobación; reportar la descarga con la evidencia de C.']],c8=0;
+CT.forEach(function(c,i){var b=document.createElement('button');b.className='st';b.innerHTML='<i>'+(i+1)+'</i>'+c[0];b.onclick=function(){s8(i)};$('s8').appendChild(b)});
+function s8(i){c8=Math.max(0,Math.min(CT.length-1,i));Q('#s8 .st').forEach(function(b,k){b.className='st'+(k===c8?' on':'')+(k<c8?' done':'')});$('h8').textContent=(c8+1)+'. '+CT[c8][0];$('b8').textContent=CT[c8][1]}
+$('pv8').onclick=function(){s8(c8-1)};$('nx8').onclick=function(){s8(c8+1)};s8(0);
+
+/* 9 conclusiones */
+var C9=['<b>Hay tres flujos críticos y una gestión débil.</b><div style="margin:10px 0">\\(15\\,\\text{t/día}\\) de residuos sin recolectar<br>\\(3\\,600\\,\\text{m}^3\\text{/día}\\) de aguas sin tratar<br>\\(175\\,\\text{kg/día}\\) de peligrosos sin manejo documentado</div>Además, los registros son incompletos y hay poca coordinación entre actores.','<b>Con \\(\\mathrm{S/}\\,26\\,000\\) se atiende un flujo por tema.</b><div style="margin:10px 0">B + C + E + G en 30 días<br>Saldo: \\(\\mathrm{S/}\\,4\\,000\\) para contingencias</div>Quedan A, D y F para una fase posterior, con sus consecuencias identificadas.','<b>La responsabilidad es compartida.</b><div style="margin:10px 0">La municipalidad coordina, inspecciona y registra; los generadores y prestadores cumplen sus obligaciones.</div>Se mide con indicadores de ejecución y de resultado, con línea base en la semana 1.'];
+function c9(i){$('c9').innerHTML=C9[i];mj($('c9'))}c9(0);pills($('p9'),function(b){c9(+b.dataset.i)});
+pills($('q9'),function(b){$('f9').innerHTML=b.dataset.a==='no'?'<b style="color:#2a9d8f">Correcto.</b> Menos basura visible solo indica mejor limpieza. No prueba segregación, valorización, disposición final adecuada ni mejoras en aguas residuales o residuos peligrosos.':'<b style="color:#d1604d">Todavía no.</b> Una calle limpia puede coexistir con residuos mal dispuestos, descargas sin tratar y peligrosos sin manejo. Se necesita más evidencia.'});
+var EV=['Toneladas valorizadas y dispuestas en sitios autorizados','Resultados de laboratorio del efluente','Registros de manejo de peligrosos','Reducción sostenida de puntos críticos y quejas'],VT=['Solo vemos calles limpias: aún no se puede concluir que mejoró la gestión.','Falta bastante evidencia: la mejora todavía no está demostrada.','Hay avance, pero faltan flujos por comprobar.','Casi completo: falta una evidencia para sustentar la mejora integral.','Con estas 4 evidencias sí podría sustentarse una mejora de la gestión integral.'];
+function ev9(){var n=Q('#ev .chk.on').length;$('evb').style.width=(n/4*100)+'%';$('ev9').textContent=n+' de 4 evidencias: '+VT[n]}
+EV.forEach(function(t){var b=document.createElement('button');b.className='chk';b.innerHTML='<span>☐</span>'+t;b.onclick=function(){b.classList.toggle('on');b.firstChild.textContent=b.classList.contains('on')?'☑':'☐';ev9()};$('ev').appendChild(b)});ev9();
+fromHash();
+</script>
+</body>
+</html>
