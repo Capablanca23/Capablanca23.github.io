@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Patrones de distribución de organismos · Ecología</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#e7f1fa; --card:#ffffff; --ink:#0b2b44; --mut:#3a5f7d; --hd:#0b4f8a;
+  --acc:#f9a825; --acc2:#e65100; --blue:#1e6fb0; --green:#1b7f3b;
+  --shadow:0 3px 10px rgba(0,25,40,.07);
+  color-scheme:light;
+  box-sizing:border-box;
+}
+*{box-sizing:inherit}
+html,body{height:100%;margin:0;overflow:hidden}
+body{
+  background:var(--bg); color:var(--ink);
+  font:15px/1.45 'Inter',Roboto,system-ui,sans-serif;
+  display:flex; flex-direction:column;
+  height:100vh; height:100dvh;
+  -webkit-tap-highlight-color:transparent;
+}
+#bar{height:4px;flex-shrink:0;background:linear-gradient(90deg,var(--green),var(--acc),var(--blue));width:0;transition:width .35s}
+#deck{flex:1;position:relative;overflow:hidden;min-height:0}
+.slide{
+  position:absolute;inset:0;padding:12px 16px 8px;
+  display:none;
+  flex-direction:column; gap:8px;
+  overflow:hidden;
+  isolation:isolate;
+  background:var(--bg);
+}
+.slide.on{display:flex;animation:fade .35s ease}
+.slide:not(.on){visibility:hidden}
+@keyframes fade{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+
+h1{font-size:clamp(1.5rem,4.5vw,2.6rem);font-weight:800;line-height:1.12;margin:.15em 0;letter-spacing:-.02em}
+h2{font-size:clamp(1.05rem,2.4vw,1.5rem);margin:0;color:var(--hd);font-weight:700;letter-spacing:-.01em;flex-shrink:0}
+h3{margin:.15em 0;color:var(--green);font-weight:700;font-size:.98rem}
+p{margin:.25em 0}
+ul{padding-left:1.1em;margin:.25em 0}
+li{margin-bottom:.15em}
+
+.cols{display:grid;grid-template-columns:1fr 1.12fr;gap:10px;flex:1;min-height:0}
+.cols.c11{grid-template-columns:1fr 1fr}
+.cols.c21{grid-template-columns:1.4fr 1fr}
+.col{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden}
+.card{
+  background:var(--card);border-radius:12px;padding:10px 13px;
+  border-left:4px solid var(--green);box-shadow:var(--shadow);
+  font-size:.88rem;line-height:1.42;min-height:0;overflow:auto;
+}
+.card.tight{padding:8px 11px}
+.card p,.card ul{margin:.2em 0}
+.card ul{padding-left:1em}
+.def{background:#e4effa;border-left:4px solid var(--blue);border-radius:8px;padding:7px 10px;margin:.3em 0;font-size:.85rem}
+.how{background:#fff6e5;border-left:4px solid var(--acc);border-radius:8px;padding:7px 10px;margin:.3em 0;font-size:.83rem}
+.warn{background:#fdecec;border-left:4px solid #c62828;border-radius:8px;padding:7px 10px;margin:.3em 0;font-size:.83rem}
+.bignote{color:var(--mut);font-size:.78rem;line-height:1.35;margin:.2em 0}
+
+.cv{width:100%;display:block;background:#f4faff;border:1px solid #b8d4e8;border-radius:9px;touch-action:manipulation}
+.cv-main{flex:1 1 auto;min-height:0;object-fit:contain}
+.cv-sub{flex:0 0 auto;height:78px}
+.st{
+  background:#fff;border-left:4px solid var(--acc2);border-radius:8px;
+  padding:7px 10px;font-weight:600;color:#5e2a00;font-size:.78rem;line-height:1.4;flex-shrink:0;
+}
+
+button{
+  background:var(--acc);color:#2b1a00;border:0;border-radius:8px;
+  padding:7px 12px;font:600 .82rem 'Inter',sans-serif;cursor:pointer;
+  margin:2px 3px 2px 0;box-shadow:0 1px 2px rgba(0,0,0,.08);
+  transition:transform .1s,background .15s;
+}
+button:active{transform:scale(.97)}
+button.alt{background:var(--blue);color:#fff}
+button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+
+#nav{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:6px 12px;background:#0b3b66;color:#dbeeff;font-size:.75rem;flex-shrink:0;
+}
+#nav button{margin:0;padding:6px 14px;font-size:.8rem;border-radius:7px}
+#nav span{text-align:center;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== PORTADA ===== */
+.cover{padding:24px;overflow:hidden;display:none}
+.cover.on{display:grid;place-items:center;text-align:center}
+.cover-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;max-width:820px;gap:.4em}
+.cover h1{margin:.15em 0}
+.cover p{margin:.3em 0}
+
+.flip{display:grid;gap:10px;grid-template-columns:repeat(2,1fr);grid-auto-rows:1fr;flex:1;min-height:0}
+.fc{perspective:900px;cursor:pointer;min-height:0}
+.fc>div{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.fc.f>div{transform:rotateY(180deg)}
+.fc b,.fc i{
+  position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;
+  padding:10px;font-style:normal;display:flex;flex-direction:column;justify-content:center;
+  box-shadow:var(--shadow);font-size:.82rem;line-height:1.35;
+}
+.fc b{background:linear-gradient(145deg,#1e6fb0,#14558c);color:#fff;font-size:1rem;text-align:center;align-items:center;font-weight:700}
+.fc i{background:#ffe8b5;transform:rotateY(180deg);color:#3a2500}
+
+input[type=range]{width:100%;accent-color:var(--acc);margin:4px 0;height:5px}
+input[type=text]{width:100%;padding:7px 9px;border-radius:8px;border:1px solid #9cc3e0;margin:4px 0;font:400 .85rem 'Inter',sans-serif;background:#f9fcff}
+
+table{border-collapse:collapse;width:100%;font-size:.78rem}
+td,th{border:1px solid #b8d4e8;padding:4px 5px;text-align:center}
+th{background:#dcebf8;color:var(--hd);font-weight:700}
+
+.tabs{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px;flex-shrink:0}
+.tabs button{
+  background:#dcebf8;color:var(--hd);font-weight:600;padding:5px 11px;
+  border-radius:8px 8px 0 0;margin:0;border-bottom:3px solid transparent;box-shadow:none;font-size:.78rem;
+}
+.tabs button.on{background:#fff;border-bottom-color:var(--acc);color:var(--ink);box-shadow:0 -2px 5px rgba(0,0,0,.04)}
+.tab-content{display:none}
+.tab-content.on{display:block}
+
+.formula{background:#f0f6fc;border-radius:8px;padding:6px 10px;margin:.25em 0;text-align:center;overflow-x:auto;font-size:.9rem}
+.formula .katex{font-size:1em}
+
+/* Glosario: tarjetas compactas con término + definición */
+.gloss{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;flex:1;min-height:0;overflow:auto}
+.gloss .g{
+  background:#fff;border-radius:10px;padding:8px 11px;border-left:4px solid var(--blue);
+  box-shadow:var(--shadow);font-size:.8rem;line-height:1.38;
+}
+.gloss .g b{color:var(--hd);font-size:.86rem}
+.gloss .g em{color:var(--mut);font-style:normal;font-size:.76rem}
+@media (max-width:700px){.gloss{grid-template-columns:1fr}}
+
+#dots{
+  position:fixed;right:8px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:6px;z-index:50;pointer-events:none;
+}
+#dots i{
+  width:8px;height:8px;border-radius:50%;background:#0b3b6640;
+  transition:background .25s,transform .25s;
+}
+#dots i.on{background:var(--acc);transform:scale(1.35)}
+@media (max-width:700px){#dots{display:none}}
+
+@media (max-width:700px){
+  body{font-size:14px}
+  .slide{padding:8px 9px 4px;gap:6px}
+  .cols,.cols.c11,.cols.c21{grid-template-columns:1fr;gap:6px}
+  .cols.keep-2{grid-template-columns:1fr 1fr}
+  .card{padding:8px 10px;font-size:.82rem}
+  .flip{grid-template-columns:1fr 1fr}
+  .fc b{font-size:.88rem}
+  .fc i{font-size:.74rem}
+  #nav{font-size:.68rem;padding:5px 8px}
+  #nav button{padding:5px 10px;font-size:.74rem}
+  .cv-sub{height:60px}
+  h2{font-size:1rem}
+  .st{font-size:.72rem;padding:5px 8px}
+  .cover{padding:16px}
+}
+@media (max-height:520px){
+  .slide{padding:6px 9px 3px;gap:5px}
+  h2{font-size:.95rem}
+  .card{font-size:.78rem;padding:6px 9px}
+  .cv-sub{height:52px}
+  .st{font-size:.7rem;padding:4px 7px}
+  button{padding:5px 9px;font-size:.75rem}
+  .cover h1{font-size:1.6rem}
+}
+@media (prefers-reduced-motion:reduce){
+  .slide.on{animation:none}
+  .fc>div{transition:none}
+}
+.slide::-webkit-scrollbar,.card::-webkit-scrollbar,.gloss::-webkit-scrollbar{width:5px;height:5px}
+.slide::-webkit-scrollbar-thumb,.card::-webkit-scrollbar-thumb,.gloss::-webkit-scrollbar-thumb{background:#9cc3e0;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="dots"></div>
+<div id="deck">
+
+<!-- ===== 1. PORTADA ===== -->
+<section class="slide cover on" id="slideCover">
+  <div class="cover-inner">
+    <p style="color:var(--mut);font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 .4em">Ecología y Recursos Naturales</p>
+    <h1>Patrones de distribución<br>de organismos</h1>
+    <p style="font-size:.98rem;color:var(--mut);margin:.5em 0 .2em"><!--Sesión interactiva ·--> <b style="color:var(--hd)">Dr. Ronald F. Rodriguez Espinoza</b></p>
+  </div>
+</section>
+
+<!-- ===== 2. INTRODUCCIÓN ===== -->
+<section class="slide">
+  <h2>Introducción a la distribución espacial</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card tight">
+        <p>La <b>distribución espacial</b> describe cómo se ubican los individuos de una población dentro de su área. Existen tres patrones básicos: <b>agrupado</b>, <b>uniforme</b> y <b>aleatorio</b>. Se detectan comparando la media y la varianza de los conteos por cuadrante.</p>
+        <div class="tabs" id="introTabs">
+          <button class="on" data-t="h">🌲 Hábitat</button>
+          <button data-t="c">🐘 Comportamiento</button>
+          <button data-t="r">💧 Recursos</button>
+        </div>
+        <div id="introContent" class="def" style="min-height:54px">🌲 <b>Hábitat:</b> los parches de suelo fértil agrupan árboles; un desierto homogéneo dispersa arbustos.</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="border-color:var(--blue)">
+        <h3>Definiciones ecológicas clave</h3>
+        <ul>
+          <li><b>Población:</b> individuos de una misma especie que viven en un área y tiempo determinados.</li>
+          <li><b>Hábitat:</b> lugar con las condiciones y recursos que una especie necesita.</li>
+          <li><b>Abundancia ($N$):</b> número total de individuos. <b>Densidad:</b> individuos por unidad de área o volumen ($N/A$).</li>
+          <li><b>Distribución espacial:</b> forma en que los individuos se ubican dentro del área que ocupan.</li>
+          <li><b>Cuadrante:</b> unidad de muestreo de área conocida, donde se cuentan los individuos.</li>
+          <li><b>Muestreo:</b> medir una parte de la población para estimar el total.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 3. GLOSARIO ESTADÍSTICO (NUEVO) ===== -->
+<section class="slide">
+  <h2>Glosario estadístico: los términos que usaremos</h2>
+  <div class="gloss">
+    <div class="g"><b>Media ($\bar{x}$)</b><br>Promedio aritmético de los conteos por cuadrante. <em>$\bar{x}=\sum x_i / n$</em></div>
+    <div class="g"><b>Varianza ($s^2$)</b><br>Medida de cuánto se dispersan los conteos alrededor de la media. <em>$s^2=\sum(x_i-\bar{x})^2/(n-1)$</em></div>
+    <div class="g"><b>Desviación estándar ($s$)</b><br>Raíz cuadrada de la varianza. Está en las mismas unidades que los datos (individuos por cuadrante).</div>
+    <div class="g"><b>Cuadrante ($n$)</b><br>Unidad de muestreo de área conocida. $n$ es el número total de cuadrantes muestreados.</div>
+    <div class="g"><b>Índice de dispersión ($I$)</b><br>Cociente $s^2/\bar{x}$. Vale $\approx 1$ si es aleatorio, $>1$ si es agrupado y $<1$ si es uniforme.</div>
+    <div class="g"><b>Distribución de Poisson</b><br>Modelo probabilístico del azar: la media es igual a la varianza. Base para detectar patrones no aleatorios.</div>
+    <div class="g"><b>Chi-cuadrado ($\chi^2$)</b><br>Estadístico de bondad de ajuste. Compara los conteos observados con los esperados bajo Poisson.</div>
+    <div class="g"><b>Grados de libertad (gl)</b><br>Número de valores que pueden variar libremente. Aquí: $gl = n - 1$.</div>
+    <div class="g"><b>Valor crítico</b><br>Umbral de $\chi^2$ a partir del cual se rechaza la aleatoriedad (95 % de confianza). Con 35 gl: 20,6–53,2.</div>
+    <div class="g"><b>Índice de Morisita ($I_\delta$)</b><br>Índice de agregación poco sensible al tamaño del cuadrante. $I_\delta\approx 1$ aleatorio; $>1$ agrupado; $<1$ uniforme.</div>
+    <div class="g"><b>Distribución agrupada</b><br>Individuos concentrados en parches. Varianza mucho mayor que la media ($s^2 \gg \bar{x}$).</div>
+    <div class="g"><b>Distribución uniforme</b><br>Individuos separados por distancias similares. Varianza menor que la media ($s^2 < \bar{x}$).</div>
+    <div class="g"><b>Distribución aleatoria</b><br>Posición independiente entre individuos. Varianza aproximadamente igual a la media ($s^2 \approx \bar{x}$).</div>
+    <div class="g"><b>CPUE</b><br>Captura por unidad de esfuerzo. Indicador de abundancia relativa en pesquerías y fauna móvil.</div>
+    <div class="g"><b>Lincoln-Petersen</b><br>Método de captura-recaptura para estimar $N$: $N = (n \cdot M)/R$.</div>
+    <div class="g"><b>Metapoblación</b><br>Conjunto de poblaciones locales conectadas por migración, con extinciones y recolonizaciones.</div>
+  </div>
+</section>
+
+<!-- ===== 4. ESCALAS ESPACIALES ===== -->
+<section class="slide">
+  <h2>Escalas espaciales: el patrón depende de la escala</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <p class="def"><b>Idea clave:</b> un mismo conjunto de individuos puede parecer aleatorio a gran escala y agrupado a pequeña escala. El patrón <b>no es absoluto</b>: depende de la escala de observación y del tamaño del cuadrante.</p>
+        <h3>Tres escalas típicas</h3>
+        <ul>
+          <li><b>Microescala (&lt; 1 m):</b> semillas alrededor de la planta madre → agrupamiento fuerte.</li>
+          <li><b>Mesoescala (1–1000 m):</b> parches de vegetación, territorios, colonias → patrón mixto.</li>
+          <li><b>Macroescala (&gt; 1 km):</b> distribución geográfica de la especie, limitada por clima y barreras.</li>
+        </ul>
+        <h3>El problema del tamaño del cuadrante</h3>
+        <p>Si el cuadrante es más pequeño que el parche, se detecta agrupamiento; si es más grande que el parche, el patrón puede parecer aleatorio o uniforme. <b>Siempre reporta el tamaño del cuadrante</b> junto al resultado.</p>
+        <p class="warn"><b>Error frecuente:</b> un $s^2/\bar{x}$ cercano a 1 no siempre significa aleatoriedad; puede ser que el cuadrante promedie parches y vacíos.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="border-color:var(--blue)">
+        <h3>Regla práctica</h3>
+        <p>El tamaño del cuadrante debe ser <b>2–4 veces el tamaño del parche</b> esperado. Para elegirlo:</p>
+        <ol style="padding-left:1.2em;margin:.3em 0">
+          <li>Observa el hábitat y estima el tamaño de los parches.</li>
+          <li>Elige un cuadrante mayor que el parche para capturar la variación entre parches.</li>
+          <li>Usa al menos 20–30 cuadrantes y una media por cuadrante &gt; 1.</li>
+          <li>Si la media es &lt; 1, aumenta el tamaño del cuadrante o el número de muestras.</li>
+        </ol>
+        <h3>Ejemplo</h3>
+        <p>En un bosque con árboles agrupados cada ~50 m: un cuadrante de 10 × 10 m detectará agrupamiento; uno de 200 × 200 m puede dar $s^2/\bar{x}\approx 1$ porque cada cuadrante contiene varios parches.</p>
+        <p class="bignote">Por eso los estudios ecológicos siempre reportan el tamaño del cuadrante junto con el índice de dispersión.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 5. AGRUPADO ===== -->
+<section class="slide">
+  <h2>Patrón agrupado: el más común</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <p class="def"><b>Definición:</b> los individuos se concentran en parches, con zonas densas y zonas vacías. También se llama agregado o contagioso.</p>
+        <h3>Causas</h3>
+        <ul>
+          <li>Hábitat heterogéneo (parches de recursos)</li>
+          <li>Comportamiento social</li>
+          <li>Reproducción clonal o semillas que caen cerca</li>
+        </ul>
+        <h3>Estadística</h3>
+        <p>Varianza ≫ Media ($s^2/\bar{x}>1$). Se confirma si $\chi^2$ supera el valor crítico superior y el índice de Morisita es $>1$: hay cuadrantes con muchos individuos y otros vacíos.</p>
+        <h3>Casos reales</h3>
+        <p>Cardúmenes de sardinas, manadas de elefantes y colonias de pingüinos.</p>
+        <p class="bignote">Haz clic en el lienzo para crear recursos y observa cómo se agrupan los organismos.</p>
+      </div>
+    </div>
+    <div class="col">
+      <p class="how"><b>Cómo usar:</b> 1) Haz clic sobre el lienzo para colocar comida (círculo amarillo). 2) Los organismos (puntos verdes) se acercan y forman grupos. 3) Mira abajo cómo la varianza supera a la media.</p>
+      <canvas id="cs3" class="cv cv-main" width="640" height="360"></canvas>
+      <canvas id="ch3" class="cv cv-sub" width="640" height="90"></canvas>
+      <p id="st3" class="st"></p>
+      <button id="r3" class="alt">Reiniciar</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 6. UNIFORME ===== -->
+<section class="slide">
+  <h2>Patrón uniforme (regular)</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <p class="def"><b>Definición:</b> los individuos están separados por distancias similares, como en una cuadrícula. También se llama regular.</p>
+        <h3>Causas</h3>
+        <ul>
+          <li>Competencia intensa por recursos</li>
+          <li>Territorialidad</li>
+          <li>Alelopatía en plantas</li>
+        </ul>
+        <h3>Estadística</h3>
+        <p>Varianza &lt; Media ($s^2/\bar{x}<1$). $\chi^2$ queda bajo el valor crítico inferior y Morisita $<1$: los conteos son parecidos entre cuadrantes.</p>
+        <h3>Casos reales</h3>
+        <p>Nidos de aves marinas en acantilados, arbustos de creosota en el desierto y territorios de lobos.</p>
+      </div>
+    </div>
+    <div class="col">
+      <p class="how"><b>Cómo usar:</b> 1) Con el control en 0, los organismos están al azar. 2) Sube la intensidad de territorialidad: cada organismo aleja a los vecinos muy cercanos. 3) Se separan de forma pareja y la varianza baja respecto a la media.</p>
+      <canvas id="cs4" class="cv cv-main" width="640" height="360"></canvas>
+      <canvas id="ch4" class="cv cv-sub" width="640" height="90"></canvas>
+      <p id="st4" class="st"></p>
+      <label style="font-size:.82rem;display:block">Intensidad de territorialidad: <b id="kv">0</b>
+        <input id="k4" type="range" min="0" max="10" value="0">
+      </label>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 7. ALEATORIO ===== -->
+<section class="slide">
+  <h2>Patrón aleatorio (al azar)</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <p class="def"><b>Definición:</b> la posición de cada individuo es independiente de la de los demás: cualquier punto del área tiene la misma probabilidad de ser ocupado.</p>
+        <h3>Causas</h3>
+        <ul>
+          <li>Ambiente homogéneo</li>
+          <li>Sin interacciones fuertes entre individuos</li>
+        </ul>
+        <h3>Estadística</h3>
+        <p>Varianza ≈ Media ($s^2/\bar{x}\approx 1$), distribución de Poisson. $\chi^2$ cae dentro del intervalo crítico y Morisita $\approx 1$: las diferencias entre cuadrantes se deben solo al azar.</p>
+        <h3>Casos reales</h3>
+        <p>Árboles de un bosque primario maduro y caracoles en un prado húmedo uniforme.</p>
+      </div>
+    </div>
+    <div class="col">
+      <p class="how"><b>Cómo leerlo:</b> los organismos se mueven al azar (movimiento browniano): no se atraen ni se repelen. En el gráfico, la media y la varianza se mantienen parecidas.</p>
+      <canvas id="cs5" class="cv cv-main" width="640" height="360"></canvas>
+      <canvas id="ch5" class="cv cv-sub" width="640" height="90"></canvas>
+      <p id="st5" class="st"></p>
+      <p class="bignote">Movimiento browniano: no hay atracción ni repulsión.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 8. POISSON ===== -->
+<section class="slide">
+  <h2>El modelo de Poisson: la línea base del azar</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <p class="def"><b>¿Por qué Poisson?</b> Si los individuos se colocan al azar, el número de individuos por cuadrante sigue una <b>distribución de Poisson</b>, donde la varianza es igual a la media. Es la línea base contra la que se comparan los patrones.</p>
+        <h3>Propiedades</h3>
+        <ul>
+          <li>$E[x] = \mathrm{Var}(x) = \lambda$ (media = varianza)</li>
+          <li>Los eventos son independientes y la probabilidad por unidad de área es constante.</li>
+          <li>El índice de dispersión $I = s^2/\bar{x}$ vale $\approx 1$.</li>
+        </ul>
+        <div class="formula">$\displaystyle P(x)=\frac{e^{-\bar{x}}\,\bar{x}^{\,x}}{x!}$</div>
+        <p class="bignote">$P(x)$ = probabilidad de encontrar exactamente $x$ individuos en un cuadrante cuando la distribución es aleatoria.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h3>Ejemplo numérico</h3>
+        <p>Si $\bar{x}=4$ individuos/cuadrante, la probabilidad de encontrar exactamente 4 individuos es:</p>
+        <div class="formula">$\displaystyle P(4)=\frac{e^{-4}\,4^{4}}{4!}\approx 0.195$</div>
+        <p>Es decir, ~19,5 % de los cuadrantes tendrían 4 individuos si la distribución fuese aleatoria. La calculadora de la diapositiva 9 usa estos valores para comparar.</p>
+        <table style="margin-top:.5em">
+          <tr><th>$x$</th><th>$P(x)$ con $\bar{x}=4$</th></tr>
+          <tr><td>0</td><td>0,018</td></tr>
+          <tr><td>1</td><td>0,073</td></tr>
+          <tr><td>2</td><td>0,147</td></tr>
+          <tr><td>3</td><td>0,195</td></tr>
+          <tr><td>4</td><td>0,195</td></tr>
+          <tr><td>5</td><td>0,156</td></tr>
+        </table>
+        <p class="bignote">Si los conteos observados se alejan mucho de estos valores, el patrón no es aleatorio.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 9. ESTADÍSTICA GENERAL ===== -->
+<section class="slide">
+  <h2>Estadística de los patrones: índices y pruebas</h2>
+  <div class="cols" style="grid-template-columns:1.15fr .85fr">
+    <div class="col">
+      <div class="card" style="flex:1">
+        <p class="def"><b>Idea clave:</b> si los individuos se ubican al azar, los conteos por cuadrante siguen una distribución de Poisson, donde la varianza es igual a la media. Si no coinciden, hay un patrón.</p>
+        <div class="tabs" id="statTabs">
+          <button class="on" data-s="f">Fórmulas</button>
+          <button data-s="t">Tabla de decisión</button>
+          <button data-s="m">Morisita</button>
+        </div>
+        <div id="statF" class="tab-content on">
+          <div class="formula">$\displaystyle \bar{x}=\frac{\sum x_i}{n} \qquad s^2=\frac{\sum (x_i-\bar{x})^2}{n-1}$</div>
+          <div class="formula">$\displaystyle I=\frac{s^2}{\bar{x}} \qquad \chi^2=I\,(n-1)$</div>
+          <div class="formula">$\displaystyle I_\delta=\frac{n\sum x_i(x_i-1)}{(\sum x_i)^2-\sum x_i}$</div>
+          <p class="bignote">Con 36 cuadrantes, el intervalo crítico de $\chi^2$ al 95 % es <b>20,6 a 53,2</b>. Morisita $\approx 1$ si es aleatorio.</p>
+        </div>
+        <div id="statT" class="tab-content">
+          <table>
+            <tr><th>Patrón</th><th>$s^2$ vs $\bar{x}$</th><th>$I$</th><th>$\chi^2$</th><th>$I_\delta$</th></tr>
+            <tr><td>Agrupado</td><td>$s^2>\bar{x}$</td><td>$>1$</td><td>$>$ crítico sup.</td><td>$>1$</td></tr>
+            <tr><td>Aleatorio</td><td>$s^2\approx\bar{x}$</td><td>$\approx1$</td><td>dentro</td><td>$\approx1$</td></tr>
+            <tr><td>Uniforme</td><td>$s^2<\bar{x}$</td><td>$<1$</td><td>$<$ crítico inf.</td><td>$<1$</td></tr>
+          </table>
+        </div>
+        <div id="statM" class="tab-content">
+          <div class="formula">$\displaystyle I_\delta=\frac{n\sum x_i(x_i-1)}{(\sum x_i)^2-\sum x_i}$</div>
+          <ul style="font-size:.85rem">
+            <li>$I_\delta > 1$: agrupado (más contagioso).</li>
+            <li>$I_\delta \approx 1$: aleatorio.</li>
+            <li>$I_\delta < 1$: uniforme (más regular).</li>
+          </ul>
+          <p class="bignote">Ventaja: Morisita es poco sensible al tamaño y al número de cuadrantes, por eso es muy usado en ecología.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="flex:1">
+        <h3>Calculadora de dispersión</h3>
+        <p style="font-size:.82rem">Escribe los conteos de cada cuadrante, separados por comas.</p>
+        <input id="ci" type="text" value="0,0,1,0,8,9,0,7,0,0,1,10,0,0,6,0,1,0,9,0">
+        <button id="cb">Calcular</button>
+        <p id="co" class="st">Pulsa «Calcular».</p>
+        <p class="def" style="font-size:.78rem"><b>Ojo:</b> el resultado depende del tamaño del cuadrante. Usa al menos 20–30 cuadrantes y una media mayor que 1. Prueba también: <b>3,4,3,5,4,3,4,4,5,3,4,4</b> (uniforme).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 10. MUESTREO CUADRANTES ===== -->
+<section class="slide">
+  <h2>Muestreo de poblaciones sésiles o de baja movilidad</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <p>Se usan <b>cuadrantes</b>: se cuenta en unidades pequeñas elegidas al azar y se extrapola.</p>
+        <p><b>Densidad estimada = media por cuadrante × número total de cuadrantes</b>.</p>
+        <p class="def"><b>Densidad</b> = individuos por unidad de área. Con la media por cuadrante ($\bar{x}$) se estima: $\hat{N}=\bar{x}\times 64$.</p>
+        <p class="how"><b>Cómo jugar:</b> 1) Haz clic en 3 cuadrantes: aparecen los organismos que contienen. 2) La página cuenta, calcula la media y estima el total. 3) Compara con el conteo real. Prueba «Nuevo hábitat» varias veces: la estimación varía porque los organismos están agrupados.</p>
+        <button id="nh">Nuevo hábitat</button>
+        <p id="rs6" class="st">Elige 3 cuadrantes.</p>
+      </div>
+    </div>
+    <div class="col">
+      <canvas id="hc" class="cv cv-main" width="640" height="360"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 11. CAPTURA-RECAPTURA ===== -->
+<section class="slide">
+  <h2>Animales móviles: captura y recaptura</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <p><b>Lincoln-Petersen:</b> $\displaystyle N=\frac{n\,M}{R}$</p>
+        <p style="font-size:.82rem">$M$ = marcados en la 1.ª captura; $n$ = individuos de la 2.ª captura; $R$ = marcados recapturados.</p>
+        <p>Casos: truchas en un río, mariposas monarca.</p>
+        <p class="def"><b>Supuestos:</b> población cerrada (sin nacimientos, muertes ni migración), las marcas no se pierden ni afectan la supervivencia, y todos los individuos tienen igual probabilidad de captura.</p>
+        <p class="how"><b>Cómo usar:</b> 1) Pulsa «Capturar y marcar»: 25 peces pasan a naranja ($M=25$) y se mezclan con los demás. 2) Pulsa «Segunda captura»: 25 peces se rodean con un aro oscuro ($n=25$). 3) Los naranjas con aro son los recapturados ($R$). Azul = sin marca.</p>
+        <button id="f1">1. Capturar y marcar (25)</button>
+        <button id="f2" class="alt">2. Segunda captura (25)</button>
+        <button id="f3">Reiniciar</button>
+        <p id="rs7" class="st">Pulsa «Capturar y marcar».</p>
+      </div>
+    </div>
+    <div class="col">
+      <canvas id="fc" class="cv cv-main" width="640" height="360"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 12. AGOTAMIENTO ===== -->
+<section class="slide">
+  <h2>Métodos alternativos: agotamiento e índices</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <h3>Agotamiento de stock</h3>
+        <p class="def"><b>CPUE:</b> captura por unidad de esfuerzo. <b>Población cerrada:</b> sin entradas ni salidas de individuos.</p>
+        <p>Para poblaciones cerradas: la captura por unidad de esfuerzo disminuye al extraer individuos. La recta captura vs. captura acumulada cruza el eje X en el tamaño original $N_0$.</p>
+        <label style="font-size:.82rem;display:block">$N$ real: <b id="nv">500</b>
+          <input id="n8" type="range" min="200" max="1000" step="50" value="500">
+        </label>
+        <button id="d8">Animar de nuevo</button>
+        <p class="how"><b>Cómo leerlo:</b> cada punto verde es una pasada de pesca (eje X: captura acumulada; eje Y: captura de esa pasada). Los puntos bajan en línea recta; al prolongarla hasta el eje X se obtiene $N_0$.</p>
+        <h3>Índices de abundancia relativa</h3>
+        <p>Rastros, heces, huellas de oso o aullidos de monos. Sirven para <b>tendencias</b>, no para números absolutos.</p>
+      </div>
+    </div>
+    <div class="col">
+      <canvas id="dc" class="cv cv-main" width="640" height="320"></canvas>
+      <p id="st8" class="st"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 13. TIPOS DE MUESTREO ===== -->
+<section class="slide">
+  <h2>Tipos de muestreo estadístico</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <p>Hábitat con gradiente de bosque a humedal.</p>
+        <button data-m="a">Aleatorio simple</button>
+        <button data-m="e">Estratificado</button>
+        <button data-m="s">Sistemático</button>
+        <p id="ms" class="st"></p>
+        <h3>¿Cuándo usar cada uno?</h3>
+        <ul style="font-size:.85rem">
+          <li><b>Aleatorio simple:</b> hábitat homogéneo y acceso fácil a toda el área.</li>
+          <li><b>Estratificado:</b> hábitat heterogéneo con zonas claramente distintas (bosque, ecotono, humedal).</li>
+          <li><b>Sistemático:</b> áreas grandes, cuando se sospecha un gradiente y se quiere cubrir todo el espacio.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <canvas id="mc" class="cv cv-main" width="640" height="360"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 14. METAPOBLACIONES ===== -->
+<section class="slide">
+  <h2>Metapoblaciones y fragmentación del hábitat</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <p class="def"><b>Metapoblación:</b> conjunto de poblaciones locales (parches) conectadas por migración. Cada parche puede extinguirse y recolonizarse; la persistencia depende del equilibrio entre ambos procesos.</p>
+        <h3>Modelo de Levins</h3>
+        <div class="formula">$\displaystyle \frac{dp}{dt}=c\,p\,(1-p)-e\,p$</div>
+        <p style="font-size:.85rem">$p$ = fracción de parches ocupados; $c$ = tasa de colonización; $e$ = tasa de extinción local. En equilibrio: $p^* = 1 - e/c$.</p>
+        <p>Si $e \geq c$, la metapoblación se extingue. Esto explica por qué la fragmentación del hábitat reduce la conectividad y aumenta el riesgo de extinción.</p>
+        <h3>Importancia para la conservación</h3>
+        <ul style="font-size:.85rem">
+          <li>Corredores biológicos que conectan parches.</li>
+          <li>Tamaño mínimo de parche para sostener poblaciones.</li>
+          <li>Diseño de reservas en red, no islas aisladas.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="border-color:var(--blue)">
+        <h3>Ejemplo conceptual</h3>
+        <p>Un río con pozas aisladas de trucha: cada poza es una población local; los peces migran entre pozas en épocas de crecida. Si una poza se seca (extinción local), puede recolonizarse desde otra. Pero si se construye una represa que corta la migración ($c\to 0$), cada poza queda aislada y la metapoblación desaparece.</p>
+        <h3>Relación con los patrones espaciales</h3>
+        <p>La fragmentación convierte un patrón <b>uniforme o aleatorio</b> en un patrón <b>agrupado</b> (individuos concentrados en parches). Por eso el índice de dispersión también sirve como indicador de fragmentación.</p>
+        <p class="warn"><b>Ojo:</b> un patrón agrupado puede ser natural (comportamiento social) o forzado por fragmentación antrópica. La interpretación ecológica requiere conocer la historia del hábitat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 15. FACTORES ===== -->
+<section class="slide">
+  <h2>Factores que determinan la distribución</h2>
+  <p class="bignote" style="flex-shrink:0">Haz clic en una tarjeta para voltearla.</p>
+  <div class="flip">
+    <div class="fc"><div><b>Abióticos</b><i>Luz, temperatura, humedad, pH y salinidad fijan el rango de tolerancia de cada especie.</i></div></div>
+    <div class="fc"><div><b>Bióticos</b><i>Depredación, competencia y mutualismo: las interacciones con otras especies empujan o retienen a los individuos.</i></div></div>
+    <div class="fc"><div><b>Geográficos</b><i>Barreras como montañas y ríos, aislamiento por islas y deriva continental limitan la dispersión.</i></div></div>
+    <div class="fc"><div><b>Temporales</b><i>Migraciones, sucesión ecológica y estacionalidad cambian el patrón a lo largo del tiempo.</i></div></div>
+  </div>
+</section>
+
+<!-- ===== 16. CONCLUSIONES ===== -->
+<section class="slide">
+  <h2>Conclusiones y retos ecológicos</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card">
+        <ul>
+          <li>Agrupado: $s^2/\bar{x}>1$. Uniforme: $<1$. Aleatorio: $\approx 1$.</li>
+          <li>El patrón depende de la escala: reporta siempre el tamaño del cuadrante.</li>
+          <li>Cuadrantes para organismos sésiles; captura y recaptura para móviles.</li>
+          <li>Agotamiento e índices sirven cuando el conteo directo es imposible.</li>
+          <li>El diseño de muestreo (aleatorio, estratificado, sistemático) afecta la precisión.</li>
+          <li>La fragmentación del hábitat convierte patrones en agrupados y amenaza metapoblaciones.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card" style="border-color:var(--acc)">
+        <h3>Reflexión</h3>
+        <p>El cambio climático está desplazando los rangos de distribución de especies hacia los polos y mayores altitudes, rompe sincronías entre depredadores y presas y fragmenta hábitats. Medir bien los patrones de distribución es el primer paso para conservar los recursos naturales.</p>
+        <p style="margin-top:.5em"><i>— Dr. Ronald F. Rodriguez Espinoza</i></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div id="nav">
+  <button id="pv" class="alt">◀ Anterior</button>
+  <span>© Dr. Ronald F. Rodriguez Espinoza · <span id="cnt"></span></span>
+  <button id="nx">Siguiente ▶</button>
+</div>
+
+<script>
+/* ===== Utilidades y navegación ===== */
+const $ = id => document.getElementById(id);
+const S = [...document.querySelectorAll('.slide')];
+const W = 640, H = 360;
+let cur = 0;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pos = (e, c) => {
+  const r = c.getBoundingClientRect();
+  return [(e.clientX - r.left) * c.width / r.width, (e.clientY - r.top) * c.height / r.height];
+};
+
+function buildDots() {
+  const d = $('dots');
+  d.innerHTML = '';
+  S.forEach((_, i) => {
+    const el = document.createElement('i');
+    if (i === cur) el.className = 'on';
+    d.appendChild(el);
+  });
+}
+
+function go(n) {
+  cur = Math.max(0, Math.min(S.length - 1, n));
+  S.forEach((s, i) => s.classList.toggle('on', i === cur));
+  $('bar').style.width = (cur + 1) / S.length * 100 + '%';
+  $('cnt').textContent = (cur + 1) + ' / ' + S.length;
+  document.querySelectorAll('#dots i').forEach((d, i) => d.classList.toggle('on', i === cur));
+  if (cur === 9 && !hab) newHab();
+  if (cur === 10 && !F) newTank();
+  if (cur === 11) startDep();
+  if (cur === 12 && !mm) drawM('a');
+  renderAllMath();
+}
+$('pv').onclick = () => go(cur - 1);
+$('nx').onclick = () => go(cur + 1);
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') go(cur + 1);
+  if (e.key === 'ArrowLeft') go(cur - 1);
+});
+
+/* ===== Pestañas ===== */
+const introData = {
+  h: '🌲 <b>Hábitat:</b> los parches de suelo fértil agrupan árboles; un desierto homogéneo dispersa arbustos.',
+  c: '🐘 <b>Comportamiento:</b> la vida en manada (agrupado) o la defensa de territorios (uniforme).',
+  r: '💧 <b>Recursos:</b> un oasis o un cuerpo de carroña atrae individuos; recursos escasos y repartidos los separan.'
+};
+document.querySelectorAll('#introTabs button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#introTabs button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    $('introContent').innerHTML = introData[b.dataset.t];
+    renderAllMath();
+  };
+});
+document.querySelectorAll('#statTabs button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#statTabs button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    ['statF','statT','statM'].forEach(id => $(id).classList.remove('on'));
+    $({f:'statF',t:'statT',m:'statM'}[b.dataset.s]).classList.add('on');
+    renderAllMath();
+  };
+});
+
+/* ===== Simulaciones de patrones ===== */
+const N = 120;
+function mkSim(id, mode) {
+  const c = $('cs' + id), x = c.getContext('2d'), ch = $('ch' + id).getContext('2d');
+  const P = [], R = [], h = [];
+  let f = 0, k = 0;
+  const init = () => {
+    P.length = R.length = h.length = 0;
+    for (let i = 0; i < N; i++) P.push({ x: rnd(0, W), y: rnd(0, H), vx: 0, vy: 0 });
+  };
+  init();
+  if (mode == 'agg') c.onclick = e => R.push(pos(e, c));
+  return {
+    init,
+    setK(v) { k = v; },
+    tick() {
+      f++;
+      P.forEach((p, a) => {
+        if (mode == 'agg') {
+          let b = null, bd = 1e9;
+          R.forEach(r => { const d = Math.hypot(r[0] - p.x, r[1] - p.y); if (d < bd) { bd = d; b = r; } });
+          if (b && bd > 28) { p.vx += (b[0] - p.x) / bd * .25; p.vy += (b[1] - p.y) / bd * .25; }
+          p.vx += rnd(-.3, .3); p.vy += rnd(-.3, .3);
+          p.vx *= .9; p.vy *= .9;
+        } else if (mode == 'uni') {
+          P.forEach((q, b) => {
+            if (a != b) {
+              const dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy) || 1;
+              if (d < 46) { const pu = (46 - d) * k * .004; p.vx += dx / d * pu; p.vy += dy / d * pu; }
+            }
+          });
+          p.vx = p.vx * .85 + rnd(-.1, .1);
+          p.vy = p.vy * .85 + rnd(-.1, .1);
+        } else {
+          p.vx = rnd(-2.5, 2.5); p.vy = rnd(-2.5, 2.5);
+        }
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 4 || p.x > W - 4) { p.vx *= -1; p.x = Math.max(4, Math.min(W - 4, p.x)); }
+        if (p.y < 4 || p.y > H - 4) { p.vy *= -1; p.y = Math.max(4, Math.min(H - 4, p.y)); }
+      });
+      const cnt = Array(36).fill(0);
+      P.forEach(p => cnt[Math.min(5, p.y / 60 | 0) * 6 + Math.min(5, p.x / (W / 6) | 0)]++);
+      const m = N / 36, v = cnt.reduce((a, b) => a + (b - m) ** 2, 0) / 35, r = v / m;
+      if (f % 5 == 0) { h.push([m, v]); if (h.length > 110) h.shift(); }
+      x.clearRect(0, 0, W, H);
+      x.strokeStyle = '#0b254530';
+      for (let i = 1; i < 6; i++) {
+        x.beginPath(); x.moveTo(i * W / 6, 0); x.lineTo(i * W / 6, H); x.stroke();
+        x.beginPath(); x.moveTo(0, i * 60); x.lineTo(W, i * 60); x.stroke();
+      }
+      R.forEach(q => {
+        x.fillStyle = '#ffb703'; x.strokeStyle = '#8a5a00'; x.lineWidth = 2;
+        x.beginPath(); x.arc(q[0], q[1], 9, 0, 7); x.fill(); x.stroke();
+      });
+      x.fillStyle = '#1b7f3b';
+      P.forEach(p => { x.beginPath(); x.arc(p.x, p.y, 4, 0, 7); x.fill(); });
+      if (mode == 'agg' && !R.length) {
+        x.fillStyle = '#0b2545'; x.font = 'bold 20px Inter,sans-serif'; x.textAlign = 'center';
+        x.fillText('Haz clic aquí para colocar comida', W / 2, H / 2);
+      }
+      ch.clearRect(0, 0, W, 90);
+      const mx = Math.max(m * 3, ...h.map(a => a[1])) * 1.1;
+      [[0, '#1d5fa8'], [1, '#d86a00']].forEach(([j, col]) => {
+        ch.strokeStyle = col; ch.lineWidth = 2; ch.beginPath();
+        h.forEach((a, i) => {
+          const X = i / 110 * W, Y = 85 - a[j] / mx * 80;
+          i ? ch.lineTo(X, Y) : ch.moveTo(X, Y);
+        });
+        ch.stroke();
+      });
+      ch.fillStyle = '#1d5fa8'; ch.font = '11px Inter,sans-serif'; ch.fillText('Media', 6, 12);
+      ch.fillStyle = '#d86a00'; ch.fillText('Varianza', 52, 12);
+      $('st' + id).innerHTML = `Media = ${m.toFixed(2)} · Varianza = ${v.toFixed(2)} · Var/Media = ${r.toFixed(2)}<br>χ² = ${(r * 35).toFixed(1)} (gl = 35; aleatorio si está entre 20,6 y 53,2) · Morisita = ${(36 * cnt.reduce((a, b) => a + b * (b - 1), 0) / (N * N - N)).toFixed(2)}<br>→ ${r * 35 > 53.2 ? 'Agrupado: la varianza es mucho mayor que la media; hay cuadrantes llenos y otros vacíos.' : r * 35 < 20.6 ? 'Uniforme: la varianza es menor que la media; los cuadrantes tienen conteos parecidos.' : 'Aleatorio: varianza ≈ media; las diferencias son solo azar.'}`;
+    }
+  };
+}
+const sims = [mkSim(3, 'agg'), mkSim(4, 'uni'), mkSim(5, 'ale')];
+$('r3').onclick = () => { sims[0].init(); };
+$('k4').oninput = e => { $('kv').textContent = e.target.value; sims[1].setK(+e.target.value); };
+
+/* ===== Calculadora ===== */
+$('cb').onclick = () => {
+  const a = $('ci').value.split(/[,;\s]+/).map(Number).filter(v => v >= 0 && !isNaN(v));
+  const n = a.length;
+  if (n < 3) { $('co').textContent = 'Escribe al menos 3 conteos separados por comas.'; return; }
+  const t = a.reduce((p, c) => p + c, 0), m = t / n;
+  const v = a.reduce((p, c) => p + (c - m) ** 2, 0) / (n - 1);
+  const I = m ? v / m : 0, df = n - 1, chi = I * df;
+  const cr = z => df * (1 - 2 / (9 * df) + z * Math.sqrt(2 / (9 * df))) ** 3;
+  const lo = cr(-1.96), hi = cr(1.96);
+  const md = t > 1 ? n * a.reduce((p, c) => p + c * (c - 1), 0) / (t * t - t) : NaN;
+  const res = chi > hi ? 'AGRUPADO' : chi < lo ? 'UNIFORME' : 'ALEATORIO';
+  $('co').innerHTML = `n = ${n} · x̄ = ${m.toFixed(2)} · s² = ${v.toFixed(2)}<br>I = s²/x̄ = ${I.toFixed(2)} · χ² = ${chi.toFixed(1)} (gl = ${df}; crítico ${lo.toFixed(1)}–${hi.toFixed(1)})<br>Morisita = ${md.toFixed(2)}<br>→ Patrón <b>${res}</b>`;
+};
+
+/* ===== Juego de cuadrantes ===== */
+let hab = null, sel = [];
+const hc = $('hc'), hx = hc.getContext('2d');
+function newHab() {
+  sel = []; hab = [];
+  const cs = Array.from({ length: 5 }, () => [rnd(60, W - 60), rnd(40, H - 40)]);
+  for (let i = 0; i < 200; i++) {
+    const c = cs[i % 5];
+    hab.push([Math.max(2, Math.min(W - 2, c[0] + rnd(-70, 70))), Math.max(2, Math.min(H - 2, c[1] + rnd(-50, 50)))]);
+  }
+  $('rs6').textContent = 'Elige 3 cuadrantes.';
+  dh();
+}
+const cellOf = p => (Math.min(7, p[1] / 45 | 0)) * 8 + Math.min(7, p[0] / 80 | 0);
+function dh() {
+  hx.clearRect(0, 0, W, H);
+  hx.strokeStyle = '#0b254540';
+  for (let i = 1; i < 8; i++) {
+    hx.beginPath(); hx.moveTo(i * 80, 0); hx.lineTo(i * 80, H); hx.stroke();
+    hx.beginPath(); hx.moveTo(0, i * 45); hx.lineTo(W, i * 45); hx.stroke();
+  }
+  sel.forEach(s => { hx.fillStyle = '#ffb70077'; hx.fillRect(s % 8 * 80, (s / 8 | 0) * 45, 80, 45); });
+  hx.fillStyle = '#1b7f3b';
+  hab.forEach(p => { if (sel.includes(cellOf(p))) { hx.beginPath(); hx.arc(p[0], p[1], 3.5, 0, 7); hx.fill(); } });
+}
+hc.onclick = e => {
+  if (!hab) return;
+  const c = cellOf(pos(e, hc)), i = sel.indexOf(c);
+  if (i >= 0) sel.splice(i, 1);
+  else if (sel.length < 3) sel.push(c);
+  dh();
+  if (sel.length == 3) {
+    const t = hab.filter(p => sel.includes(cellOf(p))).length;
+    const est = t / 3 * 64, err = (est - hab.length) / hab.length * 100;
+    $('rs6').textContent = `Contaste ${t} en 3 cuadrantes → media ${(t / 3).toFixed(1)} → estimado ${est.toFixed(0)} · real ${hab.length} · error ${err.toFixed(0)}%`;
+  } else $('rs6').textContent = 'Elige 3 cuadrantes (' + sel.length + '/3).';
+};
+$('nh').onclick = newHab;
+
+/* ===== Captura-recaptura ===== */
+let F = null, Mk = 0, ph = 0, realN = 0;
+const fc = $('fc'), fx = fc.getContext('2d');
+function newTank() {
+  realN = Math.round(rnd(70, 150));
+  F = Array.from({ length: realN }, () => ({ x: rnd(10, W - 10), y: rnd(10, H - 10), vx: rnd(-1, 1), vy: rnd(-1, 1), m: 0, c: 0 }));
+  Mk = 0; ph = 0;
+  $('rs7').textContent = 'Pulsa «Capturar y marcar».';
+}
+const pick = n => { const a = [...F].sort(() => Math.random() - .5); return a.slice(0, n); };
+$('f1').onclick = () => {
+  if (ph) return;
+  pick(25).forEach(f => f.m = 1); Mk = 25; ph = 1;
+  F.forEach(f => { f.x = rnd(10, W - 10); f.y = rnd(10, H - 10); });
+  $('rs7').textContent = 'M = 25 peces marcados (naranja). Se mezclaron con el resto.';
+};
+$('f2').onclick = () => {
+  if (ph != 1) return;
+  pick(25).forEach(f => f.c = 1); ph = 2;
+  const n = 25, R = F.filter(f => f.c && f.m).length;
+  if (!R) { $('rs7').textContent = 'R = 0: no hay recapturas, reinicia o repite.'; return; }
+  const N = n * Mk / R, v = (Mk + 1) * (n + 1) * (Mk - R) * (n - R) / ((R + 1) ** 2 * (R + 2)), e = 1.96 * Math.sqrt(v);
+  $('rs7').textContent = `M=25, n=25, R=${R} → N = ${N.toFixed(0)} (IC 95%: ${Math.max(0, N - e).toFixed(0)}–${(N + e).toFixed(0)}) · real = ${realN}`;
+};
+$('f3').onclick = newTank;
+function tickFish() {
+  fx.clearRect(0, 0, W, H);
+  F.forEach(f => {
+    f.vx += rnd(-.2, .2); f.vy += rnd(-.2, .2);
+    const s = Math.hypot(f.vx, f.vy);
+    if (s > 1.6) { f.vx *= 1.6 / s; f.vy *= 1.6 / s; }
+    f.x += f.vx; f.y += f.vy;
+    if (f.x < 8 || f.x > W - 8) f.vx *= -1;
+    if (f.y < 8 || f.y > H - 8) f.vy *= -1;
+    f.x = Math.max(8, Math.min(W - 8, f.x));
+    f.y = Math.max(8, Math.min(H - 8, f.y));
+    fx.fillStyle = f.m ? '#fb8500' : '#1d5fa8';
+    fx.beginPath(); fx.ellipse(f.x, f.y, 8, 4, Math.atan2(f.vy, f.vx), 0, 7); fx.fill();
+    if (f.c) { fx.strokeStyle = '#0b2545'; fx.lineWidth = 2; fx.beginPath(); fx.arc(f.x, f.y, 10, 0, 7); fx.stroke(); }
+  });
+}
+
+/* ===== Agotamiento ===== */
+let dd = [], dt = 0;
+const dcv = $('dc'), dx = dcv.getContext('2d');
+function startDep() {
+  const n0 = +$('n8').value;
+  dd = []; let K = 0;
+  for (let i = 0; i < 8; i++) {
+    const c = Math.max(1, .22 * (n0 - K) * rnd(.9, 1.1));
+    dd.push([K, c]); K += c;
+  }
+  dt = 0;
+}
+$('d8').onclick = startDep;
+$('n8').oninput = e => { $('nv').textContent = e.target.value; startDep(); };
+function tickDep() {
+  dt++;
+  const n0 = +$('n8').value, X = 1.15 * n0, Y = .22 * n0 * 1.1;
+  const sx = v => 40 + v / X * 580, sy = v => 250 - v / Y * 230;
+  const k = Math.min(8, dt / 12 | 0), pts = dd.slice(0, k);
+  dx.clearRect(0, 0, 640, 320);
+  dx.strokeStyle = '#0b254599'; dx.beginPath(); dx.moveTo(40, 10); dx.lineTo(40, 250); dx.lineTo(630, 250); dx.stroke();
+  dx.fillStyle = '#3d5a7a'; dx.font = '12px Inter,sans-serif'; dx.fillText('Captura acumulada', 280, 270); dx.fillText('Captura/esfuerzo', 4, 10);
+  pts.forEach(p => { dx.fillStyle = '#1b7f3b'; dx.beginPath(); dx.arc(sx(p[0]), sy(p[1]), 5, 0, 7); dx.fill(); });
+  if (k >= 2) {
+    const n = k, mx = pts.reduce((a, b) => a + b[0], 0) / n, my = pts.reduce((a, b) => a + b[1], 0) / n;
+    const b = pts.reduce((a, p) => a + (p[0] - mx) * (p[1] - my), 0) / pts.reduce((a, p) => a + (p[0] - mx) ** 2, 0);
+    const a = my - b * mx, x0 = -a / b;
+    const g = Math.min(1, Math.max(0, (dt - 96) / 60));
+    const xe = pts[0][0] + (x0 - pts[0][0]) * (k < 8 ? 0 : g);
+    dx.strokeStyle = '#d86a00'; dx.lineWidth = 2; dx.beginPath();
+    dx.moveTo(sx(0), sy(a)); dx.lineTo(sx(k < 8 ? mx : xe), sy(a + b * (k < 8 ? mx : xe))); dx.stroke();
+    if (k == 8 && g >= 1) {
+      dx.fillStyle = '#fb8500'; dx.beginPath(); dx.arc(sx(x0), 250, 7, 0, 7); dx.fill();
+      $('st8').textContent = `Intersección con el eje X: N₀ estimado ≈ ${x0.toFixed(0)} (real ${n0})`;
+    } else $('st8').textContent = 'Recogiendo capturas…';
+  }
+}
+
+/* ===== Tipos de muestreo ===== */
+let mm = null;
+const mc = $('mc'), mx2 = mc.getContext('2d');
+const MS = {
+  a: 'Aleatorio simple: cada punto tiene la misma probabilidad. Puede dejar zonas sin muestrear.',
+  e: 'Estratificado: se muestrea en cada zona. Mejora la precisión cuando el hábitat es heterogéneo.',
+  s: 'Sistemático: puntos a intervalos regulares. Fácil de aplicar, pero cuidado con patrones periódicos.'
+};
+function drawM(m) {
+  mm = m;
+  const g = mx2.createLinearGradient(0, 0, W, 0);
+  g.addColorStop(0, '#1f6b3a'); g.addColorStop(.5, '#8d8a45'); g.addColorStop(1, '#1d5f9a');
+  mx2.fillStyle = g; mx2.fillRect(0, 0, W, H);
+  let pts = [];
+  if (m == 'a') for (let i = 0; i < 21; i++) pts.push([rnd(8, W - 8), rnd(8, H - 8)]);
+  if (m == 'e') {
+    mx2.strokeStyle = '#fff'; mx2.setLineDash([6, 5]);
+    [W / 3, 2 * W / 3].forEach(v => { mx2.beginPath(); mx2.moveTo(v, 0); mx2.lineTo(v, H); mx2.stroke(); });
+    mx2.setLineDash([]);
+    for (let z = 0; z < 3; z++) for (let i = 0; i < 7; i++) pts.push([rnd(z * W / 3 + 8, (z + 1) * W / 3 - 8), rnd(8, H - 8)]);
+  }
+  if (m == 's') {
+    const ox = rnd(0, 15), oy = rnd(0, 15);
+    for (let i = 0; i < 7; i++) for (let j = 0; j < 3; j++) pts.push([ox + i * W / 7 + W / 14 - 7, oy + j * H / 3 + H / 6 - 7]);
+  }
+  mx2.fillStyle = '#fff'; mx2.strokeStyle = '#000';
+  pts.forEach(p => { mx2.beginPath(); mx2.arc(p[0], p[1], 6, 0, 7); mx2.fill(); mx2.stroke(); });
+  $('ms').textContent = MS[m];
+}
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => drawM(b.dataset.m));
+
+/* ===== Flip cards ===== */
+document.querySelectorAll('.fc').forEach(c => c.onclick = () => c.classList.toggle('f'));
+
+/* ===== Bucle ===== */
+function loop() {
+  if (cur >= 4 && cur <= 6) sims[cur - 4].tick();
+  else if (cur === 10 && F) tickFish();
+  else if (cur === 11) tickDep();
+  requestAnimationFrame(loop);
+}
+
+/* ===== KaTeX ===== */
+function renderAllMath() {
+  if (window.renderMathInElement) {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ],
+      throwOnError: false
+    });
+  }
+}
+
+/* ===== Arranque ===== */
+buildDots();
+go(0);
+loop();
+document.addEventListener('DOMContentLoaded', renderAllMath);
+addEventListener('load', renderAllMath);
+</script>
+</body>
+</html>
