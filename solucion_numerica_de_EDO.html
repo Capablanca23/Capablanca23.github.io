@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Resolución Numérica de Ecuaciones Diferenciales Ordinarias (EDO) | Dr. Ronald F. Rodriguez Espinoza</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Fraunces', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            400: '#38a3dc',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#095180'
+                        },
+                        navy: {
+                            50: '#f0f4f8',
+                            100: '#d9e2ec',
+                            700: '#1e3a5f',
+                            800: '#0f2942',
+                            900: '#0b1d30',
+                            950: '#071220'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- KaTeX CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- QRCode.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        html {
+            scroll-padding-top: calc( env(safe-area-inset-top, 0px) + 70px );
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(100, 116, 139, 0.4);
+            border-radius: 4px;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+        }
+    </style>
+</head>
+<body class="font-sans bg-slate-50 dark:bg-navy-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col antialiased transition-colors duration-200">
+
+    <!-- Header Principal -->
+    <header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-50" style="padding-top:env(safe-area-inset-top,0px)">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-brand-600 rounded-lg text-white shadow-inner text-xl leading-none">
+                    <i class="fa-solid fa-square-root-variable"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight font-serif text-white">
+                        Resolución Numérica de EDO
+                    </h1>
+                    <p class="text-xs text-slate-400">Euler, Runge-Kutta y Métodos Numéricos — PVI: dy/dx = f(x,y)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 text-xs">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>v2.0
+                </span>
+                <button onclick="document.getElementById('authorCard').scrollIntoView({behavior:'smooth'})" class="hidden sm:inline-flex hover:bg-slate-800 px-3 py-1.5 rounded-md text-slate-300 transition-colors">
+                    🎓 Dr. Ronald Rodriguez E.
+                </button>
+                <button onclick="toggleDarkMode()" class="px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Modo Oscuro / Claro">
+                    <i id="dark-icon" class="fa-solid fa-moon text-amber-300"></i>
+                </button>
+                <button onclick="window.print()" class="px-2.5 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition no-print" title="Imprimir">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+                <button onclick="exportCSV()" class="px-3 py-1.5 rounded-md bg-brand-600 hover:bg-brand-500 text-white font-semibold shadow-sm transition no-print" title="Exportar CSV">
+                    <i class="fa-solid fa-file-csv mr-1"></i> CSV
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ========================================== -->
+        <!-- DATOS DEL AUTOR (CARD INSTITUCIONAL) -->
+        <!-- ========================================== -->
+        <section id="authorCard" class="bg-white dark:bg-navy-900 rounded-xl shadow-sm border border-slate-200 dark:border-navy-800 overflow-hidden">
+            <div class="p-5 md:p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+                        <div class="relative flex-shrink-0">
+                            <div class="w-20 h-20 rounded-full bg-brand-600 border-2 border-white/20 flex items-center justify-center text-3xl shadow-lg">
+                                👤
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full" title="Verificado CTI Vitae"></span>
+                        </div>
+                        <div>
+                            <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full mb-1 border border-brand-500/20">
+                                🏅 Docente Investigador
+                            </div>
+                            <h2 class="text-lg md:text-xl font-bold font-serif">Dr. Ronald F. Rodriguez Espinoza</h2>
+                            <p class="text-sm text-slate-300">Especialista en Análisis Numérico y Métodos Computacionales</p>
+                            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2 text-xs text-slate-400">
+                                <span>🏛️ CONCYTEC CTI Vitae</span>
+                                <span>∑ Resolución de EDOs e Integración Numérica</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 flex-shrink-0">
+                        <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" title="Haz clic para abrir el perfil oficial CTI Vitae" class="bg-white p-2 rounded-lg shadow-md transition-transform duration-300 hover:scale-105 block">
+                            <div id="qrBox" class="w-20 h-20 flex items-center justify-center text-[10px] text-slate-700 [&_img]:w-20 [&_img]:h-20 [&_canvas]:hidden">QR CTI</div>
+                        </a>
+                        <div class="text-left space-y-1">
+                            <p class="text-xs font-semibold text-slate-200">▦ Código QR</p>
+                            <p class="text-[11px] text-slate-300 max-w-[130px] leading-tight">Haz clic en el código QR para consultar la trayectoria académica.</p>
+                            <a href="https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-400 hover:text-sky-300">
+                                Perfil CTI Vitae ›
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Barra de Navegación de Pestañas (Scroll horizontal táctil) -->
+        <nav class="bg-white dark:bg-navy-900 rounded-xl shadow-sm border border-slate-200 dark:border-navy-800 px-2 py-1 sticky top-[65px] z-40 no-print">
+            <div class="flex space-x-1 overflow-x-auto py-1 custom-scrollbar text-xs sm:text-sm font-medium" id="tabs-container">
+                <!-- Inyectado por JS -->
+            </div>
+        </nav>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 1: INTRODUCCIÓN -->
+        <!-- ========================================== -->
+        <section id="tab-intro" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-navy-900 rounded-xl p-5 sm:p-7 shadow-sm border border-slate-200 dark:border-navy-800">
+                <div class="flex items-center gap-3 border-b border-slate-100 dark:border-navy-800 pb-4 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-lg">
+                        <i class="fa-solid fa-book-bookmark"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-bold font-serif">Fundamentos de Ecuaciones Diferenciales Ordinarias</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Modelado matemático y resolución numérica para ingeniería computacional</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 leading-relaxed">
+                    <div class="space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        <p>
+                            Una <strong class="text-slate-900 dark:text-white">Ecuación Diferencial Ordinaria (EDO)</strong> es una relación que vincula una variable independiente $x$, una función desconocida $y(x)$ y sus correspondientes derivadas.
+                        </p>
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-800 text-center">
+                            <span class="block text-xs uppercase font-semibold text-slate-400 mb-1">Forma Normal de Primer Orden</span>
+                            <div class="text-lg text-brand-600 dark:text-brand-400">$$\frac{dy}{dx} = f(x, y)$$</div>
+                        </div>
+                        <p>
+                            Un <strong>Problema de Valor Inicial (PVI)</strong> consiste en calcular la trayectoria de $y(x)$ sujeta a una condición de inicio fija en el dominio:
+                        </p>
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-800 text-center">
+                            <span class="block text-xs uppercase font-semibold text-slate-400 mb-1">Condición de Cauchy</span>
+                            <div class="text-lg text-emerald-600 dark:text-emerald-400">$$y(x_0) = y_0$$</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-cogs text-brand-500"></i> Importancia Crítica en Ingeniería
+                        </h3>
+                        <p>
+                            La inmensa mayoría de los sistemas dinámicos reales no admiten soluciones analíticas cerradas debido a no linealidades. La resolución numérica discretiza el intervalo $[x_0, x_f]$ con un paso de muestreo $h$:
+                        </p>
+                        <div class="p-3 bg-brand-50/50 dark:bg-navy-800/40 rounded-xl border border-brand-200 dark:border-navy-700 text-center">
+                            $$x_{n+1} = x_n + h, \quad y_{n+1} \approx y(x_{n+1})$$
+                        </div>
+                        <p>
+                            El objetivo de los algoritmos de aproximación consiste en determinar $y_{n+1}$ minimizando el <strong class="text-rose-500">Error de Truncamiento Local (ETL)</strong> y asegurando la estabilidad numérica a lo largo del proceso iterativo.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-8 border-t border-slate-100 dark:border-navy-800 pt-6">
+                    <h3 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white mb-4">Campos de Aplicación Práctica:</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 flex flex-col items-center text-center gap-1">
+                            <i class="fa-solid fa-temperature-arrow-down text-lg text-amber-500"></i>
+                            <span class="font-semibold">Mecánica</span>
+                            <span class="text-[10px] text-slate-500">Enfriamiento Newton</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 flex flex-col items-center text-center gap-1">
+                            <i class="fa-solid fa-faucet-drip text-lg text-cyan-500"></i>
+                            <span class="font-semibold">Hidráulica</span>
+                            <span class="text-[10px] text-slate-500">Descarga Torricelli</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 flex flex-col items-center text-center gap-1">
+                            <i class="fa-solid fa-bolt text-lg text-yellow-400"></i>
+                            <span class="font-semibold">Eléctrica</span>
+                            <span class="text-[10px] text-slate-500">Transitorios RC / RL</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 flex flex-col items-center text-center gap-1">
+                            <i class="fa-solid fa-flask-vial text-lg text-violet-500"></i>
+                            <span class="font-semibold">Química</span>
+                            <span class="text-[10px] text-slate-500">Cinética de reactores</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-navy-800 border border-slate-200 dark:border-navy-700 flex flex-col items-center text-center gap-1">
+                            <i class="fa-solid fa-rocket text-lg text-rose-500"></i>
+                            <span class="font-semibold">Aeroespacial</span>
+                            <span class="text-[10px] text-slate-500">Arrastre balístico</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 2: DATOS DEL PROBLEMA -->
+        <!-- ========================================== -->
+        <section id="tab-data" class="tab-content hidden space-y-6">
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Entradas de datos -->
+                <div class="lg:col-span-1 bg-white dark:bg-navy-900 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-navy-800 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-navy-800 pb-3">
+                        <h2 class="font-bold text-sm sm:text-base flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-brand-500"></i> Parámetros del PVI
+                        </h2>
+                        <span class="text-[10px] bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300 font-semibold px-2 py-0.5 rounded-full">Discretización</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                Función $f(x, y) = dy/dx$
+                            </label>
+                            <input type="text" id="input-f" value="y - x" class="w-full px-3 py-2 bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-navy-700 rounded-lg font-mono focus:ring-2 focus:ring-brand-500 outline-none text-slate-900 dark:text-white" placeholder="Ej: x + y, y - x^2, sin(x)-y">
+                            <span class="text-[10px] text-slate-400 mt-1 block">Soporta: +, -, *, /, ^, sin, cos, exp, log, sqrt</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Punto inicial $x_0$</label>
+                                <input type="number" step="any" id="input-x0" value="0" class="w-full px-3 py-2 bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-navy-700 rounded-lg font-mono focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Condición inicial $y_0$</label>
+                                <input type="number" step="any" id="input-y0" value="2" class="w-full px-3 py-2 bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-navy-700 rounded-lg font-mono focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Paso $h$</label>
+                                <input type="number" step="any" id="input-h" value="0.1" class="w-full px-3 py-2 bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-navy-700 rounded-lg font-mono focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Límite $x_f$</label>
+                                <input type="number" step="any" id="input-xf" value="2.0" class="w-full px-3 py-2 bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-navy-700 rounded-lg font-mono focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                Solución Exacta $y_{exact}(x)$ (Opcional)
+                            </label>
+                            <input type="text" id="input-exact" value="exp(x) + x + 1" class="w-full px-3 py-2 bg-slate-50 dark:bg-navy-950 border border-slate-300 dark:border-navy-700 rounded-lg font-mono focus:ring-2 focus:ring-brand-500 outline-none" placeholder="exp(x) + x + 1">
+                            <span class="text-[10px] text-slate-400 mt-1 block">Para evaluación de errores absolutos y relativos reales.</span>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 dark:border-navy-800 flex flex-col gap-2">
+                            <button onclick="executeAllMethods()" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-calculator"></i> Resolver Todos los Métodos
+                            </button>
+                            <button onclick="resetDefaultProblem()" class="w-full py-2 px-4 bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 text-slate-700 dark:text-slate-300 font-semibold rounded-lg transition flex items-center justify-center gap-2 text-xs">
+                                <i class="fa-solid fa-arrow-rotate-left"></i> Restablecer Valores
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ejemplos Predefinidos de Ingeniería -->
+                <div class="lg:col-span-2 bg-white dark:bg-navy-900 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-navy-800">
+                    <div class="border-b border-slate-100 dark:border-navy-800 pb-3 mb-4">
+                        <h2 class="font-bold text-sm sm:text-base flex items-center gap-2">
+                            <i class="fa-solid fa-graduation-cap text-indigo-500"></i> Catálogo de 10 Casos de Ingeniería
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Selecciona un modelo para cargar su ecuación, parámetros y solución exacta</p>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-3 max-h-[460px] overflow-y-auto pr-1 custom-scrollbar" id="examples-container">
+                        <!-- Generado por JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑAS INDIVIDUALES DE MÉTODOS -->
+        <!-- ========================================== -->
+        <section id="tab-euler" class="tab-content hidden space-y-6"></section>
+        <section id="tab-heun" class="tab-content hidden space-y-6"></section>
+        <section id="tab-midpoint" class="tab-content hidden space-y-6"></section>
+        <section id="tab-rk2" class="tab-content hidden space-y-6"></section>
+        <section id="tab-rk4" class="tab-content hidden space-y-6"></section>
+        <section id="tab-rkf45" class="tab-content hidden space-y-6"></section>
+        <section id="tab-ab" class="tab-content hidden space-y-6"></section>
+        <section id="tab-am" class="tab-content hidden space-y-6"></section>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 11: COMPARACIÓN DE MÉTODOS -->
+        <!-- ========================================== -->
+        <section id="tab-comparison" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-navy-900 rounded-xl p-5 sm:p-6 shadow-sm border border-slate-200 dark:border-navy-800">
+                <div class="border-b border-slate-100 dark:border-navy-800 pb-3 mb-4 flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <h2 class="font-bold text-base sm:text-lg flex items-center gap-2 font-serif">
+                            <i class="fa-solid fa-table-columns text-brand-500"></i> Comparación Global de Métodos
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Orden de convergencia, complejidad, estabilidad y error en $x_f$</p>
+                    </div>
+                    <button onclick="copyComparisonTable()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-navy-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-copy"></i> Copiar Tabla
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-xs text-left border-collapse" id="table-comparison-body">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-navy-950 border-b border-slate-200 dark:border-navy-800 font-bold text-slate-700 dark:text-slate-300">
+                                <th class="p-3">Método</th>
+                                <th class="p-3">Tipo</th>
+                                <th class="p-3">Orden</th>
+                                <th class="p-3">Error Local</th>
+                                <th class="p-3">Error Global</th>
+                                <th class="p-3">Evaluaciones/Paso</th>
+                                <th class="p-3">Valor en $x_f$</th>
+                                <th class="p-3">Error Absoluto</th>
+                                <th class="p-3 text-center">Ranking</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-navy-800 font-mono" id="tbody-comp">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 12: GRÁFICAS -->
+        <!-- ========================================== -->
+        <section id="tab-graphs" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-navy-900 rounded-xl p-5 sm:p-6 shadow-sm border border-slate-200 dark:border-navy-800">
+                <div class="flex flex-wrap justify-between items-center pb-4 mb-4 border-b border-slate-100 dark:border-navy-800 gap-3">
+                    <div>
+                        <h2 class="font-bold text-base sm:text-lg flex items-center gap-2 font-serif">
+                            <i class="fa-solid fa-chart-line text-brand-500"></i> Visualización Comparativa
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Trayectorias de integración vs. Solución analítica exacta</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <button onclick="setChartType('solution')" id="btn-chart-sol" class="px-3 py-1.5 rounded-lg bg-brand-600 text-white font-bold">Trayectorias $y(x)$</button>
+                        <button onclick="setChartType('error')" id="btn-chart-err" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-navy-800 text-slate-700 dark:text-slate-300 font-medium">Error Absoluto</button>
+                    </div>
+                </div>
+
+                <div class="relative h-[380px] sm:h-[450px] w-full">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 13: TEORÍA -->
+        <!-- ========================================== -->
+        <section id="tab-theory" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-navy-900 rounded-xl p-5 sm:p-8 shadow-sm border border-slate-200 dark:border-navy-800 space-y-6">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold font-serif flex items-center gap-2 border-b border-slate-100 dark:border-navy-800 pb-3">
+                        <i class="fa-solid fa-graduation-cap text-indigo-500"></i> Fundamentos Teóricos de Integración Numérica
+                    </h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-check text-brand-500"></i> Consistencia, Estabilidad y Convergencia
+                        </h3>
+                        <p>
+                            El comportamiento de los algoritmos numéricos se rige por el <strong class="text-slate-900 dark:text-white">Teorema de Dahlquist-Lax</strong>:
+                        </p>
+                        <div class="p-3 bg-slate-50 dark:bg-navy-950 rounded-xl border border-slate-200 dark:border-navy-800 text-center font-semibold text-brand-600 dark:text-brand-400">
+                            Consistencia + Cero-Estabilidad $\iff$ Convergencia
+                        </div>
+                        <ul class="list-disc pl-5 space-y-2 text-xs">
+                            <li><strong>Consistencia:</strong> El error de truncamiento local tiende a cero más rápido que el paso de integración: $\lim_{h \to 0} \frac{\tau_n}{h} = 0$.</li>
+                            <li><strong>Estabilidad:</strong> Las perturbaciones en condiciones iniciales o redondeo permanecen acotadas conforme el número de pasos crece.</li>
+                            <li><strong>Convergencia:</strong> La solución numérica converge uniformemente a la solución analítica continua cuando $h \to 0$.</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-arrows-split-up-and-left text-brand-500"></i> Métodos Explícitos vs. Implícitos
+                        </h3>
+                        <p>
+                            En sistemas con componentes en rápida disipación (ecuaciones rígidas o <em>stiff</em>):
+                        </p>
+                        <div class="space-y-2 text-xs">
+                            <div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40">
+                                <strong class="text-amber-800 dark:text-amber-300">Métodos Explícitos:</strong> $y_{n+1} = \Phi(x_n, y_n, h)$. Región de estabilidad finita y acotada; imponen límites estrictos sobre el paso $h$.
+                            </div>
+                            <div class="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40">
+                                <strong class="text-emerald-800 dark:text-emerald-300">Métodos Implícitos:</strong> $y_{n+1} = \Phi(x_{n+1}, y_{n+1}, y_n, h)$. Poseen zonas de estabilidad infinita (A-estables), requiriendo resolver sistemas no lineales en cada paso.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 14: ALGORITMOS -->
+        <!-- ========================================== -->
+        <section id="tab-algorithms" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-navy-900 rounded-xl p-5 sm:p-6 shadow-sm border border-slate-200 dark:border-navy-800 space-y-5">
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold font-serif flex items-center gap-2 border-b border-slate-100 dark:border-navy-800 pb-3">
+                        <i class="fa-solid fa-code text-brand-500"></i> Pseudocódigos Estructurados
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Estructura algorítmica para implementar en MATLAB, Python, C++ o Julia</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4 text-xs font-mono" id="pseudo-container">
+                    <!-- Inyectado por JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 15: CONCLUSIONES -->
+        <!-- ========================================== -->
+        <section id="tab-conclusions" class="tab-content hidden space-y-6">
+            <div class="bg-white dark:bg-navy-900 rounded-xl p-5 sm:p-7 shadow-sm border border-slate-200 dark:border-navy-800 space-y-6">
+                <div class="flex items-center gap-3 border-b border-slate-100 dark:border-navy-800 pb-4">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold text-lg">
+                        <i class="fa-solid fa-square-check"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-bold font-serif">Diagnóstico y Conclusiones del Experimento Numérico</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Evaluación automática en tiempo real de los resultados computacionales</p>
+                    </div>
+                </div>
+
+                <div id="conclusions-dynamic" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                    <!-- Tarjetas de métricas calculadas -->
+                </div>
+
+                <div class="p-4 sm:p-5 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-800 space-y-3 text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-300" id="conclusions-text">
+                    <!-- Redacción académica automática -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Académico -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-2">
+            <p>© 2026 <span class="font-semibold text-slate-200">Dr. Ronald F. Rodriguez E.</span> — Análisis Numérico y Métodos Computacionales</p>
+            <p class="text-slate-500">Desarrollado para entornos académicos y profesionales en ingeniería y ciencias aplicadas.</p>
+            <p class="text-slate-600 text-[10px]">Bibliotecas: Tailwind CSS, KaTeX, Chart.js, QRCode.js</p>
+        </div>
+    </footer>
+
+    <!-- ======================================================== -->
+    <!-- MOTOR DE CÁLCULO NUMÉRICO Y LÓGICA DE INTERFAZ -->
+    <!-- ======================================================== -->
+    <script>
+        // --- BASE DE DATOS DE EJEMPLOS ---
+        const ENGINEERING_EXAMPLES = [
+            {
+                id: 1,
+                title: "Enfriamiento de Newton",
+                area: "Ingeniería Mecánica",
+                equation: "-0.05 * (y - 20)",
+                equationTex: "\\frac{dT}{dt} = -0.05(T - 20)",
+                x0: 0,
+                y0: 100,
+                h: 1.0,
+                xf: 25,
+                exact: "20 + 80 * exp(-0.05 * x)",
+                desc: "Disipación térmica de un componente sumergido en fluido a 20°C."
+            },
+            {
+                id: 2,
+                title: "Vaciado de un Tanque (Torricelli)",
+                area: "Ingeniería Civil e Hidráulica",
+                equation: "-0.2 * sqrt(max(0, y))",
+                equationTex: "\\frac{dh}{dt} = -0.2\\sqrt{h}",
+                x0: 0,
+                y0: 4,
+                h: 0.5,
+                xf: 15,
+                exact: "(2 - 0.1 * x)^2",
+                desc: "Descenso de nivel de agua por orificio de descarga libre."
+            },
+            {
+                id: 3,
+                title: "Carga de un Circuito RC",
+                area: "Ingeniería Eléctrica",
+                equation: "(12 - y) / 2",
+                equationTex: "\\frac{dV}{dt} = \\frac{1}{RC}(V_s - V), \\quad RC=2",
+                x0: 0,
+                y0: 0,
+                h: 0.2,
+                xf: 10,
+                exact: "12 * (1 - exp(-x / 2))",
+                desc: "Respuesta transitoria de voltaje en condensador de filtro."
+            },
+            {
+                id: 4,
+                title: "Respuesta de un Circuito RL",
+                area: "Ingeniería Electrónica",
+                equation: "(24 - 4 * y) / 0.5",
+                equationTex: "\\frac{di}{dt} = \\frac{V - Ri}{L}, \\quad R=4, L=0.5",
+                x0: 0,
+                y0: 0,
+                h: 0.05,
+                xf: 1.5,
+                exact: "6 * (1 - exp(-8 * x))",
+                desc: "Establecimiento de corriente en una bobina con fuente DC."
+            },
+            {
+                id: 5,
+                title: "Reacción Química de 1er Orden",
+                area: "Ingeniería Química",
+                equation: "-0.4 * y",
+                equationTex: "\\frac{dC}{dt} = -kC, \\quad k=0.4",
+                x0: 0,
+                y0: 10,
+                h: 0.25,
+                xf: 10,
+                exact: "10 * exp(-0.4 * x)",
+                desc: "Consumo de reactivo A en reactor químico homogéneo."
+            },
+            {
+                id: 6,
+                title: "Contaminación en un Río",
+                area: "Ingeniería Ambiental",
+                equation: "5 - 0.25 * y",
+                equationTex: "\\frac{dC}{dt} = Q_{in} - kC, \\quad Q=5, k=0.25",
+                x0: 0,
+                y0: 2,
+                h: 0.5,
+                xf: 15,
+                exact: "20 - 18 * exp(-0.25 * x)",
+                desc: "Evolución de concentración con caudal constante y autodepuración."
+            },
+            {
+                id: 7,
+                title: "Crecimiento Logístico",
+                area: "Ingeniería Industrial",
+                equation: "0.5 * y * (1 - y / 100)",
+                equationTex: "\\frac{dP}{dt} = rP\\left(1 - \\frac{P}{K}\\right)",
+                x0: 0,
+                y0: 10,
+                h: 0.4,
+                xf: 16,
+                exact: "100 / (1 + 9 * exp(-0.5 * x))",
+                desc: "Saturación de producción con capacidad máxima de planta."
+            },
+            {
+                id: 8,
+                title: "Eliminación de Fármaco",
+                area: "Ingeniería Biomédica",
+                equation: "-0.15 * y",
+                equationTex: "\\frac{dC}{dt} = -k_e C, \\quad k_e=0.15",
+                x0: 0,
+                y0: 50,
+                h: 0.5,
+                xf: 20,
+                exact: "50 * exp(-0.15 * x)",
+                desc: "Aclaramiento plasmático de fármaco en bolo intravenoso."
+            },
+            {
+                id: 9,
+                title: "Difusión de Innovación",
+                area: "Ingeniería de Sistemas",
+                equation: "0.3 * (1 - y)",
+                equationTex: "\\frac{dy}{dt} = a(b - y), \\quad a=0.3, b=1",
+                x0: 0,
+                y0: 0.05,
+                h: 0.5,
+                xf: 12,
+                exact: "1 - 0.95 * exp(-0.3 * x)",
+                desc: "Adopción paulatina de infraestructura cloud empresarial."
+            },
+            {
+                id: 10,
+                title: "Caída con Arrastre Balístico",
+                area: "Ingeniería Aeroespacial",
+                equation: "9.81 - 0.15 * y",
+                equationTex: "m\\frac{dv}{dt} = mg - cv, \\quad c/m=0.15",
+                x0: 0,
+                y0: 0,
+                h: 0.5,
+                xf: 25,
+                exact: "(9.81 / 0.15) * (1 - exp(-0.15 * x))",
+                desc: "Velocidad de una cápsula en caída libre atmosférica."
+            }
+        ];
+
+        // --- GESTOR DE PESTAÑAS ---
+        const TABS = [
+            { id: "intro", name: "Introducción", icon: "fa-book-bookmark" },
+            { id: "data", name: "Datos", icon: "fa-sliders" },
+            { id: "euler", name: "Euler", icon: "fa-calculator" },
+            { id: "heun", name: "Euler Mejorado", icon: "fa-chart-line" },
+            { id: "midpoint", name: "Punto Medio", icon: "fa-circle-dot" },
+            { id: "rk2", name: "Runge-Kutta 2", icon: "fa-square-root-variable" },
+            { id: "rk4", name: "Runge-Kutta 4", icon: "fa-cube" },
+            { id: "rkf45", name: "RKF45", icon: "fa-microchip" },
+            { id: "ab", name: "Adams-Bashforth", icon: "fa-forward" },
+            { id: "am", name: "Adams-Moulton", icon: "fa-forward-step" },
+            { id: "comparison", name: "Comparación", icon: "fa-table-columns" },
+            { id: "graphs", name: "Gráficas", icon: "fa-chart-area" },
+            { id: "theory", name: "Teoría", icon: "fa-graduation-cap" },
+            { id: "algorithms", name: "Algoritmos", icon: "fa-code" },
+            { id: "conclusions", name: "Conclusiones", icon: "fa-square-check" }
+        ];
+
+        let activeTabId = "intro";
+        let numericalResults = {};
+        let myChartInstance = null;
+        let chartMode = 'solution';
+
+        function initTabs() {
+            const container = document.getElementById("tabs-container");
+            container.innerHTML = TABS.map(t => `
+                <button onclick="switchTab('${t.id}')" id="tab-btn-${t.id}"
+                    class="px-3 py-2 rounded-lg flex items-center gap-1.5 whitespace-nowrap transition-all font-medium text-xs ${
+                        t.id === activeTabId 
+                        ? 'bg-brand-600 text-white shadow-sm' 
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800'
+                    }">
+                    <i class="fa-solid ${t.icon}"></i>
+                    <span>${t.name}</span>
+                </button>
+            `).join("");
+        }
+
+        function switchTab(tabId) {
+            activeTabId = tabId;
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.remove("hidden");
+
+            TABS.forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t.id}`);
+                if (btn) {
+                    if (t.id === tabId) {
+                        btn.className = "px-3 py-2 rounded-lg flex items-center gap-1.5 whitespace-nowrap transition-all font-bold text-xs bg-brand-600 text-white shadow-sm";
+                    } else {
+                        btn.className = "px-3 py-2 rounded-lg flex items-center gap-1.5 whitespace-nowrap transition-all font-medium text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-navy-800";
+                    }
+                }
+            });
+
+            if (tabId === "graphs") {
+                renderCharts();
+            }
+
+            renderKaTeX();
+        }
+
+        // --- EVALUADOR MATEMÁTICO ---
+        function evaluateMath(expression, x, y) {
+            try {
+                let parsed = expression
+                    .replace(/\^/g, '**')
+                    .replace(/\bsin\b/g, 'Math.sin')
+                    .replace(/\bcos\b/g, 'Math.cos')
+                    .replace(/\btan\b/g, 'Math.tan')
+                    .replace(/\bexp\b/g, 'Math.exp')
+                    .replace(/\blog\b/g, 'Math.log')
+                    .replace(/\bsqrt\b/g, 'Math.sqrt')
+                    .replace(/\babs\b/g, 'Math.abs')
+                    .replace(/\bmax\b/g, 'Math.max')
+                    .replace(/\bmin\b/g, 'Math.min')
+                    .replace(/\bpi\b/gi, 'Math.PI')
+                    .replace(/\be\b/g, 'Math.E');
+
+                const fn = new Function('x', 'y', `"use strict"; return (${parsed});`);
+                const val = fn(Number(x), Number(y));
+                return isFinite(val) ? val : NaN;
+            } catch (err) {
+                return NaN;
+            }
+        }
+
+        function evaluateExact(expression, x) {
+            if (!expression || expression.trim() === '') return NaN;
+            try {
+                let parsed = expression
+                    .replace(/\^/g, '**')
+                    .replace(/\bsin\b/g, 'Math.sin')
+                    .replace(/\bcos\b/g, 'Math.cos')
+                    .replace(/\btan\b/g, 'Math.tan')
+                    .replace(/\bexp\b/g, 'Math.exp')
+                    .replace(/\blog\b/g, 'Math.log')
+                    .replace(/\bsqrt\b/g, 'Math.sqrt')
+                    .replace(/\babs\b/g, 'Math.abs')
+                    .replace(/\bpi\b/gi, 'Math.PI')
+                    .replace(/\be\b/g, 'Math.E');
+
+                const fn = new Function('x', `"use strict"; return (${parsed});`);
+                const val = fn(Number(x));
+                return isFinite(val) ? val : NaN;
+            } catch (err) {
+                return NaN;
+            }
+        }
+
+        // --- SOLUCIONADORES NUMÉRICOS ---
+        function solveEuler(fExpr, x0, y0, h, steps) {
+            let pts = [{ n: 0, x: x0, y: y0, f: evaluateMath(fExpr, x0, y0), details: "" }];
+            for (let i = 0; i < steps; i++) {
+                let curr = pts[i];
+                let nextX = x0 + (i + 1) * h;
+                let nextY = curr.y + h * curr.f;
+                let nextF = evaluateMath(fExpr, nextX, nextY);
+                pts.push({
+                    n: i + 1,
+                    x: nextX,
+                    y: nextY,
+                    f: nextF,
+                    details: `y_{${i+1}} = ${curr.y.toFixed(4)} + (${h})(${curr.f.toFixed(4)}) = ${nextY.toFixed(4)}`
+                });
+            }
+            return pts;
+        }
+
+        function solveHeun(fExpr, x0, y0, h, steps) {
+            let pts = [{ n: 0, x: x0, y: y0, k1: evaluateMath(fExpr, x0, y0), k2: 0, details: "" }];
+            for (let i = 0; i < steps; i++) {
+                let xn = pts[i].x;
+                let yn = pts[i].y;
+                let k1 = evaluateMath(fExpr, xn, yn);
+                let yPred = yn + h * k1;
+                let xNext = x0 + (i + 1) * h;
+                let k2 = evaluateMath(fExpr, xNext, yPred);
+                let yNext = yn + (h / 2) * (k1 + k2);
+                pts.push({
+                    n: i + 1,
+                    x: xNext,
+                    y: yNext,
+                    k1: k1,
+                    k2: k2,
+                    details: `k_1=${k1.toFixed(4)}, k_2=${k2.toFixed(4)} \\implies y_{${i+1}}=${yNext.toFixed(4)}`
+                });
+            }
+            return pts;
+        }
+
+        function solveMidpoint(fExpr, x0, y0, h, steps) {
+            let pts = [{ n: 0, x: x0, y: y0, k1: evaluateMath(fExpr, x0, y0), k2: 0, details: "" }];
+            for (let i = 0; i < steps; i++) {
+                let xn = pts[i].x;
+                let yn = pts[i].y;
+                let k1 = evaluateMath(fExpr, xn, yn);
+                let xMid = xn + h / 2;
+                let yMid = yn + (h / 2) * k1;
+                let k2 = evaluateMath(fExpr, xMid, yMid);
+                let xNext = x0 + (i + 1) * h;
+                let yNext = yn + h * k2;
+                pts.push({
+                    n: i + 1,
+                    x: xNext,
+                    y: yNext,
+                    k1: k1,
+                    k2: k2,
+                    details: `k_1=${k1.toFixed(4)}, k_2=${k2.toFixed(4)} \\implies y_{${i+1}}=${yNext.toFixed(4)}`
+                });
+            }
+            return pts;
+        }
+
+        function solveRK2(fExpr, x0, y0, h, steps) {
+            let pts = [{ n: 0, x: x0, y: y0, k1: evaluateMath(fExpr, x0, y0), k2: 0, details: "" }];
+            for (let i = 0; i < steps; i++) {
+                let xn = pts[i].x;
+                let yn = pts[i].y;
+                let k1 = evaluateMath(fExpr, xn, yn);
+                let k2 = evaluateMath(fExpr, xn + 0.75 * h, yn + 0.75 * h * k1);
+                let xNext = x0 + (i + 1) * h;
+                let yNext = yn + h * ((1 / 3) * k1 + (2 / 3) * k2);
+                pts.push({
+                    n: i + 1,
+                    x: xNext,
+                    y: yNext,
+                    k1: k1,
+                    k2: k2,
+                    details: `k_1=${k1.toFixed(4)}, k_2=${k2.toFixed(4)} \\implies y_{${i+1}}=${yNext.toFixed(4)}`
+                });
+            }
+            return pts;
+        }
+
+        function solveRK4(fExpr, x0, y0, h, steps) {
+            let pts = [{ n: 0, x: x0, y: y0, k1: evaluateMath(fExpr, x0, y0), k2: 0, k3: 0, k4: 0, details: "" }];
+            for (let i = 0; i < steps; i++) {
+                let xn = pts[i].x;
+                let yn = pts[i].y;
+                let k1 = evaluateMath(fExpr, xn, yn);
+                let k2 = evaluateMath(fExpr, xn + h / 2, yn + (h * k1) / 2);
+                let k3 = evaluateMath(fExpr, xn + h / 2, yn + (h * k2) / 2);
+                let k4 = evaluateMath(fExpr, xn + h, yn + h * k3);
+                let xNext = x0 + (i + 1) * h;
+                let yNext = yn + (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4);
+                pts.push({
+                    n: i + 1,
+                    x: xNext,
+                    y: yNext,
+                    k1: k1,
+                    k2: k2,
+                    k3: k3,
+                    k4: k4,
+                    details: `k_1=${k1.toFixed(4)}, k_2=${k2.toFixed(4)}, k_3=${k3.toFixed(4)}, k_4=${k4.toFixed(4)}`
+                });
+            }
+            return pts;
+        }
+
+        function solveRKF45(fExpr, x0, y0, h, steps) {
+            let pts = [{ n: 0, x: x0, y: y0, errorEst: 0, details: "" }];
+            for (let i = 0; i < steps; i++) {
+                let xn = pts[i].x;
+                let yn = pts[i].y;
+                let k1 = h * evaluateMath(fExpr, xn, yn);
+                let k2 = h * evaluateMath(fExpr, xn + (1/4)*h, yn + (1/4)*k1);
+                let k3 = h * evaluateMath(fExpr, xn + (3/8)*h, yn + (3/32)*k1 + (9/32)*k2);
+                let k4 = h * evaluateMath(fExpr, xn + (12/13)*h, yn + (1932/2197)*k1 - (7200/2197)*k2 + (7296/2197)*k3);
+                let k5 = h * evaluateMath(fExpr, xn + h, yn + (439/216)*k1 - 8*k2 + (3680/513)*k3 - (845/4104)*k4);
+                let k6 = h * evaluateMath(fExpr, xn + (1/2)*h, yn - (8/27)*k1 + 2*k2 - (3544/2565)*k3 + (1859/4104)*k4 - (11/40)*k5);
+
+                let yNext = yn + ((25/216)*k1 + (1408/2565)*k3 + (2197/4104)*k4 - (1/5)*k5);
+                let zNext = yn + ((16/135)*k1 + (6656/12825)*k3 + (28561/56430)*k4 - (9/50)*k5 + (2/55)*k6);
+                let localError = Math.abs(zNext - yNext);
+
+                pts.push({
+                    n: i + 1,
+                    x: x0 + (i + 1) * h,
+                    y: zNext,
+                    y4: yNext,
+                    errorEst: localError,
+                    details: `\\epsilon_{est} = ${localError.toExponential(3)}`
+                });
+            }
+            return pts;
+        }
+
+        function solveAdamsBashforth(fExpr, x0, y0, h, steps) {
+            let rk4Init = solveRK4(fExpr, x0, y0, h, Math.min(steps, 3));
+            let pts = [...rk4Init];
+            for (let i = 0; i < pts.length; i++) {
+                pts[i].details = i < 3 ? "Inicialización con RK4" : "";
+            }
+
+            for (let i = 3; i < steps; i++) {
+                let f_n   = evaluateMath(fExpr, pts[i].x,   pts[i].y);
+                let f_nm1 = evaluateMath(fExpr, pts[i-1].x, pts[i-1].y);
+                let f_nm2 = evaluateMath(fExpr, pts[i-2].x, pts[i-2].y);
+                let f_nm3 = evaluateMath(fExpr, pts[i-3].x, pts[i-3].y);
+
+                let yNext = pts[i].y + (h / 24) * (55 * f_n - 59 * f_nm1 + 37 * f_nm2 - 9 * f_nm3);
+                let xNext = x0 + (i + 1) * h;
+
+                pts.push({
+                    n: i + 1,
+                    x: xNext,
+                    y: yNext,
+                    details: `y_{${i+1}} = y_n + \\frac{h}{24}(55f_n - 59f_{n-1} + 37f_{n-2} - 9f_{n-3})`
+                });
+            }
+            return pts;
+        }
+
+        function solveAdamsMoulton(fExpr, x0, y0, h, steps) {
+            let rk4Init = solveRK4(fExpr, x0, y0, h, Math.min(steps, 3));
+            let pts = [...rk4Init];
+            for (let i = 0; i < pts.length; i++) {
+                pts[i].details = i < 3 ? "Inicialización con RK4" : "";
+            }
+
+            for (let i = 3; i < steps; i++) {
+                let f_n   = evaluateMath(fExpr, pts[i].x,   pts[i].y);
+                let f_nm1 = evaluateMath(fExpr, pts[i-1].x, pts[i-1].y);
+                let f_nm2 = evaluateMath(fExpr, pts[i-2].x, pts[i-2].y);
+                let f_nm3 = evaluateMath(fExpr, pts[i-3].x, pts[i-3].y);
+
+                let yPred = pts[i].y + (h / 24) * (55 * f_n - 59 * f_nm1 + 37 * f_nm2 - 9 * f_nm3);
+                let xNext = x0 + (i + 1) * h;
+
+                let f_pred = evaluateMath(fExpr, xNext, yPred);
+                let yCorr = pts[i].y + (h / 24) * (9 * f_pred + 19 * f_n - 5 * f_nm1 + f_nm2);
+
+                pts.push({
+                    n: i + 1,
+                    x: xNext,
+                    y: yCorr,
+                    yPred: yPred,
+                    details: `y_{pred}=${yPred.toFixed(4)} \\to y_{corr}=${yCorr.toFixed(4)}`
+                });
+            }
+            return pts;
+        }
+
+        // --- PLANTILLA DE TABLAS ---
+        function buildTableTemplate(title, methodKey, formulaTex, desc, columns, dataRows) {
+            return `
+                <div class="bg-white dark:bg-navy-900 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-navy-800 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between border-b border-slate-100 dark:border-navy-800 pb-3 gap-3">
+                        <div>
+                            <h2 class="font-bold text-base sm:text-lg flex items-center gap-2 font-serif">
+                                <i class="fa-solid fa-calculator text-brand-500"></i> ${title}
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">${desc}</p>
+                        </div>
+                        <button onclick="copySingleTable('${methodKey}')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-navy-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-copy"></i> Copiar Tabla
+                        </button>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 dark:bg-navy-950 rounded-xl border border-slate-200 dark:border-navy-800 text-center">
+                        <span class="block text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Ecuación de Recurrencia</span>
+                        <div class="text-sm sm:text-base text-brand-600 dark:text-brand-400">${formulaTex}</div>
+                    </div>
+
+                    <div class="overflow-x-auto max-h-[460px] custom-scrollbar">
+                        <table class="w-full text-xs text-left border-collapse" id="table-${methodKey}">
+                            <thead class="sticky top-0 bg-slate-100 dark:bg-navy-950 border-b border-slate-200 dark:border-navy-800 font-bold text-slate-700 dark:text-slate-300">
+                                <tr>
+                                    ${columns.map(c => `<th class="p-2.5 whitespace-nowrap">${c}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-navy-800 font-mono">
+                                ${dataRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- EJECUCIÓN PRINCIPAL ---
+        function executeAllMethods() {
+            const fExpr = document.getElementById("input-f").value;
+            const x0 = parseFloat(document.getElementById("input-x0").value);
+            const y0 = parseFloat(document.getElementById("input-y0").value);
+            const h = parseFloat(document.getElementById("input-h").value);
+            const xf = parseFloat(document.getElementById("input-xf").value);
+            const exactExpr = document.getElementById("input-exact").value;
+
+            if (isNaN(x0) || isNaN(y0) || isNaN(h) || isNaN(xf) || h <= 0 || xf <= x0) {
+                alert("Por favor ingrese valores numéricos válidos. Asegúrese de que h > 0 y xf > x0.");
+                return;
+            }
+
+            const steps = Math.round((xf - x0) / h);
+            if (steps > 2000) {
+                alert("Demasiados pasos de discretización (límite: 2000). Reduzca el intervalo o aumente h.");
+                return;
+            }
+
+            numericalResults = {
+                euler: solveEuler(fExpr, x0, y0, h, steps),
+                heun: solveHeun(fExpr, x0, y0, h, steps),
+                midpoint: solveMidpoint(fExpr, x0, y0, h, steps),
+                rk2: solveRK2(fExpr, x0, y0, h, steps),
+                rk4: solveRK4(fExpr, x0, y0, h, steps),
+                rkf45: solveRKF45(fExpr, x0, y0, h, steps),
+                ab: solveAdamsBashforth(fExpr, x0, y0, h, steps),
+                am: solveAdamsMoulton(fExpr, x0, y0, h, steps),
+                exactExpr: exactExpr,
+                params: { fExpr, x0, y0, h, xf, steps }
+            };
+
+            renderEulerTab();
+            renderHeunTab();
+            renderMidpointTab();
+            renderRK2Tab();
+            renderRK4Tab();
+            renderRKF45Tab();
+            renderABTab();
+            renderAMTab();
+            renderComparisonTab();
+            renderConclusions();
+            renderCharts();
+            renderKaTeX();
+        }
+
+        function renderEulerTab() {
+            const res = numericalResults.euler;
+            const exactExpr = numericalResults.exactExpr;
+            const rows = res.map(r => {
+                const yEx = evaluateExact(exactExpr, r.x);
+                const err = !isNaN(yEx) ? Math.abs(r.y - yEx).toExponential(3) : "-";
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-navy-800/40">
+                        <td class="p-2 font-semibold text-slate-500">${r.n}</td>
+                        <td class="p-2 font-bold">${r.x.toFixed(4)}</td>
+                        <td class="p-2 text-brand-600 dark:text-brand-400 font-bold">${r.y.toFixed(6)}</td>
+                        <td class="p-2">${r.f ? r.f.toFixed(4) : '-'}</td>
+                        <td class="p-2 text-slate-400 text-[11px]">${r.details || '-'}</td>
+                        <td class="p-2 text-rose-500 font-bold">${err}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById("tab-euler").innerHTML = buildTableTemplate(
+                "Método de Euler (Primer Orden)",
+                "euler",
+                "$$y_{n+1} = y_n + h f(x_n, y_n)$$",
+                "Aproximación lineal básica. Error local de orden O(h^2) y global O(h).",
+                ["n", "x_n", "y_n (Euler)", "f(x_n, y_n)", "Sustitución Numérica", "Error Absoluto"],
+                rows
+            );
+        }
+
+        function renderHeunTab() {
+            const res = numericalResults.heun;
+            const exactExpr = numericalResults.exactExpr;
+            const rows = res.map(r => {
+                const yEx = evaluateExact(exactExpr, r.x);
+                const err = !isNaN(yEx) ? Math.abs(r.y - yEx).toExponential(3) : "-";
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-navy-800/40">
+                        <td class="p-2 font-semibold text-slate-500">${r.n}</td>
+                        <td class="p-2 font-bold">${r.x.toFixed(4)}</td>
+                        <td class="p-2 text-brand-600 dark:text-brand-400 font-bold">${r.y.toFixed(6)}</td>
+                        <td class="p-2">${r.k1 ? r.k1.toFixed(4) : '-'}</td>
+                        <td class="p-2">${r.k2 ? r.k2.toFixed(4) : '-'}</td>
+                        <td class="p-2 text-slate-400 text-[11px]">${r.details || '-'}</td>
+                        <td class="p-2 text-rose-500 font-bold">${err}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById("tab-heun").innerHTML = buildTableTemplate(
+                "Euler Mejorado (Método de Heun)",
+                "heun",
+                "$$k_1 = f(x_n, y_n), \\quad k_2 = f(x_n + h, y_n + h k_1), \\quad y_{n+1} = y_n + \\frac{h}{2}(k_1 + k_2)$$",
+                "Esquema predictor-corrector de segundo orden O(h^2).",
+                ["n", "x_n", "y_n (Heun)", "k_1", "k_2", "Detalle de Sustitución", "Error Absoluto"],
+                rows
+            );
+        }
+
+        function renderMidpointTab() {
+            const res = numericalResults.midpoint;
+            const exactExpr = numericalResults.exactExpr;
+            const rows = res.map(r => {
+                const yEx = evaluateExact(exactExpr, r.x);
+                const err = !isNaN(yEx) ? Math.abs(r.y - yEx).toExponential(3) : "-";
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-navy-800/40">
+                        <td class="p-2 font-semibold text-slate-500">${r.n}</td>
+                        <td class="p-2 font-bold">${r.x.toFixed(4)}</td>
+                        <td class="p-2 text-brand-600 dark:text-brand-400 font-bold">${r.y.toFixed(6)}</td>
+                        <td class="p-2">${r.k1 ? r.k1.toFixed(4) : '-'}</td>
+                        <td class="p-2">${r.k2 ? r.k2.toFixed(4) : '-'}</td>
+                        <td class="p-2 text-slate-400 text-[11px]">${r.details || '-'}</td>
+                        <td class="p-2 text-rose-500 font-bold">${err}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById("tab-midpoint").innerHTML = buildTableTemplate(
+                "Método del Punto Medio",
+                "midpoint",
+                "$$k_1 = f(x_n, y_n), \\quad k_2 = f\\left(x_n + \\frac{h}{2}, y_n + \\frac{h}{2}k_1\\right), \\quad y_{n+1} = y_n + h k_2$$",
+                "Calcula la pendiente en el centro del subintervalo.",
+                ["n", "x_n", "y_n (P. Medio)", "k_1", "k_2 (centro)", "Detalle de Sustitución", "Error Absoluto"],
+                rows
+            );
+        }
+
+        function renderRK2Tab() {
+            const res = numericalResults.rk2;
+            const exactExpr = numericalResults.exactExpr;
+            const rows = res.map(r => {
+                const yEx = evaluateExact(exactExpr, r.x);
+                const err = !isNaN(yEx) ? Math.abs(r.y - yEx).toExponential(3) : "-";
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-navy-800/40">
+                        <td class="p-2 font-semibold text-slate-500">${r.n}</td>
+                        <td class="p-2 font-bold">${r.x.toFixed(4)}</td>
+                        <td class="p-2 text-brand-600 dark:text-brand-400 font-bold">${r.y.toFixed(6)}</td>
+                        <td class="p-2">${r.k1 ? r.k1.toFixed(4) : '-'}</td>
+                        <td class="p-2">${r.k2 ? r.k2.toFixed(4) : '-'}</td>
+                        <td class="p-2 text-slate-400 text-[11px]">${r.details || '-'}</td>
+                        <td class="p-2 text-rose-500 font-bold">${err}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById("tab-rk2").innerHTML = buildTableTemplate(
+                "Runge-Kutta 2 (Ralston)",
+                "rk2",
+                "$$y_{n+1} = y_n + h\\left(\\frac{1}{3}k_1 + \\frac{2}{3}k_2\\right)$$",
+                "Formulación que minimiza la cota de error de truncamiento local.",
+                ["n", "x_n", "y_n (RK2)", "k_1", "k_2", "Detalle de Sustitución", "Error Absoluto"],
+                rows
+            );
+        }
+
+        function renderRK4Tab() {
+            const res = numericalResults.rk4;
+            const exactExpr = numericalResults.exactExpr;
+            const rows = res.map(r => {
+                const yEx = evaluateExact(exactExpr, r.x);
+                const err = !isNaN(yEx) ? Math.abs(r.y - yEx).toExponential(3) : "-";
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-navy-800/40">
+                        <td class="p-2 font-semibold text-slate-500">${r.n}</td>
+                        <td class="p-2 font-bold">${r.x.toFixed(4)}</td>
+                        <td class="p-2 text-brand-600 dark:text-brand-400 font-bold">${r.y.toFixed(6)}</td>
+                        <td class="p-2">${r.k1 ? r.k1.toFixed(4) : '-'}</td>
+                        <td class="p-2">${r.k2 ? r.k2.toFixed(4) : '-'}</td>
+                        <td class="p-2">${r.k3 ? r.k3.toFixed(4) : '-'}</td>
+                        <td class="p-2">${r.k4 ? r.k4.toFixed(4) : '-'}</td>
+                        <td class="p-2 text-rose-500 font-bold">${err}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById("tab-rk4").innerHTML = buildTableTemplate(
+                "Runge-Kutta 4 (Clásico)",
+                "rk4",
+                "$$y_{n+1} = y_n + \\frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)$$",
+                "Estándar de oro de un solo paso. Precisión global de cuarto orden O(h^4).",
+                ["n", "x_n", "y_n (RK4)", "k_1", "k_2", "k_3", "k_4", "Error Absoluto"],
+                rows
+            );
+        }
+
+        function renderRKF45Tab() {
+            const res = numericalResults.rkf45;
+            const exactExpr = numericalResults.exactExpr;
+            const rows = res.map(r => {
+                const yEx = evaluateExact(exactExpr, r.x);
+                const err = !isNaN(yEx) ? Math.abs(r.y - yEx).toExponential(3) : "-";
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-navy-800/40">
+                        <td class="p-2 font-semibold text-slate-500">${r.n}</td>
+                        <td class="p-2 font-bold">${r.x.toFixed(4)}</td>
+                        <td class="p-2 text-brand-600 dark:text-brand-400 font-bold">${r.y.toFixed(6)}</td>
+                        <td class="p-2 text-emerald-500 font-mono">${r.errorEst ? r.errorEst.toExponential(3) : '-'}</td>
+                        <td class="p-2 text-slate-400 text-[11px]">${r.details || '-'}</td>
+                        <td class="p-2 text-rose-500 font-bold">${err}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById("tab-rkf45").innerHTML = buildTableTemplate(
+                "Runge-Kutta-Fehlberg (RKF45)",
+                "rkf45",
+                "$$y_{n+1}^{(4)} = y_n + \\sum c_i k_i, \\quad z_{n+1}^{(5)} = y_n + \\sum d_i k_i, \\quad TE \\approx |z_{n+1} - y_{n+1}|$$",
+                "Par embebido de 4to y 5to orden para control adaptativo del paso.",
+                ["n", "x_n", "y_n (Orden 5)", "Error Local Estimado", "Detalle", "Error Absoluto"],
+                rows
+            );
+        }
+
+        function renderABTab() {
+            const res = numericalResults.ab;
+            const exactExpr = numericalResults.exactExpr;
+            const rows = res.map(r => {
+                const yEx = evaluateExact(exactExpr, r.x);
+                const err = !isNaN(yEx) ? Math.abs(r.y - yEx).toExponential(3) : "-";
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-navy-800/40">
+                        <td class="p-2 font-semibold text-slate-500">${r.n}</td>
+                        <td class="p-2 font-bold">${r.x.toFixed(4)}</td>
+                        <td class="p-2 text-brand-600 dark:text-brand-400 font-bold">${r.y.toFixed(6)}</td>
+                        <td class="p-2 text-slate-400 text-[11px]">${r.details || '-'}</td>
+                        <td class="p-2 text-rose-500 font-bold">${err}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById("tab-ab").innerHTML = buildTableTemplate(
+                "Adams-Bashforth (4 Pasos - Explícito)",
+                "ab",
+                "$$y_{n+1} = y_n + \\frac{h}{24}(55f_n - 59f_{n-1} + 37f_{n-2} - 9f_{n-3})$$",
+                "Método multipaso lineal explícito. Solo 1 evaluación de f(x,y) por paso tras la inicialización.",
+                ["n", "x_n", "y_n (AB4)", "Operación Realizada", "Error Absoluto"],
+                rows
+            );
+        }
+
+        function renderAMTab() {
+            const res = numericalResults.am;
+            const exactExpr = numericalResults.exactExpr;
+            const rows = res.map(r => {
+                const yEx = evaluateExact(exactExpr, r.x);
+                const err = !isNaN(yEx) ? Math.abs(r.y - yEx).toExponential(3) : "-";
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-navy-800/40">
+                        <td class="p-2 font-semibold text-slate-500">${r.n}</td>
+                        <td class="p-2 font-bold">${r.x.toFixed(4)}</td>
+                        <td class="p-2 text-brand-600 dark:text-brand-400 font-bold">${r.y.toFixed(6)}</td>
+                        <td class="p-2">${r.yPred ? r.yPred.toFixed(4) : '-'}</td>
+                        <td class="p-2 text-slate-400 text-[11px]">${r.details || '-'}</td>
+                        <td class="p-2 text-rose-500 font-bold">${err}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById("tab-am").innerHTML = buildTableTemplate(
+                "Adams-Moulton (Predictor-Corrector)",
+                "am",
+                "$$y_{n+1} = y_n + \\frac{h}{24}(9f_{n+1} + 19f_n - 5f_{n-1} + f_{n-2})$$",
+                "Combina predicción abierta (AB) con corrección cerrada (AM).",
+                ["n", "x_n", "y_n (AM4 Corregido)", "y_{pred} (AB4)", "Detalle", "Error Absoluto"],
+                rows
+            );
+        }
+
+        function renderComparisonTab() {
+            const exactExpr = numericalResults.exactExpr;
+            const methods = [
+                { id: "euler", name: "Euler", type: "1 paso (Explícito)", order: 1, locErr: "O(h^2)", globErr: "O(h)", evals: "1" },
+                { id: "heun", name: "Euler Mejorado (Heun)", type: "1 paso (Explícito)", order: 2, locErr: "O(h^3)", globErr: "O(h^2)", evals: "2" },
+                { id: "midpoint", name: "Punto Medio", type: "1 paso (Explícito)", order: 2, locErr: "O(h^3)", globErr: "O(h^2)", evals: "2" },
+                { id: "rk2", name: "Runge-Kutta 2", type: "1 paso (Explícito)", order: 2, locErr: "O(h^3)", globErr: "O(h^2)", evals: "2" },
+                { id: "rk4", name: "Runge-Kutta 4", type: "1 paso (Explícito)", order: 4, locErr: "O(h^5)", globErr: "O(h^4)", evals: "4" },
+                { id: "rkf45", name: "RKF45 (Fehlberg)", type: "1 paso (Embebido)", order: 5, locErr: "O(h^6)", globErr: "O(h^5)", evals: "6" },
+                { id: "ab", name: "Adams-Bashforth 4", type: "Multipaso (Explícito)", order: 4, locErr: "O(h^5)", globErr: "O(h^4)", evals: "1*" },
+                { id: "am", name: "Adams-Moulton 4", type: "Multipaso (Corrector)", order: 4, locErr: "O(h^5)", globErr: "O(h^4)", evals: "2*" }
+            ];
+
+            const tbody = document.getElementById("tbody-comp");
+            const lastIdx = numericalResults.euler.length - 1;
+            const xFinal = numericalResults.euler[lastIdx].x;
+            const yExactFinal = evaluateExact(exactExpr, xFinal);
+
+            const computed = methods.map(m => {
+                const finalY = numericalResults[m.id][lastIdx].y;
+                const absErr = !isNaN(yExactFinal) ? Math.abs(finalY - yExactFinal) : NaN;
+                return { ...m, finalY, absErr };
+            });
+
+            const ranked = [...computed].sort((a, b) => (isNaN(a.absErr) ? 1 : a.absErr) - (isNaN(b.absErr) ? 1 : b.absErr));
+            computed.forEach(c => {
+                c.rank = !isNaN(c.absErr) ? ranked.findIndex(r => r.id === c.id) + 1 : "-";
+            });
+
+            tbody.innerHTML = computed.map(c => `
+                <tr class="hover:bg-slate-50 dark:hover:bg-navy-800/40">
+                    <td class="p-3 font-bold text-slate-800 dark:text-slate-200">${c.name}</td>
+                    <td class="p-3 text-slate-500 dark:text-slate-400">${c.type}</td>
+                    <td class="p-3 font-bold text-brand-600 dark:text-brand-400">${c.order}</td>
+                    <td class="p-3 font-mono">${c.locErr}</td>
+                    <td class="p-3 font-mono">${c.globErr}</td>
+                    <td class="p-3 text-center">${c.evals}</td>
+                    <td class="p-3 font-bold">${c.finalY.toFixed(6)}</td>
+                    <td class="p-3 font-bold ${!isNaN(c.absErr) ? 'text-rose-500' : 'text-slate-400'}">
+                        ${!isNaN(c.absErr) ? c.absErr.toExponential(3) : 'N/A'}
+                    </td>
+                    <td class="p-3 text-center">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-bold ${c.rank === 1 ? 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300' : 'bg-slate-100 dark:bg-navy-800 text-slate-600 dark:text-slate-300'}">
+                            # ${c.rank}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderConclusions() {
+            const exactExpr = numericalResults.exactExpr;
+            const lastIdx = numericalResults.euler.length - 1;
+            const xFinal = numericalResults.euler[lastIdx].x;
+            const yExactFinal = evaluateExact(exactExpr, xFinal);
+
+            const errors = [
+                { name: "Euler", err: Math.abs(numericalResults.euler[lastIdx].y - yExactFinal) },
+                { name: "Heun", err: Math.abs(numericalResults.heun[lastIdx].y - yExactFinal) },
+                { name: "Punto Medio", err: Math.abs(numericalResults.midpoint[lastIdx].y - yExactFinal) },
+                { name: "Runge-Kutta 2", err: Math.abs(numericalResults.rk2[lastIdx].y - yExactFinal) },
+                { name: "Runge-Kutta 4", err: Math.abs(numericalResults.rk4[lastIdx].y - yExactFinal) },
+                { name: "RKF45", err: Math.abs(numericalResults.rkf45[lastIdx].y - yExactFinal) },
+                { name: "Adams-Bashforth", err: Math.abs(numericalResults.ab[lastIdx].y - yExactFinal) },
+                { name: "Adams-Moulton", err: Math.abs(numericalResults.am[lastIdx].y - yExactFinal) }
+            ].filter(e => !isNaN(e.err));
+
+            let best = { name: "N/A", err: NaN };
+            let worst = { name: "N/A", err: NaN };
+
+            if (errors.length > 0) {
+                errors.sort((a, b) => a.err - b.err);
+                best = errors[0];
+                worst = errors[errors.length - 1];
+            }
+
+            const cards = document.getElementById("conclusions-dynamic");
+            cards.innerHTML = `
+                <div class="p-4 rounded-xl bg-brand-50/50 dark:bg-navy-800/40 border border-brand-200 dark:border-navy-700">
+                    <span class="text-slate-500 font-semibold text-[10px] uppercase block">Método Más Preciso</span>
+                    <span class="text-base font-bold text-brand-600 dark:text-brand-400">${best.name}</span>
+                    <span class="text-xs block mt-1 font-mono text-emerald-600 dark:text-emerald-400">Error: ${!isNaN(best.err) ? best.err.toExponential(3) : 'N/A'}</span>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-navy-800/40 border border-slate-200 dark:border-navy-700">
+                    <span class="text-slate-500 font-semibold text-[10px] uppercase block">Mayor Error Global</span>
+                    <span class="text-base font-bold text-rose-500">${worst.name}</span>
+                    <span class="text-xs block mt-1 font-mono text-rose-400">Error: ${!isNaN(worst.err) ? worst.err.toExponential(3) : 'N/A'}</span>
+                </div>
+                <div class="p-4 rounded-xl bg-emerald-50/50 dark:bg-navy-800/40 border border-emerald-200 dark:border-navy-700">
+                    <span class="text-slate-500 font-semibold text-[10px] uppercase block">Eficiencia Computacional</span>
+                    <span class="text-base font-bold text-emerald-600 dark:text-emerald-400">Adams-Bashforth</span>
+                    <span class="text-xs block mt-1 text-slate-400">1 eval f(x,y)/paso tras inicio</span>
+                </div>
+                <div class="p-4 rounded-xl bg-amber-50/50 dark:bg-navy-800/40 border border-amber-200 dark:border-navy-700">
+                    <span class="text-slate-500 font-semibold text-[10px] uppercase block">Recomendación de Ingeniería</span>
+                    <span class="text-base font-bold text-amber-600 dark:text-amber-400">RK4 / RKF45</span>
+                    <span class="text-xs block mt-1 text-slate-400">Balance óptimo orden / costo</span>
+                </div>
+            `;
+
+            const textBlock = document.getElementById("conclusions-text");
+            textBlock.innerHTML = `
+                <p>
+                    <strong>1. Análisis de Orden de Convergencia:</strong> Con paso $h = ${numericalResults.params.h}$, el método de <strong>Euler</strong> manifiesta un decaimiento lineal de exactitud, presentando la cota de error más alta ($${!isNaN(worst.err) ? worst.err.toExponential(3) : 'N/A'}$).
+                </p>
+                <p>
+                    <strong>2. Métodos de Alto Orden:</strong> El algoritmo <strong>${best.name}</strong> exhibió el comportamiento más próximo a la trayectoria teórica exacta en el dominio evaluado $[${numericalResults.params.x0}, ${numericalResults.params.xf}]$, alcanzando un residuo de $${!isNaN(best.err) ? best.err.toExponential(3) : 'N/A'}$.
+                </p>
+                <p>
+                    <strong>3. Métodos Multipaso (Adams):</strong> En sistemas de integración de gran escala temporal, la familia Adams ahorra hasta un 75% de llamadas a $f(x,y)$ con respecto a esquemas Runge-Kutta clásicos sin sacrificar el orden global.
+                </p>
+            `;
+        }
+
+        // --- GRÁFICAS INTERACTIVAS ---
+        function setChartType(type) {
+            chartMode = type;
+            const btnSol = document.getElementById("btn-chart-sol");
+            const btnErr = document.getElementById("btn-chart-err");
+
+            if (type === 'solution') {
+                btnSol.className = "px-3 py-1.5 rounded-lg bg-brand-600 text-white font-bold";
+                btnErr.className = "px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-navy-800 text-slate-700 dark:text-slate-300 font-medium";
+            } else {
+                btnSol.className = "px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-navy-800 text-slate-700 dark:text-slate-300 font-medium";
+                btnErr.className = "px-3 py-1.5 rounded-lg bg-brand-600 text-white font-bold";
+            }
+            renderCharts();
+        }
+
+        function renderCharts() {
+            const ctx = document.getElementById('mainChart');
+            if (!ctx) return;
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#cbd5e1' : '#475569';
+            const gridColor = isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.8)';
+
+            const labels = numericalResults.euler.map(p => p.x.toFixed(2));
+            const exactExpr = numericalResults.exactExpr;
+
+            let datasets = [];
+
+            if (chartMode === 'solution') {
+                const exactData = numericalResults.euler.map(p => evaluateExact(exactExpr, p.x));
+                if (!isNaN(exactData[0])) {
+                    datasets.push({
+                        label: 'Solución Exacta y(x)',
+                        data: exactData,
+                        borderColor: '#0284c7',
+                        borderWidth: 2.5,
+                        borderDash: [6, 4],
+                        pointRadius: 0,
+                        tension: 0.1
+                    });
+                }
+
+                datasets.push({
+                    label: 'Euler',
+                    data: numericalResults.euler.map(p => p.y),
+                    borderColor: '#ef4444',
+                    borderWidth: 1.5,
+                    pointRadius: 2,
+                    tension: 0.1
+                });
+                datasets.push({
+                    label: 'Heun',
+                    data: numericalResults.heun.map(p => p.y),
+                    borderColor: '#f97316',
+                    borderWidth: 1.5,
+                    pointRadius: 2,
+                    tension: 0.1
+                });
+                datasets.push({
+                    label: 'Punto Medio',
+                    data: numericalResults.midpoint.map(p => p.y),
+                    borderColor: '#eab308',
+                    borderWidth: 1.5,
+                    pointRadius: 2,
+                    tension: 0.1
+                });
+                datasets.push({
+                    label: 'RK2',
+                    data: numericalResults.rk2.map(p => p.y),
+                    borderColor: '#10b981',
+                    borderWidth: 1.5,
+                    pointRadius: 2,
+                    tension: 0.1
+                });
+                datasets.push({
+                    label: 'RK4',
+                    data: numericalResults.rk4.map(p => p.y),
+                    borderColor: '#8b5cf6',
+                    borderWidth: 2,
+                    pointRadius: 2.5,
+                    tension: 0.1
+                });
+                datasets.push({
+                    label: 'RKF45',
+                    data: numericalResults.rkf45.map(p => p.y),
+                    borderColor: '#06b6d4',
+                    borderWidth: 2,
+                    pointRadius: 2,
+                    tension: 0.1
+                });
+            } else {
+                const methods = [
+                    { name: 'Euler', data: numericalResults.euler, color: '#ef4444' },
+                    { name: 'Heun', data: numericalResults.heun, color: '#f97316' },
+                    { name: 'Punto Medio', data: numericalResults.midpoint, color: '#eab308' },
+                    { name: 'RK2', data: numericalResults.rk2, color: '#10b981' },
+                    { name: 'RK4', data: numericalResults.rk4, color: '#8b5cf6' },
+                    { name: 'RKF45', data: numericalResults.rkf45, color: '#06b6d4' }
+                ];
+
+                methods.forEach(m => {
+                    const errData = m.data.map(p => {
+                        const yEx = evaluateExact(exactExpr, p.x);
+                        return !isNaN(yEx) ? Math.abs(p.y - yEx) : 0;
+                    });
+                    datasets.push({
+                        label: `Error ${m.name}`,
+                        data: errData,
+                        borderColor: m.color,
+                        borderWidth: 1.8,
+                        pointRadius: 2,
+                        tension: 0.1
+                    });
+                });
+            }
+
+            if (myChartInstance) {
+                myChartInstance.destroy();
+            }
+
+            myChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: textColor, font: { family: 'sans-serif', size: 11 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Variable Independiente (x)', color: textColor },
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        y: {
+                            title: { display: true, text: chartMode === 'solution' ? 'Variable y(x)' : 'Error Absoluto', color: textColor },
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- PSEUDOCÓDIGOS ---
+        function initAlgorithms() {
+            const container = document.getElementById("pseudo-container");
+            const algorithms = [
+                {
+                    name: "Algoritmo: Euler",
+                    code: `ALGORITMO Euler(f, x0, y0, h, xf)
+    x ← x0; y ← y0
+    Mientras x < xf Hacer
+        k ← f(x, y)
+        y ← y + h * k
+        x ← x + h
+    FinMientras
+FinALGORITMO`
+                },
+                {
+                    name: "Algoritmo: Heun (Euler Mejorado)",
+                    code: `ALGORITMO Heun(f, x0, y0, h, xf)
+    x ← x0; y ← y0
+    Mientras x < xf Hacer
+        k1 ← f(x, y)
+        y_pred ← y + h * k1
+        k2 ← f(x + h, y_pred)
+        y ← y + (h / 2) * (k1 + k2)
+        x ← x + h
+    FinMientras
+FinALGORITMO`
+                },
+                {
+                    name: "Algoritmo: Punto Medio",
+                    code: `ALGORITMO PuntoMedio(f, x0, y0, h, xf)
+    x ← x0; y ← y0
+    Mientras x < xf Hacer
+        k1 ← f(x, y)
+        k2 ← f(x + h/2, y + (h/2)*k1)
+        y ← y + h * k2
+        x ← x + h
+    FinMientras
+FinALGORITMO`
+                },
+                {
+                    name: "Algoritmo: Runge-Kutta 4 (RK4)",
+                    code: `ALGORITMO RungeKutta4(f, x0, y0, h, xf)
+    x ← x0; y ← y0
+    Mientras x < xf Hacer
+        k1 ← f(x, y)
+        k2 ← f(x + h/2, y + (h/2)*k1)
+        k3 ← f(x + h/2, y + (h/2)*k2)
+        k4 ← f(x + h, y + h*k3)
+        y ← y + (h / 6) * (k1 + 2*k2 + 2*k3 + k4)
+        x ← x + h
+    FinMientras
+FinALGORITMO`
+                },
+                {
+                    name: "Algoritmo: RKF45 Adaptativo",
+                    code: `ALGORITMO RKF45(f, x0, y0, h, tol)
+    x ← x0; y ← y0
+    Mientras x < xf Hacer
+        Calcular coeficientes k1..k6
+        y4 ← Orden 4
+        y5 ← Orden 5
+        error ← |y5 - y4|
+        Si error <= tol Entonces
+            x ← x + h; y ← y5
+        FinSi
+        h ← h * 0.84 * (tol / error)^0.25
+    FinMientras
+FinALGORITMO`
+                },
+                {
+                    name: "Algoritmo: Adams-Moulton (Predictor-Corrector)",
+                    code: `ALGORITMO AdamsMoulton4(f, x0, y0, h, xf)
+    Inicializar {y0, y1, y2, y3} con RK4
+    Para n = 3 Hasta Pasos Hacer
+        y_pred ← y[n] + (h/24)*(55*fn - 59*fn-1 + 37*fn-2 - 9*fn-3)
+        f_next ← f(x[n+1], y_pred)
+        y[n+1] ← y[n] + (h/24)*(9*f_next + 19*fn - 5*fn-1 + fn-2)
+    FinPara
+FinALGORITMO`
+                }
+            ];
+
+            container.innerHTML = algorithms.map(a => `
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-navy-950 border border-slate-200 dark:border-navy-800">
+                    <span class="font-bold text-brand-600 dark:text-brand-400 block mb-2">${a.name}</span>
+                    <pre class="overflow-x-auto text-[11px] leading-relaxed text-slate-700 dark:text-slate-300"><code>${a.code}</code></pre>
+                </div>
+            `).join('');
+        }
+
+        // --- INICIALIZACIÓN DE EJEMPLOS ---
+        function initExamples() {
+            const container = document.getElementById("examples-container");
+            container.innerHTML = ENGINEERING_EXAMPLES.map(ex => `
+                <div class="p-3 rounded-xl border border-slate-200 dark:border-navy-800 bg-slate-50/50 dark:bg-navy-950/40 hover:border-brand-500 dark:hover:border-brand-400 transition cursor-pointer flex flex-col justify-between"
+                    onclick="loadExample(${ex.id})">
+                    <div>
+                        <div class="flex items-center justify-between gap-1 mb-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">${ex.area}</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-navy-800 text-slate-600 dark:text-slate-300 font-mono">Ej. ${ex.id}</span>
+                        </div>
+                        <h4 class="font-bold text-xs text-slate-800 dark:text-slate-100 mb-1">${ex.title}</h4>
+                        <div class="text-[11px] text-brand-600 dark:text-brand-300 font-serif my-1">
+                            $${ex.equationTex}$
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">${ex.desc}</p>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-slate-200/60 dark:border-navy-800/80 flex items-center justify-between text-[10px] text-slate-500">
+                        <span>$x_0=${ex.x0}, y_0=${ex.y0}, h=${ex.h}$</span>
+                        <span class="text-brand-600 dark:text-brand-400 font-semibold hover:underline">Cargar →</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadExample(id) {
+            const ex = ENGINEERING_EXAMPLES.find(e => e.id === id);
+            if (!ex) return;
+
+            document.getElementById("input-f").value = ex.equation;
+            document.getElementById("input-x0").value = ex.x0;
+            document.getElementById("input-y0").value = ex.y0;
+            document.getElementById("input-h").value = ex.h;
+            document.getElementById("input-xf").value = ex.xf;
+            document.getElementById("input-exact").value = ex.exact || "";
+
+            executeAllMethods();
+            switchTab('comparison');
+        }
+
+        function resetDefaultProblem() {
+            document.getElementById("input-f").value = "y - x";
+            document.getElementById("input-x0").value = "0";
+            document.getElementById("input-y0").value = "2";
+            document.getElementById("input-h").value = "0.1";
+            document.getElementById("input-xf").value = "2.0";
+            document.getElementById("input-exact").value = "exp(x) + x + 1";
+            executeAllMethods();
+        }
+
+        // --- EXPORTAR Y UTILIDADES ---
+        function exportCSV() {
+            if (!numericalResults.euler) return;
+            const res = numericalResults;
+            const steps = res.euler.length;
+            let csv = "n,x,Euler,Heun,PuntoMedio,RK2,RK4,RKF45,AdamsBashforth,AdamsMoulton,Exacta\n";
+
+            for (let i = 0; i < steps; i++) {
+                const x = res.euler[i].x;
+                const exact = evaluateExact(res.exactExpr, x);
+                csv += [
+                    i,
+                    x.toFixed(4),
+                    res.euler[i].y.toFixed(6),
+                    res.heun[i].y.toFixed(6),
+                    res.midpoint[i].y.toFixed(6),
+                    res.rk2[i].y.toFixed(6),
+                    res.rk4[i].y.toFixed(6),
+                    res.rkf45[i].y.toFixed(6),
+                    res.ab[i].y.toFixed(6),
+                    res.am[i].y.toFixed(6),
+                    !isNaN(exact) ? exact.toFixed(6) : "N/A"
+                ].join(",") + "\n";
+            }
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `EDO_Simulacion_${Date.now()}.csv`;
+            link.click();
+        }
+
+        function copySingleTable(methodKey) {
+            const table = document.getElementById(`table-${methodKey}`);
+            if (!table) return;
+            copyElementToClipboard(table);
+        }
+
+        function copyComparisonTable() {
+            const table = document.getElementById("table-comparison-body");
+            if (!table) return;
+            copyElementToClipboard(table);
+        }
+
+        function copyElementToClipboard(table) {
+            let text = "";
+            for (let row of table.rows) {
+                let rowData = [];
+                for (let cell of row.cells) {
+                    rowData.push(cell.innerText.trim());
+                }
+                text += rowData.join("\t") + "\n";
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Tabla copiada al portapapeles.");
+            }).catch(err => {
+                alert("Error al copiar.");
+            });
+        }
+
+        function renderKaTeX() {
+            if (typeof renderMathInElement === "function") {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "$", right: "$", display: false }
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const darkIcon = document.getElementById("dark-icon");
+
+            if (html.classList.contains("dark")) {
+                html.classList.remove("dark");
+                darkIcon.className = "fa-solid fa-moon text-amber-300";
+            } else {
+                html.classList.add("dark");
+                darkIcon.className = "fa-solid fa-sun text-yellow-400";
+            }
+            if (myChartInstance) {
+                renderCharts();
+            }
+        }
+
+        // --- INICIALIZACIÓN GENERAL ---
+        window.addEventListener("DOMContentLoaded", () => {
+            // Render del QR oficial mediante qrcode.js
+            try {
+                const qrBox = document.getElementById('qrBox');
+                qrBox.innerHTML = '';
+                new QRCode(qrBox, {
+                    text: 'https://ctivitae.concytec.gob.pe/appDirectorioCTI/VerDatosInvestigador.do?id_investigador=0015364',
+                    width: 80,
+                    height: 80,
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+                const canvas = qrBox.querySelector('canvas');
+                if (canvas) canvas.remove();
+            } catch(e) {}
+
+            initTabs();
+            initExamples();
+            initAlgorithms();
+            executeAllMethods();
+            switchTab("intro");
+        });
+    </script>
+</body>
+</html>
