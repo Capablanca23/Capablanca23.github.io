@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aminas, aminoácidos, amidas y proteínas</title>
+<style>
+:root{--bg:#eef3f9;--card:#fff;--tx:#14243b;--mu:#4a5d78;--hd:#1f497d;--lt:#dbe5f1;--ok:#1b7a4b;--al:#b3341f;--bd:#c5d3e6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1726;--card:#16233a;--tx:#e6eefb;--mu:#9fb3d1;--hd:#5f9bdc;--lt:#1d2f4d;--ok:#4cc38a;--al:#ff8a73;--bd:#2c4266;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1726;--card:#16233a;--tx:#e6eefb;--mu:#9fb3d1;--hd:#5f9bdc;--lt:#1d2f4d;--ok:#4cc38a;--al:#ff8a73;--bd:#2c4266;color-scheme:dark}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:clamp(13px,2.1vh,16px)/1.38 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;display:flex;flex-direction:column}
+#deck{flex:1;position:relative;overflow:hidden}
+section{position:absolute;inset:0;padding:clamp(8px,2vh,24px) clamp(14px,4vw,56px);overflow-y:auto;opacity:0;visibility:hidden;transform:translateX(40px);transition:opacity .5s,transform .5s,visibility .5s}
+section.on{opacity:1;visibility:visible;transform:none}
+section.prev{transform:translateX(-40px)}
+h1{font-size:clamp(22px,min(4.4vw,6.5vh),42px);margin:.15em 0;color:var(--hd);line-height:1.15}
+h2{font-size:clamp(18px,min(3vw,4.4vh),28px);margin:0 0 .45em;color:var(--hd);border-bottom:3px solid var(--hd);padding-bottom:.25em}
+h3{margin:0 0 .4em;font-size:1rem;color:var(--hd)}
+.on .a{animation:up .6s both}
+.on .a:nth-child(2){animation-delay:.12s}.on .a:nth-child(3){animation-delay:.24s}.on .a:nth-child(4){animation-delay:.36s}.on .a:nth-child(5){animation-delay:.48s}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.g{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.c{background:var(--card);border:1px solid var(--bd);border-left:5px solid var(--hd);border-radius:10px;padding:8px 14px}
+.c.ok{border-left-color:var(--ok)}.c.al{border-left-color:var(--al)}
+ul,ol{margin:.2em 0;padding-left:1.2em}li{margin:.25em 0}
+.cover{display:flex;flex-direction:column;justify-content:center;min-height:100%;text-align:center;align-items:center}
+.cover .m{color:var(--mu)}
+.cover .a:nth-child(n){animation-delay:0s}
+#tm{font-variant-numeric:tabular-nums;cursor:pointer;background:#fff2;border-radius:6px;padding:2px 10px}
+#tm.w{background:#e0a800;color:#000}#tm.r{background:#c0392b}
+.tw{overflow-x:auto}
+.note{color:var(--mu);font-size:.85rem;font-style:italic;margin-top:8px}
+.ex{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 0;border-bottom:1px dashed var(--bd)}.ex3{grid-template-columns:1.1fr 1fr 1fr}.ex span{color:var(--mu)}.ex.h{font-weight:700;color:var(--hd)}
+details summary{cursor:pointer;color:var(--hd);font-weight:700;margin-top:8px}.ans{margin:6px 0 0;padding-top:6px;border-top:1px solid var(--bd)}ul.ans{padding-left:1.2em}
+.chip{display:inline-block;background:var(--lt);border:1px solid var(--bd);border-radius:14px;padding:2px 10px;margin:2px 2px 2px 0;font-size:.88rem}
+.btn{border:1px solid var(--hd);background:var(--card);color:var(--hd);padding:6px 14px;border-radius:20px;cursor:pointer;font:inherit}
+.btn.s{background:var(--hd);color:#fff}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.q{font-size:clamp(18px,2.6vw,26px);font-weight:600;text-align:center;margin:18px 0;color:var(--hd)}
+.hid{display:none}
+svg.ch{width:100%;max-width:300px;height:auto;display:block;margin:4px auto}
+svg.ch *{stroke:var(--tx);fill:none;stroke-width:2}
+svg.ch text{fill:var(--tx);stroke:none;font:600 15px system-ui,sans-serif}
+svg.ch .hl{stroke:var(--al);stroke-width:4}
+.gel{position:relative;height:120px;background:var(--lt);border:1px solid var(--bd);border-radius:10px;margin:10px 0}
+.gel .mid{position:absolute;left:50%;top:0;bottom:0;border-left:2px dashed var(--mu)}
+.sp{position:absolute;top:50%;left:50%;width:84px;margin:-16px 0 0 -42px;text-align:center;border-radius:16px;color:#fff;font-weight:700;padding:5px 0;transition:transform 2s ease}
+.pl{position:absolute;top:4px;font-weight:700}
+#bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:var(--hd);color:#fff;font-size:.85rem}
+#bar button{background:none;border:1px solid #fff8;color:#fff;border-radius:6px;padding:4px 12px;cursor:pointer;font:inherit}
+#dots{display:flex;gap:6px}#dots b{width:9px;height:9px;border-radius:50%;background:#fff5;cursor:pointer}#dots b.on{background:#fff;transform:scale(1.3)}
+#prog{height:3px;background:#fff4}#prog i{display:block;height:100%;background:#7fd1ff;transition:width .4s}
+@media(max-width:600px){#ft{display:none}}
+</style></head><body>
+<div id="deck">
+
+<section class="on"><div class="cover">
+<div class="a m">Universidad Tecnológica del Perú (UTP) · Departamento Académico de Cursos Básicos</div>
+<h1 class="a">Aminas, Aminoácidos, Amidas y Proteínas</h1>
+<p class="a">Diagnóstico estructural, propiedades ácido-base y niveles organizacionales de las proteínas.</p>
+<div class="a m">Química Orgánica – Sección 54700 · Semana 13 / Sesión 25 · Ciclo 2026-2<br><b>Dr. Ronald F. Rodriguez Espinoza</b></div>
+</div></section>
+
+<section><h2>Reflexión desde la experiencia: caso Alzheimer</h2>
+<div class="c al a"><p>El Alzheimer es una enfermedad neurodegenerativa caracterizada por la formación de <b>placas β-amiloideas</b> en el cerebro, lo que causa la pérdida progresiva de la memoria y la capacidad de aprendizaje.</p></div>
+<h3 style="margin-top:14px">Preguntas de debate</h3>
+<div class="g"><div class="c a"><b>1. ¿Las placas β-amiloideas son las únicas estructuras responsables de la enfermedad o hay otras involucradas?</b><details><summary>Ver respuesta</summary><div class="ans"><b>No.</b> Además de las placas de β-amiloide (péptido Aβ de 40–42 residuos, producto del corte de la proteína precursora APP), participan: los <b>ovillos neurofibrilares</b> de proteína tau hiperfosforilada dentro de las neuronas; los <b>oligómeros solubles de Aβ</b>, considerados más tóxicos que la placa madura; la neuroinflamación (microglía activada), la pérdida de sinapsis y del neurotransmisor acetilcolina, y factores genéticos como el alelo APOE4.</div></details></div>
+<div class="c a"><b>2. ¿El plegamiento o doblez de estas estructuras es importante o no en la etiología de la enfermedad?</b><details><summary>Ver respuesta</summary><div class="ans"><b>Sí, es central.</b> El Aβ soluble es en gran parte hélice α o desordenado; al <b>plegarse mal</b> adopta hojas β que se apilan (puentes de H entre cadenas) y forman oligómeros y fibrillas insolubles. Los agregados pueden actuar como «semillas» que inducen a otras moléculas a plegarse igual (propagación tipo prión). Es decir, la enfermedad es una <b>proteinopatía por mal plegamiento</b>, un problema de estructura secundaria y terciaria.</div></details></div></div></section>
+
+
+
+<section><h2>Tema 1 · Aminoácidos y su clasificación</h2>
+<div class="g">
+<!-- Tarjeta 1: Estructura -->
+<div class="c a"><h3>Estructura general (L-α-aminoácido)</h3>
+<svg style="width:100%; max-width:170px; display:block; margin:4px auto;" xmlns='http://www.w3.org/2000/svg' viewBox='0 -76.546 89.152 76.546'>
+<g id='page1'>
+<g transform='matrix(1 0 0 -1 0 0)'>
+<path fill="currentColor" d='M11.08724 40.89553C11.08724 41.25396 11.10724 41.36365 11.87411 41.36365H12.11318V41.6724C11.76443 41.64271 11.02755 41.64271 10.6488 41.64271C10.27036 41.64271 9.52318 41.64271 9.17474 41.6724V41.36365H9.4138C10.18068 41.36365 10.20068 41.25396 10.20068 40.89553V38.56459H7.22224V40.89553C7.22224 41.25396 7.24224 41.36365 8.00911 41.36365H8.24818V41.6724C7.89974 41.64271 7.16255 41.64271 6.78411 41.64271C6.40536 41.64271 5.658489 41.64271 5.309739 41.6724V41.36365H5.548802C6.31568 41.36365 6.33568 41.25396 6.33568 40.89553V35.645839C6.33568 35.287401 6.31568 35.177714 5.548802 35.177714H5.309739V34.868964C5.658489 34.898964 6.39536 34.898964 6.77411 34.898964C7.15255 34.898964 7.89974 34.898964 8.24818 34.868964V35.177714H8.00911C7.24224 35.177714 7.22224 35.287401 7.22224 35.645839V38.25584H10.20068V35.645839C10.20068 35.287401 10.18068 35.177714 9.4138 35.177714H9.17474V34.868964C9.52318 34.898964 10.26036 34.898964 10.63911 34.898964C11.01755 34.898964 11.76443 34.898964 12.11318 34.868964V35.177714H11.87411C11.10724 35.177714 11.08724 35.287401 11.08724 35.645839V40.89553Z'/>
+<path fill="currentColor" d='M15.9755 34.64437H15.73832C15.71738 34.49094 15.64769 34.079375 15.55675 34.009687C15.50113 33.967812 14.96394 33.967812 14.86644 33.967812H13.583C14.31519 34.61656 14.55956 34.81187 14.978 35.13969C15.49425 35.55125 15.9755 35.98375 15.9755 36.64625C15.9755 37.49031 15.23613 38.00625 14.34332 38.00625C13.47832 38.00625 12.892378 37.39969 12.892378 36.75781C12.892378 36.40219 13.192377 36.36719 13.262065 36.36719C13.429565 36.36719 13.63175 36.48594 13.63175 36.73688C13.63175 36.8625 13.583 37.10656 13.22019 37.10656C13.43644 37.60187 13.91082 37.75531 14.23863 37.75531C14.93613 37.75531 15.29894 37.21125 15.29894 36.64625C15.29894 36.03938 14.86644 35.55813 14.643 35.30719L12.962065 33.646875C12.892378 33.584375 12.892378 33.570313 12.892378 33.375H15.76613L15.9755 34.64437Z'/>
+<path fill="currentColor" d='M19.23391 41.54303C19.14423 41.6624 19.13423 41.6724 18.94517 41.6724H17.251727V41.36365H17.540477C17.689852 41.36365 17.889227 41.35365 18.0386 41.34365C18.26767 41.31396 18.27767 41.30396 18.27767 41.11459V35.9149C18.27767 35.645839 18.27767 35.177714 17.251727 35.177714V34.868964C17.600477 34.878964 18.08829 34.898964 18.41704 34.898964S19.23391 34.878964 19.58267 34.868964V35.177714C18.55673 35.177714 18.55673 35.645839 18.55673 35.9149V41.09459C18.60641 41.0449 18.61642 41.0349 18.6561 40.97521L22.72048 34.998339C22.81017 34.878964 22.82016 34.868964 22.88985 34.868964C23.02923 34.868964 23.02923 34.938651 23.02923 35.128026V40.62646C23.02923 40.89553 23.02923 41.36365 24.05516 41.36365V41.6724C23.70641 41.6624 23.2186 41.64271 22.88985 41.64271S22.07298 41.6624 21.72423 41.6724V41.36365C22.75017 41.36365 22.75017 40.89553 22.75017 40.62646V36.37303L19.23391 41.54303Z'/>
+<path fill="currentColor" d='M47.506817 38.27584C47.506817 36.21365 49.12057 34.649901 50.97338 34.649901C52.59713 34.649901 53.57307 36.03428 53.57307 37.1899C53.57307 37.28959 53.57307 37.35928 53.44369 37.35928C53.334 37.35928 53.334 37.29959 53.32432 37.1999C53.24463 35.775526 52.17869 34.958651 51.09275 34.958651C50.48525 34.958651 48.53275 35.297401 48.53275 38.26584C48.53275 41.24428 50.47525 41.58271 51.08275 41.58271C52.16869 41.58271 53.05525 40.67646 53.25432 39.22209C53.27432 39.08271 53.27432 39.05271 53.41369 39.05271C53.57307 39.05271 53.57307 39.08271 53.57307 39.29178V41.6524C53.57307 41.82178 53.57307 41.89178 53.46369 41.89178C53.42369 41.89178 53.384 41.89178 53.30432 41.77209L52.80619 41.0349C52.43775 41.39365 51.92963 41.89178 50.97338 41.89178C49.11057 41.89178 47.506817 40.30771 47.506817 38.27584Z'/>
+<path d='M26.3867 38.27344H44.957' stroke='currentColor' fill='none' stroke-width='.3985' stroke-miterlimit='10'/>
+<path fill="currentColor" d='M47.506817 68.16389C47.506817 66.1017 49.12057 64.537954 50.97338 64.537954C52.59713 64.537954 53.57307 65.92233 53.57307 67.07795C53.57307 67.17764 53.57307 67.24733 53.44369 67.24733C53.334 67.24733 53.334 67.18764 53.32432 67.08795C53.24463 65.663579 52.17869 64.846704 51.09275 64.846704C50.48525 64.846704 48.53275 65.185454 48.53275 68.15389C48.53275 71.13233 50.47525 71.47077 51.08275 71.47077C52.16869 71.47077 53.05525 70.56452 53.25432 69.11014C53.27432 68.97077 53.27432 68.94077 53.41369 68.94077C53.57307 68.94077 53.57307 68.97077 53.57307 69.17983V71.54045C53.57307 71.70983 53.57307 71.77983 53.46369 71.77983C53.42369 71.77983 53.384 71.77983 53.30432 71.66014L52.80619 70.92295C52.43775 71.2817 51.92963 71.77983 50.97338 71.77983C49.11057 71.77983 47.506817 70.19577 47.506817 68.16389Z'/>
+<path fill="currentColor" d='M61.3262 68.13389C61.3262 70.16608 59.82182 71.77983 58.00901 71.77983C56.22589 71.77983 54.701823 70.18577 54.701823 68.13389C54.701823 66.0917 56.23589 64.537954 58.00901 64.537954C59.82182 64.537954 61.3262 66.1217 61.3262 68.13389ZM58.01901 64.797016C57.06276 64.797016 55.72776 65.673579 55.72776 68.27327C55.72776 70.85327 57.18214 71.53077 58.00901 71.53077C58.87557 71.53077 60.29995 70.82327 60.29995 68.27327C60.29995 65.633579 58.93526 64.797016 58.01901 64.797016Z'/>
+<path fill="currentColor" d='M69.07522 68.13389C69.07522 70.16608 67.57084 71.77983 65.75803 71.77983C63.97491 71.77983 62.450843 70.18577 62.450843 68.13389C62.450843 66.0917 63.98491 64.537954 65.75803 64.537954C67.57084 64.537954 69.07522 66.1217 69.07522 68.13389ZM65.76803 64.797016C64.81178 64.797016 63.47678 65.673579 63.47678 68.27327C63.47678 70.85327 64.93116 71.53077 65.75803 71.53077C66.62459 71.53077 68.04897 70.82327 68.04897 68.27327C68.04897 65.633579 66.68428 64.797016 65.76803 64.797016Z'/>
+<path fill="currentColor" d='M75.74822 70.78358C75.74822 71.14202 75.76822 71.2517 76.5351 71.2517H76.77416V71.56045C76.42541 71.53077 75.68854 71.53077 75.30979 71.53077C74.93135 71.53077 74.18416 71.53077 73.83572 71.56045V71.2517H74.07479C74.84166 71.2517 74.86166 71.14202 74.86166 70.78358V68.45264H71.88322V70.78358C71.88322 71.14202 71.90322 71.2517 72.6701 71.2517H72.90916V71.56045C72.56072 71.53077 71.82354 71.53077 71.4451 71.53077C71.06635 71.53077 70.319473 71.53077 69.970723 71.56045V71.2517H70.209785C70.97666 71.2517 70.99666 71.14202 70.99666 70.78358V65.533891C70.99666 65.175454 70.97666 65.065766 70.209785 65.065766H69.970723V64.757016C70.319473 64.787016 71.05635 64.787016 71.4351 64.787016C71.81354 64.787016 72.56072 64.787016 72.90916 64.757016V65.065766H72.6701C71.90322 65.065766 71.88322 65.175454 71.88322 65.533891V68.14389H74.86166V65.533891C74.86166 65.175454 74.84166 65.065766 74.07479 65.065766H73.83572V64.757016C74.18416 64.787016 74.92135 64.787016 75.3001 64.787016C75.67854 64.787016 76.42541 64.787016 76.77416 64.757016V65.065766H76.5351C75.76822 65.065766 75.74822 65.175454 75.74822 65.533891V70.78358Z'/>
+<path d='M50.5469 43.66797V62.7656' stroke='currentColor' fill='none' stroke-width='.3985' stroke-miterlimit='10'/>
+<path fill="currentColor" d='M49.11123 8.49724V11.07724C49.11123 11.3063 49.11123 11.42599 49.33029 11.45568C49.42998 11.47568 49.71904 11.47568 49.9181 11.47568C50.81467 11.47568 51.93029 11.43599 51.93029 9.99161C51.93029 9.30411 51.69123 8.49724 50.21685 8.49724H49.11123ZM51.2131 8.36786C52.17935 8.60693 52.95623 9.21443 52.95623 9.99161C52.95623 10.94786 51.8206 11.78443 50.35654 11.78443H47.228728V11.47568H47.467791C48.23467 11.47568 48.25467 11.36599 48.25467 11.00755V5.757864C48.25467 5.399427 48.23467 5.289739 47.467791 5.289739H47.228728V4.980989C47.587166 5.010989 48.29435 5.010989 48.6831 5.010989C49.07154 5.010989 49.77873 5.010989 50.13717 4.980989V5.289739H49.8981C49.13123 5.289739 49.11123 5.399427 49.11123 5.757864V8.27818H50.25685C50.41623 8.27818 50.83467 8.27818 51.1831 7.93943C51.56185 7.58099 51.56185 7.27193 51.56185 6.60474C51.56185 5.957239 51.56185 5.558802 51.97029 5.180364C52.37842 4.821614 52.92654 4.761927 53.22529 4.761927C54.00217 4.761927 54.17154 5.578802 54.17154 5.857552C54.17154 5.917239 54.17154 6.02693 54.04217 6.02693C53.93248 6.02693 53.93248 5.937239 53.92248 5.867552C53.86279 5.160364 53.51404 4.980989 53.26498 4.980989C52.77717 4.980989 52.69748 5.489114 52.55779 6.41536L52.42842 7.21224C52.24904 7.84974 51.76092 8.17849 51.2131 8.36786Z'/>
+<path d='M50.5469 32.875V13.7813' stroke='currentColor' fill='none' stroke-width='.3985' stroke-miterlimit='10'/>
+<path fill="currentColor" d='M82.80525 40.89553C82.80525 41.25396 82.82525 41.36365 83.59213 41.36365H83.83119V41.6724C83.48244 41.64271 82.74557 41.64271 82.36682 41.64271C81.98838 41.64271 81.24119 41.64271 80.89275 41.6724V41.36365H81.13182C81.89869 41.36365 81.91869 41.25396 81.91869 40.89553V38.56459H78.94025V40.89553C78.94025 41.25396 78.96025 41.36365 79.72713 41.36365H79.96619V41.6724C79.61775 41.64271 78.88057 41.64271 78.50213 41.64271C78.12338 41.64271 77.376504 41.64271 77.027754 41.6724V41.36365H77.266817C78.03369 41.36365 78.05369 41.25396 78.05369 40.89553V35.645839C78.05369 35.287401 78.03369 35.177714 77.266817 35.177714H77.027754V34.868964C77.376504 34.898964 78.11338 34.898964 78.49213 34.898964C78.87057 34.898964 79.61775 34.898964 79.96619 34.868964V35.177714H79.72713C78.96025 35.177714 78.94025 35.287401 78.94025 35.645839V38.25584H81.91869V35.645839C81.91869 35.287401 81.89869 35.177714 81.13182 35.177714H80.89275V34.868964C81.24119 34.898964 81.97838 34.898964 82.35713 34.898964C82.73557 34.898964 83.48244 34.898964 83.83119 34.868964V35.177714H83.59213C82.82525 35.177714 82.80525 35.287401 82.80525 35.645839V40.89553Z'/>
+<path d='M56.1367 38.27344H74.707' stroke='currentColor' fill='none' stroke-width='.3985' stroke-miterlimit='10'/>
+</g>
+</g>
+</svg>
+<p style="margin:2px 0; font-size:0.95em;"><b style="color:#1f6fbf">Amino</b> · <b>Cα</b> · <b style="color:var(--al)">carboxilo</b>. El 20.º, la glicina, tiene R = H y no es quiral.</p>
+<h3 style="margin-top:8px; font-size:0.95em;">¿Qué significa «L»?</h3>
+<p style="margin:2px 0; font-size:0.95em;"><b>L</b> es la <b>configuración relativa</b>: en la proyección de Fischer, con el COOH arriba y R abajo, el –NH₂ queda a la <b>izquierda</b> del Cα. Su imagen especular es la forma D. En el sistema R/S casi todos son <b>S</b> (la cisteína es R).</p></div>
+
+<!-- Tarjeta 2: Esenciales -->
+<div class="c al a"><h3>Aminoácidos Esenciales</h3>
+<p style="margin:2px 0; font-size:0.95em;"><i>(El cuerpo no los sintetiza; deben obtenerse de la dieta)</i></p>
+<b style="font-size:0.95em;">Adultos (8):</b> Val, Leu, Ile, Phe, Trp, Met, Thr, Lys.<br>
+<b style="font-size:0.95em;">Niños (10):</b> los 8 anteriores + Arg (R) e His (H).
+<p class="note" style="margin-top:6px; font-style:normal; color:var(--tx); font-size:0.9em;"><b>Nota:</b> Los otros 10 de los 20 aminoácidos son <b>no esenciales</b>, pues el organismo sí los puede fabricar.</p></div>
+</div> <!-- Cerramos la primera fila -->
+
+<h3 style="margin-top:12px">Clasificación por grupo R (pI)</h3>
+<div class="g">
+<div class="c a"><b>No polares alifáticos</b><br>Gly 5.97 · Ala 6.01 · Val* 5.97 · Leu* 5.98 · Met* 5.74 · Ile* 6.02 · Pro 6.30</div>
+<div class="c a"><b>No polares aromáticos</b><br>Phe* 5.48 · Tyr 5.66 · Trp* 5.89</div>
+<div class="c a"><b>Polares sin carga</b><br>Ser 5.68 · Thr* 5.60 · Cys 5.07 · Asn 5.41 · Gln 5.65</div>
+<div class="c ok a"><b>Básicos (+)</b><br>Lys* 9.74 · Arg 10.76 · His* 7.59</div>
+<div class="c al a"><b>Ácidos (−)</b><br>Asp 2.85 · Glu 3.22</div></div></section>
+
+<section><h2>Tema 2 · Propiedades ácido-base y punto isoeléctrico</h2>
+<div class="g">
+<div class="c a"><h3>Carácter anfótero</h3>Poseen NH₂ (básico) y COOH (ácido). Alto punto de fusión (se descomponen) por atracción iónica; solubles en agua.
+<h3 style="margin-top:8px">Zwitterion (ion dipolar)</h3>
+<svg style="width:100%; max-width:280px; display:block; margin:8px auto;" xmlns='http://www.w3.org/2000/svg' viewBox='0 -76.546 117.85 76.546'>
+<g id='page1'>
+<g transform='matrix(1 0 0 -1 0 0)'>
+<path fill="currentColor" d='M8.21036 40.06124H10.34474C10.43536 40.06124 10.60286 40.06124 10.60286 40.22874C10.60286 40.40311 10.44255 40.40311 10.34474 40.40311H8.21036V42.54436C8.21036 42.63499 8.21036 42.80249 8.04286 42.80249C7.86849 42.80249 7.86849 42.64218 7.86849 42.54436V40.40311H5.727239C5.636614 40.40311 5.469114 40.40311 5.469114 40.23561C5.469114 40.06124 5.629739 40.06124 5.727239 40.06124H7.86849V37.919987C7.86849 37.829362 7.86849 37.661862 8.03599 37.661862C8.21036 37.661862 8.21036 37.822487 8.21036 37.919987V40.06124Z'/>
+<path fill="currentColor" d='M17.70123 40.89553C17.70123 41.25396 17.72122 41.36365 18.4881 41.36365H18.72716V41.6724C18.37841 41.64271 17.64154 41.64271 17.26279 41.64271C16.88435 41.64271 16.13716 41.64271 15.78873 41.6724V41.36365H16.02779C16.79466 41.36365 16.81466 41.25396 16.81466 40.89553V38.56459H13.83623V40.89553C13.83623 41.25396 13.85622 41.36365 14.6231 41.36365H14.86216V41.6724C14.51373 41.64271 13.77654 41.64271 13.3981 41.64271C13.01935 41.64271 12.272475 41.64271 11.923725 41.6724V41.36365H12.162787C12.92966 41.36365 12.94966 41.25396 12.94966 40.89553V35.645839C12.94966 35.287401 12.92966 35.177714 12.162787 35.177714H11.923725V34.868964C12.272475 34.898964 13.00935 34.898964 13.3881 34.898964C13.76654 34.898964 14.51373 34.898964 14.86216 34.868964V35.177714H14.6231C13.85622 35.177714 13.83623 35.287401 13.83623 35.645839V38.25584H16.81466V35.645839C16.81466 35.287401 16.79466 35.177714 16.02779 35.177714H15.78873V34.868964C16.13716 34.898964 16.87435 34.898964 17.2531 34.898964C17.63154 34.898964 18.37841 34.898964 18.72716 34.868964V35.177714H18.4881C17.72122 35.177714 17.70123 35.287401 17.70123 35.645839V40.89553Z'/>
+<path fill="currentColor" d='M20.97105 35.70469C21.51511 35.70469 21.90574 35.32813 21.90574 34.58156C21.90574 33.716875 21.40355 33.45875 20.99918 33.45875C20.72011 33.45875 20.10636 33.535313 19.813238 33.946875C20.14105 33.960938 20.21793 34.190938 20.21793 34.3375C20.21793 34.56062 20.050426 34.72125 19.834176 34.72125C19.638863 34.72125 19.443551 34.6025 19.443551 34.316562C19.443551 33.660937 20.16918 33.235625 21.01293 33.235625C21.98261 33.235625 22.65199 33.884063 22.65199 34.58156C22.65199 35.12563 22.20574 35.66969 21.43855 35.83031C22.17074 36.09531 22.43605 36.61844 22.43605 37.04375C22.43605 37.595 21.80105 38.00625 21.02699 38.00625C20.25261 38.00625 19.659801 37.62969 19.659801 37.07188C19.659801 36.83469 19.813238 36.70219 20.022613 36.70219C20.23886 36.70219 20.37824 36.8625 20.37824 37.05781C20.37824 37.26 20.23886 37.40656 20.022613 37.42063C20.26668 37.7275 20.74793 37.80406 21.00605 37.80406C21.3198 37.80406 21.75949 37.65063 21.75949 37.04375C21.75949 36.75094 21.66168 36.43 21.48043 36.21375C21.25011 35.94875 21.0548 35.93469 20.70605 35.91375C20.53168 35.9 20.51793 35.9 20.48293 35.89313C20.46886 35.89313 20.41324 35.87906 20.41324 35.80219C20.41324 35.70469 20.47605 35.70469 20.59449 35.70469H20.97105Z'/>
+<path fill="currentColor" d='M25.8479 41.54303C25.75821 41.6624 25.74821 41.6724 25.55915 41.6724H23.865713V41.36365H24.154463C24.303838 41.36365 24.503213 41.35365 24.65259 41.34365C24.88165 41.31396 24.89165 41.30396 24.89165 41.11459V35.9149C24.89165 35.645839 24.89165 35.177714 23.865713 35.177714V34.868964C24.214463 34.878964 24.70228 34.898964 25.03103 34.898964S25.8479 34.878964 26.19665 34.868964V35.177714C25.17071 35.177714 25.17071 35.645839 25.17071 35.9149V41.09459C25.2204 41.0449 25.2304 41.0349 25.27009 40.97521L29.33446 34.998339C29.42415 34.878964 29.43415 34.868964 29.50384 34.868964C29.64321 34.868964 29.64321 34.938651 29.64321 35.128026V40.62646C29.64321 40.89553 29.64321 41.36365 30.66915 41.36365V41.6724C30.3204 41.6624 29.83259 41.64271 29.50384 41.64271S28.68696 41.6624 28.33821 41.6724V41.36365C29.36415 41.36365 29.36415 40.89553 29.36415 40.62646V36.37303L25.8479 41.54303Z'/>
+<path fill="currentColor" d='M54.120802 38.27584C54.120802 36.21365 55.73455 34.649901 57.58736 34.649901C59.21112 34.649901 60.18705 36.03428 60.18705 37.1899C60.18705 37.28959 60.18705 37.35928 60.05768 37.35928C59.94799 37.35928 59.94799 37.29959 59.9383 37.1999C59.85861 35.775526 58.79268 34.958651 57.70674 34.958651C57.09924 34.958651 55.14674 35.297401 55.14674 38.26584C55.14674 41.24428 57.08924 41.58271 57.69674 41.58271C58.78268 41.58271 59.66924 40.67646 59.8683 39.22209C59.8883 39.08271 59.8883 39.05271 60.02768 39.05271C60.18705 39.05271 60.18705 39.08271 60.18705 39.29178V41.6524C60.18705 41.82178 60.18705 41.89178 60.07768 41.89178C60.03768 41.89178 59.99799 41.89178 59.9183 41.77209L59.42018 41.0349C59.05174 41.39365 58.54362 41.89178 57.58736 41.89178C55.72455 41.89178 54.120802 40.30771 54.120802 38.27584Z'/>
+<path d='M33 38.27344H51.5703' stroke='currentColor' fill='none' stroke-width='.3985' stroke-miterlimit='10'/>
+<path fill="currentColor" d='M84.008777 38.27584C84.008777 36.21365 85.62253 34.649901 87.47534 34.649901C89.09909 34.649901 90.07503 36.03428 90.07503 37.1899C90.07503 37.28959 90.07503 37.35928 89.94565 37.35928C89.83596 37.35928 89.83596 37.29959 89.82628 37.1999C89.74659 35.775526 88.68065 34.958651 87.59471 34.958651C86.98721 34.958651 85.03471 35.297401 85.03471 38.26584C85.03471 41.24428 86.97721 41.58271 87.58471 41.58271C88.67065 41.58271 89.55721 40.67646 89.75628 39.22209C89.77628 39.08271 89.77628 39.05271 89.91565 39.05271C90.07503 39.05271 90.07503 39.08271 90.07503 39.29178V41.6524C90.07503 41.82178 90.07503 41.89178 89.96565 41.89178C89.92565 41.89178 89.88596 41.89178 89.80628 41.77209L89.30815 41.0349C88.93971 41.39365 88.43159 41.89178 87.47534 41.89178C85.61253 41.89178 84.008777 40.30771 84.008777 38.27584Z'/>
+<path fill="currentColor" d='M97.82816 38.24584C97.82816 40.27803 96.32378 41.89178 94.51097 41.89178C92.72785 41.89178 91.203783 40.29771 91.203783 38.24584C91.203783 36.20365 92.73785 34.649901 94.51097 34.649901C96.32378 34.649901 97.82816 36.23365 97.82816 38.24584ZM94.52097 34.908964C93.56472 34.908964 92.22972 35.785526 92.22972 38.38521C92.22972 40.96521 93.6841 41.64271 94.51097 41.64271C95.37753 41.64271 96.80191 40.93521 96.80191 38.38521C96.80191 35.745526 95.43722 34.908964 94.52097 34.908964Z'/>
+<path fill="currentColor" d='M105.57718 38.24584C105.57718 40.27803 104.0728 41.89178 102.25999 41.89178C100.47687 41.89178 98.952803 40.29771 98.952803 38.24584C98.952803 36.20365 100.48687 34.649901 102.25999 34.649901C104.0728 34.649901 105.57718 36.23365 105.57718 38.24584ZM102.26999 34.908964C101.31374 34.908964 99.97874 35.785526 99.97874 38.38521C99.97874 40.96521 101.43312 41.64271 102.25999 41.64271C103.12655 41.64271 104.55093 40.93521 104.55093 38.38521C104.55093 35.745526 103.18624 34.908964 102.26999 34.908964Z'/>
+<path fill="currentColor" d='M111.33339 40.06124C111.44495 40.06124 111.61245 40.06124 111.61245 40.22874C111.61245 40.40311 111.45214 40.40311 111.33339 40.40311H107.1762C107.064636 40.40311 106.897448 40.40311 106.897448 40.23561C106.897448 40.06124 107.057761 40.06124 107.1762 40.06124H111.33339Z'/>
+<path d='M62.75 38.27344H81.4609' stroke='currentColor' fill='none' stroke-width='.3985' stroke-miterlimit='10'/>
+<path fill="currentColor" d='M55.72521 68.27327V70.85327C55.72521 71.08233 55.72521 71.20202 55.94428 71.2317C56.04396 71.2517 56.33303 71.2517 56.53209 71.2517C57.42865 71.2517 58.54428 71.21202 58.54428 69.76764C58.54428 69.08014 58.30521 68.27327 56.83084 68.27327H55.72521ZM57.82709 68.14389C58.79334 68.38295 59.57021 68.99045 59.57021 69.76764C59.57021 70.72389 58.43459 71.56045 56.97053 71.56045H53.842714V71.2517H54.081776C54.84865 71.2517 54.86865 71.14202 54.86865 70.78358V65.533891C54.86865 65.175454 54.84865 65.065766 54.081776 65.065766H53.842714V64.757016C54.201151 64.787016 54.90834 64.787016 55.29709 64.787016C55.68553 64.787016 56.39271 64.787016 56.75115 64.757016V65.065766H56.51209C55.74521 65.065766 55.72521 65.175454 55.72521 65.533891V68.0542H56.87084C57.03021 68.0542 57.44865 68.0542 57.79709 67.71545C58.17584 67.35702 58.17584 67.04795 58.17584 66.38077C58.17584 65.733266 58.17584 65.334829 58.58428 64.956391C58.9924 64.597641 59.54053 64.537954 59.83928 64.537954C60.61615 64.537954 60.78553 65.354829 60.78553 65.633579C60.78553 65.693266 60.78553 65.80295 60.65615 65.80295C60.54646 65.80295 60.54646 65.713266 60.53646 65.643579C60.47678 64.936391 60.12803 64.757016 59.87896 64.757016C59.39115 64.757016 59.31146 65.265141 59.17178 66.19139L59.0424 66.98827C58.86303 67.62577 58.3749 67.95452 57.82709 68.14389Z'/>
+<path d='M57.1602 43.66797V62.7656' stroke='currentColor' fill='none' stroke-width='.3985' stroke-miterlimit='10'/>
+<path fill="currentColor" d='M59.53127 11.00755C59.53127 11.36599 59.55127 11.47568 60.31814 11.47568H60.5572V11.78443C60.20845 11.75474 59.47158 11.75474 59.09283 11.75474C58.71439 11.75474 57.9672 11.75474 57.61877 11.78443V11.47568H57.85783C58.6247 11.47568 58.6447 11.36599 58.6447 11.00755V8.67661H55.66627V11.00755C55.66627 11.36599 55.68627 11.47568 56.45314 11.47568H56.6922V11.78443C56.34377 11.75474 55.60658 11.75474 55.22814 11.75474C54.84939 11.75474 54.102516 11.75474 53.753766 11.78443V11.47568H53.992828C54.7597 11.47568 54.7797 11.36599 54.7797 11.00755V5.757864C54.7797 5.399427 54.7597 5.289739 53.992828 5.289739H53.753766V4.980989C54.102516 5.010989 54.83939 5.010989 55.21814 5.010989C55.59658 5.010989 56.34377 5.010989 56.6922 4.980989V5.289739H56.45314C55.68627 5.289739 55.66627 5.399427 55.66627 5.757864V8.36786H58.6447V5.757864C58.6447 5.399427 58.6247 5.289739 57.85783 5.289739H57.61877V4.980989C57.9672 5.010989 58.70439 5.010989 59.08314 5.010989C59.46158 5.010989 60.20845 5.010989 60.5572 4.980989V5.289739H60.31814C59.55127 5.289739 59.53127 5.399427 59.53127 5.757864V11.00755Z'/>
+<path d='M57.1602 32.875V13.7813' stroke='currentColor' fill='none' stroke-width='.3985' stroke-miterlimit='10'/>
+</g>
+</g>
+</svg>
+
+<p style="margin:2px 0"><b>Zwitterion</b> (del alemán <i>Zwitter</i>, «híbrido»): molécula con una carga (+) y una (−) en átomos distintos y <b>carga neta 0</b>. Aparece porque el COOH (pKa ≈ 2) cede su H⁺ al grupo NH₂ (cuyo ácido conjugado tiene pKa ≈ 9–10): resultan –NH₃⁺ y –COO⁻.</p>
+<div class="note" style="font-style:normal"><b>pH &lt; pI:</b> H₃N⁺–CHR–COOH, catión (+)<br><b>pH = pI:</b> H₃N⁺–CHR–COO⁻, zwitterion (0)<br><b>pH &gt; pI:</b> H₂N–CHR–COO⁻, anión (−)</div></div>
+<div class="c a"><h3>pI</h3>pH en el que la máxima concentración del aminoácido está en forma dipolar (solubilidad mínima en agua).
+<h3 style="margin-top:8px">Ninhidrina</h3>Identifica α-aminoácidos: forma el complejo púrpura de Ruhemann.
+<div class="c al" style="margin-top:8px"><b>Ejercicio:</b> buffer pH 5.00. ¿Forma iónica de Thr (pI 5.60) y Asp (pI 2.85)?<br>
+<button class="btn" id="ex">Ver respuesta</button><div id="exr" class="hid"><b>Thr:</b> pH 5.00 &lt; 5.60 → catión (+).<br><b>Asp:</b> pH 5.00 &gt; 2.85 → anión (−).</div></div></div></div></section>
+
+<!-- NUEVA DIAPOSITIVA: PROBLEMA 1 -->
+<section><h2>Problema 1 · Formas iónicas a pH 5.00</h2>
+<div class="c al a" style="margin-bottom:12px">
+<b>Enunciado:</b> Se realizará un ensayo bioquímico para medir la concentración de los aminoácidos treonina y aspartato. Para ello se utilizará una solución buffer de pH 5.00. ¿En qué forma se encontrarán ambos aminoácidos? Dibuje las estructuras correspondientes.
+</div>
+<div class="g">
+<div class="c a">
+<h3>Treonina (Thr) · pI = 5.60</h3>
+<p>Como el <b>pH (5.00) &lt; pI (5.60)</b>, el medio es más ácido que su punto isoeléctrico. El aminoácido ganará un protón (H⁺), por lo que predominará la forma <b>catiónica (+)</b>.</p>
+<div style="text-align:center; margin-top:10px;">
+  <span style="font-size:1.1em; font-weight:bold; color:var(--hd);">H₃N⁺ — CH(CH(OH)CH₃) — COOH</span><br>
+  <span style="color:var(--al); font-weight:bold;">Carga neta: +1</span>
+</div>
+</div>
+<div class="c al a">
+<h3>Aspartato (Asp) · pI = 2.85</h3>
+<p>Como el <b>pH (5.00) &gt; pI (2.85)</b>, el medio es más básico que su punto isoeléctrico. El aminoácido perderá protones, por lo que predominará la forma <b>aniónica (−)</b>.</p>
+<div style="text-align:center; margin-top:10px;">
+  <span style="font-size:1.1em; font-weight:bold; color:var(--hd);">H₂N — CH(CH₂COO⁻) — COO⁻</span><br>
+  <span style="color:var(--al); font-weight:bold;">Carga neta: −1</span>
+</div>
+</div>
+</div>
+<div class="c ok a" style="margin-top:12px">
+<b>Conclusión para el ensayo:</b> A pH 5.00, la Treonina se comportará como un catión (migrará hacia el cátodo en una electroforesis) y el Aspartato como un anión (migrará hacia el ánodo).
+</div>
+</section>
+
+<!-- NUEVA DIAPOSITIVA: PROBLEMA 2 -->
+<section><h2>Problema 2 · Determinación del punto isoeléctrico (pI)</h2>
+<div class="c al a" style="margin-bottom:12px">
+<b>Enunciado:</b> Explique cómo se determina el punto isoeléctrico de los aminoácidos mostrados. Use los valores de pKa (los estándar son: Thr: pKa1=2.09, pKa2=9.10; Asp: pKa1=1.88, pKaR=3.65, pKa2=9.60).
+</div>
+<div class="g">
+<div class="c a">
+<h3>Regla general</h3>
+<p>El pI se calcula promediando los <b>dos pKa</b> que corresponden a las transiciones de carga alrededor del estado neutro (zwitterion).</p>
+<ul>
+<li><b>Aminoácidos neutros:</b> Promedio de pKa1 (COOH) y pKa2 (NH₃⁺).</li>
+<li><b>Aminoácidos ácidos:</b> Promedio de los dos pKa más bajos (los dos COOH).</li>
+<li><b>Aminoácidos básicos:</b> Promedio de los dos pKa más altos (los dos grupos amino).</li>
+</ul>
+</div>
+<div class="c ok a">
+<h3>Ejemplo 1: Treonina (Neutro)</h3>
+<p>Tiene solo dos grupos ionizables: el α-COOH (pKa1 = 2.09) y el α-NH₃⁺ (pKa2 = 9.10).</p>
+<p style="text-align:center; font-weight:bold; font-size:1.1em; margin:10px 0;">
+pI = (2.09 + 9.10) / 2 = <b>5.59</b>
+</p>
+<p>Este valor coincide con el pI de 5.60 mostrado en tu tabla.</p>
+</div>
+<div class="c al a">
+<h3>Ejemplo 2: Aspartato (Ácido)</h3>
+<p>Tiene tres grupos: α-COOH (pKa1 = 1.88), cadena lateral COOH (pKaR = 3.65) y α-NH₃⁺ (pKa2 = 9.60). Al ser ácido, usamos los dos pKa más bajos (los carboxilos).</p>
+<p style="text-align:center; font-weight:bold; font-size:1.1em; margin:10px 0;">
+pI = (1.88 + 3.65) / 2 = <b>2.76</b>
+</p>
+<p>Este valor coincide con el pI de 2.85 mostrado en tu tabla (las pequeñas variaciones dependen de la fuente bibliográfica).</p>
+</div>
+</div>
+</section>
+
+<section><h2>Aplicación · Electroforesis de aminoácidos</h2>
+<div class="g"><div class="c a"><h3>¿Qué es?</h3>Técnica que separa moléculas cargadas aplicando un campo eléctrico sobre un soporte (gel o papel) embebido en un buffer de pH fijo. Cada aminoácido migra según su <b>carga neta</b>.</div><div class="c a"><h3>¿Por qué se separan?</h3>La carga depende de la relación entre el pH del buffer y el pI: <b>pH &lt; pI → (+) → cátodo</b>; <b>pH &gt; pI → (−) → ánodo</b>; <b>pH = pI → 0 → no migra</b>. Cuanto mayor la diferencia |pI − pH|, mayor la carga y la migración.</div><div class="c a"><h3>Cómo usar la simulación</h3>Mezcla: Ile (pI 6.0), Glu (3.22), Lys (9.74). Deje el pH en 6.0 y pulse «Correr»; luego mueva el pH (p. ej. 2 o 11) y observe cómo cambia el sentido de cada banda. Al final se revelan con ninhidrina.</div></div>
+<div class="c a">pH del buffer: <b id="phv">6.0</b> <input type="range" id="ph" min="1" max="12" step="0.1" value="6"> <button class="btn s" id="run">▶ Correr</button> <button class="btn" id="rst">Reiniciar</button>
+<div class="gel"><span class="pl" style="left:8px">ÁNODO (+)</span><span class="pl" style="right:8px">CÁTODO (−)</span><div class="mid"></div>
+<div class="sp" id="s0" style="background:#1b7a4b;margin-top:-16px">Ile</div>
+<div class="sp" id="s1" style="background:#b3341f;margin-top:-46px">Glu</div>
+<div class="sp" id="s2" style="background:#1f6fbf;margin-top:14px">Lys</div></div>
+<div id="eres" style="margin-top:8px"></div></div>
+<div class="g"><div class="c a">Lys (9.74 &gt; 6.0): carga (+) → migra al <b>cátodo (−)</b>.</div><div class="c a">Glu (3.22 &lt; 6.0): carga (−) → migra al <b>ánodo (+)</b>.</div><div class="c ok a">Ile (6.0 = 6.0): carga 0 (zwitterion) → <b>sin migración</b>.</div></div></section>
+
+<section><h2>Amidas y enlace peptídico</h2>
+<div class="g">
+<div class="c a"><h3>Síntesis de amidas</h3>
+<p>Ácido carboxílico + amina/NH₃ → amida + H₂O.</p>
+<p>Ejemplos de nomenclatura:</p>
+<ul style="font-size:0.95em; margin-top:4px;">
+  <li>Acetamida (etanamida)</li>
+  <li>N-metilanilina</li>
+  <li>N-fenil-N-metilbutanamida</li>
+</ul>
+<h3 style="margin-top:12px">Nomenclatura de péptidos</h3>
+<p style="font-size:0.95em;">Se nombran con el sufijo «-il» para los aminoácidos internos, dejando el nombre completo para el C-terminal. Ejemplo:</p>
+<p style="font-size:0.9em; font-style:italic; color:var(--mu);">Fenilalanil-triptofanil-alanil-glicina</p>
+</div>
+
+<div class="c al a"><h3>Condensación: Formación del enlace peptídico</h3>
+<p style="font-size:0.95em; margin-bottom:8px;">Reacción entre el grupo carboxilo de un aminoácido y el grupo amino de otro, con liberación de una molécula de agua.</p>
+
+<!-- REACCIÓN QUÍMICA GENERAL -->
+<div style="background:var(--card); border:1px solid var(--bd); border-radius:8px; padding:10px; text-align:center; font-size:1.05em; line-height:2; margin-bottom:12px;">
+  <span style="font-family:monospace;">H₂N–CHR₁–<b style="color:var(--al);">COOH</b></span> 
+  <span style="font-size:1.2em; color:var(--mu);">+</span> 
+  <span style="font-family:monospace;"><b style="color:#1f6fbf;">H₂N</b>–CHR₂–COOH</span>
+  <br>
+  <span style="display:inline-block; border-top:2px solid var(--mu); border-bottom:2px solid var(--mu); padding:2px 15px; font-size:0.85em; color:var(--mu); margin:4px 0;">− H₂O (condensación)</span>
+  <br>
+  <span style="font-family:monospace;">H₂N–CHR₁–<b style="color:var(--al); border-bottom:2px solid var(--al);">CO–NH</b>–CHR₂–COOH</span>
+</div>
+
+<!-- EJEMPLO CONCRETO -->
+<div style="background:var(--lt); border-radius:8px; padding:10px; font-size:0.95em;">
+  <b>Ejemplo: Glicina + Alanina</b><br>
+  <div style="font-family:monospace; margin-top:6px; line-height:1.6;">
+    H₂N–CH₂–COOH + H₂N–CH(CH₃)–COOH<br>
+    <span style="color:var(--mu);">↓ − H₂O</span><br>
+    H₂N–CH₂–<b style="color:var(--al);">CO–NH</b>–CH(CH₃)–COOH
+  </div>
+  <p style="margin-top:8px; font-size:0.85em; color:var(--mu); font-style:italic;">El enlace <b>CO–NH</b> (amida) es el <b>enlace peptídico</b>.</p>
+</div>
+
+</div></div>
+
+<div class="g" style="margin-top:10px;">
+<div class="c a"><b>Dirección del péptido:</b> N-terminal (amino libre, izquierda) → C-terminal (carboxilo libre, derecha).</div>
+<div class="c a"><b>Naturaleza del enlace:</b> Es plano, rígido y tiene carácter parcial de doble enlace (resonancia). Los giros ocurren en los ángulos φ y ψ.</div>
+</div>
+</section>
+
+<section><h2>Tema 5 · Niveles estructurales de las proteínas</h2>
+<p>Biopolímeros de aminoácidos formados por C, H, O, N y S.</p>
+<div class="tabs" id="tb"><button class="btn s" data-t="0">Primaria</button><button class="btn" data-t="1">Secundaria</button><button class="btn" data-t="2">Terciaria</button><button class="btn" data-t="3">Cuaternaria</button></div>
+<div class="c tp"><b>Secuencia lineal</b> de aminoácidos unidos por enlaces peptídicos. Ejemplo: oxitocina vs. vasopresina (nonapéptidos que difieren en dos residuos).</div>
+<div class="c tp hid"><b>Plegamiento local</b> estabilizado por puentes de H en el esqueleto.<ul><li><b>Hélice α:</b> 3.6 aminoácidos por vuelta; puentes de H entre C=O y N–H a 4 residuos (α-queratina).</li><li><b>Hoja β plegada:</b> láminas paralelas o antiparalelas, R alternados arriba/abajo (fibroína de seda).</li></ul></div>
+<div class="c tp hid"><b>Plegamiento 3D completo</b> por interacciones de las cadenas laterales R: puentes disulfuro (–S–S–), puentes de H, interacciones hidrofóbicas/van der Waals y enlaces iónicos. Globulares y fibrosas.</div>
+<div class="c tp hid"><b>Asociación de subunidades</b> polipeptídicas. Ejemplo: hemoglobina, 4 subunidades con grupo hemo.</div></section>
+
+<section><h2>Clasificación de proteínas y grupos prostéticos</h2>
+<div class="g">
+<div class="c a"><h3>Por función biológica</h3><div class="ex h"><div>Función</div><div>Ejemplo</div></div><div class="ex"><b>Enzimas</b><span>Ácido graso sintasa</span></div><div class="ex"><b>Reserva</b><span>Ovoalbúmina</span></div><div class="ex"><b>Transporte</b><span>Hemoglobina</span></div><div class="ex"><b>Defensa</b><span>Anticuerpos</span></div><div class="ex"><b>Hormonas</b><span>Insulina</span></div><div class="ex"><b>Estructurales</b><span>Colágeno</span></div><div class="ex"><b>Contráctiles</b><span>Miosina</span></div></div>
+<div class="c a"><h3>Por propiedades físicas</h3><b>Fibrosas</b> <span class="note">cadenas paralelas, insolubles en agua, resistentes</span><br><span class="chip">α-queratina: pelo, uñas</span><span class="chip">β-queratina: plumas, escamas</span><span class="chip">Colágeno</span><br><b style="display:block;margin-top:8px">Globulares <span class="note">esferas compactas, solubles en agua</span></b><span class="chip">Enzimas</span><span class="chip">Albúmina</span><span class="chip">Anticuerpos</span></div>
+<div class="c a"><h3>Por composición</h3><b>Simples:</b> solo dan aminoácidos al hidrolizarse.<br><b>Conjugadas:</b> aminoácidos + grupo prostético no proteico:<div class="ex ex3 h"><div>Tipo</div><div>Grupo prostético</div><div>Ejemplo</div></div><div class="ex ex3"><b>Fosfoproteínas</b><span>Fosfato</span><span>Caseína</span></div><div class="ex ex3"><b>Cromoproteínas</b><span>Pigmento (hemo)</span><span>Hemoglobina</span></div><div class="ex ex3"><b>Glicoproteínas</b><span>Carbohidratos</span><span>Mucina, anticuerpos</span></div><div class="ex ex3"><b>Lipoproteínas</b><span>Lípidos</span><span>LDL, HDL</span></div><div class="ex ex3"><b>Nucleoproteínas</b><span>Ácidos nucleicos</span><span>Histonas, cromatina</span></div></div></div></section>
+
+<section><h2>Desnaturalización proteica y caso práctico</h2>
+<div class="c al a">Pérdida de estructuras secundaria, terciaria y cuaternaria <b>sin romper los enlaces peptídicos</b>.</div>
+<div class="g" style="margin-top:10px">
+<div class="c a"><h3>Agentes</h3><ul><li>Calor, UV, microondas: rompen puentes de H.</li><li>Agitación mecánica: despliega globulares.</li><li>Detergentes, ácidos y bases fuertes: rompen puentes salinos y de H.</li><li>Disolventes orgánicos y sales de Hg²⁺, Ag⁺, Pb²⁺ (precipitan grupos –SH).</li></ul></div>
+<div class="c ok a"><h3>Ondulación permanente del cabello</h3>El ácido tioglicólico <b>reduce</b> los puentes disulfuro (–S–S–) de la queratina; se moldea el cabello y luego se <b>reoxida</b> para fijar la nueva forma.</div></div></section>
+
+<section><h2>Repaso: apliquemos lo aprendido</h2>
+<div class="c a"><b>1. ¿Qué consideraciones debo tener para separar una mezcla de aminoácidos por pH/electroforesis?</b><ul class="ans"><li>Conocer el <b>pI</b> de cada componente.</li><li>Elegir un <b>pH de buffer</b> que les dé cargas distintas: pH &lt; pI → cátodo (+); pH &gt; pI → ánodo (−); pH = pI → sin migración.</li><li>Los pI deben diferir lo suficiente (ácidos, neutros y básicos se separan bien).</li><li>Controlar fuerza iónica, voltaje, tiempo y soporte; revelar con ninhidrina.</li></ul></div>
+<div class="c a" style="margin-top:8px"><b>2. ¿Cómo influyen las interacciones de los grupos R en la estructura terciaria y cuaternaria?</b><ul class="ans"><li><b>Apolares:</b> se agrupan en el interior (efecto hidrofóbico, van der Waals).</li><li><b>Polares y cargados:</b> quedan en la superficie, hacia el agua.</li><li><b>Entre cadenas laterales:</b> puentes de H (Ser, Thr, Asn, Gln), enlaces iónicos (Asp/Glu con Lys/Arg) y puentes disulfuro covalentes (Cys–Cys).</li><li><b>Cuaternaria:</b> las mismas interacciones, pero entre subunidades distintas (p. ej., los 4 polipéptidos de la hemoglobina).</li></ul></div>
+<div class="c a" style="margin-top:8px"><b>3. ¿Cómo se rompen y reforman los enlaces en la ondulación permanente?</b><ol class="ans"><li><b>Se rompen:</b> el ácido tioglicólico reduce cada puente –S–S– de la queratina a dos grupos –SH.</li><li><b>Se moldea:</b> con el cabello enrollado, las cadenas se reacomodan.</li><li><b>Se reforman:</b> un oxidante (p. ej., H₂O₂) reoxida los –SH a –S–S– en posiciones nuevas y fija la forma.</li></ol><p class="note" style="margin:0">Los enlaces peptídicos no se rompen.</p></div></section>
+
+<!-- NUEVA DIAPOSITIVA: ORGANIZADOR VISUAL -->
+<section><h2>Organizador visual: Aminoácidos</h2>
+<p>Completa la relación entre el nombre del aminoácido, su abreviatura de 3 letras y su símbolo de 1 letra.</p>
+
+<div class="tw">
+  <table style="width:100%; border-collapse:separate; border-spacing:0 8px; font-size:1.05em;">
+    <thead>
+      <tr style="text-align:center; color:var(--hd);">
+        <th style="padding:8px;">Nombre</th>
+        <th style="width:40px;"></th>
+        <th style="padding:8px;">Abreviatura</th>
+        <th style="width:40px;"></th>
+        <th style="padding:8px;">Símbolo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="background:var(--hd); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Glicina</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:var(--ok); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Gly</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:#4cc38a; color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">G</td>
+      </tr>
+      <tr>
+        <td style="background:var(--hd); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Alanina</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:var(--ok); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Ala</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:#4cc38a; color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">A</td>
+      </tr>
+      <tr>
+        <td style="background:var(--hd); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Valina</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:var(--ok); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Val</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:#4cc38a; color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">V</td>
+      </tr>
+      <tr>
+        <td style="background:var(--hd); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Leucina</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:var(--ok); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Leu</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:#4cc38a; color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">L</td>
+      </tr>
+      <tr>
+        <td style="background:var(--hd); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Isoleucina</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:var(--ok); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Ile</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:#4cc38a; color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">I</td>
+      </tr>
+      <tr>
+        <td style="background:var(--hd); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Fenilalanina</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:var(--ok); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Phe</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:#4cc38a; color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">F</td>
+      </tr>
+      <tr>
+        <td style="background:var(--hd); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Cisteína</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:var(--ok); color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">Cys</td>
+        <td style="text-align:center; color:var(--mu); font-size:1.2em;">➔</td>
+        <td style="background:#4cc38a; color:#fff; text-align:center; padding:10px; border-radius:8px; font-weight:bold;">C</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<section><h2>Referencias bibliográficas</h2>
+<div class="c a"><ul><li>Yurkanis Bruice, P. (2007). <i>Fundamentos de química orgánica</i>. Pearson Educación.</li><li>McMurry, J. (2008). <i>Química Orgánica</i>. Cengage Learning.</li><li>Universidad Tecnológica del Perú (2026). <i>Guía de Química Orgánica: Aminas, aminoácidos, amidas y proteínas</i>.</li></ul></div></section>
+</div>
+<div id="prog"><i></i></div>
+<div id="bar"><span id="ft">Química Orgánica – Sesión 25</span><span id="tm" title="Clic: iniciar/pausar · doble clic: reiniciar">⏱ 15:00</span><button id="pv">←</button><div id="dots"></div><button id="nx">→</button><span id="num"></span></div>
+<script>
+const S=[...document.querySelectorAll('section')],D=document.getElementById('dots');let i=0;
+S.forEach((_,k)=>{const b=document.createElement('b');b.onclick=()=>go(k);D.appendChild(b)});
+function go(n){i=Math.max(0,Math.min(S.length-1,n));S.forEach((s,k)=>{s.classList.toggle('on',k==i);s.classList.toggle('prev',k<i)});
+[...D.children].forEach((b,k)=>b.classList.toggle('on',k==i));
+document.querySelector('#prog i').style.width=((i+1)/S.length*100)+'%';
+document.getElementById('num').textContent=(i+1)+' / '+S.length;S[i].scrollTop=0}
+pv.onclick=()=>go(i-1);nx.onclick=()=>go(i+1);
+addEventListener('keydown',e=>{if(e.target.tagName=='INPUT')return;if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(i+1)}if(['ArrowLeft','PageUp'].includes(e.key))go(i-1)});
+let tx=0;addEventListener('touchstart',e=>tx=e.touches[0].clientX);addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(i+(d<0?1:-1))});
+// Ejercicio
+ex.onclick=()=>exr.classList.toggle('hid');
+// Tabs
+tb.onclick=e=>{const t=e.target.dataset.t;if(t==null)return;[...tb.children].forEach(b=>b.classList.toggle('s',b==e.target));
+tb.parentNode.querySelectorAll('.tp').forEach((p,k)=>p.classList.toggle('hid',k!=t))};
+// Electroforesis
+const pI=[6.0,3.22,9.74],nm=['Ile','Glu','Lys'];
+ph.oninput=()=>{phv.textContent=(+ph.value).toFixed(1);reset()};
+function reset(){for(let k=0;k<3;k++)document.getElementById('s'+k).style.transform='none';eres.textContent=''}
+run.onclick=()=>{const p=+ph.value;let r=[];for(let k=0;k<3;k++){const d=pI[k]-p,sg=Math.abs(d)<0.05?0:(d>0?1:-1);
+const w=document.querySelector('.gel').clientWidth/2-70;document.getElementById('s'+k).style.transform='translateX('+(sg*Math.min(1,Math.abs(d)/3+.35)*w*(sg?1:0))+'px)';
+r.push('<b>'+nm[k]+'</b> (pI '+pI[k]+'): '+(sg>0?'pH &lt; pI → predomina –NH₃⁺, carga neta (+) → migra al cátodo (−).':sg<0?'pH &gt; pI → predomina –COO⁻, carga neta (−) → migra al ánodo (+).':'pH ≈ pI → zwitterion, carga neta 0 → no migra.'))}eres.innerHTML=r.join('<br>')};
+rst.onclick=reset;
+// Cronómetro
+let T=900,iv=null;const tm=document.getElementById('tm');
+function draw(){tm.textContent='⏱ '+String(Math.floor(T/60)).padStart(2,'0')+':'+String(T%60).padStart(2,'0');tm.className=T<=0?'r':T<=180?'w':''}
+tm.onclick=()=>{if(iv){clearInterval(iv);iv=null}else iv=setInterval(()=>{if(T>0){T--;draw()}},1000)};
+tm.ondblclick=()=>{clearInterval(iv);iv=null;T=900;draw()};
+go(0);
+</script></body></html>
