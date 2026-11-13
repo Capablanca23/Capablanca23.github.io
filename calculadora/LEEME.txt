@@ -1,0 +1,32 @@
+CALCPRO CIENTÍFICA — VERSIÓN PWA OFFLINE
+
+Contenido:
+- index.html: calculadora original adaptada como aplicación web.
+- manifest.webmanifest: nombre, icono y modo de visualización fullscreen.
+- service-worker.js: almacena la aplicación para usarla sin conexión.
+- icons/: iconos de instalación.
+
+IMPORTANTE:
+Un archivo HTML abierto directamente desde Descargas (file://) no puede instalarse
+como PWA ni registrar un Service Worker. Para instalarla como aplicación, hay que
+publicar esta carpeta una sola vez en un alojamiento HTTPS (por ejemplo, GitHub Pages).
+Después de instalarla y abrirla una vez con conexión, la calculadora queda almacenada
+y puede utilizarse sin Internet.
+
+INSTALACIÓN EN ANDROID / SAMSUNG:
+1. Publica TODO el contenido de esta carpeta en la raíz de un sitio HTTPS.
+2. En el Samsung, abre en Chrome la dirección HTTPS donde quedó index.html.
+3. En el menú de Chrome, elige "Instalar aplicación" o "Añadir a pantalla de inicio".
+4. Confirma la instalación y abre CalcPro desde su icono.
+5. Una vez que cargue correctamente, activa modo avión y verifica que siga funcionando.
+
+PANTALLA COMPLETA:
+El manifiesto solicita display="fullscreen". Android/Chrome puede aplicar el modo
+fullscreen al abrir la PWA instalada. Si el sistema o la versión de Chrome no admite
+ese modo, utilizará standalone, que elimina la barra de direcciones pero puede mantener
+las barras del sistema Android.
+
+DATOS:
+La calculadora conserva su lógica original y su almacenamiento local (historial y
+variables). Los datos se guardan en el almacenamiento del navegador/origen de la PWA.
+No borres los datos de la aplicación o del sitio si deseas conservarlos.

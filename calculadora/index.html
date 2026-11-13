@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CalcPro Científica</title>
+
+  <meta name="theme-color" content="#2563eb">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
+
+  <style>
+    :root {
+      --bg-app: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-header: #ffffff;
+      --bg-key: #ffffff;
+      --bg-key-op: #e2e8f0;
+      --bg-key-fn: #eff6ff;
+      --bg-key-sto: #fef3c7;
+      --bg-key-eq: #2563eb;
+      --bg-key-del: #fee2e2;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-op: #1e40af;
+      --text-sto: #92400e;
+      --text-del: #dc2626;
+      --border: #cbd5e1;
+      --accent: #2563eb;
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      height: 100dvh;
+      width: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--bg-app);
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+
+    /* Cabecera compacta */
+    header {
+      background: var(--bg-header);
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .brand-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    .author-badge {
+      font-size: 0.66rem;
+      color: #334155;
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .mode-group {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .pill-btn {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .pill-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .pill-btn.danger {
+      color: var(--text-del);
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .precision-select {
+      font-size: 0.66rem;
+      padding: 2px 3px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    /* Consola de Historial Ampliada */
+    .history-panel {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #f8fafc;
+    }
+
+    .history-empty {
+      margin: auto;
+      text-align: center;
+      color: #475569;
+      font-size: 0.78rem;
+      padding: 12px;
+      line-height: 1.4;
+    }
+
+    .history-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 8px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hist-expr {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1e293b;
+      font-family: "Consolas", "Courier New", monospace;
+      word-break: break-all;
+      text-align: left;
+    }
+
+    .hist-res-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hist-ans-tag {
+      font-size: 0.66rem;
+      font-weight: 700;
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 1px 5px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .hist-res {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+      font-family: "Consolas", "Courier New", monospace;
+      word-break: break-all;
+      text-align: right;
+      flex: 1;
+    }
+
+    .hist-actions {
+      display: flex;
+      gap: 5px;
+      justify-content: flex-end;
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 4px;
+    }
+
+    .hist-btn {
+      font-size: 0.67rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .hist-btn:active {
+      background: #e2e8f0;
+    }
+
+    .hist-btn.res-btn {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+
+    /* Pantalla de Entrada con Alto Contraste y Cursor Funcional */
+    .display-box {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 8px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .custom-input-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      direction: ltr;
+      text-align: left;
+      background: #ffffff;
+      border: 1.5px solid #2563eb;
+      border-radius: 6px;
+      padding: 5px 8px;
+      min-height: 36px;
+      overflow-x: auto;
+      white-space: nowrap;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #000000;
+      cursor: text;
+    }
+
+    .char-span {
+      display: inline-block;
+      color: #000000;
+      padding: 0 0.5px;
+    }
+
+    .cursor-caret {
+      display: inline-block;
+      width: 2px;
+      height: 1.15em;
+      background-color: #2563eb;
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* Barra compacta de navegación y borrado */
+    .nav-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+
+    .nav-btn {
+      height: 25px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      color: #0f172a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn:active {
+      background: #cbd5e1;
+    }
+
+    .nav-btn.del {
+      background: var(--bg-key-del);
+      color: var(--text-del);
+      border-color: #fecaca;
+    }
+
+    .nav-btn.ac {
+      background: #dc2626;
+      color: #ffffff;
+      border-color: #dc2626;
+    }
+
+    /* Pestañas con soporte Swipe */
+    .tabs-header {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: #e2e8f0;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      padding: 5px 2px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: #475569;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* Contenedor con ALTURA FIJA para que no cambie de tamaño al deslizar */
+    .swipe-viewport {
+      height: 226px;
+      flex-shrink: 0;
+      background: #e2e8f0;
+      padding: 4px;
+      touch-action: pan-y;
+      overflow: hidden;
+    }
+
+    .tab-pane {
+      display: none;
+      height: 100%;
+    }
+
+    .tab-pane.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Teclado Principal y Funciones ocupan el 100% de la altura fija */
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 4px;
+      height: 100%;
+    }
+
+    .keypad-grid.fn-grid {
+      grid-template-rows: repeat(5, 1fr);
+    }
+
+    .key {
+      height: 100%;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-key);
+      color: #0f172a;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+    }
+
+    .key:active {
+      transform: scale(0.97);
+      background: #f1f5f9;
+    }
+
+    .key.op {
+      background: var(--bg-key-op);
+      color: var(--text-op);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .key.fn {
+      background: var(--bg-key-fn);
+      color: #1d4ed8;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .key.sto {
+      background: var(--bg-key-sto);
+      color: var(--text-sto);
+      border-color: #fde68a;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .key.eq {
+      background: var(--bg-key-eq);
+      color: #ffffff;
+      border-color: #1d4ed8;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    /* Pestañas Variables y Herramientas ocupan el mismo 100% de altura fija */
+    .panel-scroll {
+      height: 100%;
+      overflow-y: auto;
+      background: var(--bg-card);
+      border-radius: 6px;
+      padding: 6px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .var-form {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .var-input {
+      flex: 1;
+      min-width: 0;
+      padding: 4px 6px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #0f172a;
+      border: 1px solid #94a3b8;
+      border-radius: 4px;
+      background: #ffffff;
+    }
+
+    .section-subtitle {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .var-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .var-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 6px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: #0f172a;
+    }
+
+    .var-del-btn {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+
+    .const-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+    }
+
+    .tool-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #0f172a;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+
+    footer {
+      background: var(--bg-header);
+      border-top: 1px solid var(--border);
+      padding: 3px 8px;
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #334155;
+      flex-shrink: 0;
+    }
+
+    /* Modal rápido para botón STO */
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 500;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .modal-desc {
+      font-size: 0.74rem;
+      color: #475569;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #ffffff;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="header-top">
+        <span class="brand-title">Calculadora Científica</span>
+        <span class="author-badge">Autor: Dr. Ronald F. Rodriguez Espinoza</span>
+      </div>
+      <div class="controls-bar">
+        <div class="mode-group">
+          <button id="btnAngle" class="pill-btn active" onclick="toggleAngle()">DEG</button>
+          <button id="btnCoord" class="pill-btn" onclick="toggleCoord()">RECT</button>
+          <select id="selPrecision" class="precision-select" onchange="updatePrecision()" title="Decimales">
+            <option value="2">2 dec</option>
+            <option value="4" selected>4 dec</option>
+            <option value="6">6 dec</option>
+            <option value="8">8 dec</option>
+          </select>
+        </div>
+        <div class="mode-group">
+          <button class="pill-btn" onclick="exportHistoryFile()" title="Exportar respaldo en archivo">💾 Respaldar</button>
+          <button class="pill-btn" onclick="document.getElementById('fileImport').click()" title="Importar respaldo">📂 Abrir</button>
+          <button class="pill-btn danger" onclick="clearAllHistory()" title="Borrar historial">🗑️ Borrar</button>
+          <input type="file" id="fileImport" accept=".json" style="display:none" onchange="importHistoryFile(event)" />
+        </div>
+      </div>
+    </header>
+
+    <!-- Consola de Resultados e Historial -->
+    <div id="historyPanel" class="history-panel">
+      <div class="history-empty">
+        Motor complejo listo (ej. <b>sqrt(-4)</b>, <b>2^3</b>, <b>sin(45)</b>).<br/>
+        Usa <b>STO</b> para guardar variables y desliza para ver más funciones.
+      </div>
+    </div>
+
+    <!-- Pantalla de Edición con Alto Contraste y Cursor Real -->
+    <div class="display-box">
+      <div id="customDisplay" class="custom-input-wrapper" onclick="handleDisplayClick(event)"></div>
+      <div class="nav-strip">
+        <button class="nav-btn" onclick="moveCursor(-1)" title="Mover cursor a la izquierda">←</button>
+        <button class="nav-btn" onclick="moveCursor(1)" title="Mover cursor a la derecha">→</button>
+        <button class="nav-btn" onclick="insertToken('ans')" title="Insertar último resultado">ans</button>
+        <button class="nav-btn del" onclick="backspaceAtCursor()" title="Borrar carácter anterior">DEL</button>
+        <button class="nav-btn ac" onclick="clearExpression()" title="Limpiar expresión">AC</button>
+      </div>
+    </div>
+
+    <!-- Navegación de Pestañas -->
+    <div class="tabs-header">
+      <button class="tab-btn active" data-tab="0" onclick="switchTab(0)">Principal</button>
+      <button class="tab-btn" data-tab="1" onclick="switchTab(1)">Funciones</button>
+      <button class="tab-btn" data-tab="2" onclick="switchTab(2)">Variables</button>
+      <button class="tab-btn" data-tab="3" onclick="switchTab(3)">Herram.</button>
+    </div>
+
+    <!-- Contenedor Deslizable con Altura Fija -->
+    <div id="swipeArea" class="swipe-viewport">
+      <!-- Pestaña 0: Teclado Principal (Con STO, sin i ni ∠) -->
+      <div class="tab-pane active" id="pane-0">
+        <div class="keypad-grid">
+          <button class="key fn" onclick="insertToken('sin(')">sin</button>
+          <button class="key fn" onclick="insertToken('cos(')">cos</button>
+          <button class="key fn" onclick="insertToken('tan(')">tan</button>
+          <button class="key op" onclick="insertToken('(')">(</button>
+          <button class="key op" onclick="insertToken(')')">)</button>
+
+          <button class="key fn" onclick="insertToken('sqrt(')">√</button>
+          <button class="key op" onclick="insertToken('^')" title="Potencia (ej. 2^3)">^</button>
+          <button class="key sto" onclick="openStoModal()" title="Guardar valor o resultado en una variable">STO</button>
+          <button class="key fn" onclick="insertToken('ln(')">ln</button>
+          <button class="key op" onclick="insertToken('/')">÷</button>
+
+          <button class="key" onclick="insertToken('7')">7</button>
+          <button class="key" onclick="insertToken('8')">8</button>
+          <button class="key" onclick="insertToken('9')">9</button>
+          <button class="key fn" onclick="insertToken('pi')">π</button>
+          <button class="key op" onclick="insertToken('*')">×</button>
+
+          <button class="key" onclick="insertToken('4')">4</button>
+          <button class="key" onclick="insertToken('5')">5</button>
+          <button class="key" onclick="insertToken('6')">6</button>
+          <button class="key fn" onclick="insertToken('e')">e</button>
+          <button class="key op" onclick="insertToken('-')">−</button>
+
+          <button class="key" onclick="insertToken('1')">1</button>
+          <button class="key" onclick="insertToken('2')">2</button>
+          <button class="key" onclick="insertToken('3')">3</button>
+          <button class="key op" onclick="insertToken('!')">n!</button>
+          <button class="key op" onclick="insertToken('+')">+</button>
+
+          <button class="key" onclick="insertToken('0')">0</button>
+          <button class="key" onclick="insertToken('.')">.</button>
+          <button class="key op" onclick="insertToken('E')" title="Notación científica (×10^)">E</button>
+          <button class="key fn" onclick="insertToken('log(')">log</button>
+          <button class="key eq" onclick="evaluateCurrent()">=</button>
+        </div>
+      </div>
+
+      <!-- Pestaña 1: Funciones Científicas y Complejas (Aquí están i y ∠) -->
+      <div class="tab-pane" id="pane-1">
+        <div class="keypad-grid fn-grid">
+          <button class="key fn" onclick="insertToken('asin(')">asin</button>
+          <button class="key fn" onclick="insertToken('acos(')">acos</button>
+          <button class="key fn" onclick="insertToken('atan(')">atan</button>
+          <button class="key fn" onclick="insertToken('abs(')">abs</button>
+          <button class="key fn" onclick="insertToken('exp(')">exp</button>
+
+          <button class="key fn" onclick="insertToken('sinh(')">sinh</button>
+          <button class="key fn" onclick="insertToken('cosh(')">cosh</button>
+          <button class="key fn" onclick="insertToken('tanh(')">tanh</button>
+          <button class="key op" onclick="insertToken('i')" title="Unidad imaginaria">i</button>
+          <button class="key op" onclick="insertToken('∠')" title="Fasor / Ángulo polar (ej. 5∠30)">∠</button>
+
+          <button class="key fn" onclick="insertToken('asinh(')">asinh</button>
+          <button class="key fn" onclick="insertToken('acosh(')">acosh</button>
+          <button class="key fn" onclick="insertToken('atanh(')">atanh</button>
+          <button class="key fn" onclick="insertToken('arg(')">arg</button>
+          <button class="key fn" onclick="insertToken('conj(')">conj</button>
+
+          <button class="key fn" onclick="insertToken('re(')">Re</button>
+          <button class="key fn" onclick="insertToken('im(')">Im</button>
+          <button class="key op" onclick="insertToken('^2')">^2</button>
+          <button class="key op" onclick="insertToken('^(-1)')">^-1</button>
+          <button class="key fn" onclick="showPolarHelp()">¿∠?</button>
+
+          <button class="key" onclick="insertToken('(')">(</button>
+          <button class="key" onclick="insertToken(')')">)</button>
+          <button class="key sto" onclick="openStoModal()">STO</button>
+          <button class="key fn" onclick="insertToken('ans')">ans</button>
+          <button class="key eq" onclick="evaluateCurrent()">=</button>
+        </div>
+      </div>
+
+      <!-- Pestaña 2: Variables de Usuario y Constantes Físicas -->
+      <div class="tab-pane" id="pane-2">
+        <div class="panel-scroll">
+          <div class="var-form">
+            <input type="text" id="varNameInput" class="var-input" placeholder="Nombre (ej. x)" />
+            <input type="text" id="varValInput" class="var-input" placeholder="Valor (ej. 5+2i)" />
+            <button class="pill-btn active" onclick="saveUserVariable()">Guardar</button>
+          </div>
+          <div class="section-subtitle">Variables Guardadas</div>
+          <div id="variablesList" class="var-list"></div>
+          <div class="section-subtitle" style="margin-top:4px;">Constantes Físicas y Matemáticas</div>
+          <div id="constantsList" class="const-grid"></div>
+        </div>
+      </div>
+
+      <!-- Pestaña 3: Herramientas (Interpolación y Conversor Completo) -->
+      <div class="tab-pane" id="pane-3">
+        <div class="panel-scroll tool-section">
+          <div>
+            <strong>Interpolación Lineal (Simple):</strong>
+            <div class="tool-grid" style="margin-top:4px;">
+              <input type="number" id="intX1" class="var-input" placeholder="X1" />
+              <input type="number" id="intY1" class="var-input" placeholder="Y1" />
+              <input type="number" id="intX" class="var-input" placeholder="X buscar" />
+              <input type="number" id="intX2" class="var-input" placeholder="X2" />
+              <input type="number" id="intY2" class="var-input" placeholder="Y2" />
+              <button class="pill-btn active" onclick="calcInterpolation()">Calcular Y</button>
+            </div>
+            <div id="intResult" style="margin-top:3px; font-weight:700; color:var(--accent);"></div>
+          </div>
+          <hr style="border:none; border-top:1px solid var(--border);" />
+          <div>
+            <strong>Conversor de Unidades:</strong>
+            <div class="var-form" style="margin-top:4px;">
+              <input type="number" id="convVal" class="var-input" placeholder="Valor" />
+              <select id="convType" class="precision-select">
+                <option value="deg2rad">Grados → Radianes</option>
+                <option value="rad2deg">Radianes → Grados</option>
+                <option value="m2ft">Metros → Pies</option>
+                <option value="ft2m">Pies → Metros</option>
+                <option value="km2mi">Km → Millas</option>
+                <option value="mi2km">Millas → Km</option>
+                <option value="c2f">°C → °F</option>
+                <option value="f2c">°F → °C</option>
+                <option value="kg2lb">Kg → Libras</option>
+                <option value="lb2kg">Libras → Kg</option>
+              </select>
+              <button class="pill-btn active" onclick="runConversion()">Convertir</button>
+            </div>
+            <div id="convResult" style="margin-top:3px; font-weight:700; color:var(--accent);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Calculadora Científica • Dr. Ronald F. Rodriguez Espinoza
+    </footer>
+
+    <!-- Modal rápido para guardar variable (STO) -->
+    <div id="stoModal" class="modal-backdrop" onclick="closeStoModal(event)">
+      <div class="modal-card" onclick="event.stopPropagation()">
+        <div class="modal-title">Guardar Variable (STO)</div>
+        <div id="stoPreview" class="modal-desc">Valor a guardar: ans</div>
+        <input type="text" id="stoNameField" class="var-input" placeholder="Nombre de variable (ej. x, a, V1)" />
+        <input type="text" id="stoValueField" class="var-input" placeholder="Valor o expresión (ej. ans)" />
+        <div class="modal-actions">
+          <button class="pill-btn" onclick="closeStoModal()">Cancelar</button>
+          <button class="pill-btn active" onclick="confirmStoSave()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    /* ============================================================
+       1. MOTOR DE NÚMEROS COMPLEJOS (Réplica de Complex.java)
+       ============================================================ */
+    class Complex {
+      constructor(re = 0, im = 0) {
+        this.x = Number(re);
+        this.y = Number(im);
+      }
+      real() { return this.x; }
+      imag() { return this.y; }
+      mod() { return Math.hypot(this.x, this.y); }
+      arg() {
+        let a = Math.atan2(this.y, this.x);
+        return a < 0 ? a + 2 * Math.PI : a;
+      }
+      pipiarg() { return Math.atan2(this.y, this.x); }
+      conj() { return new Complex(this.x, -this.y); }
+      plus(w) { return new Complex(this.x + w.x, this.y + w.y); }
+      minus(w) { return new Complex(this.x - w.x, this.y - w.y); }
+      times(w) {
+        return new Complex(
+          this.x * w.x - this.y * w.y,
+          this.x * w.y + this.y * w.x
+        );
+      }
+      div(w) {
+        const den = w.x * w.x + w.y * w.y;
+        if (den === 0) throw new Error("División por cero");
+        return new Complex(
+          (this.x * w.x + this.y * w.y) / den,
+          (this.y * w.x - this.x * w.y) / den
+        );
+      }
+      pow(cp) {
+        if (this.x === 0 && this.y === 0) {
+          if (cp.x === 0 && cp.y === 0) return new Complex(1, 0);
+          return new Complex(0, 0);
+        }
+        const a = this.mod();
+        const b = this.pipiarg();
+        const c = cp.x;
+        const d = cp.y;
+        const r = Math.pow(a, c) * Math.exp(-b * d);
+        const theta = d * Math.log(a) + b * c;
+        const cos = Math.abs(Math.cos(theta)) < 1e-12 ? 0 : Math.cos(theta);
+        const sin = Math.abs(Math.sin(theta)) < 1e-12 ? 0 : Math.sin(theta);
+        return new Complex(r * cos, r * sin);
+      }
+      sqrt() {
+        const r = Math.sqrt(this.mod());
+        const theta = this.pipiarg() / 2;
+        const cos = Math.abs(Math.cos(theta)) < 1e-12 ? 0 : Math.cos(theta);
+        const sin = Math.abs(Math.sin(theta)) < 1e-12 ? 0 : Math.sin(theta);
+        return new Complex(r * cos, r * sin);
+      }
+      exp() {
+        const ex = Math.exp(this.x);
+        return new Complex(ex * Math.cos(this.y), ex * Math.sin(this.y));
+      }
+      ln() {
+        if (this.x === 0 && this.y === 0) throw new Error("Logaritmo de cero");
+        return new Complex(Math.log(this.mod()), this.pipiarg());
+      }
+      log() {
+        const l = this.ln();
+        return new Complex(l.x / Math.LN10, l.y / Math.LN10);
+      }
+      sin() {
+        return new Complex(
+          Math.cosh(this.y) * Math.sin(this.x),
+          Math.sinh(this.y) * Math.cos(this.x)
+        );
+      }
+      cos() {
+        return new Complex(
+          Math.cosh(this.y) * Math.cos(this.x),
+          -Math.sinh(this.y) * Math.sin(this.x)
+        );
+      }
+      tan() { return this.sin().div(this.cos()); }
+      sinh() {
+        return new Complex(
+          Math.sinh(this.x) * Math.cos(this.y),
+          Math.cosh(this.x) * Math.sin(this.y)
+        );
+      }
+      cosh() {
+        return new Complex(
+          Math.cosh(this.x) * Math.cos(this.y),
+          Math.sinh(this.x) * Math.sin(this.y)
+        );
+      }
+      tanh() { return this.sinh().div(this.cosh()); }
+      asin() {
+        if (this.y === 0 && Math.abs(this.x) <= 1) return new Complex(Math.asin(this.x), 0);
+        const i = new Complex(0, 1);
+        const mi = new Complex(0, -1);
+        const one = new Complex(1, 0);
+        return mi.times(i.times(this).plus(one.minus(this.pow(new Complex(2, 0))).sqrt()).ln());
+      }
+      acos() {
+        if (this.y === 0 && Math.abs(this.x) <= 1) return new Complex(Math.acos(this.x), 0);
+        return new Complex(Math.PI / 2, 0).minus(this.asin());
+      }
+      atan() {
+        if (this.y === 0) return new Complex(Math.atan(this.x), 0);
+        const i = new Complex(0, 1);
+        const one = new Complex(1, 0);
+        return new Complex(0, 0.5).times(
+          one.minus(i.times(this)).ln().minus(one.plus(i.times(this)).ln())
+        );
+      }
+      asinh() {
+        const one = new Complex(1, 0);
+        return this.plus(this.pow(new Complex(2, 0)).plus(one).sqrt()).ln();
+      }
+      acosh() {
+        const one = new Complex(1, 0);
+        return this.plus(this.minus(one).sqrt().times(this.plus(one).sqrt())).ln();
+      }
+      atanh() {
+        const one = new Complex(1, 0);
+        return new Complex(0.5, 0).times(one.plus(this).ln().minus(one.minus(this).ln()));
+      }
+    }
+
+    /* ============================================================
+       2. ESTADO Y CONSTANTES DEL SISTEMA
+       ============================================================ */
+    const SYSTEM_CONSTANTS = [
+      { sym: "pi", label: "π (Pi)", val: new Complex(Math.PI, 0) },
+      { sym: "e", label: "e (Euler)", val: new Complex(Math.E, 0) },
+      { sym: "c", label: "c (Luz m/s)", val: new Complex(299792458, 0) },
+      { sym: "g", label: "g (Gravedad)", val: new Complex(9.80665, 0) },
+      { sym: "h", label: "h (Planck)", val: new Complex(6.62607015e-34, 0) },
+      { sym: "G", label: "G (Gravit.)", val: new Complex(6.6743e-11, 0) }
+    ];
+
+    const state = {
+      expr: "",
+      cursor: 0,
+      angleMode: "DEG",
+      coordMode: "RECT",
+      precision: 4,
+      activeTab: 0,
+      history: [],
+      variables: {
+        ans: new Complex(0, 0)
+      },
+      constants: {
+        pi: new Complex(Math.PI, 0),
+        e: new Complex(Math.E, 0),
+        i: new Complex(0, 1),
+        c: new Complex(299792458, 0),
+        g: new Complex(9.80665, 0),
+        h: new Complex(6.62607015e-34, 0),
+        G: new Complex(6.6743e-11, 0)
+      }
+    };
+
+    function factorial(n) {
+      if (n < 0 || Math.floor(n) !== n) throw new Error("Factorial requiere entero ≥ 0");
+      if (n > 170) throw new Error("Desbordamiento en factorial");
+      let r = 1;
+      for (let k = 2; k <= n; k++) r *= k;
+      return r;
+    }
+
+    function evaluateMathExpression(rawExpr) {
+      if (!rawExpr || !rawExpr.trim()) throw new Error("Expresión vacía");
+
+      let s = rawExpr
+        .replace(/×/g, "*")
+        .replace(/÷/g, "/")
+        .replace(/−/g, "-")
+        .replace(/∟/g, "∠")
+        .replace(/\s+/g, "");
+
+      const tokens = [];
+      let i = 0;
+      while (i < s.length) {
+        const ch = s[i];
+        if (/[0-9.]/.test(ch)) {
+          let numStr = "";
+          while (i < s.length && /[0-9.]/.test(s[i])) {
+            numStr += s[i++];
+          }
+          if (i < s.length && (s[i] === "E" || s[i] === "e") && (/[0-9+-]/.test(s[i + 1] || ""))) {
+            numStr += s[i++];
+            if (s[i] === "+" || s[i] === "-") numStr += s[i++];
+            while (i < s.length && /[0-9]/.test(s[i])) numStr += s[i++];
+          }
+          const val = parseFloat(numStr);
+          if (isNaN(val)) throw new Error("Número inválido: " + numStr);
+          tokens.push({ type: "NUM", value: new Complex(val, 0) });
+        } else if (/[a-zA-Z_]/.test(ch)) {
+          let id = "";
+          while (i < s.length && /[a-zA-Z0-9_]/.test(s[i])) {
+            id += s[i++];
+          }
+          if (s[i] === "(") {
+            tokens.push({ type: "FUNC", value: id });
+          } else {
+            tokens.push({ type: "VAR", value: id });
+          }
+        } else if ("+-*/^∠!()".includes(ch)) {
+          tokens.push({ type: "OP", value: ch });
+          i++;
+        } else {
+          throw new Error("Símbolo no reconocido: " + ch);
+        }
+      }
+
+      const expanded = [];
+      for (let k = 0; k < tokens.length; k++) {
+        const curr = tokens[k];
+        expanded.push(curr);
+        const next = tokens[k + 1];
+        if (!next) continue;
+        const currIsVal = curr.type === "NUM" || curr.type === "VAR" || curr.value === ")" || curr.value === "!";
+        const nextIsStart = next.type === "NUM" || next.type === "VAR" || next.type === "FUNC" || next.value === "(";
+        if (currIsVal && nextIsStart) {
+          expanded.push({ type: "OP", value: "*" });
+        }
+      }
+
+      let pos = 0;
+      const peek = () => expanded[pos];
+      const consume = () => expanded[pos++];
+
+      function parseExpression() {
+        let left = parseTerm();
+        while (peek() && (peek().value === "+" || peek().value === "-")) {
+          const op = consume().value;
+          const right = parseTerm();
+          left = op === "+" ? left.plus(right) : left.minus(right);
+        }
+        return left;
+      }
+
+      function parseTerm() {
+        let left = parsePower();
+        while (peek() && (peek().value === "*" || peek().value === "/")) {
+          const op = consume().value;
+          const right = parsePower();
+          left = op === "*" ? left.times(right) : left.div(right);
+        }
+        return left;
+      }
+
+      function parsePower() {
+        let left = parsePolar();
+        if (peek() && peek().value === "^") {
+          consume();
+          const right = parsePower();
+          left = left.pow(right);
+        }
+        return left;
+      }
+
+      function parsePolar() {
+        let left = parseUnary();
+        while (peek() && peek().value === "∠") {
+          consume();
+          const right = parseUnary();
+          const mag = left.real();
+          const angRad = state.angleMode === "DEG" ? (right.real() * Math.PI) / 180 : right.real();
+          left = new Complex(mag * Math.cos(angRad), mag * Math.sin(angRad));
+        }
+        return left;
+      }
+
+      function parseUnary() {
+        if (peek() && peek().value === "+") {
+          consume();
+          return parseUnary();
+        }
+        if (peek() && peek().value === "-") {
+          consume();
+          return new Complex(0, 0).minus(parseUnary());
+        }
+        return parsePostfix();
+      }
+
+      function parsePostfix() {
+        let val = parsePrimary();
+        while (peek() && peek().value === "!") {
+          consume();
+          if (Math.abs(val.imag()) > 1e-12) throw new Error("Factorial solo para reales");
+          val = new Complex(factorial(val.real()), 0);
+        }
+        return val;
+      }
+
+      function parsePrimary() {
+        const t = peek();
+        if (!t) throw new Error("Expresión incompleta");
+
+        if (t.type === "NUM") {
+          consume();
+          return t.value;
+        }
+
+        if (t.type === "VAR") {
+          consume();
+          const name = t.value;
+          if (state.constants[name] !== undefined) return state.constants[name];
+          if (state.variables[name] !== undefined) return state.variables[name];
+          throw new Error(`Variable desconocida: "${name}"`);
+        }
+
+        if (t.type === "FUNC") {
+          const fnName = consume().value.toLowerCase();
+          if (!peek() || peek().value !== "(") throw new Error(`Falta '(' en ${fnName}`);
+          consume();
+          const arg = parseExpression();
+          if (!peek() || peek().value !== ")") throw new Error(`Falta ')' en ${fnName}`);
+          consume();
+          return applyFunction(fnName, arg);
+        }
+
+        if (t.value === "(") {
+          consume();
+          const val = parseExpression();
+          if (!peek() || peek().value !== ")") throw new Error("Paréntesis sin cerrar");
+          consume();
+          return val;
+        }
+
+        throw new Error("Token inesperado: " + t.value);
+      }
+
+      const result = parseExpression();
+      if (pos < expanded.length) {
+        throw new Error("Sintaxis inválida cerca de: " + expanded[pos].value);
+      }
+      return result;
+    }
+
+    function applyFunction(fn, z) {
+      const toRad = (c) => (state.angleMode === "DEG" && Math.abs(c.imag()) < 1e-12)
+        ? new Complex((c.real() * Math.PI) / 180, 0)
+        : c;
+      const fromRad = (c) => (state.angleMode === "DEG" && Math.abs(c.imag()) < 1e-12)
+        ? new Complex((c.real() * 180) / Math.PI, 0)
+        : c;
+
+      switch (fn) {
+        case "sin": return toRad(z).sin();
+        case "cos": return toRad(z).cos();
+        case "tan": return toRad(z).tan();
+        case "asin": return fromRad(z.asin());
+        case "acos": return fromRad(z.acos());
+        case "atan": return fromRad(z.atan());
+        case "sinh": return z.sinh();
+        case "cosh": return z.cosh();
+        case "tanh": return z.tanh();
+        case "asinh": return z.asinh();
+        case "acosh": return z.acosh();
+        case "atanh": return z.atanh();
+        case "sqrt": return z.sqrt();
+        case "ln": return z.ln();
+        case "log": return z.log();
+        case "exp": return z.exp();
+        case "abs": return new Complex(z.mod(), 0);
+        case "arg": {
+          const a = z.arg();
+          return new Complex(state.angleMode === "DEG" ? (a * 180) / Math.PI : a, 0);
+        }
+        case "conj": return z.conj();
+        case "re": return new Complex(z.real(), 0);
+        case "im": return new Complex(z.imag(), 0);
+        default: throw new Error(`Función no soportada: ${fn}`);
+      }
+    }
+
+    /* ============================================================
+       3. FORMATEO DE SALIDA
+       ============================================================ */
+    function formatNum(n) {
+      if (Math.abs(n) < 1e-12) return "0";
+      if (Math.abs(n) < 1e-5 || Math.abs(n) >= 1e10) {
+        return n.toExponential(state.precision);
+      }
+      const fixed = Number(n.toFixed(state.precision));
+      return fixed.toString();
+    }
+
+    function formatComplex(c) {
+      if (state.coordMode === "POL") {
+        const mag = c.mod();
+        let ang = c.arg();
+        if (state.angleMode === "DEG") ang = (ang * 180) / Math.PI;
+        if (mag < 1e-12) return "0";
+        return `${formatNum(mag)} ∠ ${formatNum(ang)}${state.angleMode === "DEG" ? "°" : ""}`;
+      }
+
+      const re = Math.abs(c.real()) < 1e-12 ? 0 : c.real();
+      const im = Math.abs(c.imag()) < 1e-12 ? 0 : c.imag();
+      if (im === 0) return formatNum(re);
+      if (re === 0) return `${formatNum(im)}i`;
+      const sign = im > 0 ? " + " : " - ";
+      return `${formatNum(re)}${sign}${formatNum(Math.abs(im))}i`;
+    }
+
+    /* ============================================================
+       4. PANTALLA DE ENTRADA (Escritura natural izquierda -> derecha)
+       ============================================================ */
+    function renderDisplay() {
+      const box = document.getElementById("customDisplay");
+      box.innerHTML = "";
+      const text = state.expr;
+
+      for (let i = 0; i <= text.length; i++) {
+        if (i === state.cursor) {
+          const caret = document.createElement("span");
+          caret.className = "cursor-caret";
+          box.appendChild(caret);
+        }
+        if (i < text.length) {
+          const span = document.createElement("span");
+          span.className = "char-span";
+          span.textContent = text[i];
+          span.onclick = (e) => {
+            e.stopPropagation();
+            state.cursor = i + 1;
+            renderDisplay();
+          };
+          box.appendChild(span);
+        }
+      }
+      box.scrollLeft = box.scrollWidth;
+    }
+
+    function handleDisplayClick(e) {
+      if (e.target.id === "customDisplay") {
+        state.cursor = state.expr.length;
+        renderDisplay();
+      }
+    }
+
+    function insertToken(tok) {
+      const before = state.expr.slice(0, state.cursor);
+      const after = state.expr.slice(state.cursor);
+      state.expr = before + tok + after;
+      state.cursor += tok.length;
+      renderDisplay();
+    }
+
+    function moveCursor(delta) {
+      state.cursor = Math.max(0, Math.min(state.expr.length, state.cursor + delta));
+      renderDisplay();
+    }
+
+    function backspaceAtCursor() {
+      if (state.cursor === 0) return;
+      const before = state.expr.slice(0, state.cursor - 1);
+      const after = state.expr.slice(state.cursor);
+      state.expr = before + after;
+      state.cursor--;
+      renderDisplay();
+    }
+
+    function clearExpression() {
+      state.expr = "";
+      state.cursor = 0;
+      renderDisplay();
+    }
+
+    function setExpression(str) {
+      state.expr = str;
+      state.cursor = str.length;
+      renderDisplay();
+    }
+
+    function evaluateCurrent() {
+      if (!state.expr.trim()) return;
+      try {
+        const resComplex = evaluateMathExpression(state.expr);
+        const formatted = formatComplex(resComplex);
+        const idx = state.history.length + 1;
+        const ansKey = `ans${idx}`;
+
+        state.variables.ans = resComplex;
+        state.variables[ansKey] = resComplex;
+
+        state.history.push({
+          id: idx,
+          ansKey,
+          expr: state.expr,
+          resultText: formatted,
+          re: resComplex.real(),
+          im: resComplex.imag()
+        });
+
+        persistState();
+        renderHistory();
+        renderVariables();
+        clearExpression();
+      } catch (err) {
+        showToast("⚠️ " + err.message);
+      }
+    }
+
+    /* ============================================================
+       5. MODAL RÁPIDO STO (Guardar Variable desde teclado principal)
+       ============================================================ */
+    function openStoModal() {
+      const modal = document.getElementById("stoModal");
+      const valField = document.getElementById("stoValueField");
+      const nameField = document.getElementById("stoNameField");
+      const preview = document.getElementById("stoPreview");
+
+      const defaultVal = state.expr.trim() ? state.expr.trim() : "ans";
+      valField.value = defaultVal;
+      nameField.value = "";
+      preview.textContent = `ans actual = ${formatComplex(state.variables.ans)}`;
+      modal.classList.add("open");
+      setTimeout(() => nameField.focus(), 50);
+    }
+
+    function closeStoModal() {
+      document.getElementById("stoModal").classList.remove("open");
+    }
+
+    function confirmStoSave() {
+      const name = document.getElementById("stoNameField").value.trim();
+      const valStr = document.getElementById("stoValueField").value.trim();
+      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
+        showToast("Nombre inválido (ej. x, a, V1)");
+        return;
+      }
+      if (state.constants[name] || name === "ans" || /^ans\d+$/.test(name)) {
+        showToast("Nombre reservado del sistema");
+        return;
+      }
+      try {
+        const val = evaluateMathExpression(valStr);
+        state.variables[name] = val;
+        persistState();
+        renderVariables();
+        closeStoModal();
+        showToast(`Guardado: ${name} = ${formatComplex(val)}`);
+      } catch (e) {
+        showToast("Error en valor: " + e.message);
+      }
+    }
+
+    /* ============================================================
+       6. HISTORIAL AUTOMÁTICO + RESPALDO EN ARCHIVO
+       ============================================================ */
+    function renderHistory() {
+      const panel = document.getElementById("historyPanel");
+      if (state.history.length === 0) {
+        panel.innerHTML = `<div class="history-empty">
+          Motor complejo listo (ej. <b>sqrt(-4)</b>, <b>2^3</b>, <b>sin(45)</b>).<br/>
+          Usa <b>STO</b> para guardar variables y desliza para ver más funciones.
+        </div>`;
+        return;
+      }
+
+      panel.innerHTML = "";
+      state.history.forEach((item, idx) => {
+        const c = new Complex(item.re, item.im);
+        const displayRes = formatComplex(c);
+        const card = document.createElement("div");
+        card.className = "history-item";
+        card.innerHTML = `
+          <div class="hist-expr">${escapeHtml(item.expr)}</div>
+          <div class="hist-res-row">
+            <span class="hist-ans-tag">${item.ansKey}</span>
+            <span class="hist-res">= ${escapeHtml(displayRes)}</span>
+          </div>
+          <div class="hist-actions">
+            <button class="hist-btn" onclick="copyAndLoadExpr(${idx})">Copiar Op.</button>
+            <button class="hist-btn res-btn" onclick="copyAndLoadRes(${idx})">Copiar Res.</button>
+          </div>
+        `;
+        panel.appendChild(card);
+      });
+      panel.scrollTop = panel.scrollHeight;
+    }
+
+    function copyAndLoadExpr(index) {
+      const item = state.history[index];
+      if (!item) return;
+      setExpression(item.expr);
+      copyToClipboard(item.expr, "Operación copiada para editar");
+    }
+
+    function copyAndLoadRes(index) {
+      const item = state.history[index];
+      if (!item) return;
+      const c = new Complex(item.re, item.im);
+      insertToken(item.ansKey);
+      copyToClipboard(formatComplex(c), `Resultado copiado (${item.ansKey})`);
+    }
+
+    function copyToClipboard(text, msg) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(() => {});
+      }
+      showToast(msg);
+    }
+
+    function exportHistoryFile() {
+      if (state.history.length === 0) {
+        showToast("El historial está vacío");
+        return;
+      }
+      const payload = {
+        app: "Calculadora Científica",
+        author: "Dr. Ronald F. Rodriguez Espinoza",
+        exportedAt: new Date().toISOString(),
+        history: state.history
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `calcpro_historial_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Respaldo descargado");
+    }
+
+    function importHistoryFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!Array.isArray(parsed.history)) throw new Error("Formato inválido");
+          state.history = parsed.history;
+          state.history.forEach((h) => {
+            const c = new Complex(h.re || 0, h.im || 0);
+            state.variables[h.ansKey] = c;
+            state.variables.ans = c;
+          });
+          persistState();
+          renderHistory();
+          renderVariables();
+          showToast(`Se cargaron ${state.history.length} operaciones`);
+        } catch (err) {
+          showToast("Error al leer el archivo");
+        }
+        event.target.value = "";
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllHistory() {
+      state.history = [];
+      Object.keys(state.variables).forEach((k) => {
+        if (k.startsWith("ans")) delete state.variables[k];
+      });
+      state.variables.ans = new Complex(0, 0);
+      persistState();
+      renderHistory();
+      renderVariables();
+      showToast("Historial borrado");
+    }
+
+    /* ============================================================
+       7. GESTIÓN DE VARIABLES Y CONSTANTES
+       ============================================================ */
+    function saveUserVariable() {
+      const name = document.getElementById("varNameInput").value.trim();
+      const valStr = document.getElementById("varValInput").value.trim();
+      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
+        showToast("Nombre inválido (usa letras, ej. x1)");
+        return;
+      }
+      if (state.constants[name] || name === "ans" || /^ans\d+$/.test(name)) {
+        showToast("Nombre reservado del sistema");
+        return;
+      }
+      try {
+        const val = evaluateMathExpression(valStr);
+        state.variables[name] = val;
+        document.getElementById("varNameInput").value = "";
+        document.getElementById("varValInput").value = "";
+        persistState();
+        renderVariables();
+        showToast(`Variable "${name}" guardada`);
+      } catch (e) {
+        showToast("Valor inválido: " + e.message);
+      }
+    }
+
+    function deleteUserVariable(name) {
+      delete state.variables[name];
+      persistState();
+      renderVariables();
+      showToast(`Variable "${name}" eliminada`);
+    }
+
+    function renderVariables() {
+      const list = document.getElementById("variablesList");
+      list.innerHTML = "";
+      const keys = Object.keys(state.variables).filter((k) => !/^ans\d+$/.test(k));
+      keys.forEach((k) => {
+        const row = document.createElement("div");
+        row.className = "var-row";
+        const isProtected = k === "ans";
+        row.innerHTML = `
+          <span style="cursor:pointer; flex:1;" onclick="insertToken('${k}')">
+            <b>${k}</b> = ${formatComplex(state.variables[k])}
+          </span>
+          <div>
+            <button class="hist-btn" onclick="insertToken('${k}')">Usar</button>
+            ${!isProtected ? `<button class="var-del-btn" onclick="deleteUserVariable('${k}')" title="Borrar variable">×</button>` : ""}
+          </div>
+        `;
+        list.appendChild(row);
+      });
+
+      const constContainer = document.getElementById("constantsList");
+      constContainer.innerHTML = "";
+      SYSTEM_CONSTANTS.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.className = "var-row";
+        btn.style.cursor = "pointer";
+        btn.innerHTML = `<span><b>${item.sym}</b>: ${item.label}</span>`;
+        btn.onclick = () => insertToken(item.sym);
+        constContainer.appendChild(btn);
+      });
+    }
+
+    /* ============================================================
+       8. PESTAÑAS CON DESLIZAMIENTO TÁCTIL (SWIPE) Y HERRAMIENTAS
+       ============================================================ */
+    function switchTab(idx) {
+      state.activeTab = Math.max(0, Math.min(3, idx));
+      document.querySelectorAll(".tab-btn").forEach((b, i) => {
+        b.classList.toggle("active", i === state.activeTab);
+      });
+      document.querySelectorAll(".tab-pane").forEach((p, i) => {
+        p.classList.toggle("active", i === state.activeTab);
+      });
+    }
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const swipeArea = document.getElementById("swipeArea");
+
+    swipeArea.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    swipeArea.addEventListener("touchend", (e) => {
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      const dy = e.changedTouches[0].screenY - touchStartY;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+        if (dx < 0 && state.activeTab < 3) switchTab(state.activeTab + 1);
+        if (dx > 0 && state.activeTab > 0) switchTab(state.activeTab - 1);
+      }
+    }, { passive: true });
+
+    function toggleAngle() {
+      state.angleMode = state.angleMode === "DEG" ? "RAD" : "DEG";
+      const btn = document.getElementById("btnAngle");
+      btn.textContent = state.angleMode;
+      btn.classList.toggle("active", state.angleMode === "DEG");
+      renderHistory();
+      showToast(`Modo angular: ${state.angleMode}`);
+    }
+
+    function toggleCoord() {
+      state.coordMode = state.coordMode === "RECT" ? "POL" : "RECT";
+      const btn = document.getElementById("btnCoord");
+      btn.textContent = state.coordMode;
+      btn.classList.toggle("active", state.coordMode === "POL");
+      renderHistory();
+      showToast(`Coordenadas: ${state.coordMode === "RECT" ? "Rectangular (a+bi)" : "Polar (r∠θ)"}`);
+    }
+
+    function updatePrecision() {
+      state.precision = parseInt(document.getElementById("selPrecision").value, 10);
+      renderHistory();
+    }
+
+    function showPolarHelp() {
+      showToast("∠ crea fasores polares: ej. 5∠30 = 4.3301 + 2.5i");
+    }
+
+    function calcInterpolation() {
+      const x1 = parseFloat(document.getElementById("intX1").value);
+      const y1 = parseFloat(document.getElementById("intY1").value);
+      const x2 = parseFloat(document.getElementById("intX2").value);
+      const y2 = parseFloat(document.getElementById("intY2").value);
+      const x = parseFloat(document.getElementById("intX").value);
+      const out = document.getElementById("intResult");
+      if ([x1, y1, x2, y2, x].some(isNaN) || x1 === x2) {
+        out.textContent = "Ingresa valores válidos (X1 ≠ X2)";
+        return;
+      }
+      const m = (x - x2) / (x1 - x2);
+      const y = m * y1 + (1 - m) * y2;
+      out.textContent = `Resultado Y = ${formatNum(y)}`;
+    }
+
+    function runConversion() {
+      const val = parseFloat(document.getElementById("convVal").value);
+      const type = document.getElementById("convType").value;
+      const out = document.getElementById("convResult");
+      if (isNaN(val)) {
+        out.textContent = "Ingresa un valor numérico";
+        return;
+      }
+      let res = 0;
+      switch (type) {
+        case "deg2rad": res = (val * Math.PI) / 180; break;
+        case "rad2deg": res = (val * 180) / Math.PI; break;
+        case "m2ft": res = val * 3.28084; break;
+        case "ft2m": res = val / 3.28084; break;
+        case "km2mi": res = val * 0.621371; break;
+        case "mi2km": res = val / 0.621371; break;
+        case "c2f": res = (val * 9) / 5 + 32; break;
+        case "f2c": res = ((val - 32) * 5) / 9; break;
+        case "kg2lb": res = val * 2.20462; break;
+        case "lb2kg": res = val / 2.20462; break;
+      }
+      out.textContent = `Resultado = ${formatNum(res)}`;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    /* ============================================================
+       9. PERSISTENCIA AUTOMÁTICA AL ABRIR Y CERRAR EL HTML
+       ============================================================ */
+    function persistState() {
+      try {
+        const customVars = {};
+        Object.keys(state.variables).forEach((k) => {
+          if (k !== "ans" && !/^ans\d+$/.test(k)) {
+            customVars[k] = { re: state.variables[k].real(), im: state.variables[k].imag() };
+          }
+        });
+        localStorage.setItem("calcpro_ronald_state_v2", JSON.stringify({
+          history: state.history,
+          customVars
+        }));
+      } catch (e) {}
+    }
+
+    function restoreState() {
+      try {
+        const raw = localStorage.getItem("calcpro_ronald_state_v2");
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (Array.isArray(data.history)) {
+          state.history = data.history;
+          state.history.forEach((h) => {
+            const c = new Complex(h.re || 0, h.im || 0);
+            state.variables[h.ansKey] = c;
+            state.variables.ans = c;
+          });
+        }
+        if (data.customVars) {
+          Object.keys(data.customVars).forEach((k) => {
+            state.variables[k] = new Complex(data.customVars[k].re, data.customVars[k].im);
+          });
+        }
+      } catch (e) {}
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (document.activeElement && document.activeElement.tagName === "INPUT") return;
+      if (e.key === "ArrowLeft") { e.preventDefault(); moveCursor(-1); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); moveCursor(1); }
+      else if (e.key === "Backspace") { e.preventDefault(); backspaceAtCursor(); }
+      else if (e.key === "Enter") { e.preventDefault(); evaluateCurrent(); }
+      else if (/^[0-9+\-*/^().!]$/.test(e.key)) { e.preventDefault(); insertToken(e.key); }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      restoreState();
+      renderDisplay();
+      renderHistory();
+      renderVariables();
+    });
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(err => {
+          console.error("No se pudo registrar el modo sin conexión:", err);
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>
