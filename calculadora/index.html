@@ -9,8 +9,9 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
+
+  <!-- Manifest embebido como data URI (funciona sin archivo externo) -->
+  <link rel="manifest" id="appManifest" href='data:application/manifest+json,{"name":"CalcPro Científica","short_name":"CalcPro","start_url":"./","display":"standalone","background_color":"%23f1f5f9","theme_color":"%232563eb","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 rx=%2732%27 fill=%27%232563eb%27/%3E%3Ctext x=%2796%27 y=%27130%27 font-size=%27110%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27Arial%27%3E%3D%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml","purpose":"any"}]}'>
 
   <style>
     :root {
@@ -63,7 +64,6 @@
       overflow: hidden;
     }
 
-    /* Cabecera compacta */
     header {
       background: var(--bg-header);
       padding: 5px 8px;
@@ -103,12 +103,14 @@
       align-items: center;
       justify-content: space-between;
       gap: 4px;
+      flex-wrap: wrap;
     }
 
     .mode-group {
       display: flex;
       gap: 3px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .pill-btn {
@@ -134,6 +136,13 @@
       background: #fef2f2;
     }
 
+    .pill-btn.install {
+      background: #10b981;
+      color: #fff;
+      border-color: #059669;
+      font-weight: 800;
+    }
+
     .precision-select {
       font-size: 0.66rem;
       padding: 2px 3px;
@@ -144,10 +153,10 @@
       font-weight: 700;
     }
 
-    /* HISTORIAL: ALTURA FIJA PEQUEÑA (solo ~3 tarjetas visibles) */
+    /* HISTORIAL: estrictamente 3 tarjetas, altura que se ajusta */
     .history-panel {
-      flex: 0 0 auto;          /* NO se expande ni se encoge */
-      height: 150px;           /* altura fija para ~3 tarjetas */
+      flex: 0 0 auto;
+      height: 150px;            /* altura fija: exactamente 3 tarjetas */
       overflow-y: auto;
       padding: 6px 8px;
       display: flex;
@@ -176,15 +185,21 @@
       flex-direction: column;
       gap: 4px;
       flex-shrink: 0;
+      /* altura máxima por tarjeta para que quepan 3 exactas */
+      max-height: 46px;
+      overflow: hidden;
     }
 
     .hist-expr {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: #1e293b;
       font-family: "Consolas", "Courier New", monospace;
       word-break: break-all;
       text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .hist-res-row {
@@ -195,7 +210,7 @@
     }
 
     .hist-ans-tag {
-      font-size: 0.66rem;
+      font-size: 0.64rem;
       font-weight: 700;
       background: #dbeafe;
       color: #1e40af;
@@ -205,45 +220,22 @@
     }
 
     .hist-res {
-      font-size: 1.05rem;
+      font-size: 0.98rem;
       font-weight: 800;
       color: #0f172a;
       font-family: "Consolas", "Courier New", monospace;
       word-break: break-all;
       text-align: right;
       flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .hist-actions {
-      display: flex;
-      gap: 5px;
-      justify-content: flex-end;
-      border-top: 1px dashed #e2e8f0;
-      padding-top: 4px;
+      display: none; /* ocultamos botones para que quepan 3 exactas */
     }
 
-    .hist-btn {
-      font-size: 0.67rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
-      background: #f8fafc;
-      color: #0f172a;
-      cursor: pointer;
-    }
-
-    .hist-btn:active {
-      background: #e2e8f0;
-    }
-
-    .hist-btn.res-btn {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-      color: #1d4ed8;
-    }
-
-    /* Pantalla de Entrada */
     .display-box {
       background: var(--bg-card);
       border-top: 1px solid var(--border);
@@ -294,7 +286,6 @@
       50% { opacity: 0; }
     }
 
-    /* Barra compacta de navegación y borrado */
     .nav-strip {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -331,7 +322,6 @@
       border-color: #dc2626;
     }
 
-    /* Pestañas */
     .tabs-header {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -357,7 +347,6 @@
       border-bottom-color: var(--accent);
     }
 
-    /* TECLADO: SE EXPANDE PARA OCUPAR TODO EL ESPACIO RESTANTE */
     .swipe-viewport {
       flex: 1 1 auto;
       min-height: 0;
@@ -389,7 +378,6 @@
       grid-template-rows: repeat(5, 1fr);
     }
 
-    /* BOTONES MÁS GRANDES */
     .key {
       height: 100%;
       border-radius: 9px;
@@ -440,7 +428,6 @@
       font-weight: 800;
     }
 
-    /* Paneles Variables y Herramientas ocupan todo el alto disponible */
     .panel-scroll {
       height: 100%;
       overflow-y: auto;
@@ -539,7 +526,6 @@
       flex-shrink: 0;
     }
 
-    /* Modal STO */
     .modal-backdrop {
       position: absolute;
       inset: 0;
@@ -627,6 +613,7 @@
           </select>
         </div>
         <div class="mode-group">
+          <button id="btnInstall" class="pill-btn install" onclick="promptInstall()" style="display:none;">📲 Instalar App</button>
           <button class="pill-btn" onclick="exportHistoryFile()" title="Exportar respaldo en archivo">💾 Respaldar</button>
           <button class="pill-btn" onclick="document.getElementById('fileImport').click()" title="Importar respaldo">📂 Abrir</button>
           <button class="pill-btn danger" onclick="clearAllHistory()" title="Borrar historial">🗑️ Borrar</button>
@@ -635,7 +622,7 @@
       </div>
     </header>
 
-    <!-- HISTORIAL: altura fija pequeña, solo 3 visibles -->
+    <!-- HISTORIAL: solo 3 tarjetas -->
     <div id="historyPanel" class="history-panel">
       <div class="history-empty">
         Motor complejo listo (ej. <b>sqrt(-4)</b>, <b>2^3</b>, <b>sin(45)</b>).<br/>
@@ -643,7 +630,6 @@
       </div>
     </div>
 
-    <!-- Pantalla de Edición -->
     <div class="display-box">
       <div id="customDisplay" class="custom-input-wrapper" onclick="handleDisplayClick(event)"></div>
       <div class="nav-strip">
@@ -655,7 +641,6 @@
       </div>
     </div>
 
-    <!-- Pestañas -->
     <div class="tabs-header">
       <button class="tab-btn active" data-tab="0" onclick="switchTab(0)">Principal</button>
       <button class="tab-btn" data-tab="1" onclick="switchTab(1)">Funciones</button>
@@ -663,9 +648,7 @@
       <button class="tab-btn" data-tab="3" onclick="switchTab(3)">Herram.</button>
     </div>
 
-    <!-- TECLADO: se expande a todo el espacio restante -->
     <div id="swipeArea" class="swipe-viewport">
-      <!-- Pestaña 0: Teclado Principal -->
       <div class="tab-pane active" id="pane-0">
         <div class="keypad-grid">
           <button class="key fn" onclick="insertToken('sin(')">sin</button>
@@ -706,7 +689,6 @@
         </div>
       </div>
 
-      <!-- Pestaña 1: Funciones -->
       <div class="tab-pane" id="pane-1">
         <div class="keypad-grid fn-grid">
           <button class="key fn" onclick="insertToken('asin(')">asin</button>
@@ -741,7 +723,6 @@
         </div>
       </div>
 
-      <!-- Pestaña 2: Variables -->
       <div class="tab-pane" id="pane-2">
         <div class="panel-scroll">
           <div class="var-form">
@@ -756,7 +737,6 @@
         </div>
       </div>
 
-      <!-- Pestaña 3: Herramientas -->
       <div class="tab-pane" id="pane-3">
         <div class="panel-scroll tool-section">
           <div>
@@ -800,7 +780,6 @@
       Calculadora Científica • Dr. Ronald F. Rodriguez Espinoza
     </footer>
 
-    <!-- Modal STO -->
     <div id="stoModal" class="modal-backdrop" onclick="closeStoModal(event)">
       <div class="modal-card" onclick="event.stopPropagation()">
         <div class="modal-title">Guardar Variable (STO)</div>
@@ -818,135 +797,46 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    /* ============================================================
-       1. MOTOR DE NÚMEROS COMPLEJOS
-       ============================================================ */
+    /* ============ MOTOR COMPLEJO (igual) ============ */
     class Complex {
-      constructor(re = 0, im = 0) {
-        this.x = Number(re);
-        this.y = Number(im);
-      }
+      constructor(re = 0, im = 0) { this.x = Number(re); this.y = Number(im); }
       real() { return this.x; }
       imag() { return this.y; }
       mod() { return Math.hypot(this.x, this.y); }
-      arg() {
-        let a = Math.atan2(this.y, this.x);
-        return a < 0 ? a + 2 * Math.PI : a;
-      }
+      arg() { let a = Math.atan2(this.y, this.x); return a < 0 ? a + 2 * Math.PI : a; }
       pipiarg() { return Math.atan2(this.y, this.x); }
       conj() { return new Complex(this.x, -this.y); }
       plus(w) { return new Complex(this.x + w.x, this.y + w.y); }
       minus(w) { return new Complex(this.x - w.x, this.y - w.y); }
-      times(w) {
-        return new Complex(
-          this.x * w.x - this.y * w.y,
-          this.x * w.y + this.y * w.x
-        );
-      }
-      div(w) {
-        const den = w.x * w.x + w.y * w.y;
-        if (den === 0) throw new Error("División por cero");
-        return new Complex(
-          (this.x * w.x + this.y * w.y) / den,
-          (this.y * w.x - this.x * w.y) / den
-        );
-      }
+      times(w) { return new Complex(this.x*w.x - this.y*w.y, this.x*w.y + this.y*w.x); }
+      div(w) { const d = w.x*w.x + w.y*w.y; if (d===0) throw new Error("División por cero"); return new Complex((this.x*w.x+this.y*w.y)/d, (this.y*w.x-this.x*w.y)/d); }
       pow(cp) {
-        if (this.x === 0 && this.y === 0) {
-          if (cp.x === 0 && cp.y === 0) return new Complex(1, 0);
-          return new Complex(0, 0);
-        }
-        const a = this.mod();
-        const b = this.pipiarg();
-        const c = cp.x;
-        const d = cp.y;
-        const r = Math.pow(a, c) * Math.exp(-b * d);
-        const theta = d * Math.log(a) + b * c;
-        const cos = Math.abs(Math.cos(theta)) < 1e-12 ? 0 : Math.cos(theta);
-        const sin = Math.abs(Math.sin(theta)) < 1e-12 ? 0 : Math.sin(theta);
-        return new Complex(r * cos, r * sin);
+        if (this.x===0 && this.y===0) { if (cp.x===0 && cp.y===0) return new Complex(1,0); return new Complex(0,0); }
+        const a = this.mod(), b = this.pipiarg(), c = cp.x, d = cp.y;
+        const r = Math.pow(a,c)*Math.exp(-b*d);
+        const th = d*Math.log(a)+b*c;
+        const cos = Math.abs(Math.cos(th))<1e-12?0:Math.cos(th);
+        const sin = Math.abs(Math.sin(th))<1e-12?0:Math.sin(th);
+        return new Complex(r*cos, r*sin);
       }
-      sqrt() {
-        const r = Math.sqrt(this.mod());
-        const theta = this.pipiarg() / 2;
-        const cos = Math.abs(Math.cos(theta)) < 1e-12 ? 0 : Math.cos(theta);
-        const sin = Math.abs(Math.sin(theta)) < 1e-12 ? 0 : Math.sin(theta);
-        return new Complex(r * cos, r * sin);
-      }
-      exp() {
-        const ex = Math.exp(this.x);
-        return new Complex(ex * Math.cos(this.y), ex * Math.sin(this.y));
-      }
-      ln() {
-        if (this.x === 0 && this.y === 0) throw new Error("Logaritmo de cero");
-        return new Complex(Math.log(this.mod()), this.pipiarg());
-      }
-      log() {
-        const l = this.ln();
-        return new Complex(l.x / Math.LN10, l.y / Math.LN10);
-      }
-      sin() {
-        return new Complex(
-          Math.cosh(this.y) * Math.sin(this.x),
-          Math.sinh(this.y) * Math.cos(this.x)
-        );
-      }
-      cos() {
-        return new Complex(
-          Math.cosh(this.y) * Math.cos(this.x),
-          -Math.sinh(this.y) * Math.sin(this.x)
-        );
-      }
+      sqrt() { const r = Math.sqrt(this.mod()), th = this.pipiarg()/2; const c = Math.abs(Math.cos(th))<1e-12?0:Math.cos(th); const s = Math.abs(Math.sin(th))<1e-12?0:Math.sin(th); return new Complex(r*c, r*s); }
+      exp() { const ex = Math.exp(this.x); return new Complex(ex*Math.cos(this.y), ex*Math.sin(this.y)); }
+      ln() { if (this.x===0 && this.y===0) throw new Error("Logaritmo de cero"); return new Complex(Math.log(this.mod()), this.pipiarg()); }
+      log() { const l = this.ln(); return new Complex(l.x/Math.LN10, l.y/Math.LN10); }
+      sin() { return new Complex(Math.cosh(this.y)*Math.sin(this.x), Math.sinh(this.y)*Math.cos(this.x)); }
+      cos() { return new Complex(Math.cosh(this.y)*Math.cos(this.x), -Math.sinh(this.y)*Math.sin(this.x)); }
       tan() { return this.sin().div(this.cos()); }
-      sinh() {
-        return new Complex(
-          Math.sinh(this.x) * Math.cos(this.y),
-          Math.cosh(this.x) * Math.sin(this.y)
-        );
-      }
-      cosh() {
-        return new Complex(
-          Math.cosh(this.x) * Math.cos(this.y),
-          Math.sinh(this.x) * Math.sin(this.y)
-        );
-      }
+      sinh() { return new Complex(Math.sinh(this.x)*Math.cos(this.y), Math.cosh(this.x)*Math.sin(this.y)); }
+      cosh() { return new Complex(Math.cosh(this.x)*Math.cos(this.y), Math.sinh(this.x)*Math.sin(this.y)); }
       tanh() { return this.sinh().div(this.cosh()); }
-      asin() {
-        if (this.y === 0 && Math.abs(this.x) <= 1) return new Complex(Math.asin(this.x), 0);
-        const i = new Complex(0, 1);
-        const mi = new Complex(0, -1);
-        const one = new Complex(1, 0);
-        return mi.times(i.times(this).plus(one.minus(this.pow(new Complex(2, 0))).sqrt()).ln());
-      }
-      acos() {
-        if (this.y === 0 && Math.abs(this.x) <= 1) return new Complex(Math.acos(this.x), 0);
-        return new Complex(Math.PI / 2, 0).minus(this.asin());
-      }
-      atan() {
-        if (this.y === 0) return new Complex(Math.atan(this.x), 0);
-        const i = new Complex(0, 1);
-        const one = new Complex(1, 0);
-        return new Complex(0, 0.5).times(
-          one.minus(i.times(this)).ln().minus(one.plus(i.times(this)).ln())
-        );
-      }
-      asinh() {
-        const one = new Complex(1, 0);
-        return this.plus(this.pow(new Complex(2, 0)).plus(one).sqrt()).ln();
-      }
-      acosh() {
-        const one = new Complex(1, 0);
-        return this.plus(this.minus(one).sqrt().times(this.plus(one).sqrt())).ln();
-      }
-      atanh() {
-        const one = new Complex(1, 0);
-        return new Complex(0.5, 0).times(one.plus(this).ln().minus(one.minus(this).ln()));
-      }
+      asin() { if (this.y===0 && Math.abs(this.x)<=1) return new Complex(Math.asin(this.x),0); const i = new Complex(0,1), mi = new Complex(0,-1), one = new Complex(1,0); return mi.times(i.times(this).plus(one.minus(this.pow(new Complex(2,0))).sqrt()).ln()); }
+      acos() { if (this.y===0 && Math.abs(this.x)<=1) return new Complex(Math.acos(this.x),0); return new Complex(Math.PI/2,0).minus(this.asin()); }
+      atan() { if (this.y===0) return new Complex(Math.atan(this.x),0); const i = new Complex(0,1), one = new Complex(1,0); return new Complex(0,0.5).times(one.minus(i.times(this)).ln().minus(one.plus(i.times(this)).ln())); }
+      asinh() { const one = new Complex(1,0); return this.plus(this.pow(new Complex(2,0)).plus(one).sqrt()).ln(); }
+      acosh() { const one = new Complex(1,0); return this.plus(this.minus(one).sqrt().times(this.plus(one).sqrt())).ln(); }
+      atanh() { const one = new Complex(1,0); return new Complex(0.5,0).times(one.plus(this).ln().minus(one.minus(this).ln())); }
     }
 
-    /* ============================================================
-       2. ESTADO Y CONSTANTES
-       ============================================================ */
     const SYSTEM_CONSTANTS = [
       { sym: "pi", label: "π (Pi)", val: new Complex(Math.PI, 0) },
       { sym: "e", label: "e (Euler)", val: new Complex(Math.E, 0) },
@@ -957,214 +847,62 @@
     ];
 
     const state = {
-      expr: "",
-      cursor: 0,
-      angleMode: "DEG",
-      coordMode: "RECT",
-      precision: 4,
-      activeTab: 0,
+      expr: "", cursor: 0, angleMode: "DEG", coordMode: "RECT", precision: 4, activeTab: 0,
       history: [],
-      variables: {
-        ans: new Complex(0, 0)
-      },
-      constants: {
-        pi: new Complex(Math.PI, 0),
-        e: new Complex(Math.E, 0),
-        i: new Complex(0, 1),
-        c: new Complex(299792458, 0),
-        g: new Complex(9.80665, 0),
-        h: new Complex(6.62607015e-34, 0),
-        G: new Complex(6.6743e-11, 0)
-      }
+      variables: { ans: new Complex(0, 0) },
+      constants: { pi: new Complex(Math.PI,0), e: new Complex(Math.E,0), i: new Complex(0,1), c: new Complex(299792458,0), g: new Complex(9.80665,0), h: new Complex(6.62607015e-34,0), G: new Complex(6.6743e-11,0) }
     };
 
-    function factorial(n) {
-      if (n < 0 || Math.floor(n) !== n) throw new Error("Factorial requiere entero ≥ 0");
-      if (n > 170) throw new Error("Desbordamiento en factorial");
-      let r = 1;
-      for (let k = 2; k <= n; k++) r *= k;
-      return r;
-    }
+    function factorial(n) { if (n<0 || Math.floor(n)!==n) throw new Error("Factorial requiere entero ≥ 0"); if (n>170) throw new Error("Desbordamiento"); let r=1; for (let k=2;k<=n;k++) r*=k; return r; }
 
     function evaluateMathExpression(rawExpr) {
       if (!rawExpr || !rawExpr.trim()) throw new Error("Expresión vacía");
-
-      let s = rawExpr
-        .replace(/×/g, "*")
-        .replace(/÷/g, "/")
-        .replace(/−/g, "-")
-        .replace(/∟/g, "∠")
-        .replace(/\s+/g, "");
-
-      const tokens = [];
-      let i = 0;
+      let s = rawExpr.replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-").replace(/∟/g,"∠").replace(/\s+/g,"");
+      const tokens = []; let i = 0;
       while (i < s.length) {
         const ch = s[i];
         if (/[0-9.]/.test(ch)) {
-          let numStr = "";
-          while (i < s.length && /[0-9.]/.test(s[i])) {
-            numStr += s[i++];
-          }
-          if (i < s.length && (s[i] === "E" || s[i] === "e") && (/[0-9+-]/.test(s[i + 1] || ""))) {
-            numStr += s[i++];
-            if (s[i] === "+" || s[i] === "-") numStr += s[i++];
-            while (i < s.length && /[0-9]/.test(s[i])) numStr += s[i++];
-          }
-          const val = parseFloat(numStr);
-          if (isNaN(val)) throw new Error("Número inválido: " + numStr);
-          tokens.push({ type: "NUM", value: new Complex(val, 0) });
+          let numStr = ""; while (i<s.length && /[0-9.]/.test(s[i])) numStr += s[i++];
+          if (i<s.length && (s[i]==="E"||s[i]==="e") && (/[0-9+-]/.test(s[i+1]||""))) { numStr += s[i++]; if (s[i]==="+"||s[i]==="-") numStr += s[i++]; while (i<s.length && /[0-9]/.test(s[i])) numStr += s[i++]; }
+          const val = parseFloat(numStr); if (isNaN(val)) throw new Error("Número inválido: "+numStr);
+          tokens.push({ type: "NUM", value: new Complex(val,0) });
         } else if (/[a-zA-Z_]/.test(ch)) {
-          let id = "";
-          while (i < s.length && /[a-zA-Z0-9_]/.test(s[i])) {
-            id += s[i++];
-          }
-          if (s[i] === "(") {
-            tokens.push({ type: "FUNC", value: id });
-          } else {
-            tokens.push({ type: "VAR", value: id });
-          }
-        } else if ("+-*/^∠!()".includes(ch)) {
-          tokens.push({ type: "OP", value: ch });
-          i++;
-        } else {
-          throw new Error("Símbolo no reconocido: " + ch);
-        }
+          let id = ""; while (i<s.length && /[a-zA-Z0-9_]/.test(s[i])) id += s[i++];
+          if (s[i]==="(") tokens.push({ type:"FUNC", value:id }); else tokens.push({ type:"VAR", value:id });
+        } else if ("+-*/^∠!()".includes(ch)) { tokens.push({ type:"OP", value:ch }); i++; }
+        else throw new Error("Símbolo no reconocido: "+ch);
       }
-
       const expanded = [];
-      for (let k = 0; k < tokens.length; k++) {
-        const curr = tokens[k];
-        expanded.push(curr);
-        const next = tokens[k + 1];
-        if (!next) continue;
-        const currIsVal = curr.type === "NUM" || curr.type === "VAR" || curr.value === ")" || curr.value === "!";
-        const nextIsStart = next.type === "NUM" || next.type === "VAR" || next.type === "FUNC" || next.value === "(";
-        if (currIsVal && nextIsStart) {
-          expanded.push({ type: "OP", value: "*" });
-        }
+      for (let k=0;k<tokens.length;k++) {
+        const curr = tokens[k]; expanded.push(curr);
+        const next = tokens[k+1]; if (!next) continue;
+        const currIsVal = curr.type==="NUM"||curr.type==="VAR"||curr.value===")"||curr.value==="!";
+        const nextIsStart = next.type==="NUM"||next.type==="VAR"||next.type==="FUNC"||next.value==="(";
+        if (currIsVal && nextIsStart) expanded.push({ type:"OP", value:"*" });
       }
-
-      let pos = 0;
-      const peek = () => expanded[pos];
-      const consume = () => expanded[pos++];
-
-      function parseExpression() {
-        let left = parseTerm();
-        while (peek() && (peek().value === "+" || peek().value === "-")) {
-          const op = consume().value;
-          const right = parseTerm();
-          left = op === "+" ? left.plus(right) : left.minus(right);
-        }
-        return left;
-      }
-
-      function parseTerm() {
-        let left = parsePower();
-        while (peek() && (peek().value === "*" || peek().value === "/")) {
-          const op = consume().value;
-          const right = parsePower();
-          left = op === "*" ? left.times(right) : left.div(right);
-        }
-        return left;
-      }
-
-      function parsePower() {
-        let left = parsePolar();
-        if (peek() && peek().value === "^") {
-          consume();
-          const right = parsePower();
-          left = left.pow(right);
-        }
-        return left;
-      }
-
-      function parsePolar() {
-        let left = parseUnary();
-        while (peek() && peek().value === "∠") {
-          consume();
-          const right = parseUnary();
-          const mag = left.real();
-          const angRad = state.angleMode === "DEG" ? (right.real() * Math.PI) / 180 : right.real();
-          left = new Complex(mag * Math.cos(angRad), mag * Math.sin(angRad));
-        }
-        return left;
-      }
-
-      function parseUnary() {
-        if (peek() && peek().value === "+") {
-          consume();
-          return parseUnary();
-        }
-        if (peek() && peek().value === "-") {
-          consume();
-          return new Complex(0, 0).minus(parseUnary());
-        }
-        return parsePostfix();
-      }
-
-      function parsePostfix() {
-        let val = parsePrimary();
-        while (peek() && peek().value === "!") {
-          consume();
-          if (Math.abs(val.imag()) > 1e-12) throw new Error("Factorial solo para reales");
-          val = new Complex(factorial(val.real()), 0);
-        }
-        return val;
-      }
-
+      let pos = 0; const peek = () => expanded[pos]; const consume = () => expanded[pos++];
+      function parseExpression() { let left = parseTerm(); while (peek() && (peek().value==="+"||peek().value==="-")) { const op = consume().value; const right = parseTerm(); left = op==="+"?left.plus(right):left.minus(right); } return left; }
+      function parseTerm() { let left = parsePower(); while (peek() && (peek().value==="*"||peek().value==="/")) { const op = consume().value; const right = parsePower(); left = op==="*"?left.times(right):left.div(right); } return left; }
+      function parsePower() { let left = parsePolar(); if (peek() && peek().value==="^") { consume(); const right = parsePower(); left = left.pow(right); } return left; }
+      function parsePolar() { let left = parseUnary(); while (peek() && peek().value==="∠") { consume(); const right = parseUnary(); const mag = left.real(); const angRad = state.angleMode==="DEG" ? (right.real()*Math.PI)/180 : right.real(); left = new Complex(mag*Math.cos(angRad), mag*Math.sin(angRad)); } return left; }
+      function parseUnary() { if (peek() && peek().value==="+") { consume(); return parseUnary(); } if (peek() && peek().value==="-") { consume(); return new Complex(0,0).minus(parseUnary()); } return parsePostfix(); }
+      function parsePostfix() { let val = parsePrimary(); while (peek() && peek().value==="!") { consume(); if (Math.abs(val.imag())>1e-12) throw new Error("Factorial solo para reales"); val = new Complex(factorial(val.real()),0); } return val; }
       function parsePrimary() {
-        const t = peek();
-        if (!t) throw new Error("Expresión incompleta");
-
-        if (t.type === "NUM") {
-          consume();
-          return t.value;
-        }
-
-        if (t.type === "VAR") {
-          consume();
-          const name = t.value;
-          if (state.constants[name] !== undefined) return state.constants[name];
-          if (state.variables[name] !== undefined) return state.variables[name];
-          throw new Error(`Variable desconocida: "${name}"`);
-        }
-
-        if (t.type === "FUNC") {
-          const fnName = consume().value.toLowerCase();
-          if (!peek() || peek().value !== "(") throw new Error(`Falta '(' en ${fnName}`);
-          consume();
-          const arg = parseExpression();
-          if (!peek() || peek().value !== ")") throw new Error(`Falta ')' en ${fnName}`);
-          consume();
-          return applyFunction(fnName, arg);
-        }
-
-        if (t.value === "(") {
-          consume();
-          const val = parseExpression();
-          if (!peek() || peek().value !== ")") throw new Error("Paréntesis sin cerrar");
-          consume();
-          return val;
-        }
-
-        throw new Error("Token inesperado: " + t.value);
+        const t = peek(); if (!t) throw new Error("Expresión incompleta");
+        if (t.type==="NUM") { consume(); return t.value; }
+        if (t.type==="VAR") { consume(); const name = t.value; if (state.constants[name]!==undefined) return state.constants[name]; if (state.variables[name]!==undefined) return state.variables[name]; throw new Error(`Variable desconocida: "${name}"`); }
+        if (t.type==="FUNC") { const fnName = consume().value.toLowerCase(); if (!peek()||peek().value!=="(") throw new Error(`Falta '(' en ${fnName}`); consume(); const arg = parseExpression(); if (!peek()||peek().value!==")") throw new Error(`Falta ')' en ${fnName}`); consume(); return applyFunction(fnName, arg); }
+        if (t.value==="(") { consume(); const val = parseExpression(); if (!peek()||peek().value!==")") throw new Error("Paréntesis sin cerrar"); consume(); return val; }
+        throw new Error("Token inesperado: "+t.value);
       }
-
       const result = parseExpression();
-      if (pos < expanded.length) {
-        throw new Error("Sintaxis inválida cerca de: " + expanded[pos].value);
-      }
+      if (pos < expanded.length) throw new Error("Sintaxis inválida cerca de: "+expanded[pos].value);
       return result;
     }
 
     function applyFunction(fn, z) {
-      const toRad = (c) => (state.angleMode === "DEG" && Math.abs(c.imag()) < 1e-12)
-        ? new Complex((c.real() * Math.PI) / 180, 0)
-        : c;
-      const fromRad = (c) => (state.angleMode === "DEG" && Math.abs(c.imag()) < 1e-12)
-        ? new Complex((c.real() * 180) / Math.PI, 0)
-        : c;
-
+      const toRad = (c) => (state.angleMode==="DEG" && Math.abs(c.imag())<1e-12) ? new Complex((c.real()*Math.PI)/180, 0) : c;
+      const fromRad = (c) => (state.angleMode==="DEG" && Math.abs(c.imag())<1e-12) ? new Complex((c.real()*180)/Math.PI, 0) : c;
       switch (fn) {
         case "sin": return toRad(z).sin();
         case "cos": return toRad(z).cos();
@@ -1183,10 +921,7 @@
         case "log": return z.log();
         case "exp": return z.exp();
         case "abs": return new Complex(z.mod(), 0);
-        case "arg": {
-          const a = z.arg();
-          return new Complex(state.angleMode === "DEG" ? (a * 180) / Math.PI : a, 0);
-        }
+        case "arg": { const a = z.arg(); return new Complex(state.angleMode==="DEG" ? (a*180)/Math.PI : a, 0); }
         case "conj": return z.conj();
         case "re": return new Complex(z.real(), 0);
         case "im": return new Complex(z.imag(), 0);
@@ -1194,43 +929,32 @@
       }
     }
 
-    /* ============================================================
-       3. FORMATEO DE SALIDA
-       ============================================================ */
     function formatNum(n) {
       if (Math.abs(n) < 1e-12) return "0";
-      if (Math.abs(n) < 1e-5 || Math.abs(n) >= 1e10) {
-        return n.toExponential(state.precision);
-      }
+      if (Math.abs(n) < 1e-5 || Math.abs(n) >= 1e10) return n.toExponential(state.precision);
       const fixed = Number(n.toFixed(state.precision));
       return fixed.toString();
     }
 
     function formatComplex(c) {
       if (state.coordMode === "POL") {
-        const mag = c.mod();
-        let ang = c.arg();
-        if (state.angleMode === "DEG") ang = (ang * 180) / Math.PI;
+        const mag = c.mod(); let ang = c.arg();
+        if (state.angleMode === "DEG") ang = (ang*180)/Math.PI;
         if (mag < 1e-12) return "0";
-        return `${formatNum(mag)} ∠ ${formatNum(ang)}${state.angleMode === "DEG" ? "°" : ""}`;
+        return `${formatNum(mag)} ∠ ${formatNum(ang)}${state.angleMode==="DEG"?"°":""}`;
       }
-
-      const re = Math.abs(c.real()) < 1e-12 ? 0 : c.real();
-      const im = Math.abs(c.imag()) < 1e-12 ? 0 : c.imag();
+      const re = Math.abs(c.real())<1e-12?0:c.real();
+      const im = Math.abs(c.imag())<1e-12?0:c.imag();
       if (im === 0) return formatNum(re);
       if (re === 0) return `${formatNum(im)}i`;
       const sign = im > 0 ? " + " : " - ";
       return `${formatNum(re)}${sign}${formatNum(Math.abs(im))}i`;
     }
 
-    /* ============================================================
-       4. PANTALLA DE ENTRADA
-       ============================================================ */
     function renderDisplay() {
       const box = document.getElementById("customDisplay");
       box.innerHTML = "";
       const text = state.expr;
-
       for (let i = 0; i <= text.length; i++) {
         if (i === state.cursor) {
           const caret = document.createElement("span");
@@ -1241,57 +965,19 @@
           const span = document.createElement("span");
           span.className = "char-span";
           span.textContent = text[i];
-          span.onclick = (e) => {
-            e.stopPropagation();
-            state.cursor = i + 1;
-            renderDisplay();
-          };
+          span.onclick = (e) => { e.stopPropagation(); state.cursor = i + 1; renderDisplay(); };
           box.appendChild(span);
         }
       }
       box.scrollLeft = box.scrollWidth;
     }
 
-    function handleDisplayClick(e) {
-      if (e.target.id === "customDisplay") {
-        state.cursor = state.expr.length;
-        renderDisplay();
-      }
-    }
-
-    function insertToken(tok) {
-      const before = state.expr.slice(0, state.cursor);
-      const after = state.expr.slice(state.cursor);
-      state.expr = before + tok + after;
-      state.cursor += tok.length;
-      renderDisplay();
-    }
-
-    function moveCursor(delta) {
-      state.cursor = Math.max(0, Math.min(state.expr.length, state.cursor + delta));
-      renderDisplay();
-    }
-
-    function backspaceAtCursor() {
-      if (state.cursor === 0) return;
-      const before = state.expr.slice(0, state.cursor - 1);
-      const after = state.expr.slice(state.cursor);
-      state.expr = before + after;
-      state.cursor--;
-      renderDisplay();
-    }
-
-    function clearExpression() {
-      state.expr = "";
-      state.cursor = 0;
-      renderDisplay();
-    }
-
-    function setExpression(str) {
-      state.expr = str;
-      state.cursor = str.length;
-      renderDisplay();
-    }
+    function handleDisplayClick(e) { if (e.target.id === "customDisplay") { state.cursor = state.expr.length; renderDisplay(); } }
+    function insertToken(tok) { const b = state.expr.slice(0,state.cursor); const a = state.expr.slice(state.cursor); state.expr = b+tok+a; state.cursor += tok.length; renderDisplay(); }
+    function moveCursor(d) { state.cursor = Math.max(0, Math.min(state.expr.length, state.cursor+d)); renderDisplay(); }
+    function backspaceAtCursor() { if (state.cursor===0) return; state.expr = state.expr.slice(0,state.cursor-1) + state.expr.slice(state.cursor); state.cursor--; renderDisplay(); }
+    function clearExpression() { state.expr = ""; state.cursor = 0; renderDisplay(); }
+    function setExpression(str) { state.expr = str; state.cursor = str.length; renderDisplay(); }
 
     function evaluateCurrent() {
       if (!state.expr.trim()) return;
@@ -1300,75 +986,42 @@
         const formatted = formatComplex(resComplex);
         const idx = state.history.length + 1;
         const ansKey = `ans${idx}`;
-
         state.variables.ans = resComplex;
         state.variables[ansKey] = resComplex;
-
-        state.history.push({
-          id: idx,
-          ansKey,
-          expr: state.expr,
-          resultText: formatted,
-          re: resComplex.real(),
-          im: resComplex.imag()
-        });
-
+        state.history.push({ id: idx, ansKey, expr: state.expr, resultText: formatted, re: resComplex.real(), im: resComplex.imag() });
         persistState();
         renderHistory();
         renderVariables();
         clearExpression();
-      } catch (err) {
-        showToast("⚠️ " + err.message);
-      }
+      } catch (err) { showToast("⚠️ " + err.message); }
     }
 
-    /* ============================================================
-       5. MODAL STO
-       ============================================================ */
     function openStoModal() {
       const modal = document.getElementById("stoModal");
       const valField = document.getElementById("stoValueField");
       const nameField = document.getElementById("stoNameField");
       const preview = document.getElementById("stoPreview");
-
       const defaultVal = state.expr.trim() ? state.expr.trim() : "ans";
-      valField.value = defaultVal;
-      nameField.value = "";
+      valField.value = defaultVal; nameField.value = "";
       preview.textContent = `ans actual = ${formatComplex(state.variables.ans)}`;
       modal.classList.add("open");
       setTimeout(() => nameField.focus(), 50);
     }
-
-    function closeStoModal() {
-      document.getElementById("stoModal").classList.remove("open");
-    }
-
+    function closeStoModal() { document.getElementById("stoModal").classList.remove("open"); }
     function confirmStoSave() {
       const name = document.getElementById("stoNameField").value.trim();
       const valStr = document.getElementById("stoValueField").value.trim();
-      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
-        showToast("Nombre inválido (ej. x, a, V1)");
-        return;
-      }
-      if (state.constants[name] || name === "ans" || /^ans\d+$/.test(name)) {
-        showToast("Nombre reservado del sistema");
-        return;
-      }
+      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) { showToast("Nombre inválido (ej. x, a, V1)"); return; }
+      if (state.constants[name] || name === "ans" || /^ans\d+$/.test(name)) { showToast("Nombre reservado del sistema"); return; }
       try {
         const val = evaluateMathExpression(valStr);
         state.variables[name] = val;
-        persistState();
-        renderVariables();
-        closeStoModal();
+        persistState(); renderVariables(); closeStoModal();
         showToast(`Guardado: ${name} = ${formatComplex(val)}`);
-      } catch (e) {
-        showToast("Error en valor: " + e.message);
-      }
+      } catch (e) { showToast("Error en valor: " + e.message); }
     }
 
-    /* ============================================================
-       6. HISTORIAL (solo 3 visibles)
-       ============================================================ */
+    /* HISTORIAL: solo 3 tarjetas, sin botones para que quepan exactas */
     function renderHistory() {
       const panel = document.getElementById("historyPanel");
       if (state.history.length === 0) {
@@ -1378,11 +1031,9 @@
         </div>`;
         return;
       }
-
       const visibleCount = 3;
       const start = Math.max(0, state.history.length - visibleCount);
       const visibleHistory = state.history.slice(start);
-
       panel.innerHTML = "";
       visibleHistory.forEach((item) => {
         const realIdx = state.history.indexOf(item);
@@ -1396,133 +1047,65 @@
             <span class="hist-ans-tag">${item.ansKey}</span>
             <span class="hist-res">= ${escapeHtml(displayRes)}</span>
           </div>
-          <div class="hist-actions">
-            <button class="hist-btn" onclick="copyAndLoadExpr(${realIdx})">Copiar Op.</button>
-            <button class="hist-btn res-btn" onclick="copyAndLoadRes(${realIdx})">Copiar Res.</button>
-          </div>
         `;
+        card.onclick = () => copyAndLoadRes(realIdx);
         panel.appendChild(card);
       });
       panel.scrollTop = panel.scrollHeight;
     }
 
-    function copyAndLoadExpr(index) {
-      const item = state.history[index];
-      if (!item) return;
-      setExpression(item.expr);
-      copyToClipboard(item.expr, "Operación copiada para editar");
-    }
-
-    function copyAndLoadRes(index) {
-      const item = state.history[index];
-      if (!item) return;
-      const c = new Complex(item.re, item.im);
-      insertToken(item.ansKey);
-      copyToClipboard(formatComplex(c), `Resultado copiado (${item.ansKey})`);
-    }
-
-    function copyToClipboard(text, msg) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).catch(() => {});
-      }
-      showToast(msg);
-    }
+    function copyAndLoadExpr(index) { const item = state.history[index]; if (!item) return; setExpression(item.expr); copyToClipboard(item.expr, "Operación copiada"); }
+    function copyAndLoadRes(index) { const item = state.history[index]; if (!item) return; const c = new Complex(item.re, item.im); insertToken(item.ansKey); copyToClipboard(formatComplex(c), `Resultado copiado (${item.ansKey})`); }
+    function copyToClipboard(text, msg) { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(()=>{}); showToast(msg); }
 
     function exportHistoryFile() {
-      if (state.history.length === 0) {
-        showToast("El historial está vacío");
-        return;
-      }
-      const payload = {
-        app: "Calculadora Científica",
-        author: "Dr. Ronald F. Rodriguez Espinoza",
-        exportedAt: new Date().toISOString(),
-        history: state.history
-      };
+      if (state.history.length === 0) { showToast("El historial está vacío"); return; }
+      const payload = { app: "Calculadora Científica", author: "Dr. Ronald F. Rodriguez Espinoza", exportedAt: new Date().toISOString(), history: state.history };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `calcpro_historial_${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast("Respaldo descargado");
+      a.href = url; a.download = `calcpro_historial_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url); showToast("Respaldo descargado");
     }
-
     function importHistoryFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+      const file = event.target.files[0]; if (!file) return;
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const parsed = JSON.parse(e.target.result);
           if (!Array.isArray(parsed.history)) throw new Error("Formato inválido");
           state.history = parsed.history;
-          state.history.forEach((h) => {
-            const c = new Complex(h.re || 0, h.im || 0);
-            state.variables[h.ansKey] = c;
-            state.variables.ans = c;
-          });
-          persistState();
-          renderHistory();
-          renderVariables();
+          state.history.forEach((h) => { const c = new Complex(h.re||0, h.im||0); state.variables[h.ansKey] = c; state.variables.ans = c; });
+          persistState(); renderHistory(); renderVariables();
           showToast(`Se cargaron ${state.history.length} operaciones`);
-        } catch (err) {
-          showToast("Error al leer el archivo");
-        }
+        } catch (err) { showToast("Error al leer el archivo"); }
         event.target.value = "";
       };
       reader.readAsText(file);
     }
-
     function clearAllHistory() {
       state.history = [];
-      Object.keys(state.variables).forEach((k) => {
-        if (k.startsWith("ans")) delete state.variables[k];
-      });
-      state.variables.ans = new Complex(0, 0);
-      persistState();
-      renderHistory();
-      renderVariables();
-      showToast("Historial borrado");
+      Object.keys(state.variables).forEach((k) => { if (k.startsWith("ans")) delete state.variables[k]; });
+      state.variables.ans = new Complex(0,0);
+      persistState(); renderHistory(); renderVariables(); showToast("Historial borrado");
     }
 
-    /* ============================================================
-       7. VARIABLES Y CONSTANTES
-       ============================================================ */
     function saveUserVariable() {
       const name = document.getElementById("varNameInput").value.trim();
       const valStr = document.getElementById("varValInput").value.trim();
-      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
-        showToast("Nombre inválido (usa letras, ej. x1)");
-        return;
-      }
-      if (state.constants[name] || name === "ans" || /^ans\d+$/.test(name)) {
-        showToast("Nombre reservado del sistema");
-        return;
-      }
+      if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) { showToast("Nombre inválido (usa letras, ej. x1)"); return; }
+      if (state.constants[name] || name === "ans" || /^ans\d+$/.test(name)) { showToast("Nombre reservado del sistema"); return; }
       try {
         const val = evaluateMathExpression(valStr);
         state.variables[name] = val;
         document.getElementById("varNameInput").value = "";
         document.getElementById("varValInput").value = "";
-        persistState();
-        renderVariables();
+        persistState(); renderVariables();
         showToast(`Variable "${name}" guardada`);
-      } catch (e) {
-        showToast("Valor inválido: " + e.message);
-      }
+      } catch (e) { showToast("Valor inválido: " + e.message); }
     }
-
-    function deleteUserVariable(name) {
-      delete state.variables[name];
-      persistState();
-      renderVariables();
-      showToast(`Variable "${name}" eliminada`);
-    }
-
+    function deleteUserVariable(name) { delete state.variables[name]; persistState(); renderVariables(); showToast(`Variable "${name}" eliminada`); }
     function renderVariables() {
       const list = document.getElementById("variablesList");
       list.innerHTML = "";
@@ -1542,47 +1125,32 @@
         `;
         list.appendChild(row);
       });
-
       const constContainer = document.getElementById("constantsList");
       constContainer.innerHTML = "";
       SYSTEM_CONSTANTS.forEach((item) => {
         const btn = document.createElement("button");
-        btn.className = "var-row";
-        btn.style.cursor = "pointer";
+        btn.className = "var-row"; btn.style.cursor = "pointer";
         btn.innerHTML = `<span><b>${item.sym}</b>: ${item.label}</span>`;
         btn.onclick = () => insertToken(item.sym);
         constContainer.appendChild(btn);
       });
     }
 
-    /* ============================================================
-       8. PESTAÑAS Y HERRAMIENTAS
-       ============================================================ */
     function switchTab(idx) {
       state.activeTab = Math.max(0, Math.min(3, idx));
-      document.querySelectorAll(".tab-btn").forEach((b, i) => {
-        b.classList.toggle("active", i === state.activeTab);
-      });
-      document.querySelectorAll(".tab-pane").forEach((p, i) => {
-        p.classList.toggle("active", i === state.activeTab);
-      });
+      document.querySelectorAll(".tab-btn").forEach((b, i) => b.classList.toggle("active", i === state.activeTab));
+      document.querySelectorAll(".tab-pane").forEach((p, i) => p.classList.toggle("active", i === state.activeTab));
     }
 
-    let touchStartX = 0;
-    let touchStartY = 0;
+    let touchStartX = 0, touchStartY = 0;
     const swipeArea = document.getElementById("swipeArea");
-
-    swipeArea.addEventListener("touchstart", (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-      touchStartY = e.changedTouches[0].screenY;
-    }, { passive: true });
-
+    swipeArea.addEventListener("touchstart", (e) => { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, { passive: true });
     swipeArea.addEventListener("touchend", (e) => {
       const dx = e.changedTouches[0].screenX - touchStartX;
       const dy = e.changedTouches[0].screenY - touchStartY;
-      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
-        if (dx < 0 && state.activeTab < 3) switchTab(state.activeTab + 1);
-        if (dx > 0 && state.activeTab > 0) switchTab(state.activeTab - 1);
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)*1.3) {
+        if (dx < 0 && state.activeTab < 3) switchTab(state.activeTab+1);
+        if (dx > 0 && state.activeTab > 0) switchTab(state.activeTab-1);
       }
     }, { passive: true });
 
@@ -1591,10 +1159,8 @@
       const btn = document.getElementById("btnAngle");
       btn.textContent = state.angleMode;
       btn.classList.toggle("active", state.angleMode === "DEG");
-      renderHistory();
-      showToast(`Modo angular: ${state.angleMode}`);
+      renderHistory(); showToast(`Modo angular: ${state.angleMode}`);
     }
-
     function toggleCoord() {
       state.coordMode = state.coordMode === "RECT" ? "POL" : "RECT";
       const btn = document.getElementById("btnCoord");
@@ -1603,16 +1169,8 @@
       renderHistory();
       showToast(`Coordenadas: ${state.coordMode === "RECT" ? "Rectangular (a+bi)" : "Polar (r∠θ)"}`);
     }
-
-    function updatePrecision() {
-      state.precision = parseInt(document.getElementById("selPrecision").value, 10);
-      renderHistory();
-    }
-
-    function showPolarHelp() {
-      showToast("∠ crea fasores polares: ej. 5∠30 = 4.3301 + 2.5i");
-    }
-
+    function updatePrecision() { state.precision = parseInt(document.getElementById("selPrecision").value, 10); renderHistory(); }
+    function showPolarHelp() { showToast("∠ crea fasores polares: ej. 5∠30 = 4.3301 + 2.5i"); }
     function calcInterpolation() {
       const x1 = parseFloat(document.getElementById("intX1").value);
       const y1 = parseFloat(document.getElementById("intY1").value);
@@ -1620,72 +1178,47 @@
       const y2 = parseFloat(document.getElementById("intY2").value);
       const x = parseFloat(document.getElementById("intX").value);
       const out = document.getElementById("intResult");
-      if ([x1, y1, x2, y2, x].some(isNaN) || x1 === x2) {
-        out.textContent = "Ingresa valores válidos (X1 ≠ X2)";
-        return;
-      }
-      const m = (x - x2) / (x1 - x2);
-      const y = m * y1 + (1 - m) * y2;
+      if ([x1,y1,x2,y2,x].some(isNaN) || x1===x2) { out.textContent = "Ingresa valores válidos (X1 ≠ X2)"; return; }
+      const m = (x-x2)/(x1-x2); const y = m*y1 + (1-m)*y2;
       out.textContent = `Resultado Y = ${formatNum(y)}`;
     }
-
     function runConversion() {
       const val = parseFloat(document.getElementById("convVal").value);
       const type = document.getElementById("convType").value;
       const out = document.getElementById("convResult");
-      if (isNaN(val)) {
-        out.textContent = "Ingresa un valor numérico";
-        return;
-      }
+      if (isNaN(val)) { out.textContent = "Ingresa un valor numérico"; return; }
       let res = 0;
       switch (type) {
-        case "deg2rad": res = (val * Math.PI) / 180; break;
-        case "rad2deg": res = (val * 180) / Math.PI; break;
-        case "m2ft": res = val * 3.28084; break;
-        case "ft2m": res = val / 3.28084; break;
-        case "km2mi": res = val * 0.621371; break;
-        case "mi2km": res = val / 0.621371; break;
-        case "c2f": res = (val * 9) / 5 + 32; break;
-        case "f2c": res = ((val - 32) * 5) / 9; break;
-        case "kg2lb": res = val * 2.20462; break;
-        case "lb2kg": res = val / 2.20462; break;
+        case "deg2rad": res = (val*Math.PI)/180; break;
+        case "rad2deg": res = (val*180)/Math.PI; break;
+        case "m2ft": res = val*3.28084; break;
+        case "ft2m": res = val/3.28084; break;
+        case "km2mi": res = val*0.621371; break;
+        case "mi2km": res = val/0.621371; break;
+        case "c2f": res = (val*9)/5+32; break;
+        case "f2c": res = ((val-32)*5)/9; break;
+        case "kg2lb": res = val*2.20462; break;
+        case "lb2kg": res = val/2.20462; break;
       }
       out.textContent = `Resultado = ${formatNum(res)}`;
     }
-
     function showToast(msg) {
       const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.classList.add("show");
+      t.textContent = msg; t.classList.add("show");
       clearTimeout(window._toastTimer);
       window._toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
     }
+    function escapeHtml(str) { return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    }
-
-    /* ============================================================
-       9. PERSISTENCIA
-       ============================================================ */
     function persistState() {
       try {
         const customVars = {};
         Object.keys(state.variables).forEach((k) => {
-          if (k !== "ans" && !/^ans\d+$/.test(k)) {
-            customVars[k] = { re: state.variables[k].real(), im: state.variables[k].imag() };
-          }
+          if (k !== "ans" && !/^ans\d+$/.test(k)) customVars[k] = { re: state.variables[k].real(), im: state.variables[k].imag() };
         });
-        localStorage.setItem("calcpro_ronald_state_v2", JSON.stringify({
-          history: state.history,
-          customVars
-        }));
+        localStorage.setItem("calcpro_ronald_state_v2", JSON.stringify({ history: state.history, customVars }));
       } catch (e) {}
     }
-
     function restoreState() {
       try {
         const raw = localStorage.getItem("calcpro_ronald_state_v2");
@@ -1693,17 +1226,9 @@
         const data = JSON.parse(raw);
         if (Array.isArray(data.history)) {
           state.history = data.history;
-          state.history.forEach((h) => {
-            const c = new Complex(h.re || 0, h.im || 0);
-            state.variables[h.ansKey] = c;
-            state.variables.ans = c;
-          });
+          state.history.forEach((h) => { const c = new Complex(h.re||0, h.im||0); state.variables[h.ansKey] = c; state.variables.ans = c; });
         }
-        if (data.customVars) {
-          Object.keys(data.customVars).forEach((k) => {
-            state.variables[k] = new Complex(data.customVars[k].re, data.customVars[k].im);
-          });
-        }
+        if (data.customVars) Object.keys(data.customVars).forEach((k) => { state.variables[k] = new Complex(data.customVars[k].re, data.customVars[k].im); });
       } catch (e) {}
     }
 
@@ -1716,6 +1241,46 @@
       else if (/^[0-9+\-*/^().!]$/.test(e.key)) { e.preventDefault(); insertToken(e.key); }
     });
 
+    /* ============ PWA: INSTALACIÓN ============ */
+    let deferredPrompt = null;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById("btnInstall");
+      if (btn) btn.style.display = "inline-block";
+    });
+
+    function promptInstall() {
+      if (!deferredPrompt) {
+        showToast("Para instalar: abre el menú del navegador (⋮) y elige 'Instalar app' o 'Añadir a pantalla de inicio'");
+        return;
+      }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === "accepted") showToast("¡App instalada!");
+        else showToast("Instalación cancelada");
+        deferredPrompt = null;
+        const btn = document.getElementById("btnInstall");
+        if (btn) btn.style.display = "none";
+      });
+    }
+
+    window.addEventListener("appinstalled", () => {
+      showToast("CalcPro instalada correctamente");
+      const btn = document.getElementById("btnInstall");
+      if (btn) btn.style.display = "none";
+    });
+
+    /* Registrar service worker (requiere archivo service-worker.js servido por HTTP/HTTPS) */
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(err => {
+          console.warn("SW no registrado (normal si abres con file://):", err.message);
+        });
+      });
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       restoreState();
       renderDisplay();
@@ -1723,16 +1288,5 @@
       renderVariables();
     });
   </script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js").catch(err => {
-          console.error("No se pudo registrar el modo sin conexión:", err);
-        });
-      });
-    }
-  </script>
-
 </body>
 </html>
