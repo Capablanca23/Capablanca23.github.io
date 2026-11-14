@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reparar calculadora</title>
+  <style>
+    body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:#f1f5f9; color:#0f172a; margin:0; padding:16px; }
+    .card { background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:14px; max-width:520px; margin:0 auto; }
+    h1 { font-size:1.1rem; margin:0 0 10px; color:#2563eb; }
+    pre { background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:10px; font-size:.82rem; white-space:pre-wrap; word-break:break-word; }
+    button { width:100%; padding:14px; font-size:1rem; font-weight:700; border:0; border-radius:8px; background:#2563eb; color:#fff; margin-top:10px; }
+    .ok { color:#15803d; font-weight:700; }
+    .bad { color:#b91c1c; font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Reparar calculadora</h1>
+    <p>Esta página revisa qué versión hay en GitHub y limpia la caché vieja. Tu historial y tus variables no se borran.</p>
+    <pre id="log">Revisando…</pre>
+    <div id="verdict"></div>
+    <button id="btn">Limpiar caché y abrir la calculadora</button>
+  </div>
+
+  <script>
+    var logEl = document.getElementById("log");
+    var verdict = document.getElementById("verdict");
+    function log(t) { logEl.textContent += "\n" + t; }
+
+    async function diagnostico() {
+      logEl.textContent = "Diagnóstico:";
+      try {
+        var regs = navigator.serviceWorker ? await navigator.serviceWorker.getRegistrations() : [];
+        log("Service workers activos: " + regs.length);
+      } catch (e) { log("Service workers: no se pudo leer"); }
+      try {
+        var keys = await caches.keys();
+        log("Cachés guardadas: " + (keys.length ? keys.join(", ") : "ninguna"));
+      } catch (e) { log("Cachés: no se pudo leer"); }
+      try {
+        var r = await fetch("./index.html?x=" + Date.now(), { cache: "no-store" });
+        var t = await r.text();
+        var nuevo = t.indexOf("flex: 0 1 282px") !== -1;
+        var v4 = t.indexOf("• v4") !== -1;
+        log("index.html en GitHub: " + (nuevo ? "tiene historial de 3" : "NO tiene el historial de 3") + (v4 ? " y etiqueta v4" : ", sin etiqueta v4"));
+        verdict.innerHTML = nuevo
+          ? '<p class="ok">GitHub tiene la versión nueva. El problema es solo la caché: pulsa el botón.</p>'
+          : '<p class="bad">GitHub todavía tiene el index.html viejo. Sube el index.html nuevo a la carpeta calculadora y vuelve a abrir esta página.</p>';
+      } catch (e) {
+        log("No se pudo leer index.html: " + e.message);
+      }
+    }
+
+    async function limpiar() {
+      try {
+        if (navigator.serviceWorker) {
+          var regs = await navigator.serviceWorker.getRegistrations();
+          for (var i = 0; i < regs.length; i++) await regs[i].unregister();
+        }
+        var keys = await caches.keys();
+        for (var j = 0; j < keys.length; j++) await caches.delete(keys[j]);
+      } catch (e) {}
+      location.href = "./index.html?v=" + Date.now();
+    }
+
+    document.getElementById("btn").addEventListener("click", limpiar);
+    diagnostico();
+  </script>
+</body>
+</html>
