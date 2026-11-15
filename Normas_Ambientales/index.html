@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b7a5c">
+<meta name="description" content="Consulta y evaluación de normas ambientales peruanas para agua y aire: ECA, LMP y VMA.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Normas Ambientales Perú – Agua y Aire</title>
+<style>
+:root {
+  --bg: #f4f9f8; --card: #fff; --tx: #12302e; --mut: #5b7471; 
+  --pr: #0b7a5c; --ac: #0e6ba8; --bd: #d3e3e0; --ok: #d6f2e0; 
+  --okt: #0a6b34; --no: #fadada; --not: #a11d1d; --wa: #fff1c2; --wat: #7a5a00;
+  box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media(prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1a19; --card: #142826; --tx: #e3f1ee; --mut: #97b3af; 
+    --pr: #3fcf9f; --ac: #5bb4ee; --bd: #274642; --ok: #15402a; 
+    --okt: #7fe3a8; --no: #4a1c1c; --not: #ff9c9c; --wa: #463b0f; --wat: #ffd96b;
+  }
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-tap-highlight-color: transparent; }
+*, *:before, *:after { box-sizing: inherit; }
+body { margin: 0; font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--tx); }
+
+/* Header Móvil y Moderno */
+header { background: linear-gradient(135deg, #0b7a5c, #0e6ba8); color: #fff; padding: 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.logo { width: 42px; height: 42px; flex-shrink: 0; }
+header h1 { font-size: 18px; margin: 0; font-weight: 700; line-height: 1.2; }
+header small { opacity: 0.9; font-size: 12px; display: block; margin-top: 2px; }
+.author-txt { font-weight: 600; color: #a3d8f4; margin-top: 4px; display: block; font-size: 11.5px; }
+
+nav { display: flex; gap: 8px; overflow-x: auto; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--bd); position: sticky; top: 74px; z-index: 10; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+nav::-webkit-scrollbar { display: none; }
+nav button { flex: 0 0 auto; border-radius: 99px; padding: 8px 16px; background: var(--bg); border: 1px solid var(--bd); font-weight: 600; color: var(--mut); white-space: nowrap; height: auto; min-height: 38px; }
+nav button.on { background: var(--pr); color: #fff; border-color: var(--pr); }
+
+main { max-width: 1100px; margin: auto; padding: 16px; padding-bottom: 40px; }
+
+/* Controles Base */
+button, select, input { font: inherit; font-size: 16px; color: var(--tx); background: var(--card); border: 1px solid var(--bd); border-radius: 8px; padding: 10px 14px; min-height: 44px; outline: none; }
+input:focus, select:focus { border-color: var(--pr); }
+button { cursor: pointer; font-weight: 600; text-align: center; transition: 0.2s; }
+button:active { opacity: 0.8; }
+button.p { background: var(--pr); color: #fff; border-color: var(--pr); }
+.s { flex: 0 0 auto !important; width: auto !important; }
+
+/* Layout y Utilidades */
+.card { background: var(--card); border: 1px solid var(--bd); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.row > * { flex: 1 1 140px; }
+
+/* Tablas Responsivas */
+.tw { overflow-x: auto; margin-top: 10px; border-radius: 8px; border: 1px solid var(--bd); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; white-space: nowrap; }
+th, td { border-bottom: 1px solid var(--bd); padding: 10px 12px; text-align: left; vertical-align: middle; }
+th { background: var(--bg); font-weight: 700; color: var(--mut); }
+td { background: var(--card); }
+
+.tag { padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: var(--bd); display: inline-block; }
+.ok { background: var(--ok); color: var(--okt); }
+.no { background: var(--no); color: var(--not); }
+.wa { background: var(--wa); color: var(--wat); }
+.note { border-left: 4px solid var(--wat); background: var(--wa); color: var(--wat); padding: 12px; border-radius: 8px; font-size: 14px; line-height: 1.4; margin-bottom: 16px; }
+.mut { color: var(--mut); font-size: 13.5px; }
+.hid { display: none; }
+optgroup { font-weight: 700; color: var(--pr); }
+
+@media print { nav, header button, .noprint { display: none !important; } }
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="logo" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="#fff"/><path d="M24 7c7 9 11 14 11 20a11 11 0 0 1-22 0c0-6 4-11 11-20z" fill="#0e6ba8"/><path d="M16 30c4-2 8 2 16-2" stroke="#fff" stroke-width="2.5" fill="none"/><path d="M12 40c6-6 14-6 24 0" stroke="#0b7a5c" stroke-width="3" fill="none"/></svg>
+  <div>
+    <h1>Normas Ambientales Perú – Agua y Aire</h1>
+    <small>ECA · LMP · VMA | Base de datos: <span id="upd">14/11/2026</span></small>
+    <button id="installBtn" class="noprint" style="display:none;margin-top:8px;padding:6px 10px;min-height:34px;font-size:13px;background:#fff;color:#0b7a5c;border:0;border-radius:8px;">Instalar aplicación</button>
+    <span class="author-txt">Autor: Dr. Ronald F. Rodriguez Espinoza</span>
+  </div>
+</header>
+
+<nav id="nav"></nav>
+
+<main>
+  <!-- BÚSQUEDA -->
+  <section id="t-buscar">
+    <div class="card">
+      <div class="row">
+        <input id="q" type="search" placeholder="Buscar parámetro: arsénico, DQO, pH, PM10...">
+        <select id="fa" class="s">
+          <option value="">Agua y aire</option>
+          <optgroup label="Tipo de Agua">
+            <option value="Agua Potable">Agua Potable</option>
+            <option value="Cuerpos de Agua (ECA)">Cuerpos de Agua (ECA)</option>
+            <option value="Residual Industrial">Efluentes Industriales</option>
+            <option value="Residual Doméstica (PTAR)">Efluentes PTAR</option>
+            <option value="Alcantarillado (VMA)">Alcantarillado (VMA)</option>
+          </optgroup>
+          <optgroup label="Aire"><option value="Aire Ambiental">Aire Ambiental</option></optgroup>
+        </select>
+        <select id="ft" class="s"><option value="">ECA/LMP/VMA</option><option>ECA</option><option>LMP</option><option>VMA</option></select>
+      </div>
+      <div class="row noprint">
+        <button onclick="exp('res')">Exportar CSV</button>
+        <button onclick="window.print()">Imprimir</button>
+        <span class="mut" id="cnt" style="align-self:center; font-weight:bold;"></span>
+      </div>
+      <div class="tw" id="res"></div>
+    </div>
+    <div class="note">Un parámetro puede variar según tipo de agua o receptor. Un ECA (calidad ambiental) NO es un LMP (efluente) ni un VMA (alcantarillado).</div>
+  </section>
+
+  <!-- AGUA -->
+  <section id="t-agua" class="hid">
+    <div class="card">
+      <div class="row"><select id="ga"></select></div>
+      <div id="ga-i" class="mut" style="margin-bottom:12px; padding:10px; background:var(--bg); border-radius:8px;"></div>
+      <div class="tw" id="ga-t"></div>
+      <div class="row noprint" style="margin-top:16px"><button onclick="exp('ga-t')">Exportar CSV</button></div>
+    </div>
+  </section>
+
+  <!-- AIRE -->
+  <section id="t-aire" class="hid">
+    <div class="card">
+      <div class="row"><select id="gr"></select></div>
+      <div id="gr-i" class="mut" style="margin-bottom:12px; padding:10px; background:var(--bg); border-radius:8px;"></div>
+      <div class="tw" id="gr-t"></div>
+      <div class="row noprint" style="margin-top:16px"><button onclick="exp('gr-t')">Exportar CSV</button></div>
+    </div>
+  </section>
+
+  <!-- EVALUACIÓN -->
+  <section id="t-eval" class="hid">
+    <div class="card">
+      <h3 style="margin-top:0">Evaluación de resultados de laboratorio</h3>
+      <div class="row">
+        <select id="ge"></select>
+        <button class="p s" onclick="loadEval()">Cargar parámetros</button>
+      </div>
+      <div id="ev-i" class="mut" style="margin-bottom:12px;"></div>
+      <div class="tw"><table id="ev-in"></table></div>
+      <div class="row noprint" style="margin-top:16px">
+        <button class="p" onclick="evalRun()">Comparar Resultados</button>
+        <button onclick="exp('ev-out')">Exportar CSV</button>
+        <button onclick="window.print()">Imprimir informe</button>
+      </div>
+    </div>
+    <div class="card" id="ev-out-card" style="display:none">
+      <div class="tw" id="ev-out"></div>
+      <div style="max-width:700px; margin-top:20px;"><canvas id="ch" height="200"></canvas></div>
+      <div id="ch-fb" class="mut" style="margin-top:10px;"></div>
+    </div>
+  </section>
+
+  <!-- CONVERSIÓN -->
+  <section id="t-conv" class="hid">
+    <div class="card">
+      <h3 style="margin-top:0">Conversión de unidades</h3>
+      <div class="row">
+        <input id="cv" type="number" step="any" placeholder="Valor">
+        <select id="cu" class="s"></select>
+        <span class="s" style="font-weight:bold; color:var(--mut)">→</span>
+        <select id="cd" class="s"></select>
+        <button class="p s" onclick="conv()">Convertir</button>
+      </div>
+      <div id="cr" style="margin-top:16px"></div>
+      <p class="mut">Solo concentraciones de masa/volumen. ppm se trata como mg/L (aproximación en agua diluida). Conversión de gases (ppm ↔ µg/m³) no incluida (depende de T, P y masa molar).</p>
+    </div>
+  </section>
+
+  <!-- BIBLIOTECA -->
+  <section id="t-norm" class="hid">
+    <div class="card">
+      <h3 style="margin-top:0">Biblioteca normativa</h3>
+      <div class="tw"><table id="lib"></table></div>
+      <p class="mut" style="margin-top:12px">Verifique siempre vigencia y modificaciones en el texto oficial (Diario Oficial El Peruano, portales de MINAM, MINSA, PRODUCE, VIVIENDA, PCM).</p>
+    </div>
+  </section>
+
+  <!-- HISTORIAL -->
+  <section id="t-hist" class="hid">
+    <div class="card">
+      <h3 style="margin-top:0">Historial de la sesión</h3>
+      <div id="hist" class="mut">Sin consultas.</div>
+    </div>
+  </section>
+
+  <!-- FUENTES Y ALCANCE -->
+  <section id="t-fuent" class="hid">
+    <div class="card">
+      <h3 style="margin-top:0">Fuentes, método y alcance</h3>
+      <ul style="line-height:1.6; color:var(--tx)">
+        <li>Verificación del 14/11/2026 contra el texto publicado en El Peruano (D.S. 010-2019-VIVIENDA, 003-2010-MINAM, 010-2018-MINAM, 008-2026-VIVIENDA) y reproducciones del anexo oficial. <b>Cada cifra debe contrastarse con el PDF oficial antes de un uso formal.</b></li>
+        <li><b>Consumo humano (D.S. 031-2010-SA):</b> Se integraron los microbiológicos del Anexo I (incluyendo helmintos y virus a 0) junto a los Anexos II y III.</li>
+        <li><b>ECA Agua:</b> Físico-químicos cargados. Los principales plaguicidas fueron añadidos. El amoniaco total se incluyó como cualitativo pues depende del pH y temperatura (Tablas 1 y 2).</li>
+        <li><b>PRODUCE y Curtiembre:</b> Se incluyó D.S. 003-2002-PRODUCE (Cemento, Cerveza, Papel) y los nuevos LMP del D.S. 010-2023-MINAM (Curtiembre).</li>
+        <li><b>Aire:</b> ECA Aire ambiental completo y detallado. No se cargaron emisiones industriales ni vehiculares (D.S. 014-2010, 001-2020, 010-2017) para no mezclar estándares de inmisión con estándares de emisión en base seca. El D.S. 011-2023-MINAM modificó el aire agregando (Cd, As, Cr en PM10) pero no están cargados.</li>
+        <li><b>VMA:</b> D.S. 010-2019-VIVIENDA. El D.S. 014-2019-VIVIENDA no modificó los parámetros, solo los plazos.</li>
+      </ul>
+      <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--bd); text-align:center;">
+        <span class="mut" style="font-size:14px;">Desarrollado por:</span><br>
+        <b style="font-size:16px; color:var(--tx);">Dr. Ronald F. Rodriguez Espinoza</b>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const D=[];
+function pv(s){s=(s||"-").trim();if(s=="-")return null;if(s.startsWith(">="))return{mn:+s.slice(2)};if(/^[\d.]+-[\d.]+$/.test(s)){const t=s.split("-");return{mn:+t[0],mx:+t[1]}}if(!isNaN(+s))return{mx:+s};return{tx:s}}
+function R(cols,rows,per,ob){rows.forEach(x=>{const a=x.split("|");cols.forEach((g,i)=>{const v=pv(a[2+i]);if(v)D.push({g,p:a[0],mn:v.mn??null,mx:v.mx??null,u:a[1],per:per||"—",ob:(v.tx?v.tx+". ":"")+(ob||"")})})})}
+
+const VW="Verificado contra el anexo publicado (El Peruano).";
+const G={
+  cons: { a: "Agua", sub: "Agua Potable", n: "Consumo humano", nm: "D.S. N.° 031-2010-SA", t: "LMP", ax: "Anexos I, II, III", vf: "Microbiológicos completos, físico-químicos verificados." },
+  a1: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 1-A1 · potabilizables c/desinfección", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 1, Subcat. A", vf: VW },
+  a2: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 1-A2 · potabilizables c/trat. conv.", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 1, Subcat. A", vf: VW },
+  a3: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 1-A3 · potabilizables c/trat. avan.", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 1, Subcat. A", vf: VW },
+  b1: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 1-B1 · recreación primaria", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 1, Subcat. B", vf: VW },
+  b2: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 1-B2 · recreación secundaria", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 1, Subcat. B", vf: VW },
+  c1: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 2-C1 · extracción moluscos", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 2", vf: VW },
+  c2: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 2-C2 · otras especies marinas", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 2", vf: VW },
+  c3: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 2-C3 · activ. portuarias/industr.", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 2", vf: VW },
+  c4: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 2-C4 · lagos y lagunas", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 2", vf: VW },
+  d1: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 3-D1 · riego vegetales", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 3", vf: VW },
+  d2: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 3-D2 · bebida animales", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 3", vf: VW },
+  e1: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 4-E1 · lagunas y lagos", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 4", vf: VW },
+  e2c: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 4-E2 · ríos costa/sierra", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 4", vf: VW },
+  e2s: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 4-E2 · ríos selva", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 4", vf: VW },
+  e3e: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 4-E3 · estuarios", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 4", vf: VW },
+  e3m: { a: "Agua", sub: "Cuerpos de Agua (ECA)", n: "ECA Cat. 4-E3 · marinos", nm: "D.S. N.° 004-2017-MINAM", t: "ECA", ax: "Cat. 4", vf: VW },
+  ptar: { a: "Agua", sub: "Residual Doméstica (PTAR)", n: "PTAR domésticas o municipales", nm: "D.S. N.° 003-2010-MINAM", t: "LMP", ax: "Anexo", vf: VW },
+  min: { a: "Agua", sub: "Residual Industrial", n: "Minería: efluentes minero-metalúrgicos", nm: "D.S. N.° 010-2010-MINAM", t: "LMP", ax: "Anexo 01", vf: VW },
+  hc: { a: "Agua", sub: "Residual Industrial", n: "Hidrocarburos: efluentes líquidos", nm: "D.S. N.° 037-2008-PCM", t: "LMP", ax: "Art. 1", vf: VW },
+  pesq: { a: "Agua", sub: "Residual Industrial", n: "Pesquería (CHD y CHI)", nm: "D.S. N.° 010-2018-MINAM", t: "LMP", ax: "Anexo", vf: VW },
+  cem: { a: "Agua", sub: "Residual Industrial", n: "Cemento: efluentes líquidos", nm: "D.S. N.° 003-2002-PRODUCE", t: "LMP", ax: "Anexo 2", vf: VW },
+  cer: { a: "Agua", sub: "Residual Industrial", n: "Cerveza: efluentes líquidos", nm: "D.S. N.° 003-2002-PRODUCE", t: "LMP", ax: "Anexo 2", vf: VW },
+  pap: { a: "Agua", sub: "Residual Industrial", n: "Papel: efluentes líquidos", nm: "D.S. N.° 003-2002-PRODUCE", t: "LMP", ax: "Anexo 2", vf: VW },
+  curt: { a: "Agua", sub: "Residual Industrial", n: "Curtiembre (curtido y adobo)", nm: "D.S. N.° 010-2023-MINAM", t: "LMP", ax: "Anexo Único", vf: VW },
+  vma1: { a: "Agua", sub: "Alcantarillado (VMA)", n: "VMA Anexo 1 (pago por exceso)", nm: "D.S. N.° 010-2019-VIVIENDA", t: "VMA", ax: "Anexo N.° 1", vf: VW },
+  vma2: { a: "Agua", sub: "Alcantarillado (VMA)", n: "VMA Anexo 2 (descargas prohibidas)", nm: "D.S. N.° 010-2019-VIVIENDA", t: "VMA", ax: "Anexo N.° 2", vf: VW },
+  aire: { a: "Aire", sub: "Aire Ambiental", n: "ECA para Aire (Ambiental)", nm: "D.S. N.° 003-2017-MINAM", t: "ECA", ax: "Anexo", vf: VW }
+};
+
+const CT="Muestra puntual";
+// Consumo
+R(["cons"],["pH|—|6.5-8.5","Turbiedad|UNT|5","Color|UCV Pt-Co|15","Conductividad (25 °C)|µS/cm|1500","Sólidos disueltos totales|mg/L|1000","Cloruros|mg/L|250","Sulfatos|mg/L|250","Dureza total|mg CaCO3/L|500","Amoniaco|mg/L|1.5","Hierro|mg/L|0.3","Manganeso|mg/L|0.4","Aluminio|mg/L|0.2","Cobre|mg/L|2","Sodio|mg/L|200","Zinc|mg/L|3","Antimonio|mg/L|0.02","Arsénico|mg/L|0.01","Bario|mg/L|0.7","Boro|mg/L|1.5","Cadmio|mg/L|0.003","Mercurio|mg/L|0.001","Plomo|mg/L|0.01","Nitratos|mg/L|50"],CT);
+R(["cons"],["Coliformes totales|UFC/100 mL|0","Escherichia coli|UFC/100 mL|0","Bacterias heterotróficas|UFC/mL|500","Huevos y larvas de helmintos|Organismos/L|0","Virus|UFC/100 mL|0"],CT,"Anexo I: Cero organismos vivos.");
+D.push({g:"cons",p:"Nitritos",mn:null,mx:3,u:"mg/L",per:"Exposición corta"});
+D.push({g:"cons",p:"Cloro residual libre",mn:null,mx:5,u:"mg/L",per:"—",ob:"En red: 90 % de muestras ≥ 0,5 mg/L y ninguna < 0,3 mg/L."});
+
+// ECA Cat 1
+R(["a1","a2","a3"],["Aceites y grasas|mg/L|0.5|1.7|1.7","Cianuro libre|mg/L|-|0.2|0.2","Cloruros|mg/L|250|250|250","Conductividad|µS/cm|1500|1600|-","DBO5|mg/L|3|5|10","DQO|mg/L|10|20|30","Nitratos (NO3-)|mg/L|50|50|50","Oxígeno disuelto|mg/L|>=6|>=5|>=4","pH|—|6.5-8.5|5.5-9|5.5-9","Sólidos disueltos totales|mg/L|1000|1000|1500","Sulfatos|mg/L|250|500|-","Turbiedad|UNT|5|100|-","Arsénico|mg/L|0.01|0.01|0.15","Cadmio|mg/L|0.003|0.005|0.01","Cromo total|mg/L|0.05|0.05|0.05","Plomo|mg/L|0.01|0.05|0.05","Zinc|mg/L|3|5|5","Coliformes termotolerantes|NMP/100 mL|20|2000|20000"],"Muestra receptor");
+R(["b1","b2"],["DBO5|mg/L|5|10","DQO|mg/L|30|50","Oxígeno disuelto|mg/L|>=5|>=4","pH|—|6-9|-","Arsénico|mg/L|0.01|-","Cromo VI|mg/L|0.05|-","Plomo|mg/L|0.01|-","Coliformes termotolerantes|NMP/100 mL|200|1000"],"Muestra receptor");
+
+// ECA 2, 3, 4 (Resumen)
+R(["c1","c2","c3","c4"],["Aceites y grasas|mg/L|1|1|2|1","DBO5|mg/L|-|10|10|10","Oxígeno disuelto|mg/L|>=4|>=3|>=2.5|>=5","pH|—|7-8.5|6.8-8.5|6.8-8.5|6-9","Sólidos suspendidos totales|mg/L|80|60|70|-","Arsénico|mg/L|0.05|0.05|0.05|0.1","Plomo|mg/L|0.0081|0.0081|0.03|0.0025","Coliformes termotolerantes|NMP/100 mL|14|30|1000|200"],"Muestra receptor");
+R(["d1","d2"],["Aceites y grasas|mg/L|5|10","DBO5|mg/L|15|15","DQO|mg/L|40|40","Oxígeno disuelto|mg/L|>=4|>=5","pH|—|6.5-8.5|6.5-8.4","Arsénico|mg/L|0.1|0.2","Plomo|mg/L|0.05|0.05","Coliformes termotolerantes|NMP/100 mL|1000|1000"],"Muestra receptor");
+R(["e1","e2c","e2s","e3e","e3m"],["Aceites y grasas (MEH)|mg/L|5|5|5|5|5","DBO5|mg/L|5|10|10|15|10","Oxígeno disuelto|mg/L|>=5|>=5|>=5|>=4|>=4","pH|—|6.5-9|6.5-9|6.5-9|6.8-8.5|6.8-8.5","Sólidos suspendidos totales|mg/L|25|100|400|100|30","Arsénico|mg/L|0.15|0.15|0.15|0.036|0.036","Plomo|mg/L|0.0025|0.0025|0.0025|0.0081|0.0081","Coliformes termotolerantes|NMP/100 mL|1000|2000|2000|1000|2000"],"Muestra receptor");
+
+// Amoniaco (ECA) y Plaguicidas
+D.push({g:"e2c",p:"Amoniaco total",mn:null,mx:null,u:"mg/L",per:"—",ob:"Límite dinámico (interpolación de tablas pH y T°)."});
+D.push({g:"e2s",p:"Amoniaco total",mn:null,mx:null,u:"mg/L",per:"—",ob:"Límite dinámico."});
+R(["a1","a2","a3","b1","b2"],["Aldrín + Dieldrín|µg/L|0.03|0.03|0.03|0.03|0.03","Clordano|µg/L|0.2|0.2|0.2|0.2|0.2","DDT|µg/L|2|2|2|2|2","Lindano|µg/L|2|2|2|2|2"],"Muestra puntual","Plaguicidas principales.");
+
+// PTAR / LMP
+R(["ptar"],["pH|—|6.5-8.5","DBO5|mg/L|100","DQO|mg/L|200","Sólidos suspendidos totales|mg/L|150","Aceites y grasas|mg/L|20","Coliformes termotolerantes|NMP/100 mL|10000","Temperatura|°C|35"],"Vertido");
+R(["min"],["pH|—|6-9","Sólidos totales en suspensión|mg/L|50","Arsénico total|mg/L|0.1","Plomo total|mg/L|0.2","Cromo hexavalente|mg/L|0.1"],"Cualquier momento");
+R(["hc"],["pH|—|6-9","Hidrocarburos totales|mg/L|20","Aceites y grasas|mg/L|20","Plomo|mg/L|0.1","Cloruros|mg/L|500"],"Cualquier momento");
+R(["pesq"],["pH|—|5-9","Aceites y grasas|mg/L|350","Sólidos suspendidos totales|mg/L|700"],"Efluente");
+R(["cem"],["pH|—|6-9","Sólidos suspendidos totales|mg/L|50","Temperatura|°C|35"],CT);
+R(["cer","pap"],["pH|—|6-9","DBO5|mg/L|50","DQO|mg/L|150","Sólidos suspendidos totales|mg/L|50","Temperatura|°C|35"],CT);
+R(["curt"],["pH|—|6-9","DBO5|mg/L|100","DQO|mg/L|250","Sólidos suspendidos totales|mg/L|150","Sulfuros|mg/L|1","Cromo hexavalente|mg/L|0.1","Nitrógeno amoniacal|mg/L|50"],CT);
+
+// VMA
+R(["vma1"],["DBO5|mg/L|500","DQO|mg/L|1000","Sólidos suspendidos totales|mg/L|500","Aceites y grasas|mg/L|100"],CT);
+R(["vma2"],["Aluminio|mg/L|10","Arsénico|mg/L|0.5","Cromo hexavalente|mg/L|0.5","Plomo|mg/L|0.5","pH|—|6-9","Temperatura|°C|35"],CT);
+
+// AIRE (ECA AIRE COMPLETO RESTAURADO)
+R(["aire"],["Benceno|µg/m³|2","Dióxido de azufre (SO2)|µg/m³|250","Dióxido de nitrógeno (NO2)|µg/m³|200","Dióxido de nitrógeno (NO2)|µg/m³|100","Material particulado PM2.5|µg/m³|50","Material particulado PM2.5|µg/m³|25","Material particulado PM10|µg/m³|100","Material particulado PM10|µg/m³|50","Monóxido de carbono (CO)|µg/m³|30000","Monóxido de carbono (CO)|µg/m³|10000","Ozono (O3)|µg/m³|100","Plomo (Pb) en PM10|µg/m³|1.5","Plomo (Pb) en PM10|µg/m³|0.5","Sulfuro de hidrógeno (H2S)|µg/m³|150","Mercurio gaseoso total (Hg)|µg/m³|2"],"");
+(function(){
+  const pe=["Anual","24 horas","1 hora","Anual","24 horas","Anual","24 horas","Anual","1 hora","8 horas","8 horas","Mensual","Anual","24 horas","24 horas"];
+  const ob=["Media aritmética anual.","No exceder más de 7 veces al año.","No exceder más de 24 veces al año.","Media aritmética anual.","No exceder más de 7 veces al año.","Media aritmética anual.","No exceder más de 7 veces al año.","Media aritmética anual.","No exceder más de 1 vez al año.","Media aritmética móvil.","Máxima media diaria; NE más de 24 veces al año.","No exceder más de 4 veces al año.","Media aritmética de los valores mensuales.","Media aritmética.","No exceder. Vigencia sujeta a protocolo."];
+  D.filter(d=>d.g=="aire").forEach((d,i)=>{d.per=pe[i];d.ob=ob[i]})
+})();
+
+const LIB=[
+  ["D.S. 031-2010-SA","Reglamento Calidad Agua Consumo Humano","MINSA","26/09/2010","Vigente"],
+  ["D.S. 004-2017-MINAM","ECA para Agua","MINAM","07/06/2017","Vigente"],
+  ["D.S. 003-2017-MINAM","ECA para Aire","MINAM","07/06/2017","Vigente"],
+  ["D.S. 010-2019-VIVIENDA","VMA en Alcantarillado","VIVIENDA","11/03/2019","Vigente"],
+  ["D.S. 003-2010-MINAM","LMP PTAR","MINAM","17/03/2010","Vigente"],
+  ["D.S. 010-2010-MINAM","LMP Minero-Metalúrgico","MINAM","21/08/2010","Vigente"],
+  ["D.S. 037-2008-PCM","LMP Hidrocarburos","PCM","14/05/2008","Vigente"],
+  ["D.S. 010-2018-MINAM","LMP Pesquería","MINAM","2018","Vigente"],
+  ["D.S. 010-2023-MINAM","LMP Curtiembre","MINAM","23/08/2023","Vigente"],
+  ["D.S. 003-2002-PRODUCE","LMP Cemento, Cerveza, Papel","PRODUCE","04/10/2002","Vigente"]
+];
+
+const NOCARGADO="No se encontró un límite específico. Verifique el IGA y norma sectorial.";
+const $=i=>document.getElementById(i); let H=[];
+const AL={"dbo5":"dbo5 dbo demanda bioquímica","dqo":"dqo demanda química","cromo vi":"cromo hexavalente cr6+","pm10":"pm10 material particulado"};
+const fmt=v=>v==null?"—":String(v).replace(".",",");
+const lim=d=>d.mn==null&&d.mx==null?"Cualitativo":d.mn!=null&&d.mx!=null?fmt(d.mn)+" – "+fmt(d.mx):d.mx!=null?"≤ "+fmt(d.mx):"≥ "+fmt(d.mn);
+
+// Render de Tabla Clásica
+function tbl(rows,id){
+  const h="<table><tr><th>Parámetro</th><th>Norma</th><th>Valor</th><th>Unid.</th><th>Estándar</th><th>Período</th><th>Obs.</th></tr>";
+  $(id).innerHTML=rows.length?h+rows.map(d=>{
+    const g=G[d.g];
+    return `<tr><td><b>${d.p}</b></td><td>${g.a} - ${g.sub}<br><small>${g.n}</small></td><td><b>${lim(d)}</b></td><td>${d.u}</td><td><span class="tag">${g.t}</span></td><td>${d.per}</td><td>${d.ob}</td></tr>`
+  }).join("")+"</table>":`<div class="note">${NOCARGADO}</div>`;
+}
+
+function buscar(){
+  const q=$("q").value.trim().toLowerCase(), fa=$("fa").value, t=$("ft").value;
+  const rows=D.filter(d=>{
+    const g=G[d.g];
+    if(fa&&g.a!=fa&&g.sub!=fa) return false;
+    if(t&&g.t!=t) return false;
+    if(!q) return true;
+    const hay=(d.p+" "+(AL[d.p.toLowerCase()]||"")+" "+g.n).toLowerCase();
+    return hay.includes(q);
+  });
+  tbl(rows,"res");
+  $("cnt").textContent=rows.length+" resultados";
+  if(q&&buscar.l!=q){ buscar.l=q; H.push(new Date().toLocaleTimeString()+" — Búsqueda: «"+q+"» ("+rows.length+")"); hist(); }
+}
+
+function hist(){ $("hist").innerHTML=H.length?"<ol style='padding-left:20px;margin:0'>"+H.map(x=>"<li>"+x+"</li>").join("")+"</ol>":"Sin consultas."; }
+
+function fillSelGrouped(id, area){
+  const groups = {};
+  Object.keys(G).filter(k => G[k].a == area).forEach(k => {
+    const sub = G[k].sub; if (!groups[sub]) groups[sub] = [];
+    groups[sub].push(`<option value="${k}">${G[k].n}</option>`);
+  });
+  $(id).innerHTML = Object.keys(groups).map(g => `<optgroup label="${g}">${groups[g].join("")}</optgroup>`).join("");
+}
+
+function fillEvalGrouped() {
+  const groups = {};
+  Object.keys(G).forEach(k => {
+    const sub = G[k].a + " · " + G[k].sub; if (!groups[sub]) groups[sub] = [];
+    groups[sub].push(`<option value="${k}">${G[k].n}</option>`);
+  });
+  $("ge").innerHTML = Object.keys(groups).map(g => `<optgroup label="${g}">${groups[g].join("")}</optgroup>`).join("");
+}
+
+function showG(sel,info,tb){
+  const k=$(sel).value, g=G[k];
+  $(info).innerHTML=`<b>${g.nm}</b> · Tipo: ${g.t} · ${g.ax}<br><small>${g.vf||""}</small>`;
+  tbl(D.filter(d=>d.g==k),tb);
+  H.push(new Date().toLocaleTimeString()+" — Consulta: "+g.n); hist();
+}
+
+function exp(id){
+  const t=$(id).querySelector("table"); if(!t) return alert("No hay tabla.");
+  const csv="\ufeff"+[...t.rows].map(r=>[...r.cells].map(c=>'"'+c.innerText.replace(/"/g,'""').replace(/\n/g," ")+'"').join(";")).join("\n");
+  try{navigator.clipboard&&navigator.clipboard.writeText(csv)}catch(e){}
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="normas.csv"; a.click();
+}
+
+// Evaluación Original (con inputs en tabla)
+const UN={"mg/L":1,"µg/L":1e-3,"g/L":1e3,"ppm":1,"mg/m³":1000,"µg/m³":1,"ng/m³":1e-3};
+function loadEval(){
+  const k=$("ge").value, g=G[k];
+  $("ev-i").innerHTML=`<b>${g.nm}</b> · ${g.t}`;
+  const rows=D.filter(d=>d.g==k);
+  $("ev-in").innerHTML="<tr><th>Parámetro</th><th>Período</th><th>Límite</th><th>Resultado</th><th>Unidad Resultado</th></tr>"+rows.map((d,i)=>{
+    const fam=Object.keys(UN).includes(d.u)?(d.u.includes("m³")?["mg/m³","µg/m³","ng/m³"]:["mg/L","µg/L","g/L","ppm"]):[d.u];
+    return `<tr><td>${d.p}</td><td>${d.per}</td><td><b>${lim(d)} ${d.u}</b></td><td><input type="number" step="any" id="v${i}" style="width:110px"></td><td><select id="u${i}" style="width:100%">${fam.map(u=>`<option ${u==d.u?"selected":""}>${u}</option>`).join("")}<option value="otra">otra / no comp.</option></select></td></tr>`;
+  }).join("");
+  $("ev-out-card").style.display="none";
+}
+
+let CH;
+function evalRun(){
+  const k=$("ge").value, rows=D.filter(d=>d.g==k), g=G[k], out=[], lb=[], pc=[];
+  rows.forEach((d,i)=>{
+    let v=$("v"+i).value, u=$("u"+i).value, est, cl, ob=d.ob, p="—";
+    if(v==="")return; v=parseFloat(v);
+    if(u=="otra"||(u!=d.u&&!(UN[u]&&UN[d.u]))){ est="Revisar";cl="wa";ob="Unidades no compatibles."; }
+    else if(d.mn==null&&d.mx==null){ est="Revisar";cl="wa";ob="Cualitativo / Dinámico."; }
+    else {
+      if(u!=d.u) v=v*UN[u]/UN[d.u];
+      const bad=(d.mx!=null&&v>d.mx)||(d.mn!=null&&v<d.mn);
+      est=bad?"Excede":"Cumple"; cl=bad?"no":"ok";
+      if(d.mx!=null&&d.mn==null&&d.mx>0){ p=(100*v/d.mx).toFixed(1)+" %"; lb.push(d.p); pc.push(+(100*v/d.mx).toFixed(1)); }
+    }
+    out.push(`<tr><td>${d.p}</td><td><b>${$("v"+i).value} ${u}</b></td><td>${lim(d)} ${d.u}</td><td>${p}</td><td><span class="tag ${cl}">${est}</span></td><td>${ob}</td></tr>`);
+  });
+  $("ev-out-card").style.display="block";
+  $("ev-out").innerHTML=out.length?`<h3 style="margin-top:0">Reporte · ${new Date().toLocaleString()}</h3><table><tr><th>Parámetro</th><th>Resultado</th><th>Límite Normativo</th><th>% del Límite</th><th>Estado</th><th>Observaciones</th></tr>${out.join("")}</table>`:"<div class='note'>Ingrese al menos un dato.</div>";
+  H.push(new Date().toLocaleTimeString()+" — Evaluación: "+g.n+" ("+out.length+" param.)"); hist();
+  if(CH)CH.destroy(); $("ch-fb").textContent="";
+  if(pc.length&&typeof Chart!=="undefined"){
+    CH=new Chart($("ch"),{type:"bar",data:{labels:lb,datasets:[{data:pc,backgroundColor:pc.map(x=>x>100?"#d64545":x>80?"#e0a800":"#1f9d6a")}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:"% del Límite"}}}}});
+  }
+}
+
+function conv(){
+  const v=parseFloat($("cv").value), a=$("cu").value, b=$("cd").value; if(isNaN(v))return;
+  const ma=a.includes("m³"), mb=b.includes("m³");
+  $("cr").innerHTML=ma!=mb?"<div class='note'>Agua vs Aire no compatible.</div>":`<h3 style="margin:0;color:var(--pr)">${v} ${a} = ${(v*UN[a]/UN[b]).toPrecision(6)} ${b}</h3>`;
+}
+
+// Navegación
+const tabs=[["buscar","🔍 Buscar"],["agua","💧 Agua"],["aire","💨 Aire"],["eval","🧪 Evaluar"],["conv","🔄 Unidades"],["norm","📚 Normas"],["hist","⏱️ Historial"],["fuent","ℹ️ Fuentes"]];
+$("nav").innerHTML=tabs.map(t=>`<button data-t="${t[0]}" onclick="go('${t[0]}')">${t[1]}</button>`).join("");
+function go(t){
+  tabs.forEach(x=>$("t-"+x[0]).classList.toggle("hid",x[0]!=t));
+  [...$("nav").children].forEach(b=>{
+    b.classList.toggle("on",b.dataset.t==t);
+    if(b.dataset.t==t) b.scrollIntoView({behavior: "smooth", block: "nearest", inline: "center"});
+  });
+}
+
+// Inicializar
+fillSelGrouped("ga","Agua"); fillSelGrouped("gr","Aire"); fillEvalGrouped();
+$("cu").innerHTML=$("cd").innerHTML=Object.keys(UN).map(u=>`<option>${u}</option>`).join(""); $("cd").selectedIndex=1;
+$("lib").innerHTML="<tr><th>Norma</th><th>Nombre</th><th>Entidad</th><th>Publicación</th><th>Estado</th></tr>"+LIB.map(l=>`<tr><td><b>${l[0]}</b></td><td>${l[1]}</td><td>${l[2]}</td><td>${l[3]}</td><td><span class="tag ok">${l[4]}</span></td></tr>`).join("");
+["q","fa","ft"].forEach(i=>$(i).addEventListener("input",buscar));
+$("ga").onchange=()=>showG("ga","ga-i","ga-t");
+$("gr").onchange=()=>showG("gr","gr-i","gr-t");
+
+go("buscar"); buscar(); showG("ga","ga-i","ga-t"); showG("gr","gr-i","gr-t"); loadEval();
+</script>
+
+<script>
+/* Funcionalidad PWA: instalación y disponibilidad sin conexión. */
+(() => {
+  let deferredPrompt;
+  const installBtn = document.getElementById('installBtn');
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+    if (installBtn) installBtn.style.display = 'inline-block';
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    if (installBtn) installBtn.style.display = 'none';
+  });
+
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch((err) => {
+        console.warn('No se pudo registrar el service worker:', err);
+      });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
