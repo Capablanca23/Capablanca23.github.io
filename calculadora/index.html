@@ -9,6 +9,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Calculadora científica y de números complejos, con historial, variables y herramientas. Autor: Dr. Ronald F. Rodriguez Espinoza.">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
@@ -132,6 +133,12 @@
       color: var(--text-del);
       border-color: #fecaca;
       background: #fef2f2;
+    }
+
+      .pill-btn.install {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #93c5fd;
     }
 
     .precision-select {
@@ -632,7 +639,8 @@
             <option value="8">8 dec</option>
           </select>
         </div>
-        <div class="mode-group">
+                <div class="mode-group">
+          <button id="installBtn" class="pill-btn" style="display:none;" onclick="promptInstall()" title="Instalar aplicación en el dispositivo">📲 Instalar</button>
           <button class="pill-btn" onclick="exportHistoryFile()" title="Exportar respaldo en archivo">💾 Respaldar</button>
           <button class="pill-btn" onclick="document.getElementById('fileImport').click()" title="Importar respaldo">📂 Abrir</button>
           <button class="pill-btn danger" onclick="clearAllHistory()" title="Borrar historial">🗑️ Borrar</button>
@@ -1725,13 +1733,48 @@
     });
   </script>
 
-  <script>
+    <script>
     /* Modo sin conexión (solo se registra en http/https; sin errores en consola) */
     if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
       window.addEventListener("load", function () {
         navigator.serviceWorker.register("./service-worker.js").catch(function () {});
       });
     }
+  </script>
+
+  <script>
+    /* Instalación PWA: muestra el botón solo cuando el navegador lo permite */
+    (function () {
+      let deferredPrompt = null;
+      const installBtn = document.getElementById("installBtn");
+
+      window.addEventListener("beforeinstallprompt", function (event) {
+        event.preventDefault();
+        deferredPrompt = event;
+        if (installBtn) installBtn.style.display = "inline-block";
+      });
+
+      window.promptInstall = async function () {
+        if (!deferredPrompt) {
+          if (typeof showToast === "function") {
+            showToast("La instalación no está disponible en este navegador.");
+          }
+          return;
+        }
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice && choice.outcome === "accepted") {
+          if (typeof showToast === "function") showToast("Instalando aplicación...");
+        }
+        deferredPrompt = null;
+        if (installBtn) installBtn.style.display = "none";
+      };
+
+      window.addEventListener("appinstalled", function () {
+        if (installBtn) installBtn.style.display = "none";
+        if (typeof showToast === "function") showToast("Aplicación instalada ✓");
+      });
+    })();
   </script>
 
 </body>
