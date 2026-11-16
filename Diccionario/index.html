@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="author" content="Dr. Ronald F. Rodriguez Espinoza">
+<meta name="theme-color" content="#4f46e5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Diccionario">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>Diccionario y Traductor · Dr. Ronald F. Rodriguez Espinoza</title>
+<style>
+:root{--bg:#f4f5fb;--card:#fff;--fg:#1e2233;--mut:#6b7280;--bd:#e5e7ef;--ac:#4f46e5;--ac2:#7c3aed;--soft:#eef0ff;--danger:#ef4444;--sh:0 6px 20px rgba(60,60,120,.10);color-scheme:light;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+:root[data-theme="dark"]{--bg:#0f1117;--card:#181b24;--fg:#e6e8ef;--mut:#9aa1b2;--bd:#2a2e3b;--ac:#8b93ff;--ac2:#b794f6;--soft:#222639;--sh:0 6px 20px rgba(0,0,0,.4);color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--fg);min-height:100%}
+.app{max-width:640px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+header{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;padding:18px 18px 56px;padding-top:max(18px,env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;border-radius:0 0 28px 28px}
+header h1{font-size:1.35rem;font-weight:700}
+header small{display:block;opacity:.85;font-size:.78rem;margin-top:2px}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
+.theme{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);font-size:1.15rem}#installBtn{font-weight:700;white-space:nowrap}
+.tabs{display:flex;gap:6px;background:var(--card);margin:-30px 16px 0;padding:6px;border-radius:16px;box-shadow:var(--sh);position:relative;z-index:2}
+.tab{flex:1;padding:11px;border-radius:11px;font-weight:600;color:var(--mut);font-size:.95rem}
+.tab.active{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff}
+main{flex:1;padding:16px}
+.view{display:none}.view.active{display:block;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
+.search{display:flex;align-items:center;gap:4px;background:var(--soft);border:2px solid transparent;border-radius:14px;padding:4px 4px 4px 6px}
+.search:focus-within{border-color:var(--ac)}
+.search select{border:none;background:var(--card);color:var(--ac);font-weight:700;border-radius:10px;padding:8px 6px;font-size:.9rem;outline:none}
+.search input{flex:1;min-width:0;border:none;background:transparent;padding:10px 6px;font-size:16px;color:var(--fg);outline:none}
+.ib{width:42px;height:42px;border-radius:12px;font-size:1.15rem;display:inline-flex;align-items:center;justify-content:center}
+.ib:active{background:var(--bd)}
+.go{background:var(--ac);color:#fff}
+.mic.on{background:var(--danger);color:#fff;animation:pl 1s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 12px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.hint{font-size:.76rem;color:var(--mut);text-align:center;margin-top:10px}
+.status{text-align:center;color:var(--mut);padding:10px 6px 16px;font-size:.92rem;line-height:1.5}
+.spin{display:inline-block;width:16px;height:16px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.rh h2{font-size:1.9rem;color:var(--ac);text-transform:capitalize;word-break:break-word}
+.src{font-size:.72rem;color:var(--mut);margin-bottom:8px}
+.pos{display:inline-block;background:var(--soft);color:var(--ac);font-weight:700;font-size:.78rem;padding:4px 12px;border-radius:99px;margin:10px 0 8px;text-transform:capitalize}
+.defs{list-style:none;counter-reset:d}
+.defs li{counter-increment:d;display:flex;gap:10px;margin-bottom:10px;line-height:1.5;font-size:.97rem}
+.defs li::before{content:counter(d);flex:none;width:22px;height:22px;border-radius:50%;background:var(--soft);color:var(--ac);font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.lbl{font-size:.82rem;color:var(--mut);margin-bottom:10px;font-weight:600}
+.ext{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ext a{text-align:center;padding:11px;border-radius:12px;text-decoration:none;font-weight:600;font-size:.85rem;color:#fff}
+.e1{background:#b22222}.e2{background:#4b5563}.e3{background:#2563eb}.e4{background:#7c3aed}
+.sw{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sw span{flex:1;text-align:center;font-weight:700;background:var(--soft);color:var(--ac);padding:10px;border-radius:12px}
+.sw button{width:44px;height:44px;margin:0 6px;border-radius:50%;background:var(--ac);color:#fff;font-size:1.2rem}
+textarea{width:100%;min-height:130px;border:2px solid transparent;border-radius:14px;padding:14px;padding-bottom:46px;font:inherit;font-size:16px;background:var(--soft);color:var(--fg);outline:none;resize:none;display:block}
+textarea:focus{border-color:var(--ac)}
+.wrap{position:relative}
+.wrap .bt{position:absolute;right:6px;bottom:6px;display:flex}
+.tools{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
+.pill{padding:9px 14px;border-radius:99px;background:var(--soft);color:var(--ac);font-weight:600;font-size:.88rem}
+.hidden{display:none!important}
+#toast{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);background:#111;color:#fff;padding:11px 16px;border-radius:12px;font-size:.88rem;max-width:90%;text-align:center;z-index:50;opacity:0;pointer-events:none;transition:opacity .25s}
+#toast.show{opacity:.95}
+footer{text-align:center;padding:16px;font-size:.78rem;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div><h1>📚 Diccionario &amp; Traductor</h1><small>Dr. Ronald F. Rodriguez Espinoza</small></div>
+    <div style="display:flex;gap:8px;align-items:center"><button id="installBtn" class="theme" title="Instalar aplicación" aria-label="Instalar aplicación" style="display:none;font-size:.9rem;width:auto;padding:0 12px;border-radius:22px">⬇ Instalar</button><button class="theme" id="themeBtn" title="Cambiar tema">🌙</button></div>
+  </header>
+  <div class="tabs">
+    <button class="tab active" data-tab="dict">📖 Diccionario</button>
+    <button class="tab" data-tab="trans">🌐 Traductor</button>
+  </div>
+
+  <main>
+    <section id="view-dict" class="view active">
+      <div class="card">
+        <div class="search">
+          <select id="dictLang"><option value="es">ES</option><option value="en">EN</option></select>
+          <input type="text" id="dictInput" placeholder="Escribe una palabra…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+          <button class="ib hidden" id="dictClearBtn" title="Borrar búsqueda">✕</button>
+          <button class="ib mic" id="dictMicBtn" title="Hablar">🎤</button>
+          <button class="ib go" id="dictSearchBtn" title="Buscar">🔍</button>
+        </div>
+        <p class="hint">Si el 🎤 no responde, usa el micrófono de tu teclado (Gboard).</p>
+      </div>
+      <div id="dictStatus" class="status hidden"></div>
+      <div id="dictRes" class="card hidden">
+        <div class="rh"><h2 id="dictTitle"></h2><button class="ib" id="dictAudioBtn" title="Escuchar">🔊</button></div>
+        <div class="src" id="dictSrc"></div>
+        <div id="dictBody"></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Abrir en otras fuentes (se abre en otra ventana)</div>
+        <div class="ext">
+          <a href="#" id="extRae" class="e1" target="_blank" rel="noopener">RAE</a>
+          <a href="#" id="extWik" class="e2" target="_blank" rel="noopener">Wikcionario</a>
+          <a href="#" id="extGg" class="e3" target="_blank" rel="noopener">Google</a>
+          <a href="#" id="extWr" class="e4" target="_blank" rel="noopener">WordReference</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-trans" class="view">
+      <div class="card">
+        <div class="sw"><span id="tSrc">Español</span><button id="swapBtn" title="Invertir">⇄</button><span id="tTgt">Inglés</span></div>
+        <div class="wrap">
+          <textarea id="transIn" placeholder="Escribe o dicta el texto…"></textarea>
+          <div class="bt"><button class="ib mic" id="transMicBtn">🎤</button><button class="ib" id="transClear">✕</button></div>
+        </div>
+      </div>
+      <div id="transStatus" class="status hidden"></div>
+      <div class="card">
+        <textarea id="transOut" placeholder="La traducción aparecerá aquí…" readonly style="padding-bottom:14px"></textarea>
+        <div class="tools"><button class="pill" id="copyBtn">📋 Copiar</button><button class="pill" id="transAudioBtn">🔊 Escuchar</button></div>
+      </div>
+    </section>
+  </main>
+  <footer>© 2024 · Autor: Dr. Ronald F. Rodriguez Espinoza</footer>
+</div>
+<div id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let toastT;
+function toast(m, ms = 4000) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms); }
+
+/* ---------- Red: fetch con respaldo JSONP (por si el visor bloquea fetch/CORS) ---------- */
+async function getJSON(url, ms = 8000) {
+  const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
+  try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }
+  finally { clearTimeout(t); }
+}
+function jsonp(url, ms = 8000) {
+  return new Promise((res, rej) => {
+    const cb = 'cb' + Date.now() + Math.floor(Math.random() * 1e6), s = document.createElement('script');
+    const end = () => { clearTimeout(t); delete window[cb]; s.remove(); };
+    const t = setTimeout(() => { end(); rej(new Error('timeout')); }, ms);
+    window[cb] = d => { end(); res(d); };
+    s.onerror = () => { end(); rej(new Error('script')); };
+    s.src = url + '&callback=' + cb;
+    document.head.appendChild(s);
+  });
+}
+async function wikiAPI(host, params) {
+  const base = `https://${host}/w/api.php?format=json&formatversion=2&` + params;
+  try { return await getJSON(base + '&origin=*'); } catch (e) { return await jsonp(base); }
+}
+
+/* ---------- Tema ---------- */
+let isDark;
+try { const s = localStorage.getItem('theme'); isDark = s ? s === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { isDark = false; }
+function applyTheme() { document.documentElement.dataset.theme = isDark ? 'dark' : 'light'; $('themeBtn').textContent = isDark ? '☀️' : '🌙'; try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch (e) {} }
+applyTheme();
+$('themeBtn').onclick = () => { isDark = !isDark; applyTheme(); };
+
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.view,.tab').forEach(x => x.classList.remove('active'));
+  $('view-' + b.dataset.tab).classList.add('active'); b.classList.add('active');
+});
+
+/* ---------- Voz: lectura ---------- */
+function speak(text, lang) {
+  if (!('speechSynthesis' in window)) return toast('Tu navegador no soporta lectura en voz alta.');
+  speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = lang; speechSynthesis.speak(u);
+}
+
+/* ---------- Voz: dictado ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function micFallback(input, why) { input.focus(); toast(why || 'El dictado no está disponible en este navegador/visor. Toca el campo y usa el 🎤 de tu teclado (Gboard).', 6000); }
+function setupMic(btnId, input, getLang, onDone) {
+  const btn = $(btnId); let rec = null;
+  btn.onclick = () => {
+    if (!SR) return micFallback(input);
+    if (btn.classList.contains('on')) { try { rec.stop(); } catch (e) {} return; }
+    rec = new SR(); rec.lang = getLang(); rec.continuous = false; rec.interimResults = true;
+    let fin = '';
+    rec.onstart = () => btn.classList.add('on');
+    rec.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; input.value = t; fin = t; };
+    rec.onerror = e => {
+      btn.classList.remove('on');
+      if (e.error === 'no-speech') toast('No te escuché. Inténtalo de nuevo.');
+      else if (e.error === 'aborted') return;
+      else if (e.error === 'not-allowed' || e.error === 'service-not-allowed') micFallback(input, 'Permiso de micrófono denegado (' + e.error + '). Actívalo en los ajustes del sitio o usa el micrófono del teclado.');
+      else micFallback(input, 'Error de voz (' + e.error + '). Usa el micrófono de tu teclado (Gboard).');
+    };
+    rec.onend = () => { btn.classList.remove('on'); if (fin.trim()) onDone(fin); };
+    try { rec.start(); } catch (e) { micFallback(input); }
+  };
+}
+
+/* ---------- Diccionario ---------- */
+const dictInput = $('dictInput'); let dtok = 0;
+setupMic('dictMicBtn', dictInput, () => $('dictLang').value === 'es' ? 'es-419' : 'en-US', t => searchDict(t));
+const clearDict = () => { dtok++; dictInput.value = ''; $('dictRes').classList.add('hidden'); $('dictStatus').classList.add('hidden'); $('dictClearBtn').classList.add('hidden'); dictInput.focus(); };
+$('dictClearBtn').onclick = clearDict;
+dictInput.addEventListener('input', () => $('dictClearBtn').classList.toggle('hidden', !dictInput.value));
+$('dictSearchBtn').onclick = () => searchDict(dictInput.value);
+dictInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); dictInput.blur(); searchDict(dictInput.value); } });
+$('dictLang').onchange = () => { if (dictInput.value.trim()) searchDict(dictInput.value); };
+
+function showDict(title, blocks, lang, src) {
+  $('dictTitle').textContent = title; $('dictSrc').textContent = 'Fuente: ' + src;
+  $('dictAudioBtn').onclick = () => speak(title, lang === 'es' ? 'es-ES' : 'en-US');
+  const body = $('dictBody'); body.innerHTML = '';
+  blocks.forEach(b => {
+    const p = document.createElement('div'); p.className = 'pos'; p.textContent = b.pos || 'Definición';
+    const ul = document.createElement('ul'); ul.className = 'defs';
+    b.defs.forEach(d => { const li = document.createElement('li'); const s = document.createElement('span'); s.textContent = d; li.appendChild(s); ul.appendChild(li); });
+    body.append(p, ul);
+  });
+  $('dictRes').classList.remove('hidden');
+}
+
+const SKIP = /etymolog|etimolog|pronunc|translation|traducc|referenc|further|véase|ver también|see also|conjug|derivad|related|anagram|descend/i;
+function parseWikt(html, lang) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll('sup,.mw-editsection,style,script,.HQToggle,.citation-whole').forEach(n => n.remove());
+  const target = lang === 'es' ? 'Español' : 'English';
+  let inLang = false, pos = '', blocks = [];
+  const clean = el => { const c = el.cloneNode(true); c.querySelectorAll('ul,ol,dl').forEach(n => n.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  doc.querySelectorAll('h2,h3,h4,h5,dl,ol').forEach(el => {
+    const tag = el.tagName;
+    if (tag === 'H2') { inLang = (el.id || '').replace(/_/g, ' ') === target; return; }
+    if (!inLang) return;
+    if (/^H[345]$/.test(tag)) { pos = el.textContent.trim().replace(/\s+/g, ' '); return; }
+    if (el.parentElement && el.parentElement.closest('li,dd')) return;
+    if (SKIP.test(pos)) return;
+    const defs = [];
+    if (lang === 'es' && tag === 'DL') {
+      el.querySelectorAll(':scope > dt').forEach(dt => {
+        if (!/^\d+/.test(dt.textContent.trim())) return;
+        let dd = dt.nextElementSibling; if (dd && dd.tagName === 'DD') { const t = clean(dd); if (t) defs.push(t); }
+      });
+    } else if (lang === 'en' && tag === 'OL') {
+      el.querySelectorAll(':scope > li').forEach(li => { const t = clean(li); if (t) defs.push(t); });
+    }
+    if (defs.length) blocks.push({ pos, defs: defs.slice(0, 5) });
+  });
+  return blocks.length ? blocks.slice(0, 4) : null;
+}
+
+async function searchDict(raw) {
+  const word = (raw || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  if (!word) return;
+  const lang = $('dictLang').value, tok = ++dtok, enc = encodeURIComponent(word);
+  dictInput.value = word; $('dictClearBtn').classList.remove('hidden');
+  const status = $('dictStatus'); $('dictRes').classList.add('hidden');
+  $('extRae').href = `https://dle.rae.es/${enc}`;
+  $('extWik').href = `https://${lang}.wiktionary.org/wiki/${enc}`;
+  $('extGg').href = `https://www.google.com/search?q=${lang === 'es' ? 'significado+de+' : 'meaning+of+'}${enc}`;
+  $('extWr').href = lang === 'es' ? `https://www.wordreference.com/definicion/${enc}` : `https://www.wordreference.com/definition/${enc}`;
+  status.innerHTML = '<span class="spin"></span>Buscando…'; status.classList.remove('hidden');
+
+  const CAT = { verb: 'verbo', noun: 'sustantivo', adjective: 'adjetivo', adverb: 'adverbio', pronoun: 'pronombre', preposition: 'preposición', conjunction: 'conjunción', interjection: 'interjección', article: 'artículo' };
+  const sources = [
+    ...(lang === 'es' ? [['RAE', async () => {
+      const d0 = await getJSON('https://rae-api.com/api/words/' + enc);
+      const d = d0.data || d0;
+      const bl = (d.meanings || []).map(m => {
+        const defs = (m.senses || []).slice(0, 6).map(x => String(x.raw || x.description || '').replace(/^\d+\.\s*/, '').trim()).filter(Boolean);
+        const c = m.senses && m.senses[0] && m.senses[0].category;
+        return defs.length ? { pos: CAT[c] || c || 'Definición', defs } : null;
+      }).filter(Boolean);
+      return bl.length ? bl.slice(0, 4) : null;
+    }]] : []),
+    ['Wikcionario', async () => {
+      const d = await wikiAPI(lang + '.wiktionary.org', 'action=parse&redirects=1&prop=text&page=' + enc);
+      const html = d.parse && (typeof d.parse.text === 'string' ? d.parse.text : d.parse.text['*']);
+      return html ? parseWikt(html, lang) : null;
+    }],
+    ['Free Dictionary', async () => {
+      const d = await getJSON(`https://api.dictionaryapi.dev/api/v2/entries/${lang}/${enc}`);
+      const bl = [];
+      (Array.isArray(d) ? d : []).forEach(e => (e.meanings || []).forEach(m => {
+        const defs = (m.definitions || []).slice(0, 4).map(x => x.definition).filter(Boolean);
+        if (defs.length) bl.push({ pos: m.partOfSpeech, defs });
+      }));
+      return bl.length ? bl.slice(0, 4) : null;
+    }],
+    ['Wikipedia', async () => {
+      const d = await wikiAPI(lang + '.wikipedia.org', 'action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&titles=' + enc);
+      const p = d.query && d.query.pages && d.query.pages[0];
+      return p && p.extract ? [{ pos: 'Enciclopedia', defs: [p.extract.slice(0, 700)] }] : null;
+    }]
+  ];
+  const runs = sources.map(([n, f]) => f().then(r => ({ n, r }), e => ({ n, err: e })));
+  let errors = 0;
+  for (const p of runs) {
+    const x = await p;
+    if (tok !== dtok) return;
+    if (x.err) { errors++; continue; }
+    if (x.r) { showDict(word, x.r, lang, x.n); status.classList.add('hidden'); return; }
+  }
+  if (tok !== dtok) return;
+  status.textContent = errors === sources.length
+    ? 'No se pudo conectar a internet o el visor bloquea las consultas. Prueba abrir el archivo en Chrome, o usa los botones de abajo.'
+    : `No se encontró «${word}». Revisa la ortografía o usa los botones de abajo.`;
+}
+
+/* ---------- Traductor ---------- */
+let dir = 'es-en', ttok = 0, tT; const tIn = $('transIn'), tOut = $('transOut');
+setupMic('transMicBtn', tIn, () => dir === 'es-en' ? 'es-419' : 'en-US', t => runTrans(t));
+tIn.addEventListener('input', () => { clearTimeout(tT); tT = setTimeout(() => runTrans(tIn.value), 700); });
+$('transClear').onclick = () => { tIn.value = ''; tOut.value = ''; ttok++; $('transStatus').classList.add('hidden'); };
+$('swapBtn').onclick = () => {
+  dir = dir === 'es-en' ? 'en-es' : 'es-en';
+  $('tSrc').textContent = dir === 'es-en' ? 'Español' : 'Inglés'; $('tTgt').textContent = dir === 'es-en' ? 'Inglés' : 'Español';
+  const t = tIn.value; tIn.value = tOut.value; tOut.value = t; if (tIn.value.trim()) runTrans(tIn.value);
+};
+function chunk(t, max = 450) {
+  const parts = t.match(/[^.!?\n]+[.!?\n]*/g) || [t], out = []; let cur = '';
+  for (const p of parts) { if (cur && (cur + p).length > max) { out.push(cur); cur = ''; } if (p.length > max) { for (let i = 0; i < p.length; i += max) out.push(p.slice(i, i + max)); } else cur += p; }
+  if (cur) out.push(cur); return out;
+}
+const decode = s => { const t = document.createElement('textarea'); t.innerHTML = s; return t.value; };
+const okMM = d => d && d.responseData && d.responseData.translatedText && String(d.responseStatus) === '200' && !/MYMEMORY WARNING|INVALID/i.test(d.responseData.translatedText);
+async function trChunk(q, sl, tl) {
+  const mm = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=${sl}|${tl}`;
+  try { const d = await getJSON(mm); if (okMM(d)) return decode(d.responseData.translatedText); } catch (e) {}
+  try { const d = await getJSON(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${tl}&dt=t&q=${encodeURIComponent(q)}`); return d[0].map(x => x[0]).join(''); } catch (e) {}
+  const d = await jsonp(mm); if (okMM(d)) return decode(d.responseData.translatedText);
+  throw new Error('sin traducción');
+}
+async function runTrans(text) {
+  text = (text || '').trim(); const tok = ++ttok, st = $('transStatus');
+  if (!text) { tOut.value = ''; st.classList.add('hidden'); return; }
+  st.innerHTML = '<span class="spin"></span>Traduciendo…'; st.classList.remove('hidden');
+  const [sl, tl] = dir.split('-');
+  try {
+    const r = []; for (const c of chunk(text)) r.push(await trChunk(c, sl, tl));
+    if (tok !== ttok) return;
+    tOut.value = r.join(' ').trim(); st.classList.add('hidden');
+  } catch (e) { if (tok === ttok) st.textContent = 'No se pudo traducir. Revisa tu conexión a internet.'; }
+}
+$('copyBtn').onclick = async () => {
+  const t = tOut.value; if (!t) return;
+  try { await navigator.clipboard.writeText(t); } catch (e) { tOut.removeAttribute('readonly'); tOut.select(); document.execCommand('copy'); tOut.setAttribute('readonly', ''); }
+  toast('Copiado ✅', 1800);
+};
+$('transAudioBtn').onclick = () => { if (tOut.value) speak(tOut.value, dir === 'es-en' ? 'en-US' : 'es-ES'); };
+
+/* ---------- Instalación PWA ---------- */
+let deferredInstallPrompt = null;
+const installBtn = $('installBtn');
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  installBtn.style.display = 'inline-flex';
+});
+
+installBtn.addEventListener('click', async () => {
+  if (!deferredInstallPrompt) {
+    toast('Para instalar: abre el menú ⋮ de Chrome y selecciona “Instalar aplicación” o “Añadir a pantalla principal”.', 6500);
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installBtn.style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  installBtn.style.display = 'none';
+  toast('¡Diccionario instalado correctamente! 🎉');
+});
+
+/* El service worker permite abrir la interfaz sin conexión.
+   Las búsquedas y traducciones requieren internet. */
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .catch(err => console.warn('No se pudo registrar el service worker:', err));
+  });
+}
+
+</script>
+</body>
+</html>
