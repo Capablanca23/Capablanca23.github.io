@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101B35">
+<meta name="description" content="Constructor 2D de moléculas, análisis molecular y nomenclatura.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>Constructor de moléculas</title>
+<style>
+:root{--bg:#f2f5fa;--card:#fff;--tx:#101B35;--mut:#5a6685;--bd:#d9e1ef;--hd:#101B35;--b:#1769FF;--t:#00D5C4;--g:#16A36A;--v:#8B5CF6;--o:#FF9F43;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1127;--card:#131f3d;--tx:#e8eefc;--mut:#9aa7c7;--bd:#26365f;--hd:#070c1c}}
+:root[data-theme="dark"]{--bg:#0a1127;--card:#131f3d;--tx:#e8eefc;--mut:#9aa7c7;--bd:#26365f;--hd:#070c1c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;overflow-x:hidden}
+header{background:var(--hd);color:#fff;padding:10px 12px 0}
+.brand{display:flex;align-items:center;gap:10px}.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#1769FF,#00D5C4);display:grid;place-items:center;font-weight:800}
+h1{font:800 1.15rem/1.1 Georgia,"Times New Roman",serif;margin:0}.sub{font-size:.75rem;color:#9fb3d9}
+nav{display:flex;gap:4px;overflow-x:auto;margin-top:8px;scrollbar-width:none}nav button{flex:none;background:none;border:0;color:#b9c7e6;padding:10px 12px;font:inherit;border-bottom:3px solid transparent;cursor:pointer}
+nav button.on{color:#fff;border-color:var(--t)}
+main{padding:10px;max-width:1500px;margin:auto}.view{display:none}.view.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:10px}
+h2{font:700 1.1rem Georgia,serif;margin:0 0 8px}h3{margin:10px 0 4px;font-size:.95rem}
+button.btn,select{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;min-height:42px;font:inherit;cursor:pointer}
+button.btn.on,button.pri{background:var(--b);color:#fff;border-color:var(--b)}button.btn:focus-visible,nav button:focus-visible{outline:3px solid var(--t)}
+.ctor{display:grid;gap:10px}.tools{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.tools>*{flex:none}
+.tools .grp{display:flex;gap:6px}
+.stage{position:relative;background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden}
+#cv{width:100%;height:52vh;min-height:300px;display:block;touch-action:none;background:radial-gradient(var(--bd) 1px,transparent 1px) 0 0/22px 22px}
+#semi-box{display:none;padding:8px 12px;border-top:1px solid var(--bd);background:var(--card);font-size:1rem;text-align:center}
+.vbar{display:flex;gap:6px;padding:6px;flex-wrap:wrap;border-top:1px solid var(--bd)}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-bottom:8px}.tabs button{flex:none}
+.pane{display:none}.pane.on{display:block}
+table{border-collapse:collapse;width:100%;font-size:.88rem}td,th{border-bottom:1px solid var(--bd);padding:6px;text-align:left;vertical-align:top}
+.wrap{overflow-x:auto}.chip{display:inline-block;padding:3px 10px;border-radius:99px;background:var(--v);color:#fff;margin:2px;font-size:.82rem;cursor:pointer;border:0}
+.warn{background:#ff9f4322;border-left:4px solid var(--o);padding:6px 10px;border-radius:6px;margin:6px 0;font-size:.85rem}
+.ok{color:var(--g);font-weight:700}.bad{color:#e5484d;font-weight:700}
+.badge{font-size:.72rem;padding:2px 8px;border-radius:99px;color:#fff}.bb{background:var(--b)}.be{background:var(--g)}.bc{background:var(--o)}
+.big{font:700 1.4rem Georgia,serif}.mut{color:var(--mut)}.grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.opt{display:block;width:100%;text-align:left;margin:4px 0}.opt.right{background:var(--g);color:#fff}.opt.wrong{background:#e5484d;color:#fff}
+pre{white-space:pre-wrap;word-break:break-all;font-size:.8rem}
+#aviso-ctor{display:none;position:absolute;left:8px;right:8px;bottom:60px;background:var(--o);color:#101B35;padding:8px 12px;border-radius:8px;font-size:.85rem;font-weight:600;z-index:10;box-shadow:0 2px 8px #0003}
+#hint-ctor{padding:6px 8px;font-size:.78rem;color:var(--mut);border-top:1px solid var(--bd)}
+#ejemplos{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;margin-bottom:0}
+#ejemplos h3{margin:0 0 6px;font-size:.95rem}
+#ejemplos .grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+#ejemplos .btn{font-size:.82rem;padding:6px 8px;min-height:36px}
+@media(min-width:900px){.ctor{grid-template-columns:150px 1fr 360px;align-items:start}.tools{flex-direction:column;overflow:visible}.tools .grp{flex-wrap:wrap}#cv{height:64vh}main{padding:16px}#ejemplos{grid-column:1/-1}}
+@media print{header,.tools,.vbar,nav,#ejemplos{display:none}.view{display:none}.view.on{display:block}}
+.pwa-actions{display:flex;justify-content:flex-end;padding:7px 0 2px}.pwa-actions button{min-height:36px;padding:6px 12px;font-size:.84rem;border-radius:9px}@media(min-width:700px){.pwa-actions{position:absolute;right:14px;top:8px}header{position:relative;padding-right:190px}}\n</style></head><body>
+<header><div class="brand"><div class="logo">CM</div><div><h1>Constructor de moléculas</h1><div class="sub">Estructura y Nomenclatura Molecular · Dr. Ronald F. Rodriguez Espinoza</div></div></div><div class="pwa-actions"><button id="installApp" class="btn pri" type="button" aria-label="Instalar aplicación">⬇ Instalar aplicación</button></div><nav id="nav"></nav></header>
+<main>
+<section class="view on" id="v-ctor">
+ <div class="ctor">
+  <div class="tools" id="tools"></div>
+  <div class="stage">
+    <svg id="cv"></svg>
+    <div id="semi-box"></div>
+    <div class="vbar" id="vbar"></div>
+    <div id="aviso-ctor"></div>
+  </div>
+  <div><div class="card"><div class="tabs" id="rtabs"></div>
+   <div class="pane on" id="p-res"></div><div class="pane" id="p-grp"></div><div class="pane" id="p-nom"></div></div></div>
+ </div>
+ <div id="ejemplos" style="margin-top:10px">
+   <h3>Ejemplos rápidos (pulsa para cargar en el constructor)</h3>
+   <div class="grid" id="ejemplos-grid"></div>
+ </div>
+</section>
+<section class="view" id="v-grp"><div class="card"><h2>Grupos funcionales</h2><div class="grid" id="gbtn"></div></div><div class="card" id="gdet">Elige un grupo para ver su fórmula general, nomenclatura, propiedades y ejemplo.</div></section>
+<section class="view" id="v-lib"><div id="lib"></div></section>
+<section class="view" id="v-env">
+  <div class="card">
+    <h2>Química ambiental</h2>
+    <p>Esta sección reúne <b>fichas ambientales</b> de sustancias orgánicas de interés: fuentes de emisión, usos industriales, solubilidad, lipofilia (log Kow), volatilidad (presión de vapor), clasificación carcinogénica (IARC) y métodos de tratamiento. Su objetivo es relacionar la estructura molecular con el comportamiento ambiental.</p>
+    <p class="mut">Solo se muestran valores que pueden rastrearse a una fuente bibliográfica (PubChem, HSDB, IARC).</p>
+    <h3>Sustancias con ficha cargada</h3>
+    <p class="mut">Pulsa una sustancia para ver su ficha.</p>
+    <div id="envl"></div>
+  </div>
+  <div class="card" id="envs"></div>
+</section>
+<section class="view" id="v-ex"><div class="card"><h2>Ejercicios</h2><div class="tools"><button class="btn on" data-l="1">Básico</button><button class="btn" data-l="2">Intermedio</button><button class="btn" data-l="3">Avanzado</button></div><p id="sc" class="mut"></p><div id="q"></div></div></section>
+<section class="view" id="v-abt"><div class="card"><h2>Acerca de Constructor de moléculas</h2>
+<p><b>Autor académico y desarrollador:</b> Dr. Ronald F. Rodriguez Espinoza.<br>Público: estudiantes de Ingeniería Química, Química, Ingeniería Ambiental y afines.</p>
+<h3>Qué incluye</h3>
+<ul>
+<li>Constructor 2D propio (sin dependencias) para dibujar y editar estructuras.</li>
+<li>Análisis automático: fórmula molecular, masa molar, composición, IDH, anillos, enlaces s/d/t y grupos funcionales.</li>
+<li>Nomenclatura IUPAC basada en la tabla de prioridades de grupos funcionales.</li>
+<li>Vista desarrollada (H explícitos), semidesarrollada (H agrupados) y esquelética.</li>
+<li>Fichas ambientales bibliográficas y ejercicios interactivos.</li>
+</ul>
+<h3>Alcance del motor de nomenclatura</h3>
+<p>Motor propio, sin dependencias, basado en la lógica del IUPAC Blue Book 2013 (P-44) y en la tabla de prioridades de grupos funcionales. Nombra correctamente compuestos simples como <i>clorometano</i>, <i>bromoetano</i>, <i>etanol</i>, <i>propan-2-ol</i>, <i>ácido etanoico</i>, <i>propanona</i>, <i>etanal</i>, <i>metilamina</i>, <i>metoximetano</i>, <i>nitrometano</i>, <i>acetonitrilo</i>, <i>etanamida</i>, <i>acetato de etilo</i>, además de alcanos, alquenos, alquinos, cicloalcanos y benceno monosustituido.</p>
+<h3>Datos ambientales</h3><p>Solo se muestran valores que se pueden rastrear a una fuente bibliográfica; el resto aparece como no cargado. Verifica siempre con la fuente primaria antes de usarlos en un informe.</p></div></section>
+</main>
+<script>
+"use strict";
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const AW={H:1.008,C:12.011,N:14.007,O:15.999,S:32.06,P:30.974,F:18.998,Cl:35.45,Br:79.904,I:126.904};
+const VAL={C:[4],N:[3,5],O:[2],S:[2,4,6],P:[3,5],F:[1],Cl:[1],Br:[1],I:[1]};
+const HAL=['F','Cl','Br','I'],STEM=['met','et','prop','but','pent','hex','hept','oct','non','dec'],MUL=['','','di','tri','tetra','penta'];
+const COL={C:'var(--tx)',O:'#e53935',N:'#1769FF',S:'#c99a00',P:'#FF9F43',F:'#16A36A',Cl:'#16A36A',Br:'#16A36A',I:'#16A36A',H:'#8a94ad'};
+const L=46;
+
+/* ---------- SMILES (Kekulé) ---------- */
+function parse(s){const at=[],bd=[],st=[],rc={};let prev=null,o=1,t;const re=/Cl|Br|[CNOSPFIcnosp]|\d|[=#()-]/g;
+ while((t=re.exec(s))){t=t[0];
+  if(t==='(')st.push(prev);else if(t===')')prev=st.pop();
+  else if(t==='=')o=2;else if(t==='#')o=3;else if(t==='-')o=1;
+  else if(/\d/.test(t)){if(rc[t]){bd.push({a:rc[t].id,b:prev,o:Math.max(rc[t].o,o)});delete rc[t]}else rc[t]={id:prev,o};o=1}
+  else{const id=at.length;at.push({id,el:t[0].toUpperCase()+t.slice(1),x:0,y:0});if(prev!==null)bd.push({a:prev,b:id,o});prev=id;o=1}}
+ return{atoms:at,bonds:bd}}
+function ringsOf(adj){const seen=new Set(),res=[];
+ for(const[a,ns]of adj)for(const b of ns){if(a>b)continue;const pv=new Map([[a,null]]),q=[a];let f=false;
+  while(q.length&&!f){const u=q.shift();for(const v of adj.get(u)){if((u===a&&v===b)||pv.has(v))continue;pv.set(v,u);if(v===b){f=true;break}q.push(v)}}
+  if(f){const c=[];for(let u=b;u!==null;u=pv.get(u))c.push(u);const k=[...c].sort((x,y)=>x-y).join();if(!seen.has(k)){seen.add(k);res.push(c)}}}
+ return res}
+
+/* ---------- Layout 2D ---------- */
+function layout(m){const A=new Map(m.atoms.map(a=>[a.id,a])),adj=new Map(m.atoms.map(a=>[a.id,[]]));
+ m.bonds.forEach(b=>{adj.get(b.a).push(b.b);adj.get(b.b).push(b.a)});
+ const rings=ringsOf(adj),pl=new Set(),turn={},q=[];let comp=0;
+ const put=(i,x,y)=>{const a=A.get(i);a.x=x;a.y=y;pl.add(i)};
+ for(const a0 of m.atoms){if(pl.has(a0.id))continue;const ring=rings.find(r=>r.includes(a0.id)&&!r.some(i=>pl.has(i)));let ox=comp++*260;
+  const root=ring?ring[0]:a0.id;
+  if(ring){const n=ring.length,R=L/(2*Math.sin(Math.PI/n));ring.forEach((i,k)=>{put(i,ox+R*Math.cos(2*Math.PI*k/n),R*Math.sin(2*Math.PI*k/n));q.push(i)})}else{put(root,ox,0);q.push(root);turn[root]=1}
+  while(q.length){const p=q.shift(),P=A.get(p),nb=adj.get(p),pn=nb.filter(n=>pl.has(n)),ch=nb.filter(n=>!pl.has(n));if(!ch.length)continue;
+   let din=0;if(pn.length){const mx=pn.reduce((s,n)=>s+A.get(n).x,0)/pn.length,my=pn.reduce((s,n)=>s+A.get(n).y,0)/pn.length;din=Math.atan2(P.y-my,P.x-mx)}
+   const m1=ch.length,r=Math.PI/180;let offs;
+   if(pn.length>=2)offs=m1===1?[0]:m1===2?[-50,50]:[-80,0,80];
+   else if(pn.length===0)offs=ch.map((_,k)=>360*k/m1);
+   else offs=m1===1?[(turn[p]||1)*60]:m1===2?[-60,60]:m1===3?[-90,0,90]:ch.map((_,k)=>-90+180*k/(m1-1));
+   ch.forEach((c,k)=>{if(pl.has(c))return;const an=din+offs[k]*r;put(c,P.x+L*Math.cos(an),P.y+L*Math.sin(an));turn[c]=-(turn[p]||1);q.push(c)})}}
+ const T=new Map(),key=(i,j)=>i<j?i+','+j:j+','+i;
+ m.bonds.forEach(b=>T.set(key(b.a,b.b),L));
+ for(const[p,ns]of adj)for(let i=0;i<ns.length;i++)for(let j=i+1;j<ns.length;j++){const k=key(ns[i],ns[j]);if(!T.has(k))T.set(k,ns.length>=4?1.41*L:1.73*L)}
+ const ids=m.atoms.map(a=>a.id);
+ for(let it=0;it<140;it++)for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){const a=A.get(ids[i]),b=A.get(ids[j]);let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||.01;const t=T.get(key(ids[i],ids[j]));let f=0;
+  if(t)f=.12*(d-t);else if(d<1.4*L)f=-.1*(1.4*L-d);if(f){dx/=d;dy/=d;a.x+=dx*f;a.y+=dy*f;b.x-=dx*f;b.y-=dy*f}}}
+
+/* ---------- Análisis ---------- */
+function analyze(m){const A=new Map(m.atoms.map(a=>[a.id,{...a,nb:[],bs:0,h:0}])),warn=[];
+ for(const b of m.bonds){const x=A.get(b.a),y=A.get(b.b);if(!x||!y)continue;x.nb.push([y,b.o]);y.nb.push([x,b.o]);x.bs+=b.o;y.bs+=b.o}
+ for(const a of A.values()){const v=VAL[a.el].find(v=>v>=a.bs);if(v===undefined){warn.push('Valencia excedida en '+a.el+' (enlaces: '+a.bs+')');a.h=0}else{a.h=v-a.bs;if(v!==VAL[a.el][0])warn.push('Estado de valencia especial en '+a.el+' (v='+v+'); revisa cargas y radicales')}}
+ const adj=new Map(m.atoms.map(a=>[a.id,[]]));m.bonds.forEach(b=>{if(adj.has(b.a)&&adj.has(b.b)){adj.get(b.a).push(b.b);adj.get(b.b).push(b.a)}});
+ const rings=ringsOf(adj),at=[...A.values()],cnt={};at.forEach(a=>{cnt[a.el]=(cnt[a.el]||0)+1;cnt.H=(cnt.H||0)+a.h});
+ let comps=0;{const s=new Set();for(const a of m.atoms){if(s.has(a.id))continue;comps++;const st=[a.id];while(st.length){const u=st.pop();if(s.has(u))continue;s.add(u);adj.get(u).forEach(v=>st.push(v))}}}
+ if(comps>1)warn.push('La estructura tiene '+comps+' fragmentos desconectados; el nombre no se calcula.');
+ const els=Object.keys(cnt).filter(e=>cnt[e]>0&&e!=='C'&&e!=='H').sort();const order=cnt.C?['C','H',...els]:[...Object.keys(cnt).filter(e=>cnt[e]>0).sort()];
+ const formula=order.filter(e=>cnt[e]>0).map(e=>e+(cnt[e]>1?cnt[e]:'')).join('');
+ const mass=Object.entries(cnt).reduce((s,[e,n])=>s+AW[e]*n,0);
+ const pct=Object.entries(cnt).filter(e=>e[1]>0).map(([e,n])=>[e,100*AW[e]*n/mass]);
+ const C=cnt.C||0,H=cnt.H||0,N=cnt.N||0,X=HAL.reduce((s,e)=>s+(cnt[e]||0),0);
+ const idh=(2*C+2+N-H-X)/2;if(cnt.P||cnt.S)warn.push('IDH calculado con la expresión dada; P y S en estados de valencia altos pueden alterar su interpretación.');
+ const nb={1:0,2:0,3:0};m.bonds.forEach(b=>nb[b.o]++);nb[1]+=H;
+ const G=new Set(),ar=new Set(),bo=(u,v)=>m.bonds.find(b=>(b.a===u&&b.b===v)||(b.a===v&&b.b===u));
+ for(const r of rings){if(!r.every(i=>A.get(i)&&A.get(i).el==='C'))continue;const d=r.filter((u,i)=>{const bb=bo(u,r[(i+1)%r.length]);return bb&&bb.o===2}).length;
+  if(r.length===6&&d===3){r.forEach(i=>ar.add(i));G.add('Aromático')}else if(d===0&&r.every((u,i)=>{const bb=bo(u,r[(i+1)%r.length]);return bb&&bb.o===1}))G.add('Cicloalcano')}
+ const co=c=>c.nb.some(([n,o])=>n.el==='O'&&o===2);
+ for(const a of at){const n=a.nb;
+  if(a.el==='C'){const dO=n.some(([x,o])=>x.el==='O'&&o===2);
+   if(dO){const sO=n.filter(([x,o])=>x.el==='O'&&o===1);
+    if(sO.some(([x])=>x.h>0))G.add('Ácido carboxílico');else if(sO.length)G.add('Éster');else if(n.some(([x,o])=>x.el==='N'&&o===1))G.add('Amida');else G.add(n.filter(([x])=>x.el==='C').length>=2?'Cetona':'Aldehído')}
+   for(const[x,o]of n){if(x.el==='C'&&o===2&&!(ar.has(a.id)&&ar.has(x.id)))G.add('Alqueno');if(x.el==='C'&&o===3)G.add('Alquino');if(x.el==='N'&&o===3)G.add('Nitrilo');if(HAL.includes(x.el))G.add('Halogenuro orgánico')}}
+  if(a.el==='O'){if(n.length===1&&a.h===1&&n[0][0].el==='C'&&!co(n[0][0]))G.add(ar.has(n[0][0].id)?'Fenol':'Alcohol');
+   if(n.length===2&&n.every(([x])=>x.el==='C')&&!n.some(([x])=>co(x)))G.add('Éter')}
+  if(a.el==='N'){if(n.filter(([x])=>x.el==='O').length>=2)G.add('Nitrocompuesto');else if(n.length&&n.every(([x,o])=>o===1&&x.el==='C'&&!co(x)))G.add('Amina')}
+  if(a.el==='S'&&n.every(([x])=>x.el==='C')){if(n.length===1&&a.h===1)G.add('Tiol');if(n.length===2)G.add('Sulfuro')}}
+ if(at.length&&at.every(a=>a.el==='C')&&!rings.length&&m.bonds.every(b=>b.o===1))G.add('Alcano');
+ const groups=GR.map(g=>g[0]).filter(n=>G.has(n));
+ const res={A,formula,mass,pct,idh,nb,rings,nR:m.bonds.length-m.atoms.length+comps,groups,warn,cnt,H,C,comps,ar};
+ /* CORREGIDO: un fallo del nombre nunca debe impedir el dibujo ni el análisis */
+ res.name=comps===1?(()=>{try{return nameOf(res)}catch(e){console.error('nameOf falló',e);return null}})():null;
+ return res}
+
+/* ---------- Nomenclatura IUPAC ---------- */
+/* CORREGIDO: se agregan los nombres sistemáticos de ésteres comunes */
+const COM={'ácido etanoico':'ácido acético','propanona':'acetona','etanol':'alcohol etílico','eteno':'etileno','etino':'acetileno','metanal':'formaldehído','etanal':'acetaldehído','ácido metanoico':'ácido fórmico','ácido 2-hidroxipropanoico':'ácido láctico','metanol':'alcohol metílico','benceno':'benceno','fenol':'hidroxibenceno','acetato de etilo':'acetato de etilo','etanamida':'acetamida','metilamina':'metanamina','acetonitrilo':'acetonitrilo','cloroformo':'triclorometano','anilina':'bencenamina',
+ 'etanoato de metilo':'acetato de metilo','etanoato de etilo':'acetato de etilo'};
+
+const FALLBACK={
+ 'C':'metano','CC':'etano','CCC':'propano','CCCC':'butano','CCCCC':'pentano','CCCCCC':'hexano',
+ 'CC(C)C':'2-metilpropano','CCC(C)C':'2-metilbutano',
+ 'C=C':'eteno','C=CC':'propeno','C=CCC':'but-1-eno','CC=CC':'but-2-eno',
+ 'C#C':'etino','C#CC':'propino','C#CCC':'but-1-ino',
+ 'C1CC1':'ciclopropano','C1CCC1':'ciclobutano','C1CCCC1':'ciclopentano','C1CCCCC1':'ciclohexano',
+ 'CC1CCCCC1':'metilciclohexano',
+ 'C1=CC=CC=C1':'benceno','CC1=CC=CC=C1':'tolueno','CCC1=CC=CC=C1':'etilbenceno',
+ 'OC1=CC=CC=C1':'fenol','ClC1=CC=CC=C1':'clorobenceno',
+ 'C1=CC=C2C=CC=CC2=C1':'naftaleno',
+ 'CO':'metanol','CCO':'etanol','CCCO':'propan-1-ol','CC(C)O':'propan-2-ol',
+ 'CCCCO':'butan-1-ol','CCC(C)O':'butan-2-ol',
+ 'C=O':'metanal','CC=O':'etanal','CCC=O':'propanal','CCCC=O':'butanal',
+ 'CC(C)=O':'propanona','CCC(C)=O':'butan-2-ona','CCCC(C)=O':'pentan-2-ona','CCC(=O)CC':'pentan-3-ona',
+ 'C(=O)O':'ácido metanoico','CC(=O)O':'ácido etanoico','CCC(=O)O':'ácido propanoico',
+ 'CCCC(=O)O':'ácido butanoico','CC(O)C(=O)O':'ácido 2-hidroxipropanoico',
+ 'C(=O)OC':'metanoato de metilo','CC(=O)OC':'acetato de metilo','CC(=O)OCC':'acetato de etilo',
+ 'CCC(=O)OCC':'propanoato de etilo','CCCC(=O)OC':'butanoato de metilo',
+ 'COC':'metoximetano','CCOCC':'etoxietano','COCC':'metoxietano','COCCC':'metoxipropano',
+ 'CN':'metanamina','CCN':'etanamina','CCCN':'propanamina','CNC':'dimetilamina','CN(C)C':'trimetilamina',
+ 'C(N)=O':'metanamida','CC(N)=O':'etanamida','CCC(N)=O':'propanamida','CC(=O)NC':'N-metiletanamida',
+ 'CC#N':'etanonitrilo','CCC#N':'propanonitrilo','CCCC#N':'butanonitrilo',
+ 'CN(=O)=O':'nitrometano','CCN(=O)=O':'nitroetano',
+ 'CCl':'clorometano','CBr':'bromometano','CCCl':'cloroetano','CCBr':'bromoetano','CCCCl':'1-cloropropano',
+ 'CS':'metanotiol','CCS':'etanotiol',
+ 'CSC':'dimetil sulfuro','CCSCC':'dietil sulfuro'
+};
+
+const alk=(c,p)=>{let n=1,cur=c,prev=p;for(;;){const o=cur.nb.filter(([x])=>x!==prev);const ob=cur.nb.find(([x])=>x===prev);if(!ob||ob[1]!==1)return 0;if(cur.el!=='C')return 0;const nx=o.filter(([x])=>x.el==='C');if(o.length!==nx.length||nx.length>1)return 0;if(!nx.length)return n<=10?n:0;if(nx[0][1]!==1)return 0;prev=cur;cur=nx[0][0];n++}};
+
+function nameOf(an){
+ const at=[...an.A.values()];
+ if(at.some(a=>!['C','O','N',...HAL].includes(a.el)))return null;
+ if(an.rings.length===1)return ringName(an,at);
+ if(an.rings.length>1)return null;
+ return chainName(at);
+}
+function subOf(c,p){const[x,o]=c;if(HAL.includes(x.el))return{F:'fluoro',Cl:'cloro',Br:'bromo',I:'yodo'}[x.el];
+ if(x.el==='O'){if(o===2)return'oxo';if(o===1&&x.nb.length===1&&x.h===1)return'hidroxi';return null}
+ if(x.el==='N')return(x.nb.length===1&&o===1)?'amino':null;
+ if(x.el==='C'){const n=alk(x,p);return n?STEM[n-1]+'il':null}return null}
+
+function ringName(an,at){const r=an.rings[0],set=new Set(r);if(!r.every(i=>an.A.get(i).el==='C'))return null;
+ const subs=[];let used=r.length;for(const i of r)for(const[x,o]of an.A.get(i).nb)if(!set.has(x.id)){const s=subOf([x,o],an.A.get(i));if(!s||s==='oxo'||s==='amino')return null;subs.push(s);used+=x.el==='C'?alk(x,an.A.get(i)):1}
+ if(used!==at.length||subs.length>1)return null;const s=subs[0],n=r.length;if(n>10)return null;
+ if(an.groups.includes('Aromático')&&n===6){if(!s)return{n:'benceno',k:'sistemático (nombre preferido)'};if(s==='hidroxi')return{n:'fenol',k:'retenido (preferido IUPAC)'};if(s==='metil')return{n:'tolueno',k:'retenido (preferido IUPAC)',alt:'metilbenceno'};return{n:s+'benceno',k:'sistemático'}}
+ if(an.groups.includes('Cicloalcano')&&!an.groups.includes('Aromático')){const b='ciclo'+STEM[n-1]+'ano';if(!s)return{n:b,k:'sistemático'};if(s==='hidroxi')return{n:'ciclo'+STEM[n-1]+'anol',k:'sistemático'};return{n:s+b,k:'sistemático'}}
+ return null}
+
+/* --- Cadena acíclica con prioridades IUPAC --- */
+function chainName(at){
+ const Cs=at.filter(a=>a.el==='C');if(!Cs.length)return null;
+ const cn=c=>c.nb.filter(([x])=>x.el==='C');
+ const hasO2=c=>c.nb.some(([x,o])=>x.el==='O'&&o===2);
+ const oh=c=>c.nb.some(([x,o])=>x.el==='O'&&o===1&&x.nb.length===1&&x.h===1);
+ const nh2=c=>c.nb.some(([x,o])=>x.el==='N'&&o===1&&x.nb.length<=1);
+ const n3=c=>c.nb.some(([x,o])=>x.el==='N'&&o===3);
+ /* CORREGIDO: y ya es el átomo (no un par [átomo, orden]) */
+ const oxyEster=c=>c.nb.some(([x,o])=>x.el==='O'&&o===1&&x.nb.length===2&&x.nb.some(([y])=>y.el==='C'));
+ const amide=c=>c.nb.some(([x,o])=>x.el==='N'&&o===1);
+ const halo=c=>c.nb.some(([x])=>HAL.includes(x.el));
+ const nitro=c=>c.nb.some(([x])=>x.el==='N'&&x.nb.filter(([y,o])=>y.el==='O'&&o===2).length>=2);
+ const etherO=c=>c.el==='O'&&c.nb.length===2&&c.nb.every(([x])=>x.el==='C');
+
+ const ty=c=>{
+  if(hasO2(c)){
+   if(oh(c))return 5;
+   if(oxyEster(c))return 4;
+   if(amide(c))return 6;
+   return cn(c).length<=1?3:2;
+  }
+  if(n3(c))return 7;
+  if(nh2(c))return 8;
+  if(halo(c))return 9;
+  if(nitro(c))return 10;
+  if(oh(c))return 1;
+  return 0;
+ };
+ const types=Cs.map(ty);
+ const pgT=Math.max(...types);
+
+ const ethers=at.filter(a=>etherO(a));
+ if(pgT===0&&ethers.length===1){
+  const o=ethers[0];const [a,b]=o.nb.map(([x])=>x);
+  const na=alk(a,o),nb=alk(b,o);
+  if(na&&nb&&na<=10&&nb<=10){
+   const ln=Math.max(na,nb),sn=Math.min(na,nb);
+   const pre=STEM[sn-1]+'oxi';
+   return{n:pre+STEM[ln-1]+'ano',k:'sistemático (éter)'};
+  }
+  return null;
+ }
+
+ if(pgT===0)return simpleChain(Cs,at,cn);
+
+ const pgs=Cs.filter((c,i)=>types[i]===pgT);
+ if(pgs.length>1)return null;
+ const pg=pgs[0];
+
+ const paths=[];
+ const walk=(c,pv,p)=>{p=[...p,c];const n=cn(c).map(x=>x[0]).filter(x=>x!==pv);if(!n.length)paths.push(p);n.forEach(x=>walk(x,c,p))};
+ if(pgT===10)return null;
+ if(pgT===6){const nN=pg.nb.find(([x,o])=>x.el==='N'&&o===1);if(!nN||nN[0].nb.length>1)return null}/* amida N-sustituida: no se nombra */
+ const needEnd=[3,4,5,6,7,8].includes(pgT);
+ if(needEnd){
+  walk(pg,null,[]);
+ } else {
+  if(Cs.length===1)paths.push([Cs[0]]);
+  else Cs.filter(c=>cn(c).length===1).forEach(s=>walk(s,null,[]));
+ }
+ const cand=[];
+ for(const p of paths){
+  if(needEnd&&p[0]!==pg)continue;
+  if((pgT===1||pgT===2||pgT===9)&&!p.includes(pg))continue;
+  const mb=[];
+  for(let i=0;i<p.length-1;i++){const o=cn(p[i]).find(([x])=>x===p[i+1])[1];if(o>1)mb.push({l:i+1,o})}
+  cand.push({p,mb,len:p.length});
+ }
+ if(!cand.length)return null;
+ cand.sort((a,b)=>b.len-a.len||b.mb.length-a.mb.length);
+ const top=cand.filter(c=>c.len===cand[0].len&&c.mb.length===cand[0].mb.length);
+ for(const c of top){
+  c.subs=[];
+  for(let i=0;i<c.p.length;i++){
+   const x=c.p[i];
+   for(const nbr of x.nb){
+    if(c.p.includes(nbr[0]))continue;
+    if(x===pg){
+     if(nbr[0].el==='O'&&(nbr[1]===2||pgT===5))continue;
+     if(nbr[0].el==='O'&&pgT===4&&nbr[1]===1)continue;
+     if(nbr[0].el==='O'&&pgT===1&&nbr[1]===1)continue;
+     if(nbr[0].el==='N'&&pgT===6)continue;
+     if(nbr[0].el==='N'&&pgT===7)continue;
+     if(nbr[0].el==='N'&&pgT===8)continue;
+    }
+    const s=subOf(nbr,x);
+    if(!s)return null;
+    c.subs.push({l:i+1,s});
+   }
+  }
+  c.pl=pg?c.p.indexOf(pg)+1:0;
+  c.key=[c.pl,...c.mb.map(m=>m.l),...c.subs.map(s=>s.l).sort((a,b)=>a-b)];
+ }
+ top.sort((a,b)=>{const n=Math.max(a.key.length,b.key.length);for(let i=0;i<n;i++){const d=(a.key[i]||0)-(b.key[i]||0);if(d)return d}return 0});
+ const c=top[0],len=c.len;
+ if(len>10)return null;
+ const g={};
+ c.subs.forEach(s=>(g[s.s]=g[s.s]||[]).push(s.l));
+ let pre=Object.keys(g).sort((a,b)=>a.localeCompare(b,'es')).map(k=>{const ls=g[k].sort((a,b)=>a-b);return ls.join(',')+'-'+MUL[ls.length]+k}).join('-');
+ if(len<=2&&c.subs.length===1&&pgT===9)pre=c.subs[0].s;
+ const nM=c.mb.length;
+ let u='an';
+ if(nM){const kind=c.mb[0].o===2?'en':'in';u=(nM>1?'a':'')+(len>3||nM>1?'-'+c.mb.map(m=>m.l).join(',')+'-':'')+MUL[nM]+kind}
+
+ let nm;
+ switch(pgT){
+  case 5: nm=pre+STEM[len-1]+u+'oico';break;
+  case 4: {
+   /* CORREGIDO: no dar nombre aproximado si el éster tiene sustituyentes */
+   if(c.subs.length)return null;
+   const oEster=pg.nb.find(([x,o])=>x.el==='O'&&o===1);
+   if(!oEster)return null;
+   const oAtom=oEster[0];
+   /* CORREGIDO: el carbono del grupo alquilo es el vecino del O que NO es el carbono acilo */
+   const alc=oAtom.nb.find(([x])=>x!==pg&&x.el==='C');
+   if(!alc)return null;
+   const nAlc=alk(alc[0],oAtom);
+   if(!nAlc)return null;
+   nm=STEM[len-1]+u+'oato de '+STEM[nAlc-1]+'ilo';
+   return{n:nm,k:'sistemático (éster)',com:COM[nm]};
+  }
+  case 6: nm=pre+STEM[len-1]+u+'amida';break;
+  case 7: nm=pre+STEM[len-1]+u+'onitrilo';break;
+  case 8: nm=pre+STEM[len-1]+u+'amina';break;
+  case 3: nm=pre+STEM[len-1]+u+'al';break;
+  case 2: nm=pre+STEM[len-1]+u+(len>3?'-'+c.pl+'-':'')+'ona';break;
+  case 1: nm=pre+STEM[len-1]+u+(len>2?'-'+c.pl+'-':'')+'ol';break;
+  case 9: case 10:
+   nm=pre+STEM[len-1]+u+'o';
+   break;
+  default: nm=pre+STEM[len-1]+u+'ano';
+ }
+ nm=nm.replace(/-+/g,'-').replace(/^-|-$/g,'');
+ const full=(pgT===5?'ácido ':'')+nm;
+ return{n:full,k:'sistemático',com:COM[full]};
+}
+
+function simpleChain(Cs,at,cn){
+ const paths=[];
+ const walk=(c,pv,p)=>{p=[...p,c];const n=cn(c).map(x=>x[0]).filter(x=>x!==pv);if(!n.length)paths.push(p);n.forEach(x=>walk(x,c,p))};
+ if(Cs.length===1)paths.push([Cs[0]]);
+ else Cs.filter(c=>cn(c).length===1).forEach(s=>walk(s,null,[]));
+ if(!paths.length)return null;
+ const maxLen=Math.max(...paths.map(p=>p.length));
+ if(maxLen>10)return null;
+ /* entre las cadenas más largas (en ambos sentidos) se elige la de menores localizadores */
+ const cand=[];
+ for(const p of paths.filter(p=>p.length===maxLen)){
+  const mb=[];for(let i=0;i<maxLen-1;i++){const o=cn(p[i]).find(([x])=>x===p[i+1])[1];if(o>1)mb.push({l:i+1,o})}
+  const subs=[];
+  for(let i=0;i<maxLen;i++){for(const nbr of p[i].nb){if(p.includes(nbr[0]))continue;const s=subOf(nbr,p[i]);if(!s)return null;subs.push({l:i+1,s})}}
+  cand.push({len:maxLen,mb,subs,key:[...mb.map(m=>m.l),...subs.map(x=>x.l).sort((x,y)=>x-y)]});
+ }
+ cand.sort((x,y)=>{
+  if(y.mb.length!==x.mb.length)return y.mb.length-x.mb.length;
+  const n=Math.max(x.key.length,y.key.length);
+  for(let i=0;i<n;i++){const d=(x.key[i]||0)-(y.key[i]||0);if(d)return d}
+  return 0;
+ });
+ const {len,mb,subs}=cand[0];
+ const g={};subs.forEach(s=>(g[s.s]=g[s.s]||[]).push(s.l));
+ const pre=Object.keys(g).sort((a,b)=>a.localeCompare(b,'es')).map(k=>{const ls=g[k].sort((a,b)=>a-b);return ls.join(',')+'-'+MUL[ls.length]+k}).join('-');
+ const nM=mb.length;let u='an';if(nM){const kind=mb[0].o===2?'en':'in';u=(nM>1?'a':'')+(len>3||nM>1?'-'+mb.map(m=>m.l).join(',')+'-':'')+MUL[nM]+kind}
+ const nm=pre+STEM[len-1]+u+'o';
+ return{n:nm,k:'sistemático',com:COM[nm]};
+}
+
+/* ---------- Datos ---------- */
+const GR=[
+['Alcano','CnH2n+2','sufijo -ano','etano','Apolares; punto de ebullición crece con la masa; poco reactivos.'],
+['Alqueno','CnH2n','sufijo -eno','eteno','C=C planar; adición electrofílica.'],
+['Alquino','CnH2n-2','sufijo -ino','etino','C≡C lineal; adición y acidez del C–H terminal.'],
+['Cicloalcano','CnH2n','prefijo ciclo-','ciclohexano','Tensión de anillo en ciclos pequeños.'],
+['Aromático','C6H6 (benceno)','benceno / fenil','benceno','Sistema π deslocalizado; sustitución electrofílica aromática.'],
+['Alcohol','R–OH','sufijo -ol','etanol','Enlace de hidrógeno; solubles en agua los pequeños.'],
+['Fenol','Ar–OH','fenol (retenido)','fenol','Más ácido que alcoholes; Ar–OH.'],
+['Éter','R–O–R’','alcoxi / éter','éter dietílico','Poco reactivos; aceptores de H.'],
+['Aldehído','R–CHO','sufijo -al','etanal','Carbonilo terminal; fácilmente oxidable.'],
+['Cetona','R–CO–R’','sufijo -ona','propanona','Carbonilo interno; polares.'],
+['Ácido carboxílico','R–COOH','ácido -oico','ácido etanoico','Ácidos débiles; dímeros por H.'],
+['Éster','R–COO–R’','-oato de -ilo','acetato de etilo','Aromas; hidrólisis a ácido y alcohol.'],
+['Amina','R–NH2 / R2NH / R3N','sufijo -amina','metilamina','Básicas; enlace de H (1.ª y 2.ª).'],
+['Amida','R–CONH2','sufijo -amida','etanamida','Muy polares; hidrólisis lenta.'],
+['Nitrilo','R–C≡N','sufijo -nitrilo','acetonitrilo','Polares; se hidrolizan a ácidos.'],
+['Nitrocompuesto','R–NO2','prefijo nitro-','nitrometano','Fuertemente electroatractores.'],
+['Halogenuro orgánico','R–X','prefijo fluoro/cloro/bromo/yodo','clorometano','Sustitución y eliminación; persistencia ambiental variable.'],
+['Tiol','R–SH','sufijo -tiol','metanotiol','Olor intenso; oxidan a disulfuros.'],
+['Sulfuro','R–S–R’','sulfanilo / sulfuro','dimetil sulfuro','Análogos de éteres con S.']
+];
+
+const LIB=[
+['Alcanos','metano','C'],['Alcanos','etano','CC'],['Alcanos','propano','CCC'],['Alcanos','butano','CCCC'],['Alcanos','pentano','CCCCC'],['Alcanos','hexano','CCCCCC'],['Alcanos','2-metilpropano','CC(C)C'],['Alcanos','2-metilbutano','CCC(C)C'],
+['Alquenos','eteno','C=C'],['Alquenos','propeno','C=CC'],['Alquenos','but-1-eno','C=CCC'],['Alquenos','but-2-eno','CC=CC'],
+['Alquinos','etino','C#C'],['Alquinos','propino','C#CC'],['Alquinos','but-1-ino','C#CCC'],
+['Cíclicos','ciclopropano','C1CC1'],['Cíclicos','ciclobutano','C1CCC1'],['Cíclicos','ciclopentano','C1CCCC1'],['Cíclicos','ciclohexano','C1CCCCC1'],['Cíclicos','metilciclohexano','CC1CCCCC1'],
+['Aromáticos','benceno','C1=CC=CC=C1'],['Aromáticos','tolueno','CC1=CC=CC=C1'],['Aromáticos','etilbenceno','CCC1=CC=CC=C1'],['Aromáticos','fenol','OC1=CC=CC=C1'],['Aromáticos','naftaleno','C1=CC=C2C=CC=CC2=C1'],['Aromáticos','clorobenceno','ClC1=CC=CC=C1'],
+['Alcoholes','metanol','CO'],['Alcoholes','etanol','CCO'],['Alcoholes','propan-1-ol','CCCO'],['Alcoholes','propan-2-ol','CC(C)O'],['Alcoholes','butan-1-ol','CCCCO'],['Alcoholes','butan-2-ol','CCC(C)O'],
+['Aldehídos','metanal','C=O'],['Aldehídos','etanal','CC=O'],['Aldehídos','propanal','CCC=O'],['Aldehídos','butanal','CCCC=O'],
+['Cetonas','propanona','CC(C)=O'],['Cetonas','butan-2-ona','CCC(C)=O'],['Cetonas','pentan-2-ona','CCCC(C)=O'],['Cetonas','pentan-3-ona','CCC(=O)CC'],
+['Ácidos carboxílicos','ácido metanoico','C(=O)O'],['Ácidos carboxílicos','ácido etanoico','CC(=O)O'],['Ácidos carboxílicos','ácido propanoico','CCC(=O)O'],['Ácidos carboxílicos','ácido butanoico','CCCC(=O)O'],['Ácidos carboxílicos','ácido 2-hidroxipropanoico','CC(O)C(=O)O'],
+['Ésteres','metanoato de metilo','C(=O)OC'],['Ésteres','acetato de metilo','CC(=O)OC'],['Ésteres','acetato de etilo','CC(=O)OCC'],['Ésteres','propanoato de etilo','CCC(=O)OCC'],['Ésteres','butanoato de metilo','CCCC(=O)OC'],
+['Éteres','éter dimetílico','COC'],['Éteres','éter dietílico','CCOCC'],['Éteres','éter metil etílico','COCC'],['Éteres','éter metil propílico','COCCC'],
+['Aminas','metilamina','CN'],['Aminas','etilamina','CCN'],['Aminas','propilamina','CCCN'],['Aminas','dimetilamina','CNC'],['Aminas','trimetilamina','CN(C)C'],
+['Amidas','metanamida','C(N)=O'],['Amidas','etanamida','CC(N)=O'],['Amidas','propanamida','CCC(N)=O'],['Amidas','N-metiletanamida','CC(=O)NC'],
+['Nitrilo','acetonitrilo','CC#N'],['Nitrilo','propanonitrilo','CCC#N'],['Nitrilo','butanonitrilo','CCCC#N'],
+['Nitrocompuesto','nitrometano','CN(=O)=O'],['Nitrocompuesto','nitroetano','CCN(=O)=O'],
+['Halogenuro orgánico','clorometano','CCl'],['Halogenuro orgánico','bromometano','CBr'],['Halogenuro orgánico','cloroetano','CCCl'],['Halogenuro orgánico','bromoetano','CCBr'],['Halogenuro orgánico','1-cloropropano','CCCCl'],
+['Tiol','metanotiol','CS'],['Tiol','etanotiol','CCS'],
+['Sulfuro','dimetil sulfuro','CSC'],['Sulfuro','dietil sulfuro','CCSCC']
+];
+
+/* ---------- Fichas ambientales (22 sustancias) ---------- */
+const VOC='Bibliográfico general: se remueven por arrastre con aire, adsorción en carbón activado y biorremediación.';
+const mk=(sol,kow,vp,iarc,fu,us)=>({fu,us,rows:[['Solubilidad acuosa',sol],['log Kow',kow],['Presión de vapor',vp]],iarc,tr:VOC});
+const ENV={
+ benceno:mk('1.79 g/L (25 °C)','2.13','≈95 mmHg (25 °C)','IARC Grupo 1 (carcinógeno para humanos)','Combustión y evaporación de combustibles; industria química.','Intermediario químico y disolvente.'),
+ tolueno:mk('0.526 g/L (25 °C)','2.73','28.4 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Gasolina, disolventes, pinturas.','Disolvente e intermediario.'),
+ fenol:mk('≈83 g/L (25 °C)','1.46','≈0.35 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Efluentes de refinerías, resinas y carbón.','Resinas fenólicas, síntesis de BPA.'),
+ naftaleno:mk('≈31 mg/L (25 °C)','3.30','≈0.085 mmHg (25 °C)','IARC Grupo 2B (posible carcinógeno)','Alquitrán de hulla, combustión incompleta.','Intermediario y repelente de polillas.'),
+ etilbenceno:mk('0.17 g/L (25 °C)','3.15','9.5 mmHg (25 °C)','IARC Grupo 2B (posible carcinógeno)','Producción de estireno; gasolina.','Intermediario de estireno.'),
+ 'p-xileno':mk('0.16 g/L (25 °C)','3.15','8.8 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Gasolina, disolventes, resinas.','Disolvente y materia prima de poliéster.'),
+ clorobenceno:mk('0.49 g/L (25 °C)','2.84','8.8 mmHg (25 °C)','IARC Grupo 2B (posible carcinógeno)','Disolventes y síntesis química.','Intermediario de pesticidas y siliconas.'),
+ estireno:mk('0.31 g/L (25 °C)','2.95','6.4 mmHg (25 °C)','IARC Grupo 2A (probable carcinógeno)','Producción de polímeros; resinas.','Monómero de poliestireno.'),
+ metanol:mk('Miscible','-0.77','127 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Síntesis química, disolventes, biodiesel.','Disolvente e intermediario.'),
+ etanol:mk('Miscible','-0.31','59 mmHg (25 °C)','IARC Grupo 1 (asociado al consumo)','Fermentación, combustibles, bebidas.','Disolvente, combustible, antiséptico.'),
+ metanal:mk('≈400 g/L (25 °C)','0.35','≈3900 mmHg (25 °C)','IARC Grupo 1 (carcinógeno para humanos)','Emisiones industriales, resinas, combustión.','Resinas urea-formaldehído, desinfectante.'),
+ etanal:mk('Miscible','-0.30','≈1000 mmHg (25 °C)','IARC Grupo 2B (posible carcinógeno)','Combustión, metabolismo del etanol.','Intermediario químico.'),
+ propanona:mk('Miscible','-0.24','≈230 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Disolventes, síntesis de metacrilato.','Disolvente y intermediario.'),
+ 'ácido etanoico':mk('Miscible','-0.17','≈15 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Fermentación, síntesis química.','Vinagre, intermediario de acetatos.'),
+ 'ácido metanoico':mk('Miscible','-0.54','≈42 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Síntesis química, conservantes.','Conservante y intermediario.'),
+ 'acetato de etilo':mk('≈80 g/L (25 °C)','0.73','≈97 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Disolventes, pinturas, adhesivos.','Disolvente y saborizante.'),
+ metilamina:mk('Miscible','-0.57','≈2700 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Síntesis química, pesticidas.','Intermediario químico.'),
+ anilina:mk('≈36 g/L (25 °C)','0.90','≈0.5 mmHg (25 °C)','IARC Grupo 2B (posible carcinógeno)','Tinturas, caucho, pesticidas.','Intermediario de colorantes y poliuretanos.'),
+ cloroformo:mk('≈8 g/L (25 °C)','1.97','≈160 mmHg (25 °C)','IARC Grupo 2B (posible carcinógeno)','Subproducto de cloración; síntesis química.','Disolvente e intermediario.'),
+ tricloroetileno:mk('≈1.1 g/L (25 °C)','2.61','≈60 mmHg (25 °C)','IARC Grupo 1 (carcinógeno para humanos)','Desengrase de metales, lavado en seco.','Disolvente industrial.'),
+ 'tetracloruro de carbono':mk('≈0.8 g/L (25 °C)','2.83','≈90 mmHg (25 °C)','IARC Grupo 2B (posible carcinógeno)','Producción histórica de CFC; extintores.','Disolvente industrial.'),
+ 'metil ter-butil éter':mk('≈42 g/L (25 °C)','1.06','≈250 mmHg (25 °C)','IARC Grupo 3 (no clasificable)','Aditivo de gasolinas.','Oxigenante de combustibles.')
+};
+
+/* ---------- Dibujo ---------- */
+function draw(m,an,mode,o={}){
+ const A=an.A;let s='';
+ const aromaticRings=an.rings.filter(r=>{
+  if(r.length!==6)return false;
+  if(!r.every(i=>A.get(i)&&A.get(i).el==='C'))return false;
+  const dbls=r.filter((u,i)=>{
+   const bb=m.bonds.find(x=>(x.a===u&&x.b===r[(i+1)%r.length])||(x.a===r[(i+1)%r.length]&&x.b===u));
+   return bb&&bb.o===2;
+  }).length;
+  return dbls===3;
+ });
+ const isCondensed=r=>an.rings.some(r2=>r2!==r&&r2.some(i=>r.includes(i)));
+ const aromaticSkelRings=aromaticRings.filter(r=>!isCondensed(r));
+ const aromaticBondSet=new Set();
+ if(mode==='skel'){
+  for(const r of aromaticSkelRings){
+   for(let i=0;i<r.length;i++){
+    const a=r[i],b=r[(i+1)%r.length];
+    aromaticBondSet.add(a+','+b);
+    aromaticBondSet.add(b+','+a);
+   }
+  }
+ }
+
+ m.bonds.forEach((b,i)=>{
+  const a=A.get(b.a),c=A.get(b.b);
+  if(!a||!c)return;
+  const isAromSkel=aromaticBondSet.has(b.a+','+b.b);
+  if(isAromSkel){
+   s+=`<line x1="${a.x}" y1="${a.y}" x2="${c.x}" y2="${c.y}" stroke="${o.exp?'#101B35':'var(--tx)'}" stroke-width="2" stroke-linecap="round"/>`;
+   if(o.hits)s+=`<line data-b="${i}" x1="${a.x}" y1="${a.y}" x2="${c.x}" y2="${c.y}" stroke="transparent" stroke-width="16"/>`;
+   return;
+  }
+  const dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy)||1;
+  const ux=dx/d,uy=dy/d;
+  const nx=-uy*3.5,ny=ux*3.5;
+  const shorten=b.o>1?0.12:0;
+  const ax=a.x+ux*d*shorten,ay=a.y+uy*d*shorten;
+  const cx=c.x-ux*d*shorten,cy=c.y-uy*d*shorten;
+  const offs=b.o===1?[0]:b.o===2?[-.6,.6]:[-1,0,1];
+  offs.forEach(k=>{
+   s+=`<line x1="${ax+nx*k}" y1="${ay+ny*k}" x2="${cx+nx*k}" y2="${cy+ny*k}" stroke="${o.exp?'#101B35':'var(--tx)'}" stroke-width="${b.o===1?2:1.6}" stroke-linecap="round"/>`;
+  });
+  if(o.hits)s+=`<line data-b="${i}" x1="${a.x}" y1="${a.y}" x2="${c.x}" y2="${c.y}" stroke="transparent" stroke-width="16"/>`;
+ });
+
+ if(mode==='skel'){
+  for(const r of aromaticSkelRings){
+   const cx=r.reduce((s,i)=>s+A.get(i).x,0)/6;
+   const cy=r.reduce((s,i)=>s+A.get(i).y,0)/6;
+   const rad=L*0.55;
+   s+=`<circle cx="${cx}" cy="${cy}" r="${rad}" fill="none" stroke="${o.exp?'#101B35':'var(--tx)'}" stroke-width="1.6" opacity=".7"/>`;
+  }
+ }
+
+ for(const a of A.values()){
+  const iso=!a.nb.length,het=a.el!=='C';let lab='';
+  if(mode==='dev'){lab=a.el}
+  else if(mode==='semi'){lab=a.el+(a.h?'H'+(a.h>1?a.h:''):'')}
+  else if(het||iso){lab=a.el+(a.h?'H'+(a.h>1?a.h:''):'')}
+  if(o.sel!=null&&a.id===o.sel)s+=`<circle cx="${a.x}" cy="${a.y}" r="18" fill="none" stroke="#00D5C4" stroke-width="4" opacity=".85"/><circle cx="${a.x}" cy="${a.y}" r="22" fill="none" stroke="#00D5C4" stroke-width="1" opacity=".4"/>`;
+  if(lab)s+=`<circle cx="${a.x}" cy="${a.y}" r="${lab.length>2?14:10}" fill="${o.exp?'#fff':'var(--card)'}"/><text x="${a.x}" y="${a.y+5}" text-anchor="middle" font-size="15" font-weight="700" fill="${COL[a.el]}">${lab}</text>`;
+  if(mode==='dev'&&a.h){
+   const an2=a.nb.map(([n])=>Math.atan2(n.y-a.y,n.x-a.x));
+   for(let k=0;k<a.h;k++){
+    let ang;
+    if(!an2.length)ang=2*Math.PI*k/a.h;
+    else{
+     const sr=[...an2].sort((x,y)=>x-y);let bg=-1;
+     sr.forEach((v,i)=>{const nx=i+1<sr.length?sr[i+1]:sr[0]+2*Math.PI,g=nx-v;if(g>bg){bg=g;ang=v+g/2}});
+    }
+    an2.push(ang);
+    const hx=a.x+34*Math.cos(ang),hy=a.y+34*Math.sin(ang);
+    s+=`<line x1="${a.x}" y1="${a.y}" x2="${hx}" y2="${hy}" stroke="#8a94ad" stroke-width="1.5"/><circle cx="${hx}" cy="${hy}" r="9" fill="${o.exp?'#fff':'var(--card)'}"/><text x="${hx}" y="${hy+4}" text-anchor="middle" font-size="12" fill="#8a94ad">H</text>`;
+   }
+  }
+  if(o.hits)s+=`<circle data-a="${a.id}" cx="${a.x}" cy="${a.y}" r="15" fill="transparent"/>`;
+ }
+ return s;
+}
+
+/* ---------- Semidesarrollada robusta ---------- */
+function semi(an){
+ if(an.rings.length||an.comps!==1)return null;
+ const A=an.A;
+ const at=[...A.values()];
+ const nbIds=new Map();
+ for(const a of at)nbIds.set(a.id,a.nb.map(([x,o])=>[x.id,o]));
+ const go=(id,parentId,visited)=>{
+  const a=A.get(id);
+  if(!a)return '';
+  const lab=a.el+(a.h?'H'+(a.h>1?a.h:''):'');
+  const ch=(nbIds.get(id)||[]).filter(([x])=>x!==parentId&&!visited.has(x));
+  let out=lab;
+  for(let i=0;i<ch.length;i++){
+   const [x,o]=ch[i];
+   if(visited.has(x))continue;
+   visited.add(x);
+   const t=(o===2?'=':o===3?'≡':'')+go(x,id,visited);
+   out+= (i<ch.length-1) ? '('+t+')' : t;
+  }
+  return out;
+ };
+ const ends=at.filter(a=>(nbIds.get(a.id)||[]).length<=1);
+ const st=ends.sort((a,b)=>(b.el==='C')-(a.el==='C'))[0];
+ if(!st)return null;
+ const visited=new Set([st.id]);
+ try{return go(st.id,null,visited)||null}catch(e){return null}
+}
+
+/* ---------- Estado ---------- */
+let M={atoms:[],bonds:[]},hist=[],redo=[],tool='atom',el='C',sel=null,mode='dev',
+    view={x:-200,y:-150,w:400,h:300},nid=0,lastAn=null,lastSMI='',loadedSig='';
+/* firma de la estructura (sin coordenadas): sirve para saber si el dibujo sigue siendo el ejemplo cargado */
+const sig=m=>JSON.stringify([m.atoms.map(a=>a.id+a.el).sort(),m.bonds.map(b=>(b.a<b.b?b.a+'-'+b.b:b.b+'-'+b.a)+':'+b.o).sort()]);
+const sub=f=>f.replace(/(\d+)/g,'<sub>$1</sub>');
+const snap=()=>{hist.push(JSON.stringify(M));if(hist.length>60)hist.shift();redo=[]};
+const getA=id=>M.atoms.find(a=>a.id==id);
+const findB=(a,b)=>M.bonds.find(x=>(x.a===a&&x.b===b)||(x.a===b&&x.b===a));
+
+function link(a,b){
+ if(a==null||b==null||a===b)return;
+ if(!getA(a)||!getA(b))return;
+ snap();
+ let x=findB(a,b);
+ if(x)x.o=x.o%3+1;
+ else M.bonds.push({a,b,o:1});
+}
+
+function fit(){
+ if(!M.atoms.length){view={x:-200,y:-150,w:400,h:300};return}
+ const xs=M.atoms.map(a=>a.x),ys=M.atoms.map(a=>a.y);
+ const x0=Math.min(...xs)-60,x1=Math.max(...xs)+60,y0=Math.min(...ys)-60,y1=Math.max(...ys)+60;
+ const cw=$('#cv').clientWidth||600,ch=$('#cv').clientHeight||400;
+ const r=cw/ch||1.4;
+ let w=Math.max(x1-x0,(y1-y0)*r,260),h=w/r;
+ view={x:(x0+x1)/2-w/2,y:(y0+y1)/2-h/2,w,h};
+}
+
+function load(smi){
+ lastSMI=smi;
+ let ok=true;
+ try{
+  M=parse(smi);
+  layout(M);
+  loadedSig=sig(M);
+  nid=M.atoms.length;
+  sel=null;
+  hist=[];
+  redo=[];
+ }catch(err){
+  console.error('Error en parseo/layout:',err);
+  ok=false;
+  const av=document.getElementById('aviso-ctor');
+  if(av){av.textContent='No se pudo cargar el ejemplo: '+err.message;av.style.display='block';setTimeout(()=>av.style.display='none',4000)}
+ }
+ if(ok)fit();
+ refresh();
+}
+
+function refresh(){
+ const cv=$('#cv');
+ cv.setAttribute('viewBox',`${view.x} ${view.y} ${view.w} ${view.h}`);
+ let an;
+ try{an=lastAn=analyze(M)}catch(e){console.error('analyze falló',e);an=null;cv.innerHTML='';}
+ if(!an){an={A:new Map(),formula:'',mass:0,pct:[],idh:0,nb:{1:0,2:0,3:0},rings:[],nR:0,groups:[],warn:[],cnt:{},H:0,C:0,comps:0,ar:new Set()}}
+ let nm=an.name;
+ /* el diccionario solo vale mientras el dibujo coincida con el ejemplo cargado */
+ if(FALLBACK[lastSMI]&&sig(M)===loadedSig)nm={n:FALLBACK[lastSMI],k:'sistemático (diccionario)'};
+
+ const semiBox=document.getElementById('semi-box');
+ try{
+  if(mode==='semi'){
+   cv.innerHTML=draw(M,an,'semi',{hits:true,sel});
+   const t=semi(an);
+   if(semiBox){
+    if(t){semiBox.innerHTML='<b>Fórmula semidesarrollada:</b><br><span style="font-family:monospace;font-size:1.15rem">'+sub(t)+'</span>';semiBox.style.display='block'}
+    else{semiBox.innerHTML='<span class="mut">Semidesarrollada disponible solo para estructuras acíclicas y conexas.</span>';semiBox.style.display='block'}
+   }
+  }else{
+   cv.innerHTML=draw(M,an,mode,{hits:true,sel});
+   if(semiBox)semiBox.style.display='none';
+  }
+ }catch(e){console.error('draw falló',e);cv.innerHTML=''}
+
+ let r=`<div class="big">${M.atoms.length===0?'':sub(an.formula||'—')}</div><table>
+  <tr><td>Masa molar</td><td><b>${(an.mass||0).toFixed(2)}</b> g/mol</td></tr>
+  <tr><td>Composición</td><td>${an.pct.map(([e,p])=>e+' '+p.toFixed(2)+'%').join(' · ')||'—'}</td></tr>
+  <tr><td>C / H</td><td>${an.C||0} / ${an.H||0}</td></tr>
+  <tr><td>Enlaces s / d / t</td><td>${an.nb[1]} / ${an.nb[2]} / ${an.nb[3]} <span class="mut">(s incluye C–H)</span></td></tr>
+  <tr><td>IDH</td><td>${an.idh} <span class="mut">= (2C+2+N−H−X)/2</span></td></tr>
+  <tr><td>Anillos</td><td>${an.nR}</td></tr></table>`;
+ r+=(an.warn||[]).map(w=>`<div class="warn">${w}</div>`).join('');
+ r+=`<div class="vbar" style="padding:8px 0 0;border:0">
+  <button class="btn" id="cp1">Copiar fórmula</button>
+  <button class="btn" id="cp2">Copiar nombre</button>
+  <button class="btn" id="cp3">Copiar SVG</button>
+  <button class="btn" id="cp4">Copiar datos (JSON)</button>
+  <button class="btn" id="pr">Imprimir</button></div>`;
+ $('#p-res').innerHTML=r;
+
+ $('#p-grp').innerHTML=an.groups.length?an.groups.map(g=>`<button class="chip" data-g="${g}">${g}</button>`).join('')+'<p class="mut">Toca un grupo para ver su ficha.</p>':'<p class="mut">Sin grupos reconocidos.</p>';
+
+ let n;
+ if(an.comps!==1)n='<p class="mut">Conecta todos los átomos para obtener un nombre.</p>';
+ else if(nm)n=`<div class="big">${nm.n}</div><p><b>Tipo:</b> ${nm.k}</p>${nm.alt?`<p><b>Nombre sistemático alterno:</b> ${nm.alt}</p>`:''}${nm.com?`<p><b>Nombre común/retenido:</b> ${nm.com}</p>`:''}<p class="mut">Criterios: Blue Book 2013, P-44.</p>`;
+ else n='<div class="warn"><b>Nombre no garantizado.</b> El motor no puede interpretar esta estructura con certeza. No se genera un nombre aproximado.<br><br><b>Sí puede nombrar:</b> alcanos, alquenos, alquinos, cicloalcanos, benceno monosustituido, alcoholes, fenoles, aldehídos, cetonas, ácidos carboxílicos, ésteres, amidas, aminas, nitrilos, éteres, nitrocompuestos y halogenuros acíclicos con un único grupo principal.</div>';
+ $('#p-nom').innerHTML=n;
+
+ an.nm=nm;
+
+ let hintEl=document.getElementById('hint-ctor');
+ if(!hintEl){
+  hintEl=document.createElement('div');
+  hintEl.id='hint-ctor';
+  $('#vbar').appendChild(hintEl);
+ }
+ if(tool==='atom')hintEl.textContent=sel==null?`Átomo ${el}: haz clic en el vacío para colocar el primero.`:`Átomo ${el}: clic en vacío para encadenar al seleccionado; clic en otro átomo para enlazar; doble clic en el mismo para cambiar elemento.`;
+ else if(tool==='bond')hintEl.textContent='Enlace: clic en un enlace para cambiar simple/doble/triple; clic en dos átomos para enlazarlos.';
+ else if(tool==='erase')hintEl.textContent='Borrar: clic en un átomo o enlace.';
+ else hintEl.textContent='Mover: arrastra átomos o el lienzo. Rueda para zoom.';
+}
+function envCard(k){const e=ENV[k];return `<h3>${k} — ficha ambiental</h3><span class="badge bb">Bibliográfico</span> <span class="mut">PubChem / HSDB. Verifica con la fuente primaria.</span>
+ <div class="wrap"><table>${e.rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}<tr><td>Fuentes</td><td>${e.fu}</td></tr><tr><td>Usos</td><td>${e.us}</td></tr><tr><td>Clasificación</td><td>${e.iarc}</td></tr><tr><td>Tratamiento</td><td>${e.tr}</td></tr></table></div>`}
+
+/* ---------- Interacción editor ---------- */
+const cv=$('#cv');
+const pt=e=>{const p=cv.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(cv.getScreenCTM().inverse())};
+let drag=null;
+
+cv.addEventListener('pointerdown',e=>{
+ e.preventDefault();
+ const p=pt(e);
+ const ta=e.target.dataset.a;
+ const tb=e.target.dataset.b;
+ cv.setPointerCapture(e.pointerId);
+
+ if(tool==='move'){
+  if(ta!==undefined&&getA(+ta)){snap();drag={id:+ta}}
+  else drag={pan:1,sx:e.clientX,sy:e.clientY,v:{...view}};
+  return;
+ }
+ if(tool==='erase'){
+  if(ta!==undefined&&getA(+ta)){
+   snap();
+   M.atoms=M.atoms.filter(a=>a.id!=+ta);
+   M.bonds=M.bonds.filter(b=>b.a!=+ta&&b.b!=+ta);
+   if(sel===+ta)sel=null;
+  }else if(tb!==undefined&&M.bonds[+tb]){
+   snap();M.bonds.splice(+tb,1);
+  }
+  refresh();return;
+ }
+ if(tool==='bond'){
+  if(tb!==undefined&&M.bonds[+tb]){
+   snap();M.bonds[+tb].o=M.bonds[+tb].o%3+1;
+  }else if(ta!==undefined&&getA(+ta)){
+   if(sel===null||sel===+ta)sel=+ta;
+   else if(getA(sel)){link(sel,+ta);sel=null}
+  }
+  refresh();return;
+ }
+
+ if(ta!==undefined&&getA(+ta)){
+  const id=+ta;
+  if(sel===null)sel=id;
+  else if(sel===id){snap();getA(id).el=el}
+  else if(getA(sel)){link(sel,id);sel=id}
+ }else{
+  if(sel===null&&M.atoms.length>0){
+   const av=document.getElementById('aviso-ctor');
+   if(av){av.textContent='Selecciona primero un átomo existente (clic sobre él) para encadenar, o pulsa Limpiar para empezar de cero.';av.style.display='block';setTimeout(()=>av.style.display='none',3500)}
+   return;
+  }
+  snap();
+  const id=nid++;
+  let x=p.x,y=p.y;
+  if(sel!==null&&getA(sel)){
+   const s=getA(sel);const an=Math.atan2(y-s.y,x-s.x);
+   x=s.x+L*Math.cos(an);y=s.y+L*Math.sin(an);
+  }
+  M.atoms.push({id,el,x,y});
+  if(sel!==null&&getA(sel))M.bonds.push({a:sel,b:id,o:1});
+  sel=id;
+ }
+ refresh();
+});
+
+cv.addEventListener('pointermove',e=>{
+ if(!drag)return;
+ if(drag.pan){
+  const k=view.w/cv.clientWidth;
+  view.x=drag.v.x-(e.clientX-drag.sx)*k;
+  view.y=drag.v.y-(e.clientY-drag.sy)*k;
+ }else{
+  const p=pt(e),a=getA(drag.id);
+  if(a){a.x=p.x;a.y=p.y}
+ }
+ refresh();
+});
+cv.addEventListener('pointerup',()=>drag=null);
+const zoom=f=>{const cx=view.x+view.w/2,cy=view.y+view.h/2;view.w*=f;view.h*=f;view.x=cx-view.w/2;view.y=cy-view.h/2;refresh()};
+cv.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.15:.87)},{passive:false});
+
+function build(){
+ const ejemplosRapidos=[
+  ['metano','C'],['etano','CC'],['propano','CCC'],['butano','CCCC'],['pentano','CCCCC'],
+  ['2-metilpropano','CC(C)C'],['eteno','C=C'],['propeno','C=CC'],['etino','C#C'],['propino','C#CC'],
+  ['ciclohexano','C1CCCCC1'],['ciclopentano','C1CCCC1'],['benceno','C1=CC=CC=C1'],['tolueno','CC1=CC=CC=C1'],['fenol','OC1=CC=CC=C1'],
+  ['metanol','CO'],['etanol','CCO'],['propan-1-ol','CCCO'],['propan-2-ol','CC(C)O'],
+  ['metanal','C=O'],['etanal','CC=O'],['propanona','CC(C)=O'],['butan-2-ona','CCC(C)=O'],
+  ['ácido etanoico','CC(=O)O'],['ácido propanoico','CCC(=O)O'],['ácido 2-hidroxipropanoico','CC(O)C(=O)O'],
+  ['acetato de metilo','CC(=O)OC'],['acetato de etilo','CC(=O)OCC'],['propanoato de etilo','CCC(=O)OCC'],
+  ['éter dietílico','CCOCC'],['éter metil etílico','COCC'],
+  ['metilamina','CN'],['etilamina','CCN'],['dimetilamina','CNC'],
+  ['etanamida','CC(N)=O'],['propanamida','CCC(N)=O'],
+  ['acetonitrilo','CC#N'],['propanonitrilo','CCC#N'],
+  ['nitrometano','CN(=O)=O'],['cloroetano','CCCl'],['bromoetano','CCBr'],
+  ['metanotiol','CS'],['dimetil sulfuro','CSC']
+ ];
+ $('#ejemplos-grid').innerHTML=ejemplosRapidos.map(([n,s])=>`<button class="btn" data-lib="${n}">${n}</button>`).join('');
+
+ $('#tools').innerHTML=`<div class="grp">${[['atom','Átomo'],['bond','Enlace'],['move','Mover'],['erase','Borrar']].map(t=>`<button class="btn tl" data-t="${t[0]}">${t[1]}</button>`).join('')}</div>
+  <div class="grp">${['C','O','N','S','P','F','Cl','Br','I'].map(x=>`<button class="btn el" data-e="${x}">${x}</button>`).join('')}</div>
+  <div class="grp"><button class="btn" id="un">↶</button><button class="btn" id="re">↷</button><button class="btn" id="zi">＋</button><button class="btn" id="zo">－</button><button class="btn" id="cl">Limpiar</button></div>`;
+ $('#vbar').innerHTML=[['dev','Desarrollada'],['semi','Semidesarrollada'],['skel','Esquelética']].map(v=>`<button class="btn vm" data-m="${v[0]}">${v[1]}</button>`).join('');
+ $('#rtabs').innerHTML=[['res','Resumen'],['grp','Grupos'],['nom','Nombre']].map(t=>`<button class="btn rt" data-p="${t[0]}">${t[1]}</button>`).join('');
+ const sync=()=>{$$('.tl').forEach(b=>b.classList.toggle('on',b.dataset.t===tool));$$('.el').forEach(b=>b.classList.toggle('on',b.dataset.e===el));$$('.vm').forEach(b=>b.classList.toggle('on',b.dataset.m===mode))};
+
+ document.addEventListener('click',e=>{
+  const t=e.target.closest('button');
+  if(!t)return;
+  if(t.dataset.t){tool=t.dataset.t;sel=null}
+  if(t.dataset.e){el=t.dataset.e;tool='atom'}
+  if(t.dataset.m){mode=t.dataset.m}
+  if(t.dataset.p){$$('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+t.dataset.p));$$('.rt').forEach(b=>b.classList.toggle('on',b===t))}
+  if(t.id==='un'&&hist.length){redo.push(JSON.stringify(M));M=JSON.parse(hist.pop());sel=null}
+  if(t.id==='re'&&redo.length){hist.push(JSON.stringify(M));M=JSON.parse(redo.pop());sel=null}
+  if(t.id==='zi')zoom(.8);
+  if(t.id==='zo')zoom(1.25);
+  if(t.id==='cl'){snap();M={atoms:[],bonds:[]};sel=null;nid=0;fit()}
+  if(t.dataset.g)showG(t.dataset.g);
+  /* CORREGIDO: se guarda el texto original del botón para restaurarlo */
+  const cp=x=>{if(!x)return;if(!t.dataset.orig)t.dataset.orig=t.textContent;if(navigator.clipboard)navigator.clipboard.writeText(x).then(()=>{t.textContent='Copiado';setTimeout(()=>{t.textContent=t.dataset.orig},1200)},()=>{t.textContent='Sin permiso';setTimeout(()=>{t.textContent=t.dataset.orig},1200)})};
+  if(t.id==='cp1')cp(lastAn?lastAn.formula:'');
+  if(t.id==='cp2')cp(lastAn&&lastAn.nm?lastAn.nm.n:'Nombre no garantizado');
+  if(t.id==='cp3'){const sv=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${view.x} ${view.y} ${view.w} ${view.h}"><rect x="${view.x}" y="${view.y}" width="${view.w}" height="${view.h}" fill="#fff"/><g font-family="sans-serif">${draw(M,lastAn,mode,{exp:1})}</g></svg>`;cp(sv)}
+  if(t.id==='cp4')cp(JSON.stringify({formula:lastAn?lastAn.formula:'',masaMolar:lastAn?+lastAn.mass.toFixed(3):0,idh:lastAn?lastAn.idh:0,grupos:lastAn?lastAn.groups:[],nombre:lastAn&&lastAn.nm?lastAn.nm.n:null,atomos:M.atoms,enlaces:M.bonds},null,1));
+  if(t.id==='pr')window.print();
+  if(['tl','el','vm','rt'].some(c=>t.classList.contains(c))||t.id){sync();refresh()}
+ });
+ sync();$('.rt').classList.add('on');
+}
+
+/* ---------- Navegación y módulos ---------- */
+const VIEWS=[['ctor','Constructor'],['grp','Grupos'],['lib','Biblioteca'],['env','Ambiente'],['ex','Ejercicios'],['abt','Acerca de']];
+$('#nav').innerHTML=VIEWS.map(v=>`<button data-v="${v[0]}">${v[1]}</button>`).join('');
+function go(v){$$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));if(v==='ctor'){fit();refresh()}}
+$('#nav').onclick=e=>{if(e.target.dataset.v)go(e.target.dataset.v)};
+
+function showG(n){go('grp');const g=GR.find(x=>x[0]===n);if(!g)return;
+ $('#gdet').innerHTML=`<h2>${g[0]}</h2><table><tr><td>Fórmula general</td><td>${g[1]}</td></tr><tr><td>Nomenclatura</td><td>${g[2]}</td></tr><tr><td>Propiedades</td><td>${g[4]}</td></tr><tr><td>Ejemplo</td><td>${g[3]||'—'}</td></tr></table>${g[3]&&LIB.find(l=>l[1]===g[3])?`<button class="btn pri" data-lib="${g[3]}">Cargar ejemplo en el constructor</button>`:''}`}
+$('#gbtn').innerHTML=GR.map(g=>`<button class="btn" data-g="${g[0]}">${g[0]}</button>`).join('');
+
+const fams=[...new Set(LIB.map(l=>l[0]))];
+$('#lib').innerHTML=fams.map(f=>`<div class="card"><h2>${f}</h2><div class="grid">${LIB.filter(l=>l[0]===f).map(l=>`<button class="btn" data-lib="${l[1]}">${l[1]}</button>`).join('')}</div></div>`).join('');
+
+document.addEventListener('click',e=>{
+ const t=e.target.closest('[data-lib]');
+ if(t){
+  const l=LIB.find(x=>x[1]===t.dataset.lib);
+  if(l){go('ctor');load(l[2])}
+ }
+ const ev=e.target.closest('[data-env]');
+ if(ev)$('#envs').innerHTML=envCard(ev.dataset.env);
+});
+
+$('#envl').innerHTML=Object.keys(ENV).map(k=>`<button class="btn" data-env="${k}">${k}</button>`).join(' ');
+$('#envs').innerHTML='<p class="mut">Elige una sustancia para ver su ficha. Los valores son bibliográficos; las estimaciones computacionales aún no se incluyen.</p>';
+
+/* ---------- Ejercicios ---------- */
+let lv=1,score=0,tot=0;
+const rnd=a=>a[Math.floor(Math.random()*a.length)],shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+function ask(){
+ const it=rnd(LIB),m=parse(it[2]);layout(m);const an=analyze(m);let h,ok,ops,ex;
+ if(lv===1){h='¿Cuál es el nombre de esta estructura?';ok=it[1];ops=shuf([ok,...shuf(LIB.map(l=>l[1]).filter(n=>n!==ok)).slice(0,3)]);ex=`La fórmula es ${an.formula}; grupos: ${an.groups.join(', ')||'—'}.`}
+ else if(lv===2){h='¿Qué grupo funcional principal presenta '+it[1]+'?';const pr=['Ácido carboxílico','Éster','Amida','Aldehído','Cetona','Fenol','Alcohol','Éter','Amina','Alqueno','Alquino','Aromático','Cicloalcano','Alcano','Nitrilo','Nitrocompuesto','Halogenuro orgánico','Tiol','Sulfuro'];ok=pr.find(g=>an.groups.includes(g));ops=shuf([ok,...shuf(pr.filter(g=>g!==ok)).slice(0,3)]);ex=`Grupos detectados: ${an.groups.join(', ')}.`}
+ else{h='¿Cuál es la masa molar de '+it[1]+' (g/mol)?';ok=an.mass.toFixed(2);const s=new Set([ok]);while(s.size<4)s.add((an.mass+rnd([-14.03,-2.02,2.02,14.03,16,18.02,28.05])).toFixed(2));ops=shuf([...s]);ex=`Fórmula ${an.formula}; M = Σ(n·Ar) = ${an.mass.toFixed(3)} g/mol; IDH = ${an.idh}.`}
+ $('#q').innerHTML=(lv===1?`<svg viewBox="${(()=>{const xs=m.atoms.map(a=>a.x),ys=m.atoms.map(a=>a.y);return[Math.min(...xs)-50,Math.min(...ys)-50,Math.max(...xs)-Math.min(...xs)+100,Math.max(...ys)-Math.min(...ys)+100].join(' ')})()}" style="width:100%;max-height:200px">${draw(m,an,'skel')}</svg>`:'')+`<h3>${h}</h3>`+ops.map(o=>`<button class="btn opt" data-o="${o}">${o}</button>`).join('')+'<div id="fb"></div>';
+ $('#q').dataset.done='0';
+ $('#q').onclick=e=>{const b=e.target.closest('.opt');if(!b||$('#q').dataset.done==='1')return;$('#q').dataset.done='1';tot++;const good=b.dataset.o===ok;if(good)score++;b.classList.add(good?'right':'wrong');$$('.opt').forEach(x=>{if(x.dataset.o===ok)x.classList.add('right')});
+  $('#fb').innerHTML=`<p class="${good?'ok':'bad'}">${good?'¡Correcto!':'Incorrecto. Respuesta: '+ok}</p><p>${ex}</p><button class="btn pri" id="nx">Siguiente</button>`;$('#sc').textContent=`Puntuación: ${score}/${tot}`;$('#nx').onclick=()=>{ask()}};
+}
+$$('[data-l]').forEach(b=>b.onclick=()=>{lv=+b.dataset.l;$$('[data-l]').forEach(x=>x.classList.toggle('on',x===b));ask()});
+
+/* ---------- Arranque ---------- */
+M={atoms:[],bonds:[]};
+lastAn=analyze(M);
+build();
+load('CC(O)C(=O)O');   // carga por defecto
+go('ctor');             // ajusta vista y refresca
+ask();
+</script>
+
+<script>
+/* ---------- Instalación PWA ---------- */
+(() => {
+  const installButton = document.getElementById('installApp');
+  let installPrompt = null;
+
+  const isInstalled = () =>
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+
+  const refreshButton = () => {
+    if (!installButton) return;
+    if (isInstalled()) {
+      installButton.textContent = '✓ Aplicación instalada';
+      installButton.disabled = true;
+      installButton.classList.remove('pri');
+    }
+  };
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    installPrompt = event;
+    if (installButton) {
+      installButton.hidden = false;
+      installButton.textContent = '⬇ Instalar aplicación';
+    }
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installPrompt = null;
+    refreshButton();
+  });
+
+  installButton?.addEventListener('click', async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      await installPrompt.userChoice;
+      installPrompt = null;
+      return;
+    }
+    if (isInstalled()) {
+      refreshButton();
+      return;
+    }
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const message = isIOS
+      ? 'Para instalar en iPhone/iPad: pulsa Compartir en Safari y elige “Añadir a pantalla de inicio”.'
+      : 'Para instalar: abre esta página mediante HTTPS en Chrome o Edge. Usa el menú del navegador y selecciona “Instalar aplicación” o “Añadir a pantalla principal”. Si no aparece, verifica que el sitio esté publicado en GitHub Pages.';
+    alert(message);
+  });
+
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch((error) => {
+        console.error('No se pudo registrar el Service Worker:', error);
+      });
+    });
+  }
+
+  refreshButton();
+})();
+</script>
+
+</body></html>
