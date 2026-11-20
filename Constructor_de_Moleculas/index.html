@@ -47,15 +47,28 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:.8rem}
 #ejemplos .grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
 #ejemplos .btn{font-size:.82rem;padding:6px 8px;min-height:36px}
 @media(min-width:900px){.ctor{grid-template-columns:150px 1fr 360px;align-items:start}.tools{flex-direction:column;overflow:visible}.tools .grp{flex-wrap:wrap}#cv{height:64vh}main{padding:16px}#ejemplos{grid-column:1/-1}}
-@media print{header,.tools,.vbar,nav,#ejemplos{display:none}.view{display:none}.view.on{display:block}}
+@media print{header,.tools,.vbar,nav,#ejemplos,#btn-limpiar{display:none}.view{display:none}.view.on{display:block}}
 .pwa-actions{display:flex;justify-content:flex-end;padding:7px 0 2px}.pwa-actions button{min-height:36px;padding:6px 12px;font-size:.84rem;border-radius:9px}@media(min-width:700px){.pwa-actions{position:absolute;right:14px;top:8px}header{position:relative;padding-right:190px}}
 
-/* === Botón Limpiar siempre visible, sobre todo en móvil === */
-#vbar .limpiar{background:#e5484d;color:#fff;border-color:#e5484d;font-weight:700;flex:0 0 auto;order:-1;padding:9px 16px}
-#vbar .limpiar:active{filter:brightness(.9)}
-@media(max-width:600px){
-  #vbar{position:sticky;bottom:0;z-index:5;background:var(--card);box-shadow:0 -2px 8px #0002}
-  #vbar .limpiar{min-height:46px;font-size:1rem}
+/* === Botón Limpiar flotante, siempre visible en móvil === */
+#btn-limpiar{
+  position:absolute;
+  left:10px;
+  bottom:10px;
+  z-index:20;
+  background:#e5484d;
+  color:#fff;
+  border:0;
+  border-radius:12px;
+  padding:10px 16px;
+  min-height:46px;
+  font:700 1rem/1 "Segoe UI",system-ui,sans-serif;
+  box-shadow:0 3px 10px #0005;
+  cursor:pointer;
+}
+#btn-limpiar:active{filter:brightness(.9)}
+@media(min-width:900px){
+  #btn-limpiar{position:static;margin:6px;box-shadow:none;min-height:42px;font-size:.9rem}
 }
 </style></head><body>
 <header><div class="brand"><div class="logo">CM</div><div><h1>Constructor de moléculas</h1><div class="sub">Estructura y Nomenclatura Molecular · Dr. Ronald F. Rodriguez Espinoza</div></div></div><div class="pwa-actions"><button id="installApp" class="btn pri" type="button" aria-label="Instalar aplicación">⬇ Instalar aplicación</button></div><nav id="nav"></nav></header>
@@ -68,6 +81,7 @@ pre{white-space:pre-wrap;word-break:break-all;font-size:.8rem}
     <div id="semi-box"></div>
     <div class="vbar" id="vbar"></div>
     <div id="aviso-ctor"></div>
+    <button id="btn-limpiar" type="button" aria-label="Limpiar lienzo">🧹 Limpiar</button>
   </div>
   <div><div class="card"><div class="tabs" id="rtabs"></div>
    <div class="pane on" id="p-res"></div><div class="pane" id="p-grp"></div><div class="pane" id="p-nom"></div></div></div>
@@ -805,8 +819,7 @@ function build(){
  $('#tools').innerHTML=`<div class="grp">${[['atom','Átomo'],['bond','Enlace'],['move','Mover'],['erase','Borrar']].map(t=>`<button class="btn tl" data-t="${t[0]}">${t[1]}</button>`).join('')}</div>
   <div class="grp">${['C','O','N','S','P','F','Cl','Br','I'].map(x=>`<button class="btn el" data-e="${x}">${x}</button>`).join('')}</div>
   <div class="grp"><button class="btn" id="un">↶</button><button class="btn" id="re">↷</button><button class="btn" id="zi">＋</button><button class="btn" id="zo">－</button></div>`;
- $('#vbar').innerHTML=`<button class="btn limpiar" id="cl" type="button">🧹 Limpiar</button>`+
-  [['dev','Desarrollada'],['semi','Semidesarrollada'],['skel','Esquelética']].map(v=>`<button class="btn vm" data-m="${v[0]}">${v[1]}</button>`).join('');
+ $('#vbar').innerHTML=[['dev','Desarrollada'],['semi','Semidesarrollada'],['skel','Esquelética']].map(v=>`<button class="btn vm" data-m="${v[0]}">${v[1]}</button>`).join('');
  $('#rtabs').innerHTML=[['res','Resumen'],['grp','Grupos'],['nom','Nombre']].map(t=>`<button class="btn rt" data-p="${t[0]}">${t[1]}</button>`).join('');
  const sync=()=>{$$('.tl').forEach(b=>b.classList.toggle('on',b.dataset.t===tool));$$('.el').forEach(b=>b.classList.toggle('on',b.dataset.e===el));$$('.vm').forEach(b=>b.classList.toggle('on',b.dataset.m===mode))};
 
@@ -821,7 +834,7 @@ function build(){
   if(t.id==='re'&&redo.length){hist.push(JSON.stringify(M));M=JSON.parse(redo.pop());sel=null}
   if(t.id==='zi')zoom(.8);
   if(t.id==='zo')zoom(1.25);
-  if(t.id==='cl'){snap();M={atoms:[],bonds:[]};sel=null;nid=0;fit()}
+  if(t.id==='btn-limpiar'){snap();M={atoms:[],bonds:[]};sel=null;nid=0;fit()}
   if(t.dataset.g)showG(t.dataset.g);
   /* CORREGIDO: se guarda el texto original del botón para restaurarlo */
   const cp=x=>{if(!x)return;if(!t.dataset.orig)t.dataset.orig=t.textContent;if(navigator.clipboard)navigator.clipboard.writeText(x).then(()=>{t.textContent='Copiado';setTimeout(()=>{t.textContent=t.dataset.orig},1200)},()=>{t.textContent='Sin permiso';setTimeout(()=>{t.textContent=t.dataset.orig},1200)})};
