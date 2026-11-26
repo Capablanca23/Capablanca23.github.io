@@ -70,7 +70,15 @@ details[open] summary{background:var(--ok);color:#fff;border-color:var(--ok)}
 .chip{display:inline-block;background:var(--lt);border:1px solid var(--bd);border-radius:14px;padding:2px 10px;margin:2px 2px 2px 0;font-size:.88rem}
 .formula{background:var(--lt);border-radius:8px;padding:8px 12px;font-family:monospace;text-align:center;margin:8px 0;font-size:1.02rem}
 .img-box{background:var(--lt);border:1px dashed var(--bd);border-radius:8px;padding:10px;text-align:center;margin:10px 0}
-.img-box img{max-width:100%;max-height:260px;border-radius:6px;display:block;margin:0 auto}
+.img-box img {
+    width: 100%;
+    max-width: 1100px;
+    max-height: none !important;
+    height: auto !important;
+    border-radius: 6px;
+    display: block;
+    margin: 0 auto;
+}
 .img-cap{font-size:.8rem;color:var(--mu);margin-top:5px;font-family:monospace}
 
 /* Tablas generales y celdas de respuesta destacadas */
@@ -592,8 +600,8 @@ table.disac-tbl td.ans-cell{background:var(--cell-hl) !important;color:var(--ok)
 <div class="c a">
   <h3>Esquema / Figura de trabajo</h3>
   <div class="img-box">
-    <img src="figura7.png" alt="Figura 7: Glicósidos de D-manosa"
-         style="width: 80%; max-width: 900px; height: auto;">
+    <img src="figura7.png"
+         alt="Figura 7: Glicósidos de D-manosa">
     <div class="img-cap">figura7.png</div>
 </div>
 </div>
